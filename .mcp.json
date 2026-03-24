@@ -6,6 +6,10 @@
       "env": {
         "HUKUK_DB_YOLU": "D:\\hukuk-vektordb\\vektor-db"
       }
+    },
+    "notebooklm": {
+      "command": "notebooklm-mcp",
+      "args": []
     }
   }
 }

@@ -91,31 +91,44 @@ Kaynak türleri ve erişim yöntemleri:
 
 ## Ajan Yapısı
 
-Sistemde 4 ajan vardır. Her birinin sınırı kesin.
+Sistemde artık tek katmanlı değil, orkestrasyon katmanlı bir yapı vardır.
+Ana kural şudur: işi üreten ajanlarla işi dağıtan ajan aynı şey değildir.
 
 ```
 AVUKAT
   │
-  │  Dava özeti + KRİTİK NOKTA
+  │  Dava özeti + kritik nokta + varsa kaynak
   ▼
-ADIM 0: Drive Klasörü + KAYNAK SORGULAMA
+DIRECTOR AGENT
+(Avukat Orchestrator)
   │
-  ├──────────────────────┐
-  ▼                      ▼
-AJAN 1                 AJAN 2
-Usul Ajanı             Araştırma Ajanı
-(Genel iskelet)        (Kritik nokta — derin arama
-                        + avukatın gösterdiği kaynak)
-  │                      │
-  └──────────┬───────────┘
-             ▼
-           AJAN 3
-     Sentez ve Dilekçe Ajanı
+  ├── dava hafızasını açar
+  ├── kaynak sorgulamasını yönetir
+  ├── hangi ajanların çalışacağını seçer
+  ├── araştırma işçilerini paralel başlatır
+  └── çıktıları birleştirip sıradaki adıma karar verir
+        │
+        ├───────────────┬─────────────────┬────────────────┐
+        ▼               ▼                 ▼                ▼
+    AJAN 1          AJAN 2A           AJAN 2B         AJAN 2C / 2D
+    Usul            Vector RAG        Yargı+Mevzuat   NotebookLM / Drive
+        └───────────────┴─────────────────┴────────────────┘
+                                ▼
+                             AJAN 3
+                  Belge Yazım Ajanı (dilekçe / ihtarname /
+                    sözleşme / özet not / istinaf taslağı)
 
-AJAN 4 — Pazarlama Ajanı (Bağımsız — yalnızca büro blog'u)
+AJAN 4 — Pazarlama Ajanı
+Otonom Döngü — Haftalık + olay tetiklemeli izleme
 ```
 
-Ajan 1 ve Ajan 2 paralel çalışır. İkisi de bitince Ajan 3 devreye girer.
+Temel kural:
+
+- Director Agent doğrudan hukuki rapor yazmaz.
+- Director Agent işi başlatır, böler, kontrol eder ve birleştirir.
+- Usul ve esas araştırma aynı anda yürüyebilir.
+- Araştırma artık tek blok değil, alt işçiler kümesidir.
+- Belge yazımı yalnızca usul ve esas çıktıları yeterli kaliteye ulaştığında başlar.
 
 ---
 
@@ -164,7 +177,46 @@ kritik_nokta: "Araştırılacak hukuki mesele"
 
 ---
 
-## ADIM 0: Drive Klasörü
+## DIRECTOR AGENT
+
+Director Agent sistemin üst koordinasyon katmanıdır.
+Görevi hukuk analizi yapmak değil, doğru hattı doğru sırayla çalıştırmaktır.
+
+Sorumlulukları:
+
+1. Kullanıcı niyetini sınıflandır:
+   - yeni dava
+   - sadece usul
+   - sadece araştırma
+   - sadece belge yazımı
+   - blog/pazarlama
+   - hesaplama
+2. Dava açılışıysa çalışma alanını hazırla.
+3. Kaynak sorgulamasını zorunlu olarak yap.
+4. Hangi alt araştırma işçilerinin devreye gireceğini seç.
+5. Çıktı kalitesini kontrol etmeden yazım ajanını başlatma.
+6. Eksik veri varsa avukattan net ve kısa ek bilgi iste.
+7. Otonom döngüden gelen yeni içtihat veya kaynak güncellemelerini uygun dosyalara bağla.
+
+Director Agent karar şeması:
+
+- sadece usul sorulmuşsa -> yalnızca AJAN 1
+- sadece kritik nokta araştırılacaksa -> yalnızca ilgili araştırma işçileri
+- yeni dava geldiyse -> ADIM 0 + ADIM 0B + AJAN 1 + araştırma işçileri
+- belge yazımı istendiyse -> önce gerekli usul/esas çıktıları var mı kontrol et
+- blog istendiyse -> AJAN 4
+
+---
+
+## ADIM 0: Dava Hafızasını Aç
+
+Director Agent yeni dava komutu aldığında önce dava hafızasını açar.
+
+Kalıcı dava hafızası üç katmandan oluşur:
+
+- Google Drive dava klasörü
+- yerel/aktif dava klasörü
+- gerekirse NotebookLM çalışma notebook'u
 
 Google Drive MCP ile şu yapıyı kur:
 
@@ -179,7 +231,27 @@ Hukuk Bürosu/Aktif Davalar/
 ```
 
 Klasörü oluşturduktan sonra Drive linkini ver.
-Ardından hemen KAYNAK SORGULAMA adımını çalıştır — ajanları başlatma.
+Yerel dava klasörü varsa onu da dosya hafızasının parçası olarak kabul et.
+
+Opsiyonel ama önerilen alanlar:
+
+- NotebookLM notebook adı
+- dava kısa kodu
+- kaynak listesi
+- son güncelleme tarihi
+
+Ardından hemen KAYNAK SORGULAMA adımını çalıştır.
+Ajanları bu adım bitmeden başlatma.
+
+Kaynak sorgulama notu:
+
+- Bu adım Director Agent tarafından yürütülür.
+- Bu adımdan önce AJAN 1 veya herhangi bir araştırma işçisi başlatılmaz.
+- Aşağıdaki eski metinlerde geçen "Ajan 2" ifadesi artık tek bir ajanı değil,
+  Director Agent'ın seçtiği araştırma işçileri kümesini ifade eder.
+- NotebookLM seçilirse notebook adı dava hafızasına kaydedilir.
+- Google Drive seçilirse klasör araştırma hattına kaynak olarak bağlanır.
+- Hazır kaynak yoksa temel hat Vektör DB + Yargı + Mevzuat olarak başlar.
 
 ---
 
@@ -359,6 +431,27 @@ Hukuki Kontrol:
 
 ## AJAN 2: Araştırma Ajanı
 
+Bu bölüm artık tek bir mega-ajan gibi değil, Director Agent tarafından
+koordine edilen araştırma işçileri kümesi gibi yorumlanır.
+
+Alt araştırma işçileri:
+
+- AJAN 2A -> Vector RAG işçisi
+- AJAN 2B -> Yargı işçisi
+- AJAN 2C -> Mevzuat işçisi
+- AJAN 2D -> NotebookLM / Drive işçisi
+
+Director Agent araştırmayı başlatırken şu önceliği uygular:
+
+1. Vektör DB
+2. Yargı
+3. Mevzuat
+4. NotebookLM / Drive
+
+Eski metindeki "Ajan 2" adımları, artık gerektiğinde bu işçilere bölünerek
+paralel yürütülür. Aşağıdaki detay akış, bu araştırma kümesinin birleşik çalışma
+protokolü olarak kabul edilir.
+
 Görevi: Avukatın işaret ettiği kritik nokta için nokta atışı araştırma.
 Geniş konulara dağılma. Yalnızca kritik noktayla ilgili kararları çek.
 Kaynaklar: Vektör DB + `yargi` CLI + `mevzuat` CLI + NotebookLM.
@@ -368,6 +461,13 @@ Yargıtay kararı bulunmalı. Bulunamazsa ek arama terimleriyle tekrar dene.
 Kararlar arasındaki çelişkileri ve yerleşik uygulamadan sapmaları tespit et.
 
 Çalıştırma sırası:
+
+### Yeni araştırma bölümü haritası
+
+- Bölüm A -> AJAN 2A (Vector RAG)
+- Bölüm B -> AJAN 2B + AJAN 2C (Yargı + Mevzuat)
+- Bölüm C -> AJAN 2D (NotebookLM / Drive)
+- Director Agent -> bu bölümlerin çıktılarını tek araştırma raporunda birleştirir
 
 ### Bölüm A — Vektör DB Araması (Birinci Kaynak)
 
@@ -453,6 +553,15 @@ Raporu `02-Arastirma/arastirma-raporu.md` olarak Drive'a kaydet:
 
 ## AJAN 3: Sentez ve Dilekçe Ajanı
 
+Bu ajan artık yalnızca dava dilekçesi yazarı olarak düşünülmez.
+Varsayılan görevi dava dilekçesidir, ama gerektiğinde şu belge türlerinde de çalışır:
+
+- dava dilekçesi
+- ihtarname
+- sözleşme taslağı
+- istinaf / itiraz taslağı
+- hukuki görüş veya özet not
+
 Görevi: Ajan 1 ve Ajan 2'nin çıktılarını birleştirerek dilekçe taslağı yazmak.
 
 Çalıştırma sırası:
@@ -463,8 +572,9 @@ Görevi: Ajan 1 ve Ajan 2'nin çıktılarını birleştirerek dilekçe taslağı
 5. `sablonlar/` klasöründeki onaylanmış dilekçelerden üslup referansı al
 6. Araştırma raporundaki "Dilekçeye Taşınacak Argümanlar" listesini temel al
 7. Usul raporundaki risk noktalarını dilekçede proaktif olarak karşıla
-8. Dilekçeyi `dilekce-yazim-kurallari.md` kurallarına uyarak yaz
-9. Drive'a kaydet
+8. Belge türüne uygun şablonu seç
+9. Belgeyi `dilekce-yazim-kurallari.md` kurallarına uyarak yaz
+10. Drive'a kaydet
 
 `dilekce-yazim-kurallari.md` bu dosyanın içindeki yazım kurallarını,
 yapısal teknikleri, üslup yasak listesini ve sonuç-istem bölümü kurallarını içerir.
@@ -517,7 +627,8 @@ Taslağı `03-Sentez-ve-Dilekce/dava-dilekcesi-v1.docx` olarak kaydet.
 
 ## AJAN 4: Pazarlama Ajanı (Büro Blog'u)
 
-Bağımsız çalışır. Avukat `blog yap: [konu]` dediğinde devreye girer.
+Bağımsız çalışır ama veri hattı kontrolsüz değildir.
+Avukat `blog yap: [konu]` dediğinde devreye girer.
 Yalnızca büronun hukuk blog'u için içerik üretir.
 
 **Tetikleyici:** `blog yap: [konu]` komutu.
@@ -526,8 +637,9 @@ Yalnızca büronun hukuk blog'u için içerik üretir.
 1. Avukatın verdiği konuyu al.
 2. Konu hakkında `yargi` CLI ve `mevzuat` CLI ile güncel karar ve mevzuat tara.
 3. Vektör DB'de ilgili doktrin ve emsal var mı kontrol et.
-4. Blog yazısı + sosyal medya formatlarını yaz.
-5. Tüm çıktıları `blog-icerikleri/{tarih}/` klasörüne kaydet.
+4. Otonom döngüden gelen anonimleştirilmiş içgörü varsa kullan.
+5. Blog yazısı + sosyal medya formatlarını yaz.
+6. Tüm çıktıları `blog-icerikleri/{tarih}/` klasörüne kaydet.
 
 **Çıktılar:**
 
@@ -542,24 +654,47 @@ Sosyal medya formatları (ayrı ayrı):
 - Instagram: 10 slayt metni, görsel öneri ile birlikte
 
 **Yasak:** Kesin hukuki tavsiye. Müvekkil bilgisi. "Kesin kazanırsınız" gibi vaatler.
+Pazarlama ajanına giden tüm dava içeriği anonimleştirilmiş olmalıdır.
 
 ---
 
-## Autoresearch Döngüsü — Haftalık İçtihat Taraması
+## Otonom Döngü
 
-Karpathy'nin autoresearch yaklaşımının hukuk karşılığı.
-Bu döngü avukat `içtihat tara` dediğinde veya haftalık periyodik olarak çalışır.
+Bu katman görseldeki 7/24 mantığın ilk pratik versiyonudur.
+Tam otonom karar vermez; Director Agent'a sinyal üretir.
+
+İki modda çalışır:
+
+### Mod 1 — Haftalık İçtihat Taraması
 
 1. `yargi` CLI ile son 7 günün dikkat çekici kararlarını tara:
    ```bash
    yargi bedesten search "emsal karar" --date-start {7_gün_öncesi}
    ```
 2. Büronun aktif dava türleriyle ilgili yeni kararları filtrele.
-3. Kritik değişiklik varsa (HGK, İBK, bozma kararı) avukata bildirim gönder.
+3. Kritik değişiklik varsa (HGK, İBK, bozma kararı) Director Agent'a bildirim üret.
 4. Raporu `bilgi-tabani/haftalik-ictihat-{tarih}.md` dosyasına kaydet.
-5. Blog'a çevrilecek ilginç kararları işaretle — avukat onaylarsa Ajan 4 ile blog yaz.
+5. Blog'a çevrilecek ilginç kararları işaretle.
 
-Bu tarama büronun bilgi tabanını sürekli güncel tutar.
+### Mod 2 — Olay Tetiklemeli Akış
+
+Tetikler:
+
+- yeni dava açıldı
+- Drive'a yeni dava belgesi düştü
+- Vektör DB'ye yeni kaynak eklendi
+- belirli konuda yeni HGK / İBK / bozma kararı bulundu
+- NotebookLM çalışma notebook'u güncellendi
+
+Bu durumda Director Agent şunlardan birini seçebilir:
+
+- yalnızca bilgi notu üret
+- araştırma raporunu tazele
+- usul risk raporunu güncelle
+- pazarlama için anonim içgörü kuyruğuna gönder
+
+Bu döngü büronun bilgi tabanını pasif arşiv olmaktan çıkarıp güncellenen
+çalışma hafızasına dönüştürür.
 
 ---
 
@@ -876,13 +1011,19 @@ Google Calendar MCP ile ekle:
 
 | Komut | Çalışan Ajan |
 |---|---|
-| `yeni dava: [isim], [tür] / özet: [...] / kritik nokta: [...]` | Tüm sistem |
+| `yeni dava: [isim], [tür] / özet: [...] / kritik nokta: [...]` | Director Agent + ilgili tüm hat |
 | `usul: [dava türü]` | Sadece Ajan 1 |
-| `araştır: [kritik nokta]` | Sadece Ajan 2 |
+| `araştır: [kritik nokta]` | Director Agent + araştırma işçileri |
+| `araştır vector: [kritik nokta]` | Sadece AJAN 2A |
+| `araştır yargı: [kritik nokta]` | Sadece AJAN 2B |
+| `araştır mevzuat: [kritik nokta]` | Sadece AJAN 2C |
+| `araştır notebook: [kritik nokta]` | Sadece AJAN 2D |
 | `dilekçe yaz` | Sadece Ajan 3 |
+| `ihtarname yaz` | Sadece Ajan 3 |
+| `sözleşme yaz` | Sadece Ajan 3 |
 | `hesapla: giriş:[tarih], çıkış:[tarih], net:[TL], yemek:[TL], servis:[TL], fesih:[tür]` | Hesaplama modülü — tüm kalemler |
 | `hesapla kıdem: [parametreler]` | Sadece kıdem tazminatı |
 | `hesapla işe iade: [parametreler]` | Sadece işe iade modülü |
 | `blog yap: [konu]` | Ajan 4 |
-| `içtihat tara` | Autoresearch döngüsü |
+| `içtihat tara` | Otonom döngü |
 | `süre ekle: [tarih, tür]` | Calendar MCP |
