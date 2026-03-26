@@ -147,6 +147,7 @@ After recommending, briefly mention:
 
 | Skill | Source | What It Does |
 |-------|--------|-------------|
+| udf | community | Convert between HTML/Markdown and UYAP UDF format (`npx udf-cli md2udf`) |
 | docx | anthropics/skills | Create, edit, analyze Word documents |
 | pdf | anthropics/skills | Extract, merge, annotate, create PDFs |
 | pptx | anthropics/skills | Read, generate, adjust presentations |
@@ -248,7 +249,7 @@ Quick routing for common requests:
 
 | User Says Something Like... | Route To |
 |-----------------------------|----------|
-| "PDF", "Word", "Excel", "slides" | Document skills (docx/pdf/pptx/xlsx) |
+| "PDF", "Word", "Excel", "slides", "dilekçe" | Document skills (udf/docx/pdf/pptx/xlsx) |
 | "build a website/app", "vibe code" | vibe-coder → frontend-design |
 | "dashboard", "chart", "visualize" | web-artifacts-builder or frontend-design |
 | "test", "TDD", "coverage" | test-driven-development |

@@ -22,7 +22,7 @@ Sonra asagidaki revizyonlari VERILEN SIRAYLA uygula.
 
 ## DOSYA OLUSTURMA SKILL'LERI
 
-Projede .docx (dilekce, ihtarname), .xlsx (hesaplama tablosu), .pdf (rapor)
+Projede .udf (dilekçe, ihtarname), .xlsx (hesaplama tablosu), .pdf (rapor)
 olusturma islemleri var. Bu islemler icin `ALLSKILL.md` dosyasindaki
 Skill Gateway sistemini kullan.
 
@@ -32,7 +32,7 @@ Kullanilacak skill'ler (sadece bunlar -- geri kalanini yoksay):
 
 | Is | Kullanilacak Skill | Ne Zaman |
 |---|---|---|
-| Dilekce/ihtarname .docx olusturma | `docx` | Ajan 3 cikti urettiginde |
+| Dilekce/ihtarname .udf olusturma | `udf` | Ajan 3 cikti urettiginde |
 | Hesaplama tablosu .xlsx olusturma | `xlsx` | Usul Ajani iscilik hesaplamasi yaptiginda |
 | PDF olusturma/birlestirme | `pdf` | Rapor veya belge PDF'e cevrildiginde |
 | Dashboard UI iyilestirmesi | `frontend-design` | Faza 3 dashboard degisikliklerinde |
@@ -257,8 +257,8 @@ V. SONUC VE TALEP
 
 ## Dosya Formati
 
-Dilekce .docx olarak kaydedilir. ALLSKILL.md'deki `docx` skill'ini kullan.
-Kayit yolu: `aktif-davalar/{dava-id}/03-Sentez-ve-Dilekce/dava-dilekcesi-v[N].docx`
+Dilekçe `.udf` olarak kaydedilmelidir. Bunun için `udf-cli` paketini kullanarak Markdown çıktısını UDF formatına çevir (`npx udf-cli md2udf <input.md> <output.udf>`). UDF formatı Türkiye'deki tüm adli yazışmalar (UYAP) için zorunludur.
+Kayıt yolu: `aktif-davalar/{dava-id}/03-Sentez-ve-Dilekce/dava-dilekcesi-v[N].udf`
 
 ## Kalite Kontrol
 

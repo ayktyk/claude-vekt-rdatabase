@@ -93,8 +93,8 @@ V. SONUC VE TALEP
 
 ## Dosya Formati
 
-Dilekce `.docx` olarak kaydedilir. `ALLSKILL.md`'deki `docx` skill'ini kullan.
-Kayit yolu: `aktif-davalar/{dava-id}/03-Sentez-ve-Dilekce/dava-dilekcesi-v[N].docx`
+Dilekçe `.udf` olarak kaydedilmelidir. Bunun için `udf-cli` paketini kullanarak Markdown çıktısını UDF formatına çevir (`npx udf-cli md2udf <input.md> <output.udf>`). UDF formatı Türkiye'deki tüm adli yazışmalar (UYAP) için zorunludur.
+Kayıt yolu: `aktif-davalar/{dava-id}/03-Sentez-ve-Dilekce/dava-dilekcesi-v[N].udf`
 
 ## Kalite Kontrol
 
