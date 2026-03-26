@@ -94,7 +94,7 @@ V. SONUC VE TALEP
 ## Dosya Formati
 
 Dilekçe `.udf` olarak kaydedilmelidir. Bunun için `udf-cli` paketini kullanarak Markdown çıktısını UDF formatına çevir (`npx udf-cli md2udf <input.md> <output.udf>`). UDF formatı Türkiye'deki tüm adli yazışmalar (UYAP) için zorunludur.
-Kayıt yolu: `aktif-davalar/{dava-id}/03-Sentez-ve-Dilekce/dava-dilekcesi-v[N].udf`
+Kayıt yolu: `G:\.shortcut-targets-by-id\1ZkRESQIhcw0806PHqQyQEYmGlWk9ZP8D\Aktif Davalar\{dava-id}\03-Sentez-ve-Dilekce\dava-dilekcesi-v[N].udf`
 
 ## Kalite Kontrol
 

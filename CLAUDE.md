@@ -44,7 +44,7 @@ Her cikti TASLAK'tir. Avukat son kontrolu yapar.
 |   |   `-- SKILL.md
 |   `-- revizyon-ajani/
 |       `-- SKILL.md
-|-- aktif-davalar/
+|-- aktif-davalar/ (ARTIK KULLANILMIYOR - GOOGLE DRIVE'A TASINDI)
 |-- blog-icerikleri/
 |-- bilgi-tabani/
 |-- sablonlar/
@@ -55,7 +55,7 @@ Her cikti TASLAK'tir. Avukat son kontrolu yapar.
 Aktif dava yapisi:
 
 ```text
-aktif-davalar/{dava-id}/
+G:\.shortcut-targets-by-id\1ZkRESQIhcw0806PHqQyQEYmGlWk9ZP8D\Aktif Davalar\{dava-id}\
 |-- 00-Briefing.md
 |-- 01-Usul/
 |-- 02-Arastirma/
@@ -398,7 +398,7 @@ EVET derse asagidaki sorulari sor. Her soru opsiyoneldir.
 8. SOMUT VERILER
 
 Avukat doldurunca briefing verisini dava hafizasina kaydet:
-`aktif-davalar/{dava-id}/00-Briefing.md`
+`G:\.shortcut-targets-by-id\1ZkRESQIhcw0806PHqQyQEYmGlWk9ZP8D\Aktif Davalar\{dava-id}\00-Briefing.md`
 
 Bu veri tum ajanlara girdi olarak iletilir:
 - Ajan 1 risk ve ton bilgisini usul raporuna yansitir
