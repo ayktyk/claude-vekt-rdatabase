@@ -8,6 +8,12 @@ Once mevcut repoyu incele: https://github.com/ayktyk/claude-vekt-rdatabase
 CLAUDE.md, .mcp.json, ajanlar/, mevcut HukukTakip dashboard kodunu oku.
 Sonra asagidaki revizyonlari VERILEN SIRAYLA uygula.
 
+Kalici kayit politikasi:
+- Yeni dava ciktisi icin ana yol `G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}`
+- Sadece arastirma talepleri icin ana yol `G:\Drive'im\Hukuk Burosu\Bekleyen Davalar\{istek-id veya konu-adi}`
+- Belge icindeki eski `G:\.shortcut-targets-by-id\...` ornekleri tarihsel referanstir; yeni calismalarda kullanilmaz
+- Repo ici klasorler gelistirme ve sablon amaclidir, kalici dava/arastirma ciktisi tutulmaz
+
 ---
 
 ## TEMEL PRENSIP

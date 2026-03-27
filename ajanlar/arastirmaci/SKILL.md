@@ -73,7 +73,9 @@ GUVEN NOTU:
 - [Arguman 2 - kaynak]
 ```
 
-Kayit yolu: `02-Arastirma/arastirma-raporu.md`
+Kayit yolu:
+- Dava akisinda: `G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\02-Arastirma\arastirma-raporu.md`
+- Sadece arastirma talebinde: `G:\Drive'im\Hukuk Burosu\Bekleyen Davalar\{istek-id veya konu-adi}\01-Arastirma\arastirma-raporu.md`
 
 ## Kalite Kontrol
 

@@ -13,6 +13,24 @@ Yapay zeka oldugun hicbir cikti da belli olmamali.
 Uslup: kisa, net, resmi. Kararlari ve mevzuati kaynak goster.
 Her cikti TASLAK'tir. Avukat son kontrolu yapar.
 
+## Kalici Kayit Politikasi
+
+Kalici dava ve arastirma ciktisi yerel diske degil, yalnizca Google Drive'a kaydedilir.
+
+Temel klasor:
+- `G:\Drive'im\Hukuk Burosu`
+
+Kayit kurali:
+- Yeni dava acilisi -> `G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}`
+- Sadece arastirma talebi -> `G:\Drive'im\Hukuk Burosu\Bekleyen Davalar\{istek-id veya konu-adi}`
+
+Bu kuralin sonucu:
+- Repo ici klasorler gelistirme ve sablon amaclidir
+- Kalici briefing, usul raporu, arastirma raporu, savunma simulasyonu,
+  revizyon raporu, dilekce `.md` ve `.udf` dosyalari Drive'a yazilir
+- Yerel diskte kalici dava dosyasi tutulmaz
+- Gecici lokal dosya gerekirse is bitince temizlenir
+
 ---
 
 ## Proje Klasor Yapisi (Yerel)
@@ -55,7 +73,7 @@ Her cikti TASLAK'tir. Avukat son kontrolu yapar.
 Aktif dava yapisi:
 
 ```text
-G:\.shortcut-targets-by-id\1ZkRESQIhcw0806PHqQyQEYmGlWk9ZP8D\Aktif Davalar\{dava-id}\
+G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\
 |-- 00-Briefing.md
 |-- 01-Usul/
 |-- 02-Arastirma/
@@ -65,6 +83,16 @@ G:\.shortcut-targets-by-id\1ZkRESQIhcw0806PHqQyQEYmGlWk9ZP8D\Aktif Davalar\{dava
 |   |-- 01-Tasnif/
 |   `-- evrak-listesi.md
 `-- 05-Durusma-Notlari/
+```
+
+Sadece arastirma istendiginde bekleyen is yapisi:
+
+```text
+G:\Drive'im\Hukuk Burosu\Bekleyen Davalar\{istek-id veya konu-adi}\
+|-- 00-Talep.md
+|-- 01-Arastirma/
+|   `-- arastirma-raporu.md
+`-- 02-Notlar/
 ```
 
 ---
@@ -288,7 +316,7 @@ Kalici dava hafizasi uc katmandan olusur:
 Google Drive MCP ile su yapiyi kur:
 
 ```text
-Hukuk Burosu/Aktif Davalar/
+G:\Drive'im\Hukuk Burosu\Aktif Davalar\
 `-- [YIL]-[SIRA] [Muvekkil Adi] - [Dava Turu]/
     |-- 01-Usul/
     |-- 02-Arastirma/
@@ -299,6 +327,18 @@ Hukuk Burosu/Aktif Davalar/
 
 Klasoru olusturduktan sonra Drive linkini ver.
 Yerel dava klasoru varsa onu da dosya hafizasinin parcasi olarak kabul et.
+
+Sadece arastirma talebinde ise bunun yerine:
+
+```text
+G:\Drive'im\Hukuk Burosu\Bekleyen Davalar\
+`-- [YIL]-[SIRA] [Konu veya Muvekkil] - Arastirma/
+    |-- 00-Talep.md
+    |-- 01-Arastirma/
+    `-- 02-Notlar/
+```
+
+Arastirma odakli taleplerde `Aktif Davalar` klasoru olusturma.
 
 Opsiyonel ama onerilen alanlar:
 
@@ -398,7 +438,10 @@ EVET derse asagidaki sorulari sor. Her soru opsiyoneldir.
 8. SOMUT VERILER
 
 Avukat doldurunca briefing verisini dava hafizasina kaydet:
-`G:\.shortcut-targets-by-id\1ZkRESQIhcw0806PHqQyQEYmGlWk9ZP8D\Aktif Davalar\{dava-id}\00-Briefing.md`
+`G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\00-Briefing.md`
+
+Sablon gerekiyorsa:
+`@sablonlar/advanced-briefing-template.md`
 
 Bu veri tum ajanlara girdi olarak iletilir:
 - Ajan 1 risk ve ton bilgisini usul raporuna yansitir

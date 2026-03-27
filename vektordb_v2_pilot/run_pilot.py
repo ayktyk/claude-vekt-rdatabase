@@ -138,7 +138,13 @@ def main() -> None:
     markdown_path.parent.mkdir(parents=True, exist_ok=True)
     markdown_path.write_text(markdown, encoding="utf-8")
 
-    chunks = chunk_pages(pages, source)
+    chunk_category = f"pilot-{method}"
+    chunks = chunk_pages(
+        pages,
+        source,
+        kategori=chunk_category,
+        isleme_yontemi=method,
+    )
     processed_path = processed_dir / f"{safe_name}.json"
     write_json(processed_path, chunks)
 

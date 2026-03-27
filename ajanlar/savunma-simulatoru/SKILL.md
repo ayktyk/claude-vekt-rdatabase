@@ -30,6 +30,12 @@ Ajan 3 dilekce taslagi olusturduktan sonra kalite gate asamasinda.
 
 ## Cikti Formati
 
+Sablon:
+`@sablonlar/savunma-simulasyonu-template.md`
+
+Kayit yolu: `G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\02-Arastirma\savunma-simulasyonu.md`
+Kalici kaydi yerel diske yapma.
+
 ```markdown
 ---
 GUVEN NOTU:

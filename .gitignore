@@ -1,0 +1,6 @@
+.env
+isbu-ofis/hukuk-takip/cookies.txt
+isbu-ofis/hukuk-takip/server/dist/
+pilot-output/
+vektordb_v2_pilot/__pycache__/
+vektordb_v2_pilot/*.pyc

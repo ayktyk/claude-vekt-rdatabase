@@ -76,18 +76,18 @@ def file_md5(path: Path) -> str:
 def slugify(value: str) -> str:
     replacements = str.maketrans(
         {
-            "c": "c",
-            "C": "C",
-            "g": "g",
-            "G": "G",
-            "i": "i",
-            "I": "I",
-            "o": "o",
-            "O": "O",
-            "s": "s",
-            "S": "S",
-            "u": "u",
-            "U": "U",
+            "ç": "c",
+            "Ç": "C",
+            "ğ": "g",
+            "Ğ": "G",
+            "ı": "i",
+            "İ": "I",
+            "ö": "o",
+            "Ö": "O",
+            "ş": "s",
+            "Ş": "S",
+            "ü": "u",
+            "Ü": "U",
         }
     )
     value = value.translate(replacements)

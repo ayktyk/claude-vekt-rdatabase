@@ -10,6 +10,9 @@ def chunk_pages(
     source_path: Path,
     chunk_chars: int = 1400,
     overlap_chars: int = 220,
+    kategori: str = "pilot-gemini-ocr",
+    isleme_yontemi: str = "gemini_ocr_or_digital_pdf",
+    kaynak_tipi: str = "doktrin",
 ) -> list[dict]:
     chunks: list[dict] = []
     file_hash = file_md5(source_path)
@@ -31,12 +34,12 @@ def chunk_pages(
                         "metadata": {
                             "kaynak_dosya": source_path.name,
                             "orijinal_yol": str(source_path),
-                            "kaynak_tipi": "doktrin",
-                            "kategori": "pilot-gemini-ocr",
+                            "kaynak_tipi": kaynak_tipi,
+                            "kategori": kategori,
                             "bolum": f"sayfa_{page['page']}_parca_{part}",
                             "sayfa": page["page"],
                             "hash": file_hash,
-                            "isleme_yontemi": "gemini_ocr_or_digital_pdf",
+                            "isleme_yontemi": isleme_yontemi,
                         },
                     }
                 )
@@ -46,4 +49,3 @@ def chunk_pages(
             part += 1
 
     return chunks
-
