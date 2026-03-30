@@ -9,6 +9,11 @@ GUVEN NOTU:
 
 # Savunma Simulasyonu - [Dava Ozeti]
 
+**Hazirlanma Tarihi:** [YYYY-MM-DD]
+**Dava ID:** [2026-XXX]
+**Muvekkil:** [Muvekkil]
+**Mahkeme:** [Mahkeme]
+
 ## 1. En Guclu Savunma
 Savunma:
 Dayanak:

@@ -24,10 +24,13 @@ G:\Drive'im\Hukuk Burosu\Aktif Davalar\[DAVA-ID]/
 ## Kurulum Adimlari
 
 1. `00-Briefing.md` icin `advanced-briefing-template.md` kopyala.
-2. `04-Muvekkil-Belgeleri/evrak-listesi.md` icin `evrak-listesi-template.md` kopyala.
-3. Ilk dilekce taslagi sonrasi `savunma-simulasyonu.md` ve `revizyon-raporu-v1.md` olustur.
-4. Dilekce `md` ve `udf` olarak birlikte saklanir.
-5. Kalici dava ciktilarini repo icine yazma; ana kayit yeri Google Drive klasorudur.
+2. `01-Usul/usul-raporu.md` icin `usul-raporu-template.md` kopyala.
+3. `02-Arastirma/arastirma-raporu.md` icin `arastirma-raporu-template.md` kopyala.
+4. `02-Arastirma/savunma-simulasyonu.md` icin `savunma-simulasyonu-template.md` kopyala.
+5. `03-Sentez-ve-Dilekce/revizyon-raporu-v1.md` icin `revizyon-raporu-template.md` kopyala.
+6. `04-Muvekkil-Belgeleri/evrak-listesi.md` icin `evrak-listesi-template.md` kopyala.
+7. Dilekce `md` ve `udf` olarak birlikte saklanir.
+8. Kalici dava ciktilarini repo icine yazma; ana kayit yeri Google Drive klasorudur.
 
 ## Arastirma Talebi Icin Alternatif Yol
 

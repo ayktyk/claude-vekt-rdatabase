@@ -2,7 +2,10 @@
 
 **Hazirlanma Tarihi:** [YYYY-MM-DD]
 **Dava ID:** [2026-XXX]
-**Dava Turu:** [iscilik_alacagi / tapu_iptal_tescil / kira / diger]
+**Dava Turu:** [Dava Turu]
+**Muvekkil:** [Muvekkil]
+**Mahkeme:** [Mahkeme]
+**Esas No:** [Esas No]
 
 ## 1. DAVA TEORISI
 [Dosyanin ana hukuki omurgasi]
@@ -35,4 +38,4 @@
 - [Tarih / tutar / ada-parsel / olum tarihi / SGK bilgisi vb.]
 
 ## 9. NOTLAR
-[Avukatin stratejik notlari]
+[Dava Aciklamasi / Avukatin stratejik notlari]

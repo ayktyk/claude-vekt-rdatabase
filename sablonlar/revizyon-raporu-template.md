@@ -9,6 +9,11 @@ GUVEN NOTU:
 
 # Revizyon Raporu - [Dava Adi] v[N]
 
+**Hazirlanma Tarihi:** [YYYY-MM-DD]
+**Dava ID:** [2026-XXX]
+**Muvekkil:** [Muvekkil]
+**Mahkeme:** [Mahkeme]
+
 ## Guclu Noktalar
 - [guclu nokta]
 

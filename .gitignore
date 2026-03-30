@@ -1,6 +1,15 @@
 .env
+isbu-ofis/hukuk-takip/.env
+isbu-ofis/hukuk-takip/.dev-server.log
+isbu-ofis/hukuk-takip/.server-only.log
+isbu-ofis/hukuk-takip/node_modules/
+isbu-ofis/hukuk-takip/client/node_modules/
+isbu-ofis/hukuk-takip/server/node_modules/
+isbu-ofis/hukuk-takip/shared/node_modules/
 isbu-ofis/hukuk-takip/cookies.txt
 isbu-ofis/hukuk-takip/server/dist/
+isbu-ofis/hukuk-takip/server/uploads/
 pilot-output/
+test-output/
 vektordb_v2_pilot/__pycache__/
 vektordb_v2_pilot/*.pyc
