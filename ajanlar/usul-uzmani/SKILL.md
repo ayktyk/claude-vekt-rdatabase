@@ -93,7 +93,11 @@ Gerekli ise aciklama: [Vekaletnameye eklenmesi gereken ibare]
 [Dava surecinin ongorulen suresi]
 ```
 
-Kayit yolu: `01-Usul/usul-raporu.md`
+Kayit yolu: `G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\01-Usul\usul-raporu.md`
+
+`04-Muvekkil-Belgeleri/evrak-listesi.md` gerekiyorsa:
+- `@sablonlar/evrak-listesi-template.md` dosyasini baz al
+- dava klasoru kurulurken `@sablonlar/dava-klasoru-checklist.md` dosyasini izle
 
 Iscilik hesaplamasi gerekiyorsa:
 - `@ajanlar/usul-uzmani/iscilik-hesaplama.md` dosyasini oku

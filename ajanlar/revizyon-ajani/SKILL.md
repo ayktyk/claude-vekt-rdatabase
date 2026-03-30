@@ -36,6 +36,12 @@ Dilekceyi su acilardan degerlendirerek "Revizyon Raporu" olustur:
 
 ## Cikti Formati
 
+Sablon:
+`@sablonlar/revizyon-raporu-template.md`
+
+Kayit yolu: `G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\03-Sentez-ve-Dilekce\revizyon-raporu-v[N].md`
+Kalici kaydi yerel diske yapma.
+
 ```markdown
 ---
 GUVEN NOTU:

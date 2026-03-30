@@ -1,7 +1,7 @@
 # Dilekce Yazari -- Skill Dosyasi
 
-Son guncelleme: 2026-03-26
-Versiyon: 1.0
+Son guncelleme: 2026-03-27
+Versiyon: 1.1
 
 ---
 
@@ -93,8 +93,16 @@ V. SONUC VE TALEP
 
 ## Dosya Formati
 
-Dilekçe `.udf` olarak kaydedilmelidir. Bunun için `udf-cli` paketini kullanarak Markdown çıktısını UDF formatına çevir (`npx udf-cli md2udf <input.md> <output.udf>`). UDF formatı Türkiye'deki tüm adli yazışmalar (UYAP) için zorunludur.
-Kayıt yolu: `aktif-davalar/{dava-id}/03-Sentez-ve-Dilekce/dava-dilekcesi-v[N].udf`
+Dilekce `.udf` olarak kaydedilmelidir. Bunun icin `udf-cli` paketini
+kullanarak Markdown ciktisini UDF formatina cevir
+(`npx udf-cli md2udf <input.md> <output.udf>`). UDF formati
+Turkiye'deki adli yazismalar ve UYAP aktarimi icin zorunludur.
+Kayit yolu:
+`G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\03-Sentez-ve-Dilekce\dava-dilekcesi-v[N].udf`
+Markdown kaynak dosyasi ayni klasorde
+`dava-dilekcesi-v[N].md` olarak tutulur.
+Kalici kaydi yerel diske yapma. Repo ici klasorler yalnizca gelistirme,
+test ve sablon amaclidir.
 
 ## Kalite Kontrol
 
@@ -114,7 +122,7 @@ Kayıt yolu: `aktif-davalar/{dava-id}/03-Sentez-ve-Dilekce/dava-dilekcesi-v[N].u
 - [ ] Yapay zeka oldugu belli oluyor mu? EVET ISE yeniden yaz.
 - [ ] En az 2 Yargitay kararina atif var mi?
 - [ ] Netice-i talep rakamlari Usul Ajaninin hesaplamalariyla tutarli mi?
-- [ ] Zamanasiimi savunmasina karsi pozisyon alindi mi?
+- [ ] Zamanasimi savunmasina karsi pozisyon alindi mi?
 - [ ] Arabuluculuk son tutanagina atif var mi?
 - [ ] Referans verilen karar/mevzuat gercekten var mi?
       EMIN DEGILSEN: "dogrulanmasi gerekir" notu ekle.

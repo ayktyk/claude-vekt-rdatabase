@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code — 4 Katman Rehberi</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #111118;
+    --bg3: #1a1a24;
+    --border: #2a2a3a;
+    --accent: #7c6af7;
+    --accent2: #f7a26a;
+    --accent3: #6af7c8;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --danger: #f76a6a;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top:0; left:0; right:0; z-index:100;
+    background: rgba(10,10,15,0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    display: flex; align-items: center; gap: 32px;
+    height: 60px;
+  }
+
+  nav .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    margin-right: auto;
+  }
+
+  nav a {
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  nav a:hover { color: var(--text); }
+
+  /* HERO */
+  .hero {
+    padding: 140px 60px 80px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .hero-badge {
+    display: inline-block;
+    background: rgba(124,106,247,0.12);
+    border: 1px solid rgba(124,106,247,0.3);
+    color: var(--accent);
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    padding: 5px 14px;
+    border-radius: 100px;
+    margin-bottom: 28px;
+    letter-spacing: 0.1em;
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(38px, 5vw, 64px);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 24px;
+  }
+
+  .hero h1 span { color: var(--accent); }
+
+  .hero p {
+    font-size: 18px;
+    color: var(--muted);
+    max-width: 600px;
+    font-weight: 300;
+    margin-bottom: 48px;
+  }
+
+  .hero-analogy {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    border-radius: 12px;
+    padding: 24px 28px;
+    max-width: 700px;
+  }
+
+  .hero-analogy .label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent2);
+    letter-spacing: 0.15em;
+    margin-bottom: 10px;
+  }
+
+  .hero-analogy p {
+    font-size: 16px;
+    color: var(--text);
+    margin: 0;
+  }
+
+  /* SECTION */
+  .section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 60px 60px;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .section h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 40px;
+  }
+
+  /* CARDS */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin-bottom: 60px;
+  }
+
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: pointer;
+  }
+
+  .card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .card-number {
+    font-family: 'Syne', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .card-icon {
+    font-size: 28px;
+    margin-bottom: 14px;
+  }
+
+  .card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .card p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .card.c1 { border-top: 2px solid var(--accent); }
+  .card.c2 { border-top: 2px solid var(--danger); }
+  .card.c3 { border-top: 2px solid var(--accent2); }
+  .card.c4 { border-top: 2px solid var(--accent3); }
+
+  /* DEEP DIVE */
+  .layer-section {
+    margin-bottom: 80px;
+  }
+
+  .layer-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .layer-num {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .ln1 { background: rgba(124,106,247,0.15); color: var(--accent); border: 1px solid rgba(124,106,247,0.3); }
+  .ln2 { background: rgba(247,106,106,0.15); color: var(--danger); border: 1px solid rgba(247,106,106,0.3); }
+  .ln3 { background: rgba(247,162,106,0.15); color: var(--accent2); border: 1px solid rgba(247,162,106,0.3); }
+  .ln4 { background: rgba(106,247,200,0.15); color: var(--accent3); border: 1px solid rgba(106,247,200,0.3); }
+
+  .layer-title h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  .layer-title p {
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .where-tag {
+    margin-left: auto;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* BENEFIT ROW */
+  .benefit-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .benefit-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .benefit-box.before {
+    border-left: 2px solid var(--danger);
+  }
+
+  .benefit-box.after {
+    border-left: 2px solid var(--accent3);
+  }
+
+  .benefit-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    margin-bottom: 8px;
+  }
+
+  .benefit-box.before .benefit-label { color: var(--danger); }
+  .benefit-box.after .benefit-label { color: var(--accent3); }
+
+  .benefit-box p {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  /* CODE BLOCK */
+  .code-wrap {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 20px 0;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-header span {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .copy-btn {
+    background: rgba(124,106,247,0.15);
+    border: 1px solid rgba(124,106,247,0.3);
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+  }
+
+  .copy-btn:hover {
+    background: rgba(124,106,247,0.3);
+  }
+
+  .copy-btn.copied {
+    background: rgba(106,247,200,0.15);
+    border-color: rgba(106,247,200,0.3);
+    color: var(--accent3);
+  }
+
+  pre {
+    padding: 24px;
+    overflow-x: auto;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    color: #c8c8e0;
+  }
+
+  .cm { color: var(--muted); font-style: italic; }
+  .ck { color: var(--accent); }
+  .cv { color: var(--accent2); }
+  .cs { color: var(--accent3); }
+  .cd { color: var(--danger); }
+
+  /* STEPS */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .step {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .step-num {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: rgba(124,106,247,0.15);
+    border: 1px solid rgba(124,106,247,0.3);
+    color: var(--accent);
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+
+  .step-content h4 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+
+  .step-content p {
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .step-content code {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    background: rgba(255,255,255,0.08);
+    padding: 2px 7px;
+    border-radius: 4px;
+    color: var(--accent);
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 24px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 5px;
+    width: fit-content;
+  }
+
+  .tab-btn {
+    padding: 8px 18px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .tab-btn.active {
+    background: var(--accent);
+    color: white;
+    font-weight: 500;
+  }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 20px 0;
+  }
+
+  /* CHECKLIST */
+  .checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 20px 0;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 14px;
+  }
+
+  .check-icon {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  .ci-done { background: rgba(106,247,200,0.15); color: var(--accent3); }
+  .ci-auto { background: rgba(124,106,247,0.15); color: var(--accent); }
+
+  /* TABLE */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 14px;
+  }
+
+  th {
+    text-align: left;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid var(--border);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    color: var(--text);
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  td:first-child {
+    font-family: 'DM Mono', monospace;
+    color: var(--accent2);
+    font-size: 13px;
+  }
+
+  /* FOOTER */
+  footer {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 60px 60px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  footer p {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 768px) {
+    .hero { padding: 100px 24px 40px; }
+    .section { padding: 40px 24px; }
+    .benefit-row { grid-template-columns: 1fr; }
+    nav { padding: 0 20px; gap: 16px; }
+    nav a { display: none; }
+    footer { padding: 30px 24px; flex-direction: column; gap: 12px; }
+    .layer-header { flex-wrap: wrap; }
+    .where-tag { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">⚡ CLAUDE CODE KURULUM</div>
+  <a onclick="document.getElementById('nedir').scrollIntoView({behavior:'smooth'})">Nedir?</a>
+  <a onclick="document.getElementById('katmanlar').scrollIntoView({behavior:'smooth'})">4 Katman</a>
+  <a onclick="document.getElementById('kurulum').scrollIntoView({behavior:'smooth'})">Kurulum</a>
+  <a onclick="document.getElementById('dosyalar').scrollIntoView({behavior:'smooth'})">Dosyalar</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">CLAUDE CODE — GİZLİ 4 KATMAN</div>
+  <h1>Claude Code'u<br><span>gerçekten</span> kullanmak</h1>
+  <p>Terminal açıp prompt yazmak sadece 1. vites. Bu rehber sana kalan 5 vitesi öğretir — ve bunları bir kere kurarsın, sonsuza kadar çalışır.</p>
+
+  <div class="hero-analogy">
+    <div class="label">// BASİT BİR BENZETME</div>
+    <p>Düşün ki bir asistan tuttun. Şu an yaptığın: her sabah ona "bugün şu dosyalara dokunma, commit yapmadan test çalıştır, kod yazınca formatla" diyorsun. Her. Gün. Tekrar. Bu rehberdeki sistem ise bunu bir kere yazıp asistanın beynine yerleştiriyor. Bir daha söylemene gerek kalmıyor.</p>
+  </div>
+</div>
+
+<!-- NEDIR -->
+<div class="section" id="nedir">
+  <div class="section-label">// ÖNCE ŞU SORUYU CEVAPLAYALIM</div>
+  <h2>Bu 4 katman ne işe yarar?</h2>
+
+  <div class="cards">
+    <div class="card c1" onclick="document.getElementById('k-claudemd').scrollIntoView({behavior:'smooth'})">
+      <div class="card-number">01</div>
+      <div class="card-icon">🧠</div>
+      <h3>CLAUDE.md</h3>
+      <p>Projenin hafızası. Claude her session'da sıfırdan öğrenmek yerine bunu okur ve projeyi tanır.</p>
+    </div>
+    <div class="card c2" onclick="document.getElementById('k-hooks').scrollIntoView({behavior:'smooth'})">
+      <div class="card-number">02</div>
+      <div class="card-icon">🔒</div>
+      <h3>Hooks</h3>
+      <p>Otomatik tetikleyiciler. Dosya düzenlenince formatla, .env'ye dokunulunca engelle. Deterministik.</p>
+    </div>
+    <div class="card c3" onclick="document.getElementById('k-skills').scrollIntoView({behavior:'smooth'})">
+      <div class="card-number">03</div>
+      <div class="card-icon">⚡</div>
+      <h3>Skills / Commands</h3>
+      <p>Özel slash komutları. /commit yazarsın, Claude analiz edip semantic mesajla commit atar.</p>
+    </div>
+    <div class="card c4" onclick="document.getElementById('k-rules').scrollIntoView({behavior:'smooth'})">
+      <div class="card-number">04</div>
+      <div class="card-icon">📋</div>
+      <h3>Rules</h3>
+      <p>Global kurallar. "any tipi yasak, test olmadan commit yok" — bir yaz, her projede geçerli.</p>
+    </div>
+  </div>
+
+  <div class="benefit-row">
+    <div class="benefit-box before">
+      <div class="benefit-label">❌ ŞUAN NE YAPIYORSUN</div>
+      <p>Her yeni session'da aynı kuralları tekrar yazıyorsun. "Türkçe yorum ekle, console.log bırakma, .env'ye dokunma…" Claude unutuyor, sen tekrarlıyorsun.</p>
+    </div>
+    <div class="benefit-box after">
+      <div class="benefit-label">✅ BU SİSTEMLE NE OLACAK</div>
+      <p>Kuralları bir kere yazıyorsun. Claude her açılışta bunları okur. Hooks deterministik çalışır, hatırlamasına bile gerek kalmaz.</p>
+    </div>
+  </div>
+</div>
+
+<!-- 4 KATMAN -->
+<div class="section" id="katmanlar">
+  <div class="section-label">// 4 KATMANIN DETAYLİ AÇIKLAMASI</div>
+  <h2>Her katmanı tek tek anlayalım</h2>
+
+  <!-- CLAUDE.md -->
+  <div class="layer-section" id="k-claudemd">
+    <div class="layer-header">
+      <div class="layer-num ln1">01</div>
+      <div class="layer-title">
+        <h3>🧠 CLAUDE.md — Proje Hafızası</h3>
+        <p>Her projenin kökündeki tek bir dosya</p>
+      </div>
+      <div class="where-tag">📁 proje-klasörü/CLAUDE.md</div>
+    </div>
+
+    <div class="benefit-row">
+      <div class="benefit-box before">
+        <div class="benefit-label">❌ OLMADAN</div>
+        <p>"Bu proje Next.js, TypeScript kullan, any tipi yazma, Türkçe yorum ekle" — Her session başında yazıyorsun. Claude 10 dakikada unutuyor.</p>
+      </div>
+      <div class="benefit-box after">
+        <div class="benefit-label">✅ OLMADAN</div>
+        <p>Claude Code başlarken bu dosyayı okur. Projeyi zaten tanıyor, stack'i biliyor, kuralları biliyor. Sen hiçbir şey söylemeden doğru çalışıyor.</p>
+      </div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span>CLAUDE.md — Kopyala, projenin köküne yapıştır</span>
+        <button class="copy-btn" onclick="copyCode(this, 'code-claudemd')">Kopyala</button>
+      </div>
+      <pre id="code-claudemd"><span class="cm"># Bu dosyayı projenin ana klasörüne koy (index.js ile aynı yere)</span>
+<span class="cm"># Claude Code her açılışta bunu okur</span>
+
+<span class="cv"># Proje: [PROJENİN ADI]</span>
+
+<span class="cv">## Tech Stack</span>
+- Dil: TypeScript (strict mode)
+- Framework: Next.js 14 / Node.js
+- Veritabanı: PostgreSQL + Prisma
+- Test: Jest + Testing Library
+
+<span class="cv">## Kesin Kurallar</span>
+- `any` tipi YASAK — her zaman doğru tip kullan
+- `console.log` bırakma — logger kullan
+- Test yazmadan commit etme
+- .env dosyasına kesinlikle dokunma
+- Tüm yorumları Türkçe yaz
+
+<span class="cv">## Dizin Yapısı</span>
+/src/components  → UI bileşenleri
+/src/lib         → Business logic
+/src/api         → API route handlers
+/tests           → Test dosyaları
+
+<span class="cv">## Önemli Komutlar</span>
+- `npm run dev`   → Geliştirme sunucusu
+- `npm run test`  → Testleri çalıştır
+- `npm run build` → Production build
+- `git add . && /commit` → Akıllı commit
+
+<span class="cv">## Bu Projede Dikkat Edilecekler</span>
+- [Projeye özel notlarını buraya ekle]
+- Örn: "Payment modülüne dokunurken mutlaka test yaz"</pre>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- HOOKS -->
+  <div class="layer-section" id="k-hooks">
+    <div class="layer-header">
+      <div class="layer-num ln2">02</div>
+      <div class="layer-title">
+        <h3>🔒 Hooks — Otomatik Güvenlik ve Otomasyon</h3>
+        <p>Claude ne yaparsa yapsın, bunlar deterministik olarak çalışır</p>
+      </div>
+      <div class="where-tag">📁 ~/.claude/settings.json</div>
+    </div>
+
+    <p style="color:var(--muted); margin-bottom:20px; font-size:14px;">
+      ⚠️ <strong style="color:var(--text)">Önemli fark:</strong> CLAUDE.md'ye "rm -rf kullanma" yazarsan Claude bunu <em>unutabilir</em>. Ama hook koyduysan, fiziksel olarak <em>bloke edilir</em>. Fark bu.
+    </p>
+
+    <div class="benefit-row">
+      <div class="benefit-box before">
+        <div class="benefit-label">❌ HOOK OLMADAN</div>
+        <p>Claude kazara .env dosyasını düzenledi. API anahtarların değişti. Production çöktü. Fark ettin mi? Hayır.</p>
+      </div>
+      <div class="benefit-box after">
+        <div class="benefit-label">✅ HOOK İLE</div>
+        <p>.env'ye dokunmaya çalıştığında sistem "ENGEL: Bu dosyaya izin yok" diyerek durdurur. Otomatik. Her zaman.</p>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab(this, 'tab-global')">Global (Tüm Projeler)</button>
+      <button class="tab-btn" onclick="switchTab(this, 'tab-proje')">Proje Bazlı</button>
+    </div>
+
+    <div id="tab-global" class="tab-content active">
+      <div class="code-wrap">
+        <div class="code-header">
+          <span>~/.claude/settings.json — Ev dizinine koy, TÜM projelerde çalışır</span>
+          <button class="copy-btn" onclick="copyCode(this, 'code-hooks-global')">Kopyala</button>
+        </div>
+        <pre id="code-hooks-global">{
+  <span class="ck">"hooks"</span>: {
+    <span class="cm">// KURAL 1: .env ve gizli dosyalara dokunma engeli</span>
+    <span class="ck">"PreToolUse"</span>: [
+      {
+        <span class="ck">"matcher"</span>: <span class="cs">"Edit|Write"</span>,
+        <span class="ck">"hooks"</span>: [{
+          <span class="ck">"type"</span>: <span class="cs">"command"</span>,
+          <span class="ck">"command"</span>: <span class="cs">"if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE '\\.env|\\.secret|credentials'; then echo 'ENGEL: Hassas dosyaya erişim yasak!' && exit 2; fi"</span>
+        }]
+      },
+      <span class="cm">// KURAL 2: rm -rf gibi tehlikeli komutları durdur</span>
+      {
+        <span class="ck">"matcher"</span>: <span class="cs">"Bash"</span>,
+        <span class="ck">"hooks"</span>: [{
+          <span class="ck">"type"</span>: <span class="cs">"command"</span>,
+          <span class="ck">"command"</span>: <span class="cs">"if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE 'rm -rf|sudo rm|dd if='; then echo 'TEHLIKE: Bu komut onay gerektiriyor!' && exit 2; fi"</span>
+        }]
+      }
+    ],
+    <span class="cm">// KURAL 3: Dosya düzenlenince otomatik formatla</span>
+    <span class="ck">"PostToolUse"</span>: [
+      {
+        <span class="ck">"matcher"</span>: <span class="cs">"Edit|Write"</span>,
+        <span class="ck">"hooks"</span>: [{
+          <span class="ck">"type"</span>: <span class="cs">"command"</span>,
+          <span class="ck">"command"</span>: <span class="cs">"prettier --write \"$CLAUDE_FILE_PATHS\" 2>/dev/null || true"</span>
+        }]
+      }
+    ],
+    <span class="cm">// KURAL 4: İş bitince masaüstüne bildirim gönder (Mac)</span>
+    <span class="ck">"Stop"</span>: [
+      {
+        <span class="ck">"hooks"</span>: [{
+          <span class="ck">"type"</span>: <span class="cs">"command"</span>,
+          <span class="ck">"command"</span>: <span class="cs">"osascript -e 'display notification \"Claude işi tamamladı ✅\" with title \"Claude Code\"' 2>/dev/null || echo 'Bitti!'"</span>
+        }]
+      }
+    ]
+  }
+}</pre>
+      </div>
+    </div>
+
+    <div id="tab-proje" class="tab-content">
+      <div class="code-wrap">
+        <div class="code-header">
+          <span>.claude/settings.json — Proje klasörü içine koy, SADECE bu projede çalışır</span>
+          <button class="copy-btn" onclick="copyCode(this, 'code-hooks-proje')">Kopyala</button>
+        </div>
+        <pre id="code-hooks-proje">{
+  <span class="ck">"hooks"</span>: {
+    <span class="cm">// Bu projeye özel: TypeScript dosyası düzenlenince lint çalıştır</span>
+    <span class="ck">"PostToolUse"</span>: [
+      {
+        <span class="ck">"matcher"</span>: <span class="cs">"Edit|Write"</span>,
+        <span class="ck">"hooks"</span>: [{
+          <span class="ck">"type"</span>: <span class="cs">"command"</span>,
+          <span class="ck">"command"</span>: <span class="cs">"if echo \"$CLAUDE_FILE_PATHS\" | grep -q '\\.ts'; then npx eslint \"$CLAUDE_FILE_PATHS\" --fix 2>/dev/null || true; fi"</span>
+        }]
+      }
+    ]
+  }
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- SKILLS -->
+  <div class="layer-section" id="k-skills">
+    <div class="layer-header">
+      <div class="layer-num ln3">03</div>
+      <div class="layer-title">
+        <h3>⚡ Skills — Özel Slash Komutları</h3>
+        <p>Markdown dosyasına yaz, her projede /komut olarak kullan</p>
+      </div>
+      <div class="where-tag">📁 ~/.claude/commands/</div>
+    </div>
+
+    <div class="benefit-row">
+      <div class="benefit-box before">
+        <div class="benefit-label">❌ SKILLS OLMADAN</div>
+        <p>"Git diff'e bak, değişiklikleri analiz et, uygun bir commit mesajı yaz, conventional commits formatında, sonra commit at" — Her seferinde bu uzun promptu yazıyorsun.</p>
+      </div>
+      <div class="benefit-box after">
+        <div class="benefit-label">✅ SKILLS İLE</div>
+        <p><code>/commit</code> yazıyorsun. Claude tüm bu adımları otomatik yapıyor. 2 saniye.</p>
+      </div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span>~/.claude/commands/commit.md — Bu dosyayı oluştur</span>
+        <button class="copy-btn" onclick="copyCode(this, 'code-commit')">Kopyala</button>
+      </div>
+      <pre id="code-commit"><span class="cm"># /commit — Akıllı Git Commit</span>
+<span class="cm"># Bu komutu kullanmak için: Claude Code'da /commit yaz</span>
+
+Aşağıdaki adımları sırayla yap:
+
+1. `git diff --staged` çalıştır, staged değişiklikleri gör
+2. `git diff` çalıştır, unstaged değişiklikleri de kontrol et
+3. Değişikliklerin amacını ve kapsamını analiz et
+4. Conventional Commits formatında commit mesajı oluştur:
+   - feat: yeni özellik
+   - fix: hata düzeltme  
+   - refactor: kod düzenleme
+   - docs: dokümantasyon
+   - test: test ekleme
+5. `git add .` çalıştır
+6. `git commit -m "[mesaj]"` ile commit at
+7. Ne commit ettiğini Türkçe özetle</pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span>~/.claude/commands/review.md — Kod inceleme komutu</span>
+        <button class="copy-btn" onclick="copyCode(this, 'code-review')">Kopyala</button>
+      </div>
+      <pre id="code-review"><span class="cm"># /review — Kapsamlı Kod İnceleme</span>
+<span class="cm"># Kullanım: /review src/components/Login.tsx</span>
+
+$ARGUMENTS dosyasını 5 açıdan incele ve Türkçe rapor ver:
+
+1. **Güvenlik**: SQL injection, XSS, auth açıkları var mı?
+2. **Performans**: Gereksiz re-render, N+1 query, memory leak?
+3. **Kod Kalitesi**: DRY prensibi, okunabilirlik, isimlendirme
+4. **Test Edilebilirlik**: Mock'lanabilir mi, side effect'ler ayrılmış mı?
+5. **TypeScript**: any tipi var mı, tipler doğru mu?
+
+Her bölüm için: ✅ İyi / ⚠️ Dikkat / ❌ Kritik sorun işareti koy.
+Sonunda öncelikli düzeltme listesi ver.</pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span>~/.claude/commands/deploy.md — Deploy komutu</span>
+        <button class="copy-btn" onclick="copyCode(this, 'code-deploy')">Kopyala</button>
+      </div>
+      <pre id="code-deploy"><span class="cm"># /deploy — Güvenli Deploy Akışı</span>
+
+Aşağıdaki sırayı ADIM ADIM takip et, her adım başarılı olmadan devam etme:
+
+1. `npm run test` → Testler geçiyor mu? Geçmiyorsa DUR, düzelt.
+2. `npm run build` → Build alınıyor mu? Hata varsa DUR, düzelt.
+3. `npm run lint` → Lint hataları var mı? Kritik olanları düzelt.
+4. Son değişiklikleri özetle, deploy edilecek şeyi göster
+5. Onayımı iste: "Deploy etmemi onaylıyor musun?"
+6. Onay verince `git push origin main` çalıştır
+7. Sonucu rapor et</pre>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- RULES -->
+  <div class="layer-section" id="k-rules">
+    <div class="layer-header">
+      <div class="layer-num ln4">04</div>
+      <div class="layer-title">
+        <h3>📋 Rules — Global Kurallar</h3>
+        <p>Bir kere yaz, tüm projelerde geçerli</p>
+      </div>
+      <div class="where-tag">📁 ~/.claude/CLAUDE.md</div>
+    </div>
+
+    <p style="color:var(--muted); margin-bottom:20px; font-size:14px;">
+      Proje CLAUDE.md'den farklı: bu ev dizininde, tüm projelerde geçerli. Genel çalışma stilini buraya yaz.
+    </p>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span>~/.claude/CLAUDE.md — Global kurallar, bir kere kur</span>
+        <button class="copy-btn" onclick="copyCode(this, 'code-global-claude')">Kopyala</button>
+      </div>
+      <pre id="code-global-claude"><span class="cv"># Global Claude Code Kuralları — Aykut</span>
+<span class="cm"># Bu dosya tüm projelerde geçerli</span>
+
+<span class="cv">## Dil ve İletişim</span>
+- Tüm yanıtları Türkçe ver
+- Yorumları Türkçe yaz
+- Hata mesajlarını Türkçe açıkla
+
+<span class="cv">## Kod Kalitesi — Asla Taviz Verme</span>
+- TypeScript: `any` tipi YASAK, her zaman doğru tip
+- `console.log` bırakma, logger kullan
+- Fonksiyonlar tek sorumluluk taşısın
+- Magic number kullanma, sabit tanımla
+- Yorumlar "ne yaptığını" değil "neden yaptığını" açıklasın
+
+<span class="cv">## Güvenlik</span>
+- .env dosyasına asla dokunma
+- Şifreleri ve API anahtarlarını koda yazma
+- Input validation her zaman yap
+
+<span class="cv">## Git Disiplini</span>
+- Test olmadan commit atma
+- Commit mesajları Conventional Commits formatında
+- Her commit tek bir iş yapmalı
+
+<span class="cv">## Çalışma Stili</span>
+- Bir şeyi değiştirmeden önce bana sor
+- Emin olmadığında varsayım yapma, sor
+- Büyük değişiklikleri küçük parçalara böl
+- Her adımda ne yaptığını kısaca açıkla</pre>
+    </div>
+  </div>
+</div>
+
+<!-- KURULUM -->
+<div class="section" id="kurulum">
+  <div class="section-label">// ADIM ADIM KURULUM</div>
+  <h2>Nasıl kurulur? (Terminal bilmesen de olur)</h2>
+
+  <p style="color:var(--muted); margin-bottom:32px; font-size:15px;">
+    Terminali aç (Mac'te: Cmd+Space → "Terminal" yaz → Enter). Aşağıdaki komutları sırayla yapıştır.
+  </p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Klasörleri oluştur</h4>
+        <p>Global Claude klasörü ve komut klasörü. Bir kere yap, sonsuza kadar kullan.</p>
+        <div class="code-wrap" style="margin-top:12px">
+          <div class="code-header">
+            <span>Terminal'e yapıştır</span>
+            <button class="copy-btn" onclick="copyCode(this, 'code-step1')">Kopyala</button>
+          </div>
+          <pre id="code-step1">mkdir -p ~/.claude/commands</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Global CLAUDE.md dosyasını oluştur</h4>
+        <p>Üstteki "Global Kurallar" kodunu kopyala, aşağıdaki komutu çalıştır, açılan editöre yapıştır, kaydet (Ctrl+X → Y → Enter).</p>
+        <div class="code-wrap" style="margin-top:12px">
+          <div class="code-header">
+            <span>Terminal'e yapıştır</span>
+            <button class="copy-btn" onclick="copyCode(this, 'code-step2')">Kopyala</button>
+          </div>
+          <pre id="code-step2">nano ~/.claude/CLAUDE.md</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Global settings.json (Hooks) oluştur</h4>
+        <p>Üstteki "Global Hooks" kodunu kopyala, aynı şekilde yapıştır ve kaydet.</p>
+        <div class="code-wrap" style="margin-top:12px">
+          <div class="code-header">
+            <span>Terminal'e yapıştır</span>
+            <button class="copy-btn" onclick="copyCode(this, 'code-step3')">Kopyala</button>
+          </div>
+          <pre id="code-step3">nano ~/.claude/settings.json</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>Komutları ekle</h4>
+        <p>commit.md, review.md, deploy.md dosyalarını oluştur. Her birini ayrı ayrı oluşturup içine ilgili kodu yapıştır.</p>
+        <div class="code-wrap" style="margin-top:12px">
+          <div class="code-header">
+            <span>Terminal'e yapıştır</span>
+            <button class="copy-btn" onclick="copyCode(this, 'code-step4')">Kopyala</button>
+          </div>
+          <pre id="code-step4">nano ~/.claude/commands/commit.md
+<span class="cm"># Kodu yapıştır, Ctrl+X → Y → Enter</span>
+nano ~/.claude/commands/review.md
+<span class="cm"># Kodu yapıştır, Ctrl+X → Y → Enter</span>
+nano ~/.claude/commands/deploy.md
+<span class="cm"># Kodu yapıştır, Ctrl+X → Y → Enter</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h4>Her yeni projede: CLAUDE.md oluştur</h4>
+        <p>Projenin ana klasörüne gir (index.js ya da package.json'ın olduğu yer), proje CLAUDE.md'ini oluştur ve proje bilgilerini doldur.</p>
+        <div class="code-wrap" style="margin-top:12px">
+          <div class="code-header">
+            <span>Her proje için — proje klasöründeyken yap</span>
+            <button class="copy-btn" onclick="copyCode(this, 'code-step5')">Kopyala</button>
+          </div>
+          <pre id="code-step5"><span class="cm"># Proje klasörüne gir</span>
+cd ~/Projects/benim-projem
+
+<span class="cm"># CLAUDE.md oluştur</span>
+nano CLAUDE.md
+<span class="cm"># Üstteki proje CLAUDE.md şablonunu yapıştır, düzenle, kaydet</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-content">
+        <h4>Claude Code'u yeniden başlat</h4>
+        <p>Hook değişiklikleri için Claude Code'u kapatıp açman gerekiyor. CLAUDE.md değişiklikleri anında geçerli.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DOSYA YAPISI -->
+<div class="section" id="dosyalar">
+  <div class="section-label">// TAM DOSYA HARİTASI</div>
+  <h2>Neyi nereye koyuyoruz?</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>DOSYA YOLU</th>
+        <th>NE İŞE YARAR</th>
+        <th>NE ZAMAN GEÇERLİ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>~/.claude/CLAUDE.md</td>
+        <td>Global kurallar, çalışma stili</td>
+        <td>Tüm projelerde her zaman</td>
+      </tr>
+      <tr>
+        <td>~/.claude/settings.json</td>
+        <td>Global hooks (.env koruması, bildirim vb.)</td>
+        <td>Tüm projelerde her zaman</td>
+      </tr>
+      <tr>
+        <td>~/.claude/commands/commit.md</td>
+        <td>/commit komutu</td>
+        <td>Tüm projelerde</td>
+      </tr>
+      <tr>
+        <td>~/.claude/commands/review.md</td>
+        <td>/review komutu</td>
+        <td>Tüm projelerde</td>
+      </tr>
+      <tr>
+        <td>~/.claude/commands/deploy.md</td>
+        <td>/deploy komutu</td>
+        <td>Tüm projelerde</td>
+      </tr>
+      <tr>
+        <td>proje-klasörü/CLAUDE.md</td>
+        <td>Projenin stack'i, kuralları, yapısı</td>
+        <td>Sadece o proje</td>
+      </tr>
+      <tr>
+        <td>proje-klasörü/.claude/settings.json</td>
+        <td>Projeye özel hooks (linter vs.)</td>
+        <td>Sadece o proje</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="code-wrap" style="margin-top: 24px;">
+    <div class="code-header">
+      <span>Görsel ağaç yapısı</span>
+      <button class="copy-btn" onclick="copyCode(this, 'code-tree')">Kopyala</button>
+    </div>
+    <pre id="code-tree"><span class="cs">~/ (ev dizini)</span>
+└── <span class="ck">.claude/</span>                    <span class="cm">← Global ayarlar</span>
+    ├── <span class="cv">CLAUDE.md</span>               <span class="cm">← Tüm projelerde geçerli kurallar</span>
+    ├── <span class="cv">settings.json</span>           <span class="cm">← Global hooks</span>
+    └── <span class="cv">commands/</span>               <span class="cm">← Slash komutları</span>
+        ├── commit.md           <span class="cm">← /commit</span>
+        ├── review.md           <span class="cm">← /review</span>
+        └── deploy.md           <span class="cm">← /deploy</span>
+
+<span class="cs">~/Projects/projem/ (proje klasörü)</span>
+├── <span class="ck">CLAUDE.md</span>                   <span class="cm">← Bu projeye özel hafıza</span>
+├── <span class="ck">.claude/</span>
+│   └── <span class="cv">settings.json</span>           <span class="cm">← Bu projeye özel hooks</span>
+├── src/
+├── package.json
+└── ...</pre>
+  </div>
+</div>
+
+<!-- CHECKLIST -->
+<div class="section">
+  <div class="section-label">// KONTROL LİSTESİ</div>
+  <h2>Kurulum tamamlandı mı?</h2>
+
+  <div class="checklist">
+    <div class="check-item">
+      <div class="check-icon ci-done">✓</div>
+      <span><code>~/.claude/CLAUDE.md</code> oluşturuldu ve dolduruldu</span>
+    </div>
+    <div class="check-item">
+      <div class="check-icon ci-done">✓</div>
+      <span><code>~/.claude/settings.json</code> hook'larla oluşturuldu</span>
+    </div>
+    <div class="check-item">
+      <div class="check-icon ci-done">✓</div>
+      <span><code>~/.claude/commands/commit.md</code> oluşturuldu</span>
+    </div>
+    <div class="check-item">
+      <div class="check-icon ci-done">✓</div>
+      <span><code>~/.claude/commands/review.md</code> oluşturuldu</span>
+    </div>
+    <div class="check-item">
+      <div class="check-icon ci-done">✓</div>
+      <span><code>~/.claude/commands/deploy.md</code> oluşturuldu</span>
+    </div>
+    <div class="check-item">
+      <div class="check-icon ci-auto">→</div>
+      <span>Her yeni projede: <code>CLAUDE.md</code> oluştur ve proje bilgilerini doldur</span>
+    </div>
+    <div class="check-item">
+      <div class="check-icon ci-auto">→</div>
+      <span>Claude Code'u kapat ve yeniden aç (hooks için)</span>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>// Claude Code — 4 Katman Kurulum Rehberi</p>
+  <p>~/.claude/ → global &nbsp;|&nbsp; proje/.claude/ → lokal</p>
+</footer>
+
+<script>
+function copyCode(btn, id) {
+  const el = document.getElementById(id);
+  const text = el.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Kopyalandı ✓';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Kopyala';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+function switchTab(btn, tabId) {
+  const parent = btn.closest('.layer-section') || btn.parentElement.parentElement;
+  const allBtns = btn.parentElement.querySelectorAll('.tab-btn');
+  const allTabs = parent.querySelectorAll('.tab-content');
+  allBtns.forEach(b => b.classList.remove('active'));
+  allTabs.forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+}
+</script>
+</body>
+</html>

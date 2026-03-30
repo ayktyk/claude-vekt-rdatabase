@@ -54,6 +54,17 @@ def require_gemini_api_key() -> str:
     return api_key
 
 
+def require_anthropic_api_key() -> str:
+    load_env_file()
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+    if not api_key:
+        raise RuntimeError(
+            "ANTHROPIC_API_KEY bulunamadi. Proje kokundeki .env dosyasina "
+            "ANTHROPIC_API_KEY=... seklinde ekleyin."
+        )
+    return api_key
+
+
 def file_md5(path: Path) -> str:
     digest = hashlib.md5()
     with path.open("rb") as handle:
@@ -65,18 +76,18 @@ def file_md5(path: Path) -> str:
 def slugify(value: str) -> str:
     replacements = str.maketrans(
         {
-            "c": "c",
-            "C": "C",
-            "g": "g",
-            "G": "G",
-            "i": "i",
-            "I": "I",
-            "o": "o",
-            "O": "O",
-            "s": "s",
-            "S": "S",
-            "u": "u",
-            "U": "U",
+            "ç": "c",
+            "Ç": "C",
+            "ğ": "g",
+            "Ğ": "G",
+            "ı": "i",
+            "İ": "I",
+            "ö": "o",
+            "Ö": "O",
+            "ş": "s",
+            "Ş": "S",
+            "ü": "u",
+            "Ü": "U",
         }
     )
     value = value.translate(replacements)
@@ -140,7 +151,18 @@ def estimate_gemini_cost(
     }
 
 
+def estimate_token_cost(
+    usage: GeminiUsage,
+    input_rate_per_million: float,
+    output_rate_per_million: float,
+) -> dict[str, float]:
+    return estimate_gemini_cost(
+        usage,
+        input_rate_per_million=input_rate_per_million,
+        output_rate_per_million=output_rate_per_million,
+    )
+
+
 def write_json(path: Path, payload: dict[str, Any] | list[Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-

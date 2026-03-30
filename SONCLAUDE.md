@@ -8,6 +8,12 @@ Once mevcut repoyu incele: https://github.com/ayktyk/claude-vekt-rdatabase
 CLAUDE.md, .mcp.json, ajanlar/, mevcut HukukTakip dashboard kodunu oku.
 Sonra asagidaki revizyonlari VERILEN SIRAYLA uygula.
 
+Kalici kayit politikasi:
+- Yeni dava ciktisi icin ana yol `G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}`
+- Sadece arastirma talepleri icin ana yol `G:\Drive'im\Hukuk Burosu\Bekleyen Davalar\{istek-id veya konu-adi}`
+- Belge icindeki eski `G:\.shortcut-targets-by-id\...` ornekleri tarihsel referanstir; yeni calismalarda kullanilmaz
+- Repo ici klasorler gelistirme ve sablon amaclidir, kalici dava/arastirma ciktisi tutulmaz
+
 ---
 
 ## TEMEL PRENSIP
@@ -258,7 +264,7 @@ V. SONUC VE TALEP
 ## Dosya Formati
 
 Dilekçe `.udf` olarak kaydedilmelidir. Bunun için `udf-cli` paketini kullanarak Markdown çıktısını UDF formatına çevir (`npx udf-cli md2udf <input.md> <output.udf>`). UDF formatı Türkiye'deki tüm adli yazışmalar (UYAP) için zorunludur.
-Kayıt yolu: `aktif-davalar/{dava-id}/03-Sentez-ve-Dilekce/dava-dilekcesi-v[N].udf`
+Kayıt yolu: `G:\.shortcut-targets-by-id\1ZkRESQIhcw0806PHqQyQEYmGlWk9ZP8D\Aktif Davalar\{dava-id}\03-Sentez-ve-Dilekce\dava-dilekcesi-v[N].udf`
 
 ## Kalite Kontrol
 
@@ -509,7 +515,7 @@ Briefing Sorulari:
    (ornek: ada/parsel, olum tarihi, ise giris/cikis, son brut ucret)
 
 Avukat doldurunca briefing verisini dava hafizasina kaydet:
-`aktif-davalar/{dava-id}/00-Briefing.md`
+`G:\.shortcut-targets-by-id\1ZkRESQIhcw0806PHqQyQEYmGlWk9ZP8D\Aktif Davalar\{dava-id}\00-Briefing.md`
 
 Bu veri tum ajanlara girdi olarak iletilir:
 - Ajan 1 risk ve ton bilgisini usul raporuna yansitir
@@ -620,7 +626,7 @@ hangi belge eksik -- bu bilgi sistematik olarak cikarilmiyor.
 
 Mevcut yapi:
 ```
-aktif-davalar/{dava-id}/
+G:\.shortcut-targets-by-id\1ZkRESQIhcw0806PHqQyQEYmGlWk9ZP8D\Aktif Davalar\{dava-id}\
 ├── 00-Briefing.md          (YENI -- Adim 8)
 ├── 01-Usul/
 ├── 02-Arastirma/

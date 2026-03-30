@@ -8,13 +8,16 @@ import fitz
 
 from .chunk_markdown import chunk_pages
 from .load_chroma import load_chunks_into_chroma
-from .ocr_gemini import DEFAULT_MODEL, ocr_pages
+from .ocr_anthropic import DEFAULT_MODEL as ANTHROPIC_DEFAULT_MODEL
+from .ocr_anthropic import ocr_pages as ocr_pages_anthropic
+from .ocr_gemini import DEFAULT_MODEL as GEMINI_DEFAULT_MODEL
+from .ocr_gemini import ocr_pages as ocr_pages_gemini
 from .pdf_digital import detect_digital_pdf, extract_digital_pages
-from .utils import estimate_gemini_cost, load_env_file, slugify, write_json
+from .utils import estimate_token_cost, load_env_file, slugify, write_json
 
 
-DEFAULT_INPUT_RATE = 0.10
-DEFAULT_OUTPUT_RATE = 0.40
+DEFAULT_GEMINI_INPUT_RATE = 0.10
+DEFAULT_GEMINI_OUTPUT_RATE = 0.40
 
 
 def build_markdown(book_title: str, source_file: Path, pages: list[dict], method: str) -> str:
@@ -36,16 +39,34 @@ def build_markdown(book_title: str, source_file: Path, pages: list[dict], method
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Tek PDF ile v2 Gemini OCR pilotu")
+    parser = argparse.ArgumentParser(description="Tek PDF ile v2 OCR pilotu")
     parser.add_argument("--source", required=True, help="Pilot PDF yolu")
     parser.add_argument(
         "--out-root",
         default=str(Path.cwd() / "pilot-output"),
         help="Pilot ciktilarinin yazilacagi kok klasor",
     )
-    parser.add_argument("--model", default=DEFAULT_MODEL, help="Gemini modeli")
+    parser.add_argument(
+        "--ocr-provider",
+        choices=("gemini", "anthropic"),
+        default="gemini",
+        help="Taranmis PDF icin OCR saglayicisi",
+    )
+    parser.add_argument("--model", default=None, help="Saglayici modeli")
     parser.add_argument("--sample-pages", type=int, default=12, help="Ilk etapta islenecek sayfa sayisi")
     parser.add_argument("--start-page", type=int, default=1, help="Baslangic sayfasi")
+    parser.add_argument(
+        "--input-rate",
+        type=float,
+        default=None,
+        help="1 milyon input token icin USD maliyet",
+    )
+    parser.add_argument(
+        "--output-rate",
+        type=float,
+        default=None,
+        help="1 milyon output token icin USD maliyet",
+    )
     parser.add_argument("--load-chroma", action="store_true", help="Chunklari ChromaDB'ye de yukle")
     args = parser.parse_args()
 
@@ -60,7 +81,11 @@ def main() -> None:
         )
 
     out_root = Path(args.out_root)
-    markdown_dir = out_root / "markdown-temiz" / "pilot-gemini-ocr"
+    provider_name = args.ocr_provider
+    ocr_model = args.model or (
+        GEMINI_DEFAULT_MODEL if provider_name == "gemini" else ANTHROPIC_DEFAULT_MODEL
+    )
+    markdown_dir = out_root / "markdown-temiz" / f"pilot-{provider_name}-ocr"
     processed_dir = out_root / "islenmis-v2"
     chroma_dir = out_root / "vektor-db-v2"
     report_dir = out_root / "raporlar"
@@ -82,12 +107,22 @@ def main() -> None:
         cost_info = {"input_cost_usd": 0.0, "output_cost_usd": 0.0, "total_cost_usd": 0.0}
         usage = {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0}
     else:
-        pages, usage_raw = ocr_pages(args.model, source, page_indexes, book_title)
-        method = "gemini_ocr"
-        cost_info = estimate_gemini_cost(
+        if provider_name == "gemini":
+            pages, usage_raw = ocr_pages_gemini(ocr_model, source, page_indexes, book_title)
+            default_input_rate = DEFAULT_GEMINI_INPUT_RATE
+            default_output_rate = DEFAULT_GEMINI_OUTPUT_RATE
+        else:
+            pages, usage_raw = ocr_pages_anthropic(ocr_model, source, page_indexes, book_title)
+            default_input_rate = 0.0
+            default_output_rate = 0.0
+
+        method = f"{provider_name}_ocr"
+        input_rate = args.input_rate if args.input_rate is not None else default_input_rate
+        output_rate = args.output_rate if args.output_rate is not None else default_output_rate
+        cost_info = estimate_token_cost(
             usage_raw,
-            input_rate_per_million=DEFAULT_INPUT_RATE,
-            output_rate_per_million=DEFAULT_OUTPUT_RATE,
+            input_rate_per_million=input_rate,
+            output_rate_per_million=output_rate,
         )
         usage = {
             "input_tokens": usage_raw.input_tokens,
@@ -103,7 +138,13 @@ def main() -> None:
     markdown_path.parent.mkdir(parents=True, exist_ok=True)
     markdown_path.write_text(markdown, encoding="utf-8")
 
-    chunks = chunk_pages(pages, source)
+    chunk_category = f"pilot-{method}"
+    chunks = chunk_pages(
+        pages,
+        source,
+        kategori=chunk_category,
+        isleme_yontemi=method,
+    )
     processed_path = processed_dir / f"{safe_name}.json"
     write_json(processed_path, chunks)
 
@@ -118,7 +159,8 @@ def main() -> None:
         "processed_pages": [page["page"] for page in pages],
         "page_count_processed": len(pages),
         "method": method,
-        "model": args.model if method == "gemini_ocr" else None,
+        "provider": provider_name if method != "digital_pdf" else None,
+        "model": ocr_model if method != "digital_pdf" else None,
         "usage": usage,
         "estimated_cost_usd": cost_info,
         "markdown_path": str(markdown_path),

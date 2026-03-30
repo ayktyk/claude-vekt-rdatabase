@@ -4,11 +4,32 @@
       "Bash(echo === $drive ===:*)",
       "Bash(pip install:*)",
       "Bash(python:*)",
+      "Bash(yargi:*)",
+      "Bash(mevzuat:*)",
+      "Bash(cd \"D:/hukuk-vektordb\":*)",
       "mcp__claude_ai_Yarg_MCP__search_bedesten_unified",
       "mcp__claude_ai_Mevuzat_MCP__search_within_kanun",
       "mcp__claude_ai_Yarg_MCP__get_emsal_document_markdown",
       "mcp__claude_ai_Yarg_MCP__search_emsal_detailed_decisions",
       "Bash(du:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [{
+          "type": "command",
+          "command": "bash -c 'if echo \"$CLAUDE_TOOL_INPUT\" | grep -qiE \"\\.env|credentials|api.key|secret\"; then echo \"KVKK ENGEL: Hassas dosyaya erisim yasak!\" && exit 2; fi'"
+        }]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [{
+          "type": "command",
+          "command": "bash -c 'if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE \"rm -rf|sudo rm|dd if=\"; then echo \"TEHLIKE: Yikim komutu engellendi!\" && exit 2; fi'"
+        }]
+      }
     ]
   }
 }
