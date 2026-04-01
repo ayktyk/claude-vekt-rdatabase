@@ -222,6 +222,7 @@ export default function ResearchTab({ caseId, caseData }: ResearchTabProps) {
   const [researchProgress, setResearchProgress] = useState<string[]>([])
 
   const [latestRun, setLatestRun] = useState<any>(null)
+  const [showFullReport, setShowFullReport] = useState(false)
   const [reviewNotes, setReviewNotes] = useState('')
 
   // ─── Sync from server ──────────────────
@@ -243,7 +244,6 @@ export default function ResearchTab({ caseId, caseData }: ResearchTabProps) {
     const q =
       researchProfile.researchQuestion ||
       intakeProfile?.criticalPointSummary ||
-      briefing?.summary ||
       caseData?.description ||
       ''
     setResearchQuestion(q)
@@ -798,7 +798,7 @@ export default function ResearchTab({ caseId, caseData }: ResearchTabProps) {
             </div>
 
             {/* Research progress indicator */}
-            {isResearching && researchProgress.length > 0 && (
+            {researchProgress.length > 0 && (
               <div className="rounded-xl border border-violet-200 bg-violet-50/50 p-4">
                 <p className="mb-2 text-xs font-medium uppercase tracking-wide text-violet-700">
                   Arastirma Durumu
@@ -806,7 +806,7 @@ export default function ResearchTab({ caseId, caseData }: ResearchTabProps) {
                 <div className="space-y-1.5">
                   {researchProgress.map((msg, i) => (
                     <div key={i} className="flex items-center gap-2 text-sm text-violet-800">
-                      {i === researchProgress.length - 1 ? (
+                      {i === researchProgress.length - 1 && isResearching ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin text-violet-600 shrink-0" />
                       ) : (
                         <CheckCircle2 className="h-3.5 w-3.5 text-green-600 shrink-0" />
@@ -819,18 +819,48 @@ export default function ResearchTab({ caseId, caseData }: ResearchTabProps) {
             )}
 
             {/* Results */}
-            {(latestRun?.sourceRuns?.length > 0 || researchProfile?.lastRunSummary) && (
-              <div className="rounded-xl border bg-card/80 p-4">
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Arastirma Sonuclari
-                </p>
-                <p className="mt-2 text-sm">
+            {(latestRun || researchProfile?.lastRunSummary) && (
+              <div className="rounded-xl border bg-card/80 p-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Arastirma Sonuclari
+                  </p>
+                  {(latestRun?.report?.status === 'completed' || researchProfile?.lastRunStatus === 'completed') && (
+                    <Badge variant="success">Tamamlandi</Badge>
+                  )}
+                </div>
+
+                {/* Summary */}
+                <p className="text-sm">
                   {latestRun?.report?.summary ||
+                    latestRun?.summary ||
                     researchProfile?.lastRunSummary ||
                     'Sonuc bekleniyor...'}
                 </p>
+
+                {/* Orchestrate stats */}
+                {latestRun?.decisionsFound != null && (
+                  <div className="flex flex-wrap gap-3">
+                    <div className="rounded-lg border bg-emerald-50 px-3 py-2 text-center">
+                      <p className="text-lg font-bold text-emerald-700">{latestRun.decisionsFound}</p>
+                      <p className="text-[10px] text-emerald-600">Karar Bulundu</p>
+                    </div>
+                    <div className="rounded-lg border bg-blue-50 px-3 py-2 text-center">
+                      <p className="text-lg font-bold text-blue-700">{latestRun.legislationFound}</p>
+                      <p className="text-[10px] text-blue-600">Mevzuat Bulundu</p>
+                    </div>
+                    {latestRun.toolCallCount > 0 && (
+                      <div className="rounded-lg border bg-violet-50 px-3 py-2 text-center">
+                        <p className="text-lg font-bold text-violet-700">{latestRun.toolCallCount}</p>
+                        <p className="text-[10px] text-violet-600">Tool Cagrisi</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Source run cards (from /run endpoint) */}
                 {latestRun?.sourceRuns?.length > 0 && (
-                  <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                     {latestRun.sourceRuns.map((source: any) => (
                       <div key={source.sourceType} className="rounded-lg border p-3">
                         <div className="flex items-center justify-between gap-2">
@@ -856,6 +886,26 @@ export default function ResearchTab({ caseId, caseData }: ResearchTabProps) {
                         <p className="mt-2 whitespace-pre-wrap text-sm">{source.summary}</p>
                       </div>
                     ))}
+                  </div>
+                )}
+
+                {/* Full report content (from orchestrate endpoint) */}
+                {latestRun?.reportContent && (
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => setShowFullReport(!showFullReport)}
+                      className="inline-flex items-center gap-2 text-sm font-medium text-law-accent hover:underline cursor-pointer"
+                    >
+                      <BookOpen className="h-4 w-4" />
+                      {showFullReport ? 'Raporu Gizle' : 'Tam Raporu Goruntule'}
+                      {showFullReport ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                    </button>
+                    {showFullReport && (
+                      <div className="mt-3 max-h-[600px] overflow-y-auto rounded-lg border bg-white p-4">
+                        <pre className="whitespace-pre-wrap text-sm leading-relaxed font-sans">{latestRun.reportContent}</pre>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

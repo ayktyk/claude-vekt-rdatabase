@@ -648,15 +648,25 @@ router.post('/cases/:id/research/orchestrate', async (req, res) => {
     // Raporu dosyaya yaz
     const fs = await import('fs/promises')
     const path = await import('path')
-    if (caseRecord.researchPath) {
-      const researchDir = path.dirname(caseRecord.researchPath)
-      await fs.mkdir(researchDir, { recursive: true })
-      await fs.writeFile(caseRecord.researchPath, result.researchMarkdown, 'utf8')
 
-      // Orkestratör raporunu ayrı dosyaya da kaydet
-      const orchestratedPath = path.join(researchDir, 'orchestrated-arastirma.md')
-      await fs.writeFile(orchestratedPath, result.researchMarkdown, 'utf8')
+    // researchPath yoksa otomatik oluştur
+    let effectiveResearchPath = caseRecord.researchPath
+    if (!effectiveResearchPath) {
+      const baseDir = path.join(process.cwd(), 'data', 'research', caseId)
+      effectiveResearchPath = path.join(baseDir, 'arastirma-raporu.md')
+      await db
+        .update(cases)
+        .set({ researchPath: effectiveResearchPath })
+        .where(eq(cases.id, caseId))
     }
+
+    const researchDir = path.dirname(effectiveResearchPath)
+    await fs.mkdir(researchDir, { recursive: true })
+    await fs.writeFile(effectiveResearchPath, result.researchMarkdown, 'utf8')
+
+    // Orkestratör raporunu ayrı dosyaya da kaydet
+    const orchestratedPath = path.join(researchDir, 'orchestrated-arastirma.md')
+    await fs.writeFile(orchestratedPath, result.researchMarkdown, 'utf8')
 
     // Artifact kaydet
     await upsertResearchArtifact(
@@ -664,7 +674,7 @@ router.post('/cases/:id/research/orchestrate', async (req, res) => {
       caseId,
       'research_report',
       'Orkestre Arastirma Raporu (Opus 4.6)',
-      caseRecord.researchPath,
+      effectiveResearchPath,
       `${result.decisionsFound} karar, ${result.legislationFound} mevzuat, ${result.toolCallCount} tool cagri`,
       'orchestrated_research'
     )
@@ -696,7 +706,13 @@ router.post('/cases/:id/research/orchestrate', async (req, res) => {
       tokensUsed: result.tokensUsed,
       decisionsFound: result.decisionsFound,
       legislationFound: result.legislationFound,
-      reportPath: caseRecord.researchPath,
+      reportPath: effectiveResearchPath,
+      reportContent: result.researchMarkdown,
+      report: {
+        summary,
+        status: 'completed',
+        storagePath: effectiveResearchPath,
+      },
     })
   } catch (error: any) {
     await setResearchStep(

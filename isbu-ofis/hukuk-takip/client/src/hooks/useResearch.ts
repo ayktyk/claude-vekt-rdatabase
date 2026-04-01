@@ -76,6 +76,7 @@ export function useOrchestrateResearch(caseId: string | undefined) {
     onSuccess: (data) => {
       if (caseId) {
         queryClient.invalidateQueries({ queryKey: ['cases', caseId, 'research-profile'] })
+        queryClient.invalidateQueries({ queryKey: ['cases', caseId, 'research-qc'] })
         queryClient.invalidateQueries({ queryKey: ['cases', caseId, 'ai-jobs'] })
         queryClient.invalidateQueries({ queryKey: ['cases', caseId] })
       }
