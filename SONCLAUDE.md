@@ -9,6 +9,7 @@ CLAUDE.md, .mcp.json, ajanlar/, mevcut HukukTakip dashboard kodunu oku.
 Sonra asagidaki revizyonlari VERILEN SIRAYLA uygula.
 
 Kalici kayit politikasi:
+
 - Yeni dava ciktisi icin ana yol `G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}`
 - Sadece arastirma talepleri icin ana yol `G:\Drive'im\Hukuk Burosu\Bekleyen Davalar\{istek-id veya konu-adi}`
 - Belge icindeki eski `G:\.shortcut-targets-by-id\...` ornekleri tarihsel referanstir; yeni calismalarda kullanilmaz
@@ -36,13 +37,13 @@ Skill Gateway sistemini kullan.
 
 Kullanilacak skill'ler (sadece bunlar -- geri kalanini yoksay):
 
-| Is | Kullanilacak Skill | Ne Zaman |
-|---|---|---|
-| Dilekce/ihtarname .udf olusturma | `udf` | Ajan 3 cikti urettiginde |
-| Hesaplama tablosu .xlsx olusturma | `xlsx` | Usul Ajani iscilik hesaplamasi yaptiginda |
-| PDF olusturma/birlestirme | `pdf` | Rapor veya belge PDF'e cevrildiginde |
-| Dashboard UI iyilestirmesi | `frontend-design` | Faza 3 dashboard degisikliklerinde |
-| Yeni skill olusturma | `skill-creator` | Yeni ajan skill'i gerektiginde |
+| Is                                | Kullanilacak Skill | Ne Zaman                                  |
+| --------------------------------- | ------------------ | ----------------------------------------- |
+| Dilekce/ihtarname .udf olusturma  | `udf`              | Ajan 3 cikti urettiginde                  |
+| Hesaplama tablosu .xlsx olusturma | `xlsx`             | Usul Ajani iscilik hesaplamasi yaptiginda |
+| PDF olusturma/birlestirme         | `pdf`              | Rapor veya belge PDF'e cevrildiginde      |
+| Dashboard UI iyilestirmesi        | `frontend-design`  | Faza 3 dashboard degisikliklerinde        |
+| Yeni skill olusturma              | `skill-creator`    | Yeni ajan skill'i gerektiginde            |
 
 ALLSKILL.md'deki SEO, marketing, AWS, Stripe, iOS, video gibi
 yazilim gelistirme odakli skill'ler bu proje icin GEREKSIZ -- yoksay.
@@ -52,6 +53,7 @@ yazilim gelistirme odakli skill'ler bu proje icin GEREKSIZ -- yoksay.
 ## MEVCUT SISTEM DURUMU
 
 Calisan:
+
 - CLAUDE.md (33.9KB, monolitik) + Director Agent + 4 ajan tanimi
 - Yargi MCP + Mevzuat MCP (CLI: `yargi`, `mevzuat`)
 - Vector DB (ChromaDB + multilingual-e5-large) -- pipeline yeniden kuruluyor
@@ -64,6 +66,7 @@ Calisan:
 - dilekce-yazim-kurallari.md
 
 Gercek dava deneyiminden cikan eksikler:
+
 - Somut veri girisi daginik (ada/parsel, olum tarihi, veraset, saglik kaydi gibi
   dosyaya ozgu veriler sistematik olarak toplanmiyor)
 - Karsi taraf savunmasi simulasyonu yok
@@ -223,20 +226,20 @@ dilidir, kullanabilirsin. Her cumlede degil, ihtiyac olunca.
 ## Referans Formatlari
 
 Yargitay karari:
-  Yargitay X. Hukuk Dairesi'nin GG.AA.YYYY tarih ve
-  YYYY/XXXXX E., YYYY/XXXXX K. sayili kararinda...
+Yargitay X. Hukuk Dairesi'nin GG.AA.YYYY tarih ve
+YYYY/XXXXX E., YYYY/XXXXX K. sayili kararinda...
 
 Mevzuat:
-  4857 sayili Is Kanunu'nun XX. maddesi uyarinca...
+4857 sayili Is Kanunu'nun XX. maddesi uyarinca...
 
 ## Cikti Yapisi
 
 [MAHKEME ADI]
-                                              ESAS NO:
-DAVACI    :
-VEKILI    :
-DAVALI    :
-KONU      :
+ESAS NO:
+DAVACI :
+VEKILI :
+DAVALI :
+KONU :
 
 ACIKLAMALAR
 
@@ -249,6 +252,7 @@ II. HUKUKI DEGERLENDIRME
 [Advanced Briefing'deki karsi taraf savunma beklentisi burada karsilanir]
 
 III. DELILLER
+
 1. [Belge]
 2. ...
 
@@ -269,6 +273,7 @@ Kayıt yolu: `G:\.shortcut-targets-by-id\1ZkRESQIhcw0806PHqQyQEYmGlWk9ZP8D\Aktif
 ## Kalite Kontrol
 
 Dilekceyi kaydetmeden once:
+
 - [ ] Yapay zeka oldugu belli oluyor mu? EVET ISE yeniden yaz.
 - [ ] En az 2 Yargitay kararina atif var mi?
 - [ ] Netice-i talep rakamlari Usul Ajaninin hesaplamalariyla tutarli mi?
@@ -283,6 +288,7 @@ Dilekceyi kaydetmeden once:
 ## Risk Flag'leri
 
 Su durumlarda avukata don, otomatik kaydetme:
+
 - Netice-i talep ile hesaplama arasinda tutarsizlik var
 - Uydurma olabilecek referans tespit edildi
 - Belirsiz alacak davasi mi kismi dava mi karari verilemedi
@@ -351,6 +357,7 @@ Detay ve kurallar: @ajanlar/pazarlama/SKILL.md
 Hedef: CLAUDE.md 33.9KB -> yaklasik 12-15KB.
 
 CLAUDE.md'de KALACAK bolumler (silme/tasima):
+
 - Kimlik ve Calisma Prensibi
 - Proje Klasor Yapisi
 - Arac Katmani (harici + dahili)
@@ -444,12 +451,14 @@ Sayisal skor (% bazli) KULLANMA -- yaniltici olur. Kategorik not yeterli.
 ## ADIM 7: Repo Temizligi
 
 Silinecek dosyalar:
+
 - CLAUDE1.md
 - CLAUDETASLAK.md
 - YENIPLAN.md
 - GELISTIRME.md (icerigi artik bu dosyada -- SONCLAUDE.md)
 
 Kalacak dosyalar:
+
 - CLAUDE.md (hafifletilmis)
 - PLAN.md
 - SONCLAUDE.md (bu dosya -- referans olarak)
@@ -577,18 +586,22 @@ Ajan 3 dilekce taslagi olusturduktan sonra kalite gate asamasinda.
 # Savunma Simulasyonu — [Dava Ozeti]
 
 ## 1. En Guclu Savunma
+
 Savunma: [ne iddia edecek]
 Dayanak: [kanun maddesi / olasi ictihat]
 Bizim Yanitimiz: [nasil karsilanir]
 Dilekceye Eklenmeli: [onerilen paragraf ozeti]
 
 ## 2. Ikinci Savunma
+
 [ayni format]
 
 ## 3. Ucuncu Savunma
+
 [ayni format]
 
 ## Genel Risk Degerlendirmesi
+
 [Karsi tarafin en guclu oldugu nokta ve bizim en zayif noktamiz]
 
 ## Kalite Kontrol
@@ -625,6 +638,7 @@ hangi belge eksik -- bu bilgi sistematik olarak cikarilmiyor.
 ### Dava Klasor Yapisina Ek
 
 Mevcut yapi:
+
 ```
 G:\.shortcut-targets-by-id\1ZkRESQIhcw0806PHqQyQEYmGlWk9ZP8D\Aktif Davalar\{dava-id}\
 ├── 00-Briefing.md          (YENI -- Adim 8)
@@ -717,19 +731,24 @@ Dilekceyi su aculardan degerlendirerek "Revizyon Raporu" olustur:
 # Revizyon Raporu — [Dava Adi] v[N]
 
 ## Guclu Noktalar
+
 - [Neyi iyi yapmis]
 
 ## Duzeltilmesi Gereken Noktalar
+
 1. [Sorun] -> [Onerilen duzeltme]
 2. [Sorun] -> [Onerilen duzeltme]
 
 ## Eklenmesi Gereken Noktalar
+
 - [Eksik arguman veya delil]
 
 ## Cikarilmasi Gereken Noktalar
+
 - [Zayiflatan veya gereksiz kisim]
 
 ## Sonraki Adim
+
 [v2 icin net talimat]
 ```
 
@@ -770,6 +789,7 @@ Mevcut case detail sayfasindaki sekmelere
 Yeni sekme: **AI Workspace**
 
 Bu sekmede gosterilecekler:
+
 - Briefing ozeti (varsa)
 - Usul raporu durumu (tamamlandi / bekleniyor)
 - Arastirma raporu durumu
@@ -780,6 +800,7 @@ Bu sekmede gosterilecekler:
 - Guven notu
 
 Her AI ciktisi yaninda iki buton:
+
 - [Onayla] -- avukat onayladiginda "final" olarak isaretlenir
 - [Revize Et] -- revizyon ajani tetiklenir
 
@@ -828,6 +849,7 @@ Mevcut "Yeni Dava Ekle" ekranina:
 ```
 
 "AI ile Baslat" tiklandiginda:
+
 1. Dava turu secimi (dropdown)
 2. Kisa ozet (textarea)
 3. Kritik nokta (textarea)

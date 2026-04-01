@@ -11,24 +11,51 @@
       "mcp__claude_ai_Mevuzat_MCP__search_within_kanun",
       "mcp__claude_ai_Yarg_MCP__get_emsal_document_markdown",
       "mcp__claude_ai_Yarg_MCP__search_emsal_detailed_decisions",
-      "Bash(du:*)"
+      "Bash(du:*)",
+      "Bash(npx tsc:*)",
+      "Read(//d/hukuk-vektordb/pdf-kaynak/is-hukuku/**)",
+      "Read(//d/hukuk-vektordb/pdf-kaynak/doktrin/**)",
+      "Read(//d/hukuk-vektordb/pdf-kaynak/buro-arsivi/**)",
+      "Bash(GEMINI_API_KEY=\"AIzaSyCxSGUtM7b6HuihZ_4nIzK3gddyLTXv8E0\" python pipeline/01-ocr-gemini.py --kaynak \"pdf-kaynak\" --cikti \"markdown-temiz/diger\")",
+      "Bash(GEMINI_API_KEY=\"AIzaSyCxSGUtM7b6HuihZ_4nIzK3gddyLTXv8E0\" python pipeline/01-ocr-gemini.py --help)",
+      "Bash(docker ps:*)",
+      "Bash(npm run:*)",
+      "Bash(netstat -ano)",
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"legal law firm dashboard professional luxury dark\" --design-system -p \"HukukTakip\")",
+      "Bash(PYTHONIOENCODING=utf-8 python .claude/skills/ui-ux-pro-max/scripts/search.py \"legal law firm dashboard professional luxury dark\" --design-system -p \"HukukTakip\")",
+      "Bash(PYTHONIOENCODING=utf-8 python .claude/skills/ui-ux-pro-max/scripts/search.py \"elegant luxury serif\" --domain typography -n 5)",
+      "Bash(PYTHONIOENCODING=utf-8 python .claude/skills/ui-ux-pro-max/scripts/search.py \"dashboard sidebar layout\" --stack shadcn -n 5)",
+      "mcp__Claude_Preview__preview_start",
+      "mcp__firecrawl-mcp__firecrawl_scrape",
+      "WebFetch(domain:21st.dev)",
+      "Bash(npx vite:*)",
+      "Bash(grep -E \"\\\\.ts$\")",
+      "Bash(npx drizzle-kit:*)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:postgres@localhost:5432/hukuk_takip\" npx drizzle-kit push)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Read(//c/Users/user/Desktop/projelerim/**)",
+      "Bash(find . -name \"schema.ts\" -path \"*/server/src/db/*\" -exec head -800 {})"
     ]
   },
   "hooks": {
     "PreToolUse": [
       {
         "matcher": "Edit|Write",
-        "hooks": [{
-          "type": "command",
-          "command": "bash -c 'if echo \"$CLAUDE_TOOL_INPUT\" | grep -qiE \"\\.env|credentials|api.key|secret\"; then echo \"KVKK ENGEL: Hassas dosyaya erisim yasak!\" && exit 2; fi'"
-        }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'if echo \"$CLAUDE_TOOL_INPUT\" | grep -qiE \"\\.env|credentials|api.key|secret\"; then echo \"KVKK ENGEL: Hassas dosyaya erisim yasak!\" && exit 2; fi'"
+          }
+        ]
       },
       {
         "matcher": "Bash",
-        "hooks": [{
-          "type": "command",
-          "command": "bash -c 'if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE \"rm -rf|sudo rm|dd if=\"; then echo \"TEHLIKE: Yikim komutu engellendi!\" && exit 2; fi'"
-        }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE \"rm -rf|sudo rm|dd if=\"; then echo \"TEHLIKE: Yikim komutu engellendi!\" && exit 2; fi'"
+          }
+        ]
       }
     ]
   }
