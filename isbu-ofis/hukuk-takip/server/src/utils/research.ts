@@ -231,7 +231,12 @@ function trimForPrompt(value: string | null | undefined, maxLength = 500) {
 
 function ensureJsonValue<T>(stdout: string): T {
   const trimmed = stdout.trim().replace(/^\uFEFF/, '')
-  return JSON.parse(trimmed) as T
+  try {
+    return JSON.parse(trimmed) as T
+  } catch (e) {
+    console.error(`[ensureJsonValue] JSON parse hatasi. Ham cikti (ilk 300 karakter): ${trimmed.slice(0, 300)}`)
+    throw e
+  }
 }
 
 function excerptMarkdown(value: string | null | undefined, maxLength = 1400) {
@@ -249,25 +254,23 @@ async function runCommand(
   options?: { shell?: boolean; timeoutMs?: number; env?: Record<string, string> }
 ): Promise<CommandResult> {
   return await new Promise((resolve, reject) => {
-    const quotePowerShellArg = (value: string) => `'${value.replace(/'/g, "''")}'`
-    const spawnEnv = options?.env
-      ? { ...process.env, ...options.env }
-      : undefined
+    const spawnEnv: Record<string, string> = {
+      ...process.env as Record<string, string>,
+      ...(options?.env || {}),
+    }
 
-    const child = options?.shell
-      ? (() => {
-          const commandLine = `& ${[command, ...args].map(quotePowerShellArg).join(' ')}`
-          return spawn('C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe', ['-NoProfile', '-Command', commandLine], {
-            shell: false,
-            windowsHide: true,
-            ...(spawnEnv ? { env: spawnEnv } : {}),
-          })
-        })()
-      : spawn(command, args, {
-          shell: false,
-          windowsHide: true,
-          ...(spawnEnv ? { env: spawnEnv } : {}),
-        })
+    // Windows'ta .cmd/.bat dosyaları cmd.exe üzerinden çalıştırılmalı.
+    // Node.js shell:true argümanları escape etmez, boşluklu string'leri böler.
+    // cmd.exe /c ile doğrudan spawn edersek argümanlar düzgün aktarılır.
+    const isCmd = command.endsWith('.cmd') || command.endsWith('.bat')
+    const spawnCmd = (options?.shell || isCmd) ? 'cmd.exe' : command
+    const spawnArgs = (options?.shell || isCmd) ? ['/c', command, ...args] : args
+
+    const child = spawn(spawnCmd, spawnArgs, {
+      shell: false,
+      windowsHide: true,
+      env: spawnEnv,
+    })
 
     let stdout = ''
     let stderr = ''
@@ -295,12 +298,14 @@ async function runCommand(
       clearTimeout(timeout)
 
       if (timedOut) {
-        reject(new Error(`Komut zaman asimina ugradi: ${command}`))
+        reject(new Error(`Komut zaman asimina ugradi (${(options?.timeoutMs ?? 120000) / 1000}s): ${command} ${args.join(' ')}`))
         return
       }
 
       if (code !== 0) {
-        reject(new Error(stderr.trim() || stdout.trim() || `${command} komutu hata verdi.`))
+        const errMsg = stderr.trim() || stdout.trim() || `${command} komutu hata verdi.`
+        console.error(`[runCommand] Hata (code ${code}): ${command} ${args.slice(0, 3).join(' ')} → ${errMsg.slice(0, 200)}`)
+        reject(new Error(errMsg))
         return
       }
 
@@ -314,32 +319,46 @@ async function runCommand(
  * Uzun araştırma sorusu yerine anahtar kelimeleri veya kısa özeti kullanır.
  * Yargı CLI 3-8 kelimelik sorgularla en iyi sonuç verir.
  */
+/**
+ * Keywords'den birden fazla kısa Yargı sorgusu üretir.
+ * Tek uzun sorgu yerine paralel kısa sorgular çok daha iyi sonuç verir.
+ */
+function buildYargiQueries(
+  question: string,
+  keywords?: string | null,
+  mainLegalAxis?: string | null,
+): string[] {
+  if (keywords) {
+    const terms = keywords.split(',').map((t) => t.trim()).filter(Boolean)
+    // Her keyword'ü max 4 kelimeye kısalt ve ayrı sorgu olarak döndür
+    const queries = terms.slice(0, 4).map((t) => {
+      const words = t.split(/\s+/)
+      return words.slice(0, 4).join(' ')
+    })
+    return queries.length > 0 ? queries : [question.slice(0, 60)]
+  }
+
+  if (mainLegalAxis && mainLegalAxis.length < 80) {
+    return [mainLegalAxis]
+  }
+
+  // Soruyu kısalt — ilk 60 karaktere kadar anlamlı kes
+  if (question.length > 60) {
+    const cut = question.slice(0, 60)
+    const lastSpace = cut.lastIndexOf(' ')
+    return [lastSpace > 20 ? cut.slice(0, lastSpace) : cut]
+  }
+
+  return [question]
+}
+
+// Geriye uyumluluk — tek sorgu döndüren wrapper
 function buildShortYargiQuery(
   question: string,
   keywords?: string | null,
   mainLegalAxis?: string | null,
 ): string {
-  // Öncelik 1: Keywords varsa en etkili sorgu onlar
-  if (keywords) {
-    // Keywords zaten virgülle ayrılmış kısa terimler
-    const terms = keywords.split(',').map((t) => t.trim()).filter(Boolean)
-    // İlk 4-5 terimi al, fazlası sorguyu bozar
-    return terms.slice(0, 5).join(' ')
-  }
-
-  // Öncelik 2: mainLegalAxis kısa bir hukuki eksen
-  if (mainLegalAxis && mainLegalAxis.length < 200) {
-    return mainLegalAxis
-  }
-
-  // Öncelik 3: Soruyu kısalt — ilk 80 karaktere kadar anlamlı kes
-  if (question.length > 80) {
-    const cut = question.slice(0, 80)
-    const lastSpace = cut.lastIndexOf(' ')
-    return lastSpace > 30 ? cut.slice(0, lastSpace) : cut
-  }
-
-  return question
+  return buildYargiQueries(question, keywords, mainLegalAxis)[0]
 }
 
 /**
@@ -352,13 +371,14 @@ function buildShortMevzuatQuery(
 ): string {
   if (keywords) {
     const terms = keywords.split(',').map((t) => t.trim()).filter(Boolean)
-    return terms.slice(0, 4).join(' ')
+    // Mevzuat araması kısa terimlerle daha iyi çalışır — ilk 2 term, max 3 kelime
+    return terms.slice(0, 2).map(t => t.split(/\s+/).slice(0, 3).join(' ')).join(' ')
   }
 
-  if (question.length > 100) {
-    const cut = question.slice(0, 100)
+  if (question.length > 60) {
+    const cut = question.slice(0, 60)
     const lastSpace = cut.lastIndexOf(' ')
-    return lastSpace > 30 ? cut.slice(0, lastSpace) : cut
+    return lastSpace > 20 ? cut.slice(0, lastSpace) : cut
   }
 
   return question
@@ -501,6 +521,15 @@ export async function runYargiResearch(options: {
       ? [chamber]
       : mapping ? mapping.yargiChambers : []
 
+    // Keywords'den birden fazla kısa sorgu üret
+    const queries = buildYargiQueries(
+      effectiveQuery,
+      normalizeOptionalString(options.profile.searchKeywords),
+      null,
+    )
+    console.log(`[Yargi] ${queries.length} sorgu uretildi: ${queries.map(q => `"${q}"`).join(', ')}`)
+    console.log(`[Yargi] Daire: ${chamber || chamberList.join(',') || 'genel'}, Mahkeme tipi: ${effectiveCourtTypes?.join(',') || 'tümü'}`)
+
     const limit = options.profile.yargiResultLimit || 8
     const allDecisions: Array<{
       documentId: string
@@ -512,55 +541,35 @@ export async function runYargiResearch(options: {
 
     const seenIds = new Set<string>()
 
-    if (chamberList.length > 0) {
-      // Daire bazlı paralel arama
-      const chamberResults = await Promise.all(
-        chamberList.map((ch) =>
-          executeYargiSearch(
-            effectiveQuery,
-            effectiveCourtTypes,
-            ch,
-            options.profile.yargiDateStart,
-            options.profile.yargiDateEnd,
-          )
-        )
-      )
-      for (const decisions of chamberResults) {
-        for (const d of decisions) {
-          if (!seenIds.has(d.documentId)) {
-            seenIds.add(d.documentId)
-            allDecisions.push(d)
-          }
-        }
-      }
+    // Her sorgu + daire kombinasyonu için paralel arama
+    const searchPromises: Promise<Array<typeof allDecisions[0]>>[] = []
 
-      // HGK araması da yap
-      try {
-        const hgkDecisions = await executeYargiSearch(
-          effectiveQuery,
-          effectiveCourtTypes,
-          'HGK',
-          options.profile.yargiDateStart,
-          options.profile.yargiDateEnd,
-        )
-        for (const d of hgkDecisions) {
-          if (!seenIds.has(d.documentId)) {
-            seenIds.add(d.documentId)
-            allDecisions.push(d)
-          }
+    for (const query of queries) {
+      if (chamberList.length > 0) {
+        for (const ch of chamberList) {
+          searchPromises.push(
+            executeYargiSearch(query, effectiveCourtTypes, ch,
+              options.profile.yargiDateStart, options.profile.yargiDateEnd)
+              .catch(() => [])
+          )
         }
-      } catch {
-        // HGK araması opsiyonel, başarısız olursa devam et
+        // HGK araması
+        searchPromises.push(
+          executeYargiSearch(query, effectiveCourtTypes, 'HGK',
+            options.profile.yargiDateStart, options.profile.yargiDateEnd)
+            .catch(() => [])
+        )
+      } else {
+        searchPromises.push(
+          executeYargiSearch(query, effectiveCourtTypes, null,
+            options.profile.yargiDateStart, options.profile.yargiDateEnd)
+            .catch(() => [])
+        )
       }
-    } else {
-      // Daire bilgisi yoksa genel arama
-      const decisions = await executeYargiSearch(
-        effectiveQuery,
-        effectiveCourtTypes,
-        null,
-        options.profile.yargiDateStart,
-        options.profile.yargiDateEnd,
-      )
+    }
+
+    const allResults = await Promise.all(searchPromises)
+    for (const decisions of allResults) {
       for (const d of decisions) {
         if (!seenIds.has(d.documentId)) {
           seenIds.add(d.documentId)
@@ -570,6 +579,7 @@ export async function runYargiResearch(options: {
     }
 
     const decisions = allDecisions.slice(0, limit)
+    console.log(`[Yargi] Toplam ${allDecisions.length} karar bulundu, ${decisions.length} tanesi isleniyor.`)
 
     // Belge içeriklerini paralel çek
     const documents = await Promise.all(
@@ -627,6 +637,7 @@ export async function runYargiResearch(options: {
       errorMessage: null,
     }
   } catch (error: any) {
+    console.error(`[Yargi] HATA: ${error?.message?.slice(0, 300)}`)
     return {
       sourceType: 'yargi_mcp',
       sourceName: 'Yargi MCP',
@@ -702,8 +713,10 @@ export async function runMevzuatResearch(options: {
   }
 
   try {
+    console.log(`[Mevzuat] Arama basliyor — sorgu: "${effectiveQuery}", caseType: ${options.caseType}`)
     const mapping = getCaseTypeMapping(options.caseType, options.customCaseType)
     const manualLawNumbers = parseDelimitedList(options.profile.mevzuatLawNumbers)
+    console.log(`[Mevzuat] Mapping: ${mapping ? `bulundu (${mapping.mevzuatKeyLaws.map(l => l.number).join(',')})` : 'yok'}, Manuel kanun no: ${manualLawNumbers.join(',') || 'yok'}`)
 
     const allDocuments: Array<{
       mevzuatId: string
@@ -821,6 +834,7 @@ export async function runMevzuatResearch(options: {
       errorMessage: null,
     }
   } catch (error: any) {
+    console.error(`[Mevzuat] HATA: ${error?.message?.slice(0, 300)}`)
     return {
       sourceType: 'mevzuat_mcp',
       sourceName: 'Mevzuat MCP',
@@ -830,6 +844,45 @@ export async function runMevzuatResearch(options: {
       markdownContent: `# Mevzuat Notlari\n\nSorgu hata verdi.\n\n\`\`\`\n${error?.message || 'Bilinmeyen hata'}\n\`\`\`\n`,
       errorMessage: error?.message || 'Bilinmeyen hata',
     }
+  }
+}
+
+/**
+ * Notebook adını UUID'ye çevirir.
+ * NLM CLI Türkçe karakter içeren isimlerle URL encoding sorunu yaşıyor.
+ * UUID zaten geçerli bir formattaysa doğrudan döndürür.
+ */
+async function resolveNotebookId(nameOrId: string): Promise<string | null> {
+  // Zaten UUID formatındaysa doğrudan döndür
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(nameOrId)) {
+    return nameOrId
+  }
+
+  try {
+    const result = await runCommand(NOTEBOOKLM_CMD, ['notebook', 'list', '--json'], {
+      timeoutMs: 15000,
+      env: { PYTHONIOENCODING: 'utf-8', NO_COLOR: '1' },
+    })
+
+    const notebooks = JSON.parse(result.stdout.trim().replace(/^\uFEFF/, '')) as Array<{
+      id: string
+      title: string
+    }>
+
+    // Case-insensitive karşılaştırma
+    const match = notebooks.find(
+      (nb) => nb.title.toLowerCase() === nameOrId.toLowerCase()
+    )
+    if (match) return match.id
+
+    // Partial match dene
+    const partial = notebooks.find(
+      (nb) => nb.title.toLowerCase().includes(nameOrId.toLowerCase())
+    )
+    return partial?.id || null
+  } catch (error: any) {
+    console.error(`[NotebookLM] Notebook listesi alinamadi: ${error?.message?.slice(0, 200)}`)
+    return null
   }
 }
 
@@ -857,10 +910,10 @@ export async function runNotebooklmResearch(options: {
     }
   }
 
-  const notebook = normalizeOptionalString(options.profile.notebooklmNotebook)
+  const notebookInput = normalizeOptionalString(options.profile.notebooklmNotebook)
   const criticalPoint = normalizeOptionalString(options.question)
 
-  if (!notebook || !criticalPoint) {
+  if (!notebookInput || !criticalPoint) {
     return {
       sourceType: 'notebooklm',
       sourceName: 'NotebookLM',
@@ -871,6 +924,22 @@ export async function runNotebooklmResearch(options: {
       errorMessage: null,
     }
   }
+
+  // Notebook adını UUID'ye çevir — NLM CLI Türkçe isimlerle sorun yaşıyor
+  const notebook = await resolveNotebookId(notebookInput)
+  if (!notebook) {
+    return {
+      sourceType: 'notebooklm',
+      sourceName: 'NotebookLM',
+      status: 'failed',
+      query: criticalPoint,
+      summary: `"${notebookInput}" notebook bulunamadi.`,
+      markdownContent: `# NotebookLM Calisma Alani\n\n"${notebookInput}" notebook bulunamadi. Notebook adini kontrol edin.\n`,
+      errorMessage: `Notebook "${notebookInput}" bulunamadi`,
+    }
+  }
+
+  console.log(`[NotebookLM] Notebook: "${notebookInput}" → ID: ${notebook}`)
 
   // Kritik noktadan hedefli sorular türet
   const questions = generateWorkspaceQuestions(criticalPoint, options.caseType || null)
@@ -883,7 +952,10 @@ export async function runNotebooklmResearch(options: {
       const result = await runCommand(NOTEBOOKLM_CMD, ['notebook', 'query', notebook, q, '--json'], {
         timeoutMs: 90000,
         shell: true,
-        env: { PYTHONIOENCODING: 'utf-8' },
+        env: {
+          PYTHONIOENCODING: 'utf-8',
+          NO_COLOR: '1',
+        },
       })
 
       let answer = ''
@@ -962,45 +1034,55 @@ export async function runNotebooklmResearch(options: {
 
 /** Kritik noktadan 3-5 hedefli çalışma sorusu türet */
 function generateWorkspaceQuestions(criticalPoint: string, caseType: string | null): string[] {
+  // criticalPoint çok uzun olabilir (birden fazla paragraf).
+  // NotebookLM API kısa sorgularla daha iyi çalışır — max 150 karakter
+  let shortPoint = criticalPoint
+  if (shortPoint.length > 150) {
+    // İlk cümleyi veya ilk 150 karakteri al
+    const firstSentenceEnd = shortPoint.search(/[.?!]\s/)
+    if (firstSentenceEnd > 20 && firstSentenceEnd < 200) {
+      shortPoint = shortPoint.slice(0, firstSentenceEnd + 1)
+    } else {
+      const cut = shortPoint.slice(0, 150)
+      const lastSpace = cut.lastIndexOf(' ')
+      shortPoint = lastSpace > 50 ? cut.slice(0, lastSpace) : cut
+    }
+  }
+
   const questions: string[] = []
 
-  // Soru 1: Temel ilkeler
   questions.push(
-    `${criticalPoint} konusunda temel hukuki ilkeler ve yerlesik ictihat egilimi nedir?`
+    `${shortPoint} konusunda temel hukuki ilkeler ve yerlesik ictihat egilimi nedir?`
   )
 
-  // Soru 2: İspat yükü ve delil stratejisi
   questions.push(
-    `${criticalPoint} konusunda ispat yuku kime duser ve hangi deliller kabul edilir?`
+    `${shortPoint} konusunda ispat yuku kime duser ve hangi deliller kabul edilir?`
   )
 
-  // Soru 3: Karşı taraf savunması
   questions.push(
-    `${criticalPoint} konusunda karsi tarafin kullanabilecegi savunma hatlari ve itiraz noktalari nelerdir?`
+    `${shortPoint} konusunda karsi tarafin kullanabilecegi savunma hatlari ve itiraz noktalari nelerdir?`
   )
 
-  // Soru 4: Dava türüne özel soru
   if (caseType === 'iscilik_alacagi' || caseType === 'is_davasi') {
     questions.push(
-      `Isci ve isveren arasindaki uyusmazliklarda ${criticalPoint} konusunun iscilik alacaklarina etkisi nedir?`
+      `Isci ve isveren arasindaki uyusmazliklarda ${shortPoint} konusunun iscilik alacaklarina etkisi nedir?`
     )
   } else if (caseType === 'bosanma' || caseType === 'aile') {
     questions.push(
-      `Aile hukukunda ${criticalPoint} konusunun nafaka, velayet ve mal paylasimina etkisi nedir?`
+      `Aile hukukunda ${shortPoint} konusunun nafaka, velayet ve mal paylasimina etkisi nedir?`
     )
   } else if (caseType === 'kira') {
     questions.push(
-      `Kira hukukunda ${criticalPoint} konusundaki guncel Yargitay egilimi nedir?`
+      `Kira hukukunda ${shortPoint} konusundaki guncel Yargitay egilimi nedir?`
     )
   } else {
     questions.push(
-      `${criticalPoint} konusunda emsal kararlardaki ortak arguman kaliplari nelerdir?`
+      `${shortPoint} konusunda emsal kararlardaki ortak arguman kaliplari nelerdir?`
     )
   }
 
-  // Soru 5: Pratik strateji önerisi
   questions.push(
-    `${criticalPoint} konusunda davanin kazanilmasi icin en etkili hukuki strateji ve arguman sirasi ne olmalidir?`
+    `${shortPoint} konusunda davanin kazanilmasi icin en etkili hukuki strateji ve arguman sirasi ne olmalidir?`
   )
 
   return questions

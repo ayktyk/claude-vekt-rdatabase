@@ -6,6 +6,7 @@
  */
 
 import { spawn } from 'node:child_process'
+import { existsSync } from 'node:fs'
 
 const CLAUDE_CLI = 'C:\\Users\\user\\.local\\bin\\claude.exe'
 
@@ -49,14 +50,7 @@ export async function callClaudeCli(options: ClaudeCliOptions): Promise<ClaudeCl
       '--output-format', 'json',   // JSON çıktı
       '--model', model,
       '--system-prompt', systemPrompt,
-      '--bare',                    // hooks, CLAUDE.md, LSP atla
     ]
-
-    if (tools) {
-      args.push('--tools', tools)
-    } else {
-      args.push('--tools', '')   // araç kullanma
-    }
 
     if (maxBudgetUsd > 0) {
       args.push('--max-budget-usd', String(maxBudgetUsd))
@@ -66,15 +60,31 @@ export async function callClaudeCli(options: ClaudeCliOptions): Promise<ClaudeCl
       args.push('--json-schema', jsonSchema)
     }
 
+    // ÖNEMLI: prompt, variadic --allowedTools'tan ÖNCE gelmeli
     args.push(userPrompt)
 
+    // --allowedTools variadic — en sona koy, yoksa prompt'u yutar
+    if (tools) {
+      args.push('--allowedTools', ...tools.split(','))
+    }
+
     const startTime = Date.now()
+
+    // ANTHROPIC_API_KEY env'de varsa CLI bunu kullanır (bakiye yoksa hata verir).
+    // Pro/Max plan (OAuth) kullanmak için key'i env'den çıkar.
+    const {
+      ANTHROPIC_API_KEY: _k1,
+      ANTHROPIC_BASE_URL: _k2,
+      ANTHROPIC_VERSION: _k3,
+      ...cleanEnv
+    } = process.env
 
     const child = spawn(CLAUDE_CLI, args, {
       shell: false,
       windowsHide: true,
+      stdio: ['ignore', 'pipe', 'pipe'],
       env: {
-        ...process.env,
+        ...cleanEnv,
         PYTHONIOENCODING: 'utf-8',
       },
     })
@@ -116,6 +126,13 @@ export async function callClaudeCli(options: ClaudeCliOptions): Promise<ClaudeCl
 
       try {
         const parsed = JSON.parse(stdout.trim())
+
+        // CLI başarıyla çıksa bile is_error kontrolü yap (ör. auth hatası)
+        if (parsed.is_error) {
+          reject(new Error(`Claude CLI hatası: ${parsed.result || 'Bilinmeyen hata'}`))
+          return
+        }
+
         text = parsed.result || parsed.text || parsed.content || ''
         inputTokens = parsed.input_tokens || parsed.usage?.input_tokens || 0
         outputTokens = parsed.output_tokens || parsed.usage?.output_tokens || 0
@@ -135,10 +152,5 @@ export async function callClaudeCli(options: ClaudeCliOptions): Promise<ClaudeCl
  * Pro/Max plan ile giriş yapılmış mı bakar.
  */
 export function hasClaudeCliConfig(): boolean {
-  try {
-    const fs = require('fs')
-    return fs.existsSync(CLAUDE_CLI)
-  } catch {
-    return false
-  }
+  return existsSync(CLAUDE_CLI)
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   useCase,
@@ -17,15 +17,10 @@ import {
   useCreateDocument,
   useDeleteDocument,
 } from '@/hooks/useCases'
-import { useCaseAiJobs, useCreateAiJob, useRunAiJobStep } from '@/hooks/useAiJobs'
+import { useCaseAiJobs } from '@/hooks/useAiJobs'
 import {
-  useApproveCaseBriefing,
-  useApproveCaseIntakeProfile,
   useCaseBriefing,
   useCaseIntakeProfile,
-  useGenerateCaseBriefing,
-  useGenerateCriticalPoint,
-  useUpdateCaseIntakeProfile,
 } from '@/hooks/useIntake'
 import {
   useCaseResearchProfile,
@@ -101,7 +96,6 @@ import {
   Loader2,
   Plus,
   X,
-  Search,
   Scale,
   ScrollText,
   Shield,
@@ -118,35 +112,6 @@ const priorityVariant: Record<string, 'danger' | 'warning' | 'secondary' | 'outl
 }
 const taskStatusVariant: Record<string, 'warning' | 'default' | 'success' | 'secondary'> = {
   pending: 'warning', in_progress: 'default', completed: 'success', cancelled: 'secondary',
-}
-
-const aiJobStatusLabels: Record<string, string> = {
-  draft: 'Taslak',
-  queued: 'Sırada',
-  in_progress: 'Çalışıyor',
-  review_required: 'Review Bekliyor',
-  completed: 'Tamamlandı',
-  failed: 'Hata',
-  cancelled: 'İptal',
-}
-
-const aiJobStatusVariant: Record<string, 'default' | 'success' | 'danger' | 'warning' | 'secondary'> = {
-  draft: 'secondary',
-  queued: 'warning',
-  in_progress: 'default',
-  review_required: 'warning',
-  completed: 'success',
-  failed: 'danger',
-  cancelled: 'secondary',
-}
-
-const aiJobTypeLabels: Record<string, string> = {
-  intake: 'Intake',
-  briefing: 'Briefing',
-  procedure: 'Usul',
-  research: 'Araştırma',
-  pleading: 'Dilekçe',
-  udf: 'UDF',
 }
 
 type TabId =
@@ -214,39 +179,6 @@ export default function CaseDetailPage() {
   const [showDocumentForm, setShowDocumentForm] = useState(false)
   const [documentFiles, setDocumentFiles] = useState<File[]>([])
   const [documentDescription, setDocumentDescription] = useState('')
-  const [lawyerDirection, setLawyerDirection] = useState('')
-  const [clientInterviewNotes, setClientInterviewNotes] = useState('')
-  const [criticalPointSummaryDraft, setCriticalPointSummaryDraft] = useState('')
-  const [mainLegalAxisDraft, setMainLegalAxisDraft] = useState('')
-  const [secondaryRisksDraft, setSecondaryRisksDraft] = useState('')
-  const [proofRisksDraft, setProofRisksDraft] = useState('')
-  const [missingInformationDraft, setMissingInformationDraft] = useState('')
-  const [missingDocumentsDraft, setMissingDocumentsDraft] = useState('')
-  const [opponentArgumentsDraft, setOpponentArgumentsDraft] = useState('')
-  const [briefingToneStrategy, setBriefingToneStrategy] = useState('')
-  const [researchQuestion, setResearchQuestion] = useState('')
-  const [researchKeywords, setResearchKeywords] = useState('')
-  const [useNotebooklm, setUseNotebooklm] = useState(false)
-  const [notebooklmNotebook, setNotebooklmNotebook] = useState('')
-  const [notebooklmQuestion, setNotebooklmQuestion] = useState('')
-  const [useVectorDb, setUseVectorDb] = useState(false)
-  const [vectorCollections, setVectorCollections] = useState('')
-  const [vectorQuery, setVectorQuery] = useState('')
-  const [vectorTopK, setVectorTopK] = useState('5')
-  const [useYargiMcp, setUseYargiMcp] = useState(true)
-  const [yargiQuery, setYargiQuery] = useState('')
-  const [yargiCourtTypes, setYargiCourtTypes] = useState('YARGITAYKARARI,ISTINAFHUKUK')
-  const [yargiChamber, setYargiChamber] = useState('')
-  const [yargiDateStart, setYargiDateStart] = useState('')
-  const [yargiDateEnd, setYargiDateEnd] = useState('')
-  const [yargiResultLimit, setYargiResultLimit] = useState('3')
-  const [useMevzuatMcp, setUseMevzuatMcp] = useState(true)
-  const [mevzuatQuery, setMevzuatQuery] = useState('')
-  const [mevzuatScope, setMevzuatScope] = useState('')
-  const [mevzuatLawNumbers, setMevzuatLawNumbers] = useState('')
-  const [mevzuatResultLimit, setMevzuatResultLimit] = useState('3')
-  const [latestResearchRun, setLatestResearchRun] = useState<any | null>(null)
-  const [researchReviewNotes, setResearchReviewNotes] = useState('')
   const [pleadingReviewNotes, setPleadingReviewNotes] = useState('')
   const [pleadingEditMode, setPleadingEditMode] = useState(false)
   const [pleadingEditContent, setPleadingEditContent] = useState('')
@@ -260,10 +192,10 @@ export default function CaseDetailPage() {
   const { data: collectionsData } = useCaseCollections(id)
   const { data: documentsData } = useCaseDocuments(id)
   const { data: notesData } = useCaseNotes(id)
-  const { data: aiJobsData } = useCaseAiJobs(id)
-  const { data: intakeProfileData } = useCaseIntakeProfile(id)
+  useCaseAiJobs(id)
+  useCaseIntakeProfile(id)
   const { data: briefingData } = useCaseBriefing(id)
-  const { data: researchProfileData } = useCaseResearchProfile(id)
+  useCaseResearchProfile(id)
   const { data: procedureData } = useCaseProcedureReport(id)
   const { data: pleadingData } = useCasePleading(id)
   const generatePleading = useGeneratePleading(id)
@@ -289,13 +221,7 @@ export default function CaseDetailPage() {
   const deleteCollection = useDeleteCollection()
   const createDocument = useCreateDocument()
   const deleteDocument = useDeleteDocument(id)
-  const createAiJob = useCreateAiJob(id)
-  const runAiJobStep = useRunAiJobStep(id)
-  const updateCaseIntakeProfile = useUpdateCaseIntakeProfile(id)
-  const generateCriticalPoint = useGenerateCriticalPoint(id)
-  const approveCaseIntakeProfile = useApproveCaseIntakeProfile(id)
-  const generateCaseBriefing = useGenerateCaseBriefing(id)
-  const approveCaseBriefing = useApproveCaseBriefing(id)
+
   const { data: researchQcData } = useCaseResearchQc(id)
   const runProcedurePrecheck = useRunProcedurePrecheck(id)
   const generateProcedureReport = useGenerateProcedureReport(id)
@@ -307,68 +233,8 @@ export default function CaseDetailPage() {
   const collections = collectionsData?.collections || collectionsData || []
   const documents = documentsData?.documents || documentsData || []
   const notes = notesData?.notes || notesData || []
-  const aiJobs = aiJobsData?.jobs || aiJobsData || []
-  const intakeProfile = intakeProfileData?.profile || null
+
   const briefing = briefingData?.briefing || null
-  const researchProfile = researchProfileData?.profile || null
-
-  useEffect(() => {
-    if (!intakeProfile) {
-      return
-    }
-
-    setLawyerDirection(intakeProfile.lawyerDirection || '')
-    setClientInterviewNotes(intakeProfile.clientInterviewNotes || '')
-    setCriticalPointSummaryDraft(intakeProfile.criticalPointSummary || '')
-    setMainLegalAxisDraft(intakeProfile.mainLegalAxis || '')
-    setSecondaryRisksDraft(intakeProfile.secondaryRisks || '')
-    setProofRisksDraft(intakeProfile.proofRisks || '')
-    setMissingInformationDraft(intakeProfile.missingInformation || '')
-    setMissingDocumentsDraft(intakeProfile.missingDocuments || '')
-    setOpponentArgumentsDraft(intakeProfile.opponentInitialArguments || '')
-  }, [intakeProfile])
-
-  useEffect(() => {
-    if (!briefing) {
-      return
-    }
-
-    setBriefingToneStrategy(briefing.toneStrategy || '')
-  }, [briefing])
-
-  useEffect(() => {
-    if (!researchProfile) {
-      return
-    }
-
-    // Araştırma sorusu boşsa, kritik nokta / briefing / açıklamadan otomatik doldur
-    const effectiveQuestion = researchProfile.researchQuestion
-      || intakeProfile?.criticalPointSummary
-      || briefing?.summary
-      || caseData?.description
-      || ''
-    setResearchQuestion(effectiveQuestion)
-    setResearchKeywords(researchProfile.searchKeywords || '')
-    setUseNotebooklm(!!researchProfile.useNotebooklm)
-    setNotebooklmNotebook(researchProfile.notebooklmNotebook || '')
-    setNotebooklmQuestion(researchProfile.notebooklmQuestion || '')
-    setUseVectorDb(!!researchProfile.useVectorDb)
-    setVectorCollections(researchProfile.vectorCollections || '')
-    setVectorQuery(researchProfile.vectorQuery || '')
-    setVectorTopK(String(researchProfile.vectorTopK || 5))
-    setUseYargiMcp(researchProfile.useYargiMcp ?? true)
-    setYargiQuery(researchProfile.yargiQuery || '')
-    setYargiCourtTypes(researchProfile.yargiCourtTypes || 'YARGITAYKARARI,ISTINAFHUKUK')
-    setYargiChamber(researchProfile.yargiChamber || '')
-    setYargiDateStart(researchProfile.yargiDateStart || '')
-    setYargiDateEnd(researchProfile.yargiDateEnd || '')
-    setYargiResultLimit(String(researchProfile.yargiResultLimit || 3))
-    setUseMevzuatMcp(researchProfile.useMevzuatMcp ?? true)
-    setMevzuatQuery(researchProfile.mevzuatQuery || '')
-    setMevzuatScope(researchProfile.mevzuatScope || '')
-    setMevzuatLawNumbers(researchProfile.mevzuatLawNumbers || '')
-    setMevzuatResultLimit(String(researchProfile.mevzuatResultLimit || 3))
-  }, [researchProfile])
 
   if (isLoading) {
     return (
@@ -402,22 +268,6 @@ export default function CaseDetailPage() {
   const totalCollections = collections.reduce((sum: number, c: any) => sum + parseFloat(c.amount || '0'), 0)
   const balance = totalCollections - totalExpenses
   const selectedDocumentTotalSize = documentFiles.reduce((sum, file) => sum + file.size, 0)
-  const activeAiJobCount = aiJobs.filter(
-    (job: any) => !['completed', 'cancelled', 'failed'].includes(job.status)
-  ).length
-  const pendingAiReviewCount = aiJobs.reduce(
-    (sum: number, job: any) =>
-      sum +
-      (Array.isArray(job.reviews)
-        ? job.reviews.filter((review: any) => review.status === 'pending').length
-        : 0),
-    0
-  )
-  const totalArtifacts = aiJobs.reduce(
-    (sum: number, job: any) => sum + (Array.isArray(job.artifacts) ? job.artifacts.length : 0),
-    0
-  )
-
   const appendSelectedFiles = (fileList: FileList | null) => {
     if (!fileList) return
 

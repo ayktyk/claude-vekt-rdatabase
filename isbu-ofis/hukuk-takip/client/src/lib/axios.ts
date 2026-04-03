@@ -39,6 +39,11 @@ api.interceptors.response.use(
 
     // 401: Token süresi dolmuş — refresh dene
     if (error.response?.status === 401 && !originalRequest._retry) {
+      // Login veya refresh endpoint'lerinde 401 alırsa döngüye girme
+      if (originalRequest.url?.includes('/auth/login') || originalRequest.url?.includes('/auth/refresh')) {
+        return Promise.reject(error)
+      }
+
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject })
@@ -57,7 +62,10 @@ api.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError)
         // Refresh başarısız — login'e yönlendir
-        window.location.href = '/login'
+        if (window.location.pathname !== '/login') {
+          toast.error('Oturum süresi doldu. Tekrar giriş yapın.')
+          window.location.href = '/login'
+        }
         return Promise.reject(refreshError)
       } finally {
         isRefreshing = false

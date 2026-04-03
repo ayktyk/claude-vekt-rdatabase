@@ -10,8 +10,25 @@ import { loginSchema } from '@hukuk-takip/shared'
 
 const router = Router()
 
-const ACCESS_TOKEN_EXPIRES = (process.env.JWT_EXPIRES_IN || '15m') as jwt.SignOptions['expiresIn']
+const ACCESS_TOKEN_EXPIRES = (process.env.JWT_EXPIRES_IN || '2h') as jwt.SignOptions['expiresIn']
 const REFRESH_TOKEN_EXPIRES = (process.env.JWT_REFRESH_EXPIRES_IN || '7d') as jwt.SignOptions['expiresIn']
+
+// Süre string'ini milisaniyeye çevir (cookie maxAge için)
+function parseDurationMs(dur: string): number {
+  const match = dur.match(/^(\d+)\s*(s|m|h|d)$/)
+  if (!match) return 2 * 60 * 60 * 1000 // fallback 2 saat
+  const val = parseInt(match[1], 10)
+  switch (match[2]) {
+    case 's': return val * 1000
+    case 'm': return val * 60 * 1000
+    case 'h': return val * 60 * 60 * 1000
+    case 'd': return val * 24 * 60 * 60 * 1000
+    default: return 2 * 60 * 60 * 1000
+  }
+}
+
+const ACCESS_TOKEN_MAX_AGE = parseDurationMs(ACCESS_TOKEN_EXPIRES as string)
+const REFRESH_TOKEN_MAX_AGE = parseDurationMs(REFRESH_TOKEN_EXPIRES as string)
 
 function generateAccessToken(payload: JwtPayload): string {
   return jwt.sign(payload, process.env.JWT_SECRET!, {
@@ -31,17 +48,17 @@ function setTokenCookies(res: import('express').Response, accessToken: string, r
   res.cookie('access_token', accessToken, {
     httpOnly: true,
     secure: isProduction,
-    sameSite: 'strict',
-    maxAge: 15 * 60 * 1000, // 15 dakika
+    sameSite: 'lax',
+    maxAge: ACCESS_TOKEN_MAX_AGE,
     path: '/',
   })
 
   res.cookie('refresh_token', refreshToken, {
     httpOnly: true,
     secure: isProduction,
-    sameSite: 'strict',
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 gün
-    path: '/api/auth/refresh',
+    sameSite: 'lax',
+    maxAge: REFRESH_TOKEN_MAX_AGE,
+    path: '/',
   })
 }
 
@@ -233,7 +250,7 @@ router.put('/password', authenticate, async (req, res) => {
 
 router.post('/logout', (_req, res) => {
   res.clearCookie('access_token', { path: '/' })
-  res.clearCookie('refresh_token', { path: '/api/auth/refresh' })
+  res.clearCookie('refresh_token', { path: '/' })
   res.json({ message: 'Çıkış yapıldı.' })
 })
 

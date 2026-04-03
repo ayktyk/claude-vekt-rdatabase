@@ -185,23 +185,36 @@ function runClaudeCli(options: {
       '--output-format', 'json',   // JSON çıktı
       '--model', model,
       '--system-prompt', systemPrompt,
-      '--tools', 'Bash,Read',     // Bash ile CLI araçlarını kullanabilir
-      '--bare',                    // hooks, CLAUDE.md, LSP atla — temiz çalışma
     ]
 
     if (maxBudgetUsd > 0) {
       args.push('--max-budget-usd', String(maxBudgetUsd))
     }
 
+    // ÖNEMLI: prompt, variadic --allowedTools'tan ÖNCE gelmeli
+    // yoksa tools flag'i prompt'u yutar
     args.push(userPrompt)
 
-    console.log(`[orchestrator] Claude CLI başlatılıyor (model: ${model})...`)
+    // --allowedTools variadic olduğu için en sona koy
+    args.push('--allowedTools', 'Bash', 'Read')
+
+    // ANTHROPIC_API_KEY env'de varsa CLI bunu kullanır (bakiye yoksa hata verir).
+    // Pro/Max plan (OAuth) kullanmak için: key'i env'den çıkar + --bare kullanma.
+    const cleanEnv: Record<string, string> = {}
+    for (const [k, v] of Object.entries(process.env)) {
+      if (k.startsWith('ANTHROPIC_')) continue
+      if (v !== undefined) cleanEnv[k] = v
+    }
+
+    console.log(`[orchestrator] Claude CLI başlatılıyor (model: ${model}), ANTHROPIC_API_KEY in env: ${!!cleanEnv.ANTHROPIC_API_KEY}`)
+    console.log(`[orchestrator] Args: ${args.slice(0, 6).join(' ')} ...`)
 
     const child = spawn(CLAUDE_CLI, args, {
       shell: false,
       windowsHide: true,
+      stdio: ['ignore', 'pipe', 'pipe'],
       env: {
-        ...process.env,
+        ...cleanEnv,
         PYTHONIOENCODING: 'utf-8',
       },
     })
@@ -231,13 +244,23 @@ function runClaudeCli(options: {
       clearTimeout(timer)
 
       if (code !== 0) {
-        reject(new Error(`Claude CLI hata kodu ${code}. Stderr: ${stderr.slice(0, 500)}`))
+        console.error(`[orchestrator] Claude CLI hata kodu ${code}`)
+        console.error(`[orchestrator] Stdout (ilk 500): ${stdout.slice(0, 500)}`)
+        console.error(`[orchestrator] Stderr (ilk 500): ${stderr.slice(0, 500)}`)
+        reject(new Error(`Claude CLI hata kodu ${code}. Stdout: ${stdout.slice(0, 300)}. Stderr: ${stderr.slice(0, 300)}`))
         return
       }
 
       try {
         // JSON çıktıyı parse et
         const parsed = JSON.parse(stdout.trim())
+
+        // CLI başarıyla çıksa bile is_error kontrolü yap
+        if (parsed.is_error) {
+          reject(new Error(`Claude CLI hatası: ${parsed.result || 'Bilinmeyen hata'}`))
+          return
+        }
+
         const resultText = parsed.result || parsed.text || parsed.content || ''
         resolve({ output: resultText, raw: stdout })
       } catch {
