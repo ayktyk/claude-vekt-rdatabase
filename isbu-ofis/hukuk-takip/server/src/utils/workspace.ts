@@ -931,3 +931,41 @@ export async function materializeWorkspace(layout: ReturnType<typeof buildWorksp
     createdFiles,
   }
 }
+
+// ─── Save Generated Artifact to Drive ───────────────────────────────────────
+
+type SaveArtifactType = 'procedure' | 'research' | 'pleading_v1' | 'pleading_v2' | 'defense_simulation' | 'revision'
+
+export async function saveArtifactToDrive(
+  automationCaseCode: string,
+  artifactType: SaveArtifactType,
+  content: string,
+  filename?: string,
+): Promise<string | null> {
+  try {
+    const basePath = path.win32.join(ACTIVE_CASES_ROOT, automationCaseCode)
+    const layout = buildWorkspaceLayout(basePath)
+
+    const fileMap: Record<SaveArtifactType, string> = {
+      procedure: layout.files.procedurePath,
+      research: layout.files.researchPath,
+      pleading_v1: layout.files.pleadingMdPath,
+      pleading_v2: path.win32.join(layout.root, '03-Sentez-ve-Dilekce', filename || 'dilekce-v2.md'),
+      defense_simulation: layout.files.defenseSimulationPath,
+      revision: layout.files.revisionPath,
+    }
+
+    const targetPath = fileMap[artifactType]
+    if (!targetPath) return null
+
+    // Klasörü oluştur (yoksa)
+    await fs.mkdir(path.win32.dirname(targetPath), { recursive: true })
+    await fs.writeFile(targetPath, content, 'utf-8')
+
+    console.log(`[workspace] ${artifactType} kaydedildi: ${targetPath}`)
+    return targetPath
+  } catch (err) {
+    console.error(`[workspace] Drive kaydi basarisiz (${artifactType}):`, err)
+    return null
+  }
+}

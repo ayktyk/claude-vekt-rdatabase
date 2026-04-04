@@ -2,8 +2,29 @@ import { z } from 'zod'
 
 // ─── Pleading Generate ─────────────────────────────────────────────────────
 
+export const documentTypeEnum = z.enum([
+  'dava_dilekcesi',
+  'ihtarname',
+  'cevap_dilekcesi',
+  'istinaf_dilekcesi',
+  'temyiz_dilekcesi',
+  'basvuru_dilekcesi',
+])
+
+export type DocumentType = z.infer<typeof documentTypeEnum>
+
+export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
+  dava_dilekcesi: 'Dava Dilekçesi',
+  ihtarname: 'İhtarname',
+  cevap_dilekcesi: 'Cevap Dilekçesi',
+  istinaf_dilekcesi: 'İstinaf Dilekçesi',
+  temyiz_dilekcesi: 'Temyiz Dilekçesi',
+  basvuru_dilekcesi: 'Başvuru Dilekçesi',
+}
+
 export const generatePleadingSchema = z.object({
   forceRerun: z.boolean().optional().default(false),
+  documentType: documentTypeEnum.optional(),
 })
 
 // ─── Pleading Review ────────────────────────────────────────────────────────

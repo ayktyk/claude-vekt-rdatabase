@@ -29,6 +29,15 @@ type CommandResult = {
 const YARGI_CMD = 'C:\\Users\\user\\AppData\\Roaming\\npm\\yargi.cmd'
 const MEVZUAT_CMD = 'C:\\Users\\user\\AppData\\Roaming\\npm\\mevzuat.cmd'
 const NOTEBOOKLM_CMD = 'C:\\Users\\user\\.local\\bin\\nlm.exe'
+
+/** NLM CLI Windows'ta Rich kütüphanesi yüzünden Unicode encoding hatası veriyor.
+ *  TERM=dumb + NO_COLOR=1 + PYTHONIOENCODING=utf-8 ile Rich'i plain text moduna zorla. */
+const NLM_ENV: Record<string, string> = {
+  PYTHONIOENCODING: 'utf-8',
+  PYTHONLEGACYWINDOWSSTDIO: '0',
+  NO_COLOR: '1',
+  TERM: 'dumb',
+}
 const VECTOR_DB_PATH = 'D:\\hukuk-vektordb\\vektor-db'
 const VECTOR_QUERY_SCRIPT = fileURLToPath(new URL('./vector_query.py', import.meta.url))
 
@@ -303,8 +312,11 @@ async function runCommand(
       }
 
       if (code !== 0) {
-        const errMsg = stderr.trim() || stdout.trim() || `${command} komutu hata verdi.`
-        console.error(`[runCommand] Hata (code ${code}): ${command} ${args.slice(0, 3).join(' ')} → ${errMsg.slice(0, 200)}`)
+        // NLM CLI hata mesajlarını stderr yerine stdout'a yazabilir (Rich formatting)
+        // Ayrıca Python traceback'leri stderr'de olur — ikisini birleştir
+        const combined = [stderr.trim(), stdout.trim()].filter(Boolean).join('\n')
+        const errMsg = combined || `${command} komutu hata verdi (exit code: ${code}).`
+        console.error(`[runCommand] Hata (code ${code}): ${command} ${args.slice(0, 3).join(' ')} → ${errMsg.slice(0, 300)}`)
         reject(new Error(errMsg))
         return
       }
@@ -861,7 +873,7 @@ async function resolveNotebookId(nameOrId: string): Promise<string | null> {
   try {
     const result = await runCommand(NOTEBOOKLM_CMD, ['notebook', 'list', '--json'], {
       timeoutMs: 15000,
-      env: { PYTHONIOENCODING: 'utf-8', NO_COLOR: '1' },
+      env: NLM_ENV,
     })
 
     const notebooks = JSON.parse(result.stdout.trim().replace(/^\uFEFF/, '')) as Array<{
@@ -951,11 +963,7 @@ export async function runNotebooklmResearch(options: {
     try {
       const result = await runCommand(NOTEBOOKLM_CMD, ['notebook', 'query', notebook, q, '--json'], {
         timeoutMs: 90000,
-        shell: true,
-        env: {
-          PYTHONIOENCODING: 'utf-8',
-          NO_COLOR: '1',
-        },
+        env: NLM_ENV,
       })
 
       let answer = ''

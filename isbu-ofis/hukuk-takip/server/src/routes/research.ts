@@ -15,6 +15,7 @@ import {
   aiJobSteps,
   caseBriefings,
   caseIntakeProfiles,
+  caseProcedureReports,
   caseResearchProfiles,
   cases,
 } from '../db/schema.js'
@@ -36,6 +37,12 @@ import {
   writeResearchArtifacts,
   type ResearchSourceRun,
 } from '../utils/research.js'
+import {
+  generatePrecheckWithAi,
+  generateProcedureReportWithAi,
+  hasProcedureAiConfig,
+} from '../utils/procedureAi.js'
+import { saveArtifactToDrive } from '../utils/workspace.js'
 
 const router = Router()
 router.use(authenticate)
@@ -849,7 +856,14 @@ router.post('/cases/:id/research/review', validate(reviewCaseResearchSchema), as
       })
       .where(eq(cases.id, caseId))
 
-    res.json({ message: 'Arastirma kalite kontrolu onaylandi. Dilekce asamasina gecilebilir.', approved: true })
+    // Araştırma onaylandıktan sonra otomatik usul raporu üret (arka planda)
+    if (hasProcedureAiConfig()) {
+      triggerAutoProcedureReport(caseId, caseRecord).catch((err) => {
+        console.error(`[research] Otomatik usul raporu basarisiz (caseId=${caseId}):`, err.message)
+      })
+    }
+
+    res.json({ message: 'Arastirma kalite kontrolu onaylandi. Usul raporu otomatik olusturuluyor.', approved: true })
   } else {
     // Keep job in review_required state so user can re-run or fix
     await syncResearchJobState(job.id, 'review_required', 'research_review')
@@ -857,6 +871,109 @@ router.post('/cases/:id/research/review', validate(reviewCaseResearchSchema), as
     res.json({ message: 'Arastirma kalite kontrolu reddedildi.', approved: false })
   }
 })
+
+// ─── Auto Procedure Report (araştırma onayı sonrası) ────────────────────────
+
+async function triggerAutoProcedureReport(caseId: string, caseRecord: any) {
+  // Mevcut rapor var mı kontrol et
+  const [existing] = await db
+    .select()
+    .from(caseProcedureReports)
+    .where(eq(caseProcedureReports.caseId, caseId))
+    .limit(1)
+
+  // Zaten tamamlanmış rapor varsa tekrar üretme
+  if (existing && existing.reportMarkdown && existing.status !== 'precheck_done') {
+    console.log(`[research] Usul raporu zaten mevcut (caseId=${caseId}), atlaniyor.`)
+    return
+  }
+
+  // Procedure report yoksa oluştur
+  let report = existing
+  if (!report) {
+    const [created] = await db
+      .insert(caseProcedureReports)
+      .values({ caseId, status: 'not_started' })
+      .returning()
+    report = created
+  }
+
+  // Intake ve briefing bilgilerini al
+  const [intake] = await db
+    .select()
+    .from(caseIntakeProfiles)
+    .where(eq(caseIntakeProfiles.caseId, caseId))
+    .limit(1)
+
+  const [briefing] = await db
+    .select()
+    .from(caseBriefings)
+    .where(eq(caseBriefings.caseId, caseId))
+    .limit(1)
+
+  // 1. Precheck üret
+  console.log(`[research] Otomatik precheck baslatiliyor (caseId=${caseId})`)
+  const precheck = await generatePrecheckWithAi({
+    caseTitle: caseRecord.title,
+    caseType: caseRecord.caseType,
+    caseDescription: caseRecord.description,
+    courtName: caseRecord.courtName,
+    criticalPointSummary: intake?.criticalPointSummary,
+    mainLegalAxis: intake?.mainLegalAxis,
+  })
+
+  await db
+    .update(caseProcedureReports)
+    .set({
+      status: 'precheck_done',
+      precheckNotes: precheck.precheckNotes,
+      courtType: precheck.courtType,
+      jurisdiction: precheck.jurisdiction,
+      arbitrationRequired: precheck.arbitrationRequired,
+      statuteOfLimitations: precheck.statuteOfLimitations,
+      updatedAt: new Date(),
+    })
+    .where(eq(caseProcedureReports.id, report.id))
+
+  // 2. Rapor üret
+  console.log(`[research] Otomatik usul raporu uretiliyor (caseId=${caseId})`)
+  await db
+    .update(caseProcedureReports)
+    .set({ status: 'generating', updatedAt: new Date() })
+    .where(eq(caseProcedureReports.id, report.id))
+
+  const reportMarkdown = await generateProcedureReportWithAi({
+    caseTitle: caseRecord.title,
+    caseType: caseRecord.caseType,
+    caseDescription: caseRecord.description,
+    courtName: caseRecord.courtName,
+    criticalPointSummary: intake?.criticalPointSummary,
+    mainLegalAxis: intake?.mainLegalAxis,
+    lawyerDirection: intake?.lawyerDirection,
+    briefingSummary: briefing?.summary,
+    precheckNotes: precheck.precheckNotes,
+    courtType: precheck.courtType,
+    jurisdiction: precheck.jurisdiction,
+    arbitrationRequired: precheck.arbitrationRequired,
+    statuteOfLimitations: precheck.statuteOfLimitations,
+  })
+
+  await db
+    .update(caseProcedureReports)
+    .set({
+      reportMarkdown,
+      status: 'draft',
+      updatedAt: new Date(),
+    })
+    .where(eq(caseProcedureReports.id, report.id))
+
+  // Google Drive'a kaydet
+  if (caseRecord.automationCaseCode) {
+    saveArtifactToDrive(caseRecord.automationCaseCode, 'procedure', reportMarkdown).catch(() => {})
+  }
+
+  console.log(`[research] Otomatik usul raporu tamamlandi (caseId=${caseId})`)
+}
 
 // ─── PUT /cases/:id/research/arguments ──────────────────────────────────────
 

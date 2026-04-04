@@ -19,9 +19,10 @@ import {
   useCaseResearchQc,
   useReviewCaseResearch,
   useRunCaseResearch,
-  useOrchestrateResearch,
   useUpdateCaseResearchProfile,
   useUpdateResearchArguments,
+  type ParallelResearchResult,
+  type ResearchSourceRunResult,
 } from '@/hooks/useResearch'
 import { useCaseDocuments, useCaseNotes } from '@/hooks/useCases'
 import { formatDateTime } from '@/lib/utils'
@@ -45,6 +46,9 @@ import {
   Save,
   Play,
   Eye,
+  XCircle,
+  RefreshCw,
+  TriangleAlert,
 } from 'lucide-react'
 
 type ResearchTabProps = {
@@ -164,6 +168,119 @@ function SourceCard({
   )
 }
 
+// ─── Source Result Card ─────────────────────────────────────
+
+const SOURCE_ICONS: Record<string, React.ElementType> = {
+  yargi_mcp: Scale,
+  mevzuat_mcp: BookOpen,
+  notebooklm: Brain,
+  vector_db: Database,
+}
+
+const SOURCE_LABELS: Record<string, string> = {
+  yargi_mcp: 'Yargi Kararlari',
+  mevzuat_mcp: 'Ilgili Mevzuat',
+  notebooklm: 'NotebookLM',
+  vector_db: 'Vektor Veritabani',
+}
+
+const SOURCE_COLORS: Record<string, { border: string; bg: string; text: string }> = {
+  yargi_mcp: { border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-700' },
+  mevzuat_mcp: { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-700' },
+  notebooklm: { border: 'border-purple-200', bg: 'bg-purple-50', text: 'text-purple-700' },
+  vector_db: { border: 'border-orange-200', bg: 'bg-orange-50', text: 'text-orange-700' },
+}
+
+function SourceResultCard({
+  source,
+  onRetry,
+  retrying,
+}: {
+  source: ResearchSourceRunResult
+  onRetry?: () => void
+  retrying?: boolean
+}) {
+  const [expanded, setExpanded] = useState(false)
+  const Icon = SOURCE_ICONS[source.sourceType] || Brain
+  const colors = SOURCE_COLORS[source.sourceType] || SOURCE_COLORS.yargi_mcp
+
+  return (
+    <div className={`rounded-xl border-2 ${colors.border} overflow-hidden`}>
+      {/* Header */}
+      <div className={`flex items-center justify-between gap-2 p-3 ${source.status === 'failed' ? 'bg-red-50' : colors.bg}`}>
+        <div className="flex items-center gap-2">
+          <Icon className={`h-4 w-4 ${source.status === 'failed' ? 'text-red-600' : colors.text}`} />
+          <p className={`text-sm font-semibold ${source.status === 'failed' ? 'text-red-800' : colors.text}`}>
+            {SOURCE_LABELS[source.sourceType] || source.sourceName}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {source.status === 'failed' && onRetry && (
+            <button
+              type="button"
+              onClick={onRetry}
+              disabled={retrying}
+              className="inline-flex items-center gap-1 rounded-md border border-red-300 bg-white px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50 disabled:opacity-50 cursor-pointer"
+            >
+              {retrying ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+              Tekrar Dene
+            </button>
+          )}
+          <Badge
+            variant={
+              source.status === 'completed' ? 'success'
+                : source.status === 'failed' ? 'danger'
+                  : 'secondary'
+            }
+          >
+            {source.status === 'completed' ? 'Basarili'
+              : source.status === 'failed' ? 'Hata'
+                : source.status === 'skipped' ? 'Atlanid' : source.status}
+          </Badge>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="p-3">
+        <p className="text-sm">{source.summary}</p>
+
+        {/* Error message — always visible when failed */}
+        {source.status === 'failed' && source.errorMessage && (
+          <div className="mt-2 rounded-lg border border-red-200 bg-red-50 p-2">
+            <div className="flex items-start gap-2">
+              <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
+              <pre className="whitespace-pre-wrap text-xs text-red-700 font-mono leading-relaxed">
+                {source.errorMessage.slice(0, 500)}
+              </pre>
+            </div>
+          </div>
+        )}
+
+        {/* Expand/collapse content */}
+        {source.status === 'completed' && source.markdownContent && (
+          <div className="mt-2">
+            <button
+              type="button"
+              onClick={() => setExpanded(!expanded)}
+              className="inline-flex items-center gap-1 text-xs font-medium text-law-accent hover:underline cursor-pointer"
+            >
+              {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+              {expanded ? 'Icerigi gizle' : 'Tam icerigi goruntule'}
+            </button>
+            {expanded && (
+              <div className="mt-2 max-h-[400px] overflow-y-auto rounded-lg border bg-white p-3">
+                <pre className="whitespace-pre-wrap text-xs leading-relaxed font-sans">
+                  {source.markdownContent}
+                </pre>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ─── Main Component ─────────────────────────────────────────
 
 export default function ResearchTab({ caseId, caseData }: ResearchTabProps) {
@@ -180,7 +297,6 @@ export default function ResearchTab({ caseId, caseData }: ResearchTabProps) {
   const approveIntake = useApproveCaseIntakeProfile(caseId)
   const updateResearch = useUpdateCaseResearchProfile(caseId)
   const runResearch = useRunCaseResearch(caseId)
-  const orchestrate = useOrchestrateResearch(caseId)
   const reviewResearch = useReviewCaseResearch(caseId)
   const updateArguments = useUpdateResearchArguments(caseId)
 
@@ -219,10 +335,10 @@ export default function ResearchTab({ caseId, caseData }: ResearchTabProps) {
   const [mevzuatLawNumbers, setMevzuatLawNumbers] = useState('')
   const [vectorCollections, setVectorCollections] = useState('')
   const [vectorQuery, setVectorQuery] = useState('')
-  const [researchProgress, setResearchProgress] = useState<string[]>([])
 
-  const [latestRun, setLatestRun] = useState<any>(null)
-  const [showFullReport, setShowFullReport] = useState(false)
+  // ─── Research results state ─────────────
+  const [parallelResult, setParallelResult] = useState<ParallelResearchResult | null>(null)
+  const [researchError, setResearchError] = useState<string | null>(null)
   const [reviewNotes, setReviewNotes] = useState('')
 
   // ─── Sync from server ──────────────────
@@ -276,6 +392,33 @@ export default function ResearchTab({ caseId, caseData }: ResearchTabProps) {
       ? 'active'
       : 'pending'
 
+  // ─── Build profile payload ─────────────
+  function buildProfilePayload() {
+    return {
+      researchQuestion,
+      searchKeywords,
+      useYargiMcp: useYargi,
+      yargiQuery,
+      yargiCourtTypes: 'YARGITAYKARARI,ISTINAFHUKUK',
+      yargiChamber,
+      yargiDateStart,
+      yargiDateEnd,
+      yargiResultLimit: 5,
+      useMevzuatMcp: useMevzuat,
+      mevzuatQuery,
+      mevzuatScope: '',
+      mevzuatLawNumbers,
+      mevzuatResultLimit: 5,
+      useNotebooklm: useNotebook,
+      notebooklmNotebook: notebookId,
+      notebooklmQuestion: '',
+      useVectorDb: useVector,
+      vectorCollections,
+      vectorQuery,
+      vectorTopK: 5,
+    }
+  }
+
   // ─── Handlers ──────────────────────────
 
   const handleSaveProfile = () => {
@@ -312,75 +455,38 @@ export default function ResearchTab({ caseId, caseData }: ResearchTabProps) {
   }
 
   const handleSaveResearchProfile = () => {
-    updateResearch.mutate({
-      researchQuestion,
-      searchKeywords,
-      useYargiMcp: useYargi,
-      yargiQuery,
-      yargiCourtTypes: 'YARGITAYKARARI,ISTINAFHUKUK',
-      yargiChamber,
-      yargiDateStart,
-      yargiDateEnd,
-      yargiResultLimit: 5,
-      useMevzuatMcp: useMevzuat,
-      mevzuatQuery,
-      mevzuatScope: '',
-      mevzuatLawNumbers,
-      mevzuatResultLimit: 5,
-      useNotebooklm: useNotebook,
-      notebooklmNotebook: notebookId,
-      notebooklmQuestion: '',
-      useVectorDb: useVector,
-      vectorCollections,
-      vectorQuery,
-      vectorTopK: 5,
-    })
+    updateResearch.mutate(buildProfilePayload())
   }
 
-  const handleRunResearch = () => {
-    // Save profile first, then run orchestrated research
-    handleSaveResearchProfile()
-    setResearchProgress(['Arastirma baslatiliyor...'])
+  /** Paralel araştırma — 4 kaynağı aynı anda çalıştır */
+  const handleRunParallel = () => {
+    setResearchError(null)
+    setParallelResult(null)
 
-    // Simulate progress stages while waiting for the orchestrator
-    const stages = [
-      { msg: 'Claude CLI baslatiliyor (model: opus)...', delay: 3000 },
-      { msg: 'Kritik nokta analiz ediliyor...', delay: 8000 },
-      { msg: 'Yargi kararlari araniyor...', delay: 15000 },
-      { msg: 'Mevzuat taraniyor...', delay: 25000 },
-      { msg: 'Kaynaklar sentezleniyor...', delay: 40000 },
-      { msg: 'Rapor olusturuluyor...', delay: 60000 },
-    ]
-    const timers: ReturnType<typeof setTimeout>[] = []
-    for (const stage of stages) {
-      timers.push(setTimeout(() => {
-        setResearchProgress((prev) => [...prev, stage.msg])
-      }, stage.delay))
-    }
-
-    orchestrate.mutate(undefined, {
-      onSuccess: (data: any) => {
-        timers.forEach(clearTimeout)
-        setResearchProgress((prev) => [...prev, 'Arastirma tamamlandi!'])
-        setLatestRun(data)
-      },
-      onError: () => {
-        timers.forEach(clearTimeout)
-        setResearchProgress((prev) => [...prev, 'Hata: Arastirma basarisiz oldu.'])
+    // Profili kaydet, sonra araştırmayı başlat
+    updateResearch.mutate(buildProfilePayload(), {
+      onSuccess: () => {
+        runResearch.mutate(
+          { forceNewRun: true },
+          {
+            onSuccess: (data) => {
+              setParallelResult(data)
+            },
+            onError: (err: any) => {
+              setResearchError(err?.response?.data?.error || err?.message || 'Paralel arastirma basarisiz.')
+            },
+          },
+        )
       },
     })
   }
 
-  const isResearching = runResearch.isPending || orchestrate.isPending
+  const isResearching = runResearch.isPending || updateResearch.isPending
 
-  // ─── Source result labels ──────────────
-  const sourceLabels: Record<string, string> = {
-    yargi_mcp: 'Yargi Kararlari',
-    mevzuat_mcp: 'Ilgili Mevzuat',
-    notebooklm: 'NotebookLM',
-    vector_db: 'Vektor Veritabani',
-  }
-
+  // ─── Derived: active source runs for display ──────
+  const sourceRuns = parallelResult?.sourceRuns || []
+  const failedSources = sourceRuns.filter((s) => s.status === 'failed')
+  const completedSources = sourceRuns.filter((s) => s.status === 'completed')
   return (
     <div className="space-y-5">
       {/* ─── Stepper ──────────────────────────────── */}
@@ -447,101 +553,99 @@ export default function ResearchTab({ caseId, caseData }: ResearchTabProps) {
                 value={lawyerDirection}
                 onChange={(e) => setLawyerDirection(e.target.value)}
                 rows={5}
-                placeholder="Davayi nasil goruyorsunuz, neresi kritik, hangi hatta dikkat edilmeli..."
-                className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-law-accent focus:ring-2 focus:ring-law-accent/20 resize-none"
+                placeholder="Bu davadaki ana stratejinizi ve odak noktanizi yazin..."
+                className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none resize-none"
               />
             </div>
             <div>
               <label className="mb-1.5 block text-xs font-medium">
-                <MessageSquare className="mr-1 inline h-3 w-3" />
-                Muvekkil Gorusme Notu
+                <UserCheck className="mr-1 inline h-3 w-3" />
+                Muvekkil Gorusme Notlari
               </label>
               <textarea
                 value={clientNotes}
                 onChange={(e) => setClientNotes(e.target.value)}
                 rows={5}
-                placeholder="Muvekkilin olay anlatimi, tarihler, talepler, oncelikler..."
-                className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-law-accent focus:ring-2 focus:ring-law-accent/20 resize-none"
+                placeholder="Muvekkilden alinan bilgiler..."
+                className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none resize-none"
               />
             </div>
           </div>
 
-          {/* AI-generated critical point */}
+          {/* Critical Point */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium">Kritik Nokta</label>
+            <label className="mb-1.5 block text-xs font-medium">
+              <AlertCircle className="mr-1 inline h-3 w-3" />
+              Kritik Nokta Ozeti
+            </label>
             <textarea
               value={criticalPoint}
               onChange={(e) => setCriticalPoint(e.target.value)}
-              rows={4}
-              placeholder="AI tarafindan belirlenir veya siz yazarsiniz. 'Taslagi Uret' butonuyla AI'dan yardim alin."
-              className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-law-accent focus:ring-2 focus:ring-law-accent/20 resize-none font-medium"
+              rows={3}
+              placeholder="Davayi kazanmak veya kaybetmek icin en kritik hukuki mesele..."
+              className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none resize-none"
             />
           </div>
 
-          {/* Expandable detail fields */}
+          {/* Toggle details */}
           <button
             type="button"
             onClick={() => setShowDetails(!showDetails)}
-            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+            className="inline-flex items-center gap-1 text-xs font-medium text-law-accent hover:underline cursor-pointer"
           >
             {showDetails ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-            {showDetails ? 'Detaylari Gizle' : 'Detaylari Goster (Eksen, Risk, Eksik Bilgi)'}
+            {showDetails ? 'Detaylari gizle' : 'Detaylari goster (hukuki eksen, riskler, ispat...)'}
           </button>
 
           {showDetails && (
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               <div>
                 <label className="mb-1 block text-xs font-medium">Ana Hukuki Eksen</label>
-                <textarea
+                <input
                   value={mainLegalAxis}
                   onChange={(e) => setMainLegalAxis(e.target.value)}
-                  rows={3}
-                  className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none resize-none"
+                  placeholder="ornek: hakli fesih, tahliye, nafaka"
+                  className="w-full rounded-lg border px-3 py-2 text-sm outline-none"
                 />
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium">Ikincil Riskler</label>
-                <textarea
+                <input
                   value={secondaryRisks}
                   onChange={(e) => setSecondaryRisks(e.target.value)}
-                  rows={3}
-                  className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none resize-none"
+                  className="w-full rounded-lg border px-3 py-2 text-sm outline-none"
                 />
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium">Ispat Riskleri</label>
-                <textarea
+                <input
                   value={proofRisks}
                   onChange={(e) => setProofRisks(e.target.value)}
-                  rows={3}
-                  className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none resize-none"
+                  className="w-full rounded-lg border px-3 py-2 text-sm outline-none"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium">Karsi Taraf Savunma Cizgisi</label>
-                <textarea
+                <label className="mb-1 block text-xs font-medium">Karsi Taraf Argumanlari</label>
+                <input
                   value={opponentArgs}
                   onChange={(e) => setOpponentArgs(e.target.value)}
-                  rows={3}
-                  className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none resize-none"
+                  className="w-full rounded-lg border px-3 py-2 text-sm outline-none"
                 />
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium">Eksik Bilgi</label>
-                <textarea
+                <input
                   value={missingInfo}
                   onChange={(e) => setMissingInfo(e.target.value)}
-                  rows={3}
-                  className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none resize-none"
+                  className="w-full rounded-lg border px-3 py-2 text-sm outline-none"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium">Eksik Belge</label>
-                <textarea
+                <label className="mb-1 block text-xs font-medium">Eksik Belgeler</label>
+                <input
                   value={missingDocs}
                   onChange={(e) => setMissingDocs(e.target.value)}
-                  rows={3}
-                  className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none resize-none"
+                  className="w-full rounded-lg border px-3 py-2 text-sm outline-none"
                 />
               </div>
             </div>
@@ -760,18 +864,19 @@ export default function ResearchTab({ caseId, caseData }: ResearchTabProps) {
               </div>
             )}
 
-            {/* Action buttons */}
-            <div className="flex flex-wrap items-center justify-between gap-2">
+            {/* Keywords + Action buttons */}
+            <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <label className="mb-0 block text-xs font-medium">Anahtar Kelimeler</label>
+                <label className="mb-0 block text-xs font-medium shrink-0">Anahtar Kelimeler</label>
                 <input
                   value={searchKeywords}
                   onChange={(e) => setSearchKeywords(e.target.value)}
                   placeholder="fazla mesai, ispat yuku, bordro"
-                  className="rounded-lg border px-3 py-1.5 text-sm outline-none w-64"
+                  className="flex-1 rounded-lg border px-3 py-1.5 text-sm outline-none"
                 />
               </div>
-              <div className="flex items-center gap-2">
+
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <button
                   type="button"
                   disabled={updateResearch.isPending}
@@ -779,134 +884,145 @@ export default function ResearchTab({ caseId, caseData }: ResearchTabProps) {
                   className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 cursor-pointer"
                 >
                   <Save className="h-3.5 w-3.5" />
-                  Kaydet
+                  Profili Kaydet
                 </button>
-                <button
-                  type="button"
-                  disabled={isResearching || !criticalApproved}
-                  onClick={handleRunResearch}
-                  className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 px-4 py-2 text-sm font-medium text-white hover:from-violet-700 hover:to-purple-700 disabled:opacity-50 cursor-pointer shadow-sm"
-                >
-                  {isResearching ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Play className="h-4 w-4" />
-                  )}
-                  Arastirmayi Baslat
-                </button>
+
+                <div className="flex items-center gap-2">
+                  {/* Paralel Araştırma — 4 kaynağı aynı anda çalıştır */}
+                  <button
+                    type="button"
+                    disabled={isResearching || !criticalApproved}
+                    onClick={handleRunParallel}
+                    className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 px-4 py-2 text-sm font-medium text-white hover:from-blue-700 hover:to-cyan-700 disabled:opacity-50 cursor-pointer shadow-sm"
+                  >
+                    {runResearch.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Play className="h-4 w-4" />
+                    )}
+                    Paralel Arastirma
+                  </button>
+
+                </div>
               </div>
             </div>
 
-            {/* Research progress indicator */}
-            {researchProgress.length > 0 && (
+            {/* ─── Loading indicator ───────────────── */}
+            {isResearching && (
               <div className="rounded-xl border border-violet-200 bg-violet-50/50 p-4">
-                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-violet-700">
-                  Arastirma Durumu
-                </p>
-                <div className="space-y-1.5">
-                  {researchProgress.map((msg, i) => (
-                    <div key={i} className="flex items-center gap-2 text-sm text-violet-800">
-                      {i === researchProgress.length - 1 && isResearching ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin text-violet-600 shrink-0" />
-                      ) : (
-                        <CheckCircle2 className="h-3.5 w-3.5 text-green-600 shrink-0" />
-                      )}
-                      <span>{msg}</span>
-                    </div>
-                  ))}
+                <div className="flex items-center gap-3">
+                  <Loader2 className="h-5 w-5 animate-spin text-violet-600" />
+                  <div>
+                    <p className="text-sm font-medium text-violet-800">
+                      Paralel arastirma calistiriliyor...
+                    </p>
+                    <p className="text-xs text-violet-600">
+                      Yargi, mevzuat, NotebookLM ve vektor DB kaynaklari paralel olarak taraniyor...
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* Results */}
-            {(latestRun || researchProfile?.lastRunSummary) && (
-              <div className="rounded-xl border bg-card/80 p-4 space-y-4">
-                <div className="flex items-center justify-between">
-                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Arastirma Sonuclari
-                  </p>
-                  {(latestRun?.report?.status === 'completed' || researchProfile?.lastRunStatus === 'completed') && (
-                    <Badge variant="success">Tamamlandi</Badge>
-                  )}
+            {/* ─── Global error ────────────────────── */}
+            {researchError && !isResearching && (
+              <div className="rounded-xl border-2 border-red-300 bg-red-50 p-4">
+                <div className="flex items-start gap-3">
+                  <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-red-800">Arastirma Hatasi</p>
+                    <pre className="mt-2 whitespace-pre-wrap text-xs text-red-700 font-mono leading-relaxed">
+                      {researchError}
+                    </pre>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setResearchError(null)}
+                    className="rounded-md p-1 text-red-400 hover:text-red-600 cursor-pointer"
+                  >
+                    <XCircle className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ─── Parallel Research Results ──────── */}
+            {parallelResult && !isResearching && (
+              <div className="space-y-4">
+                {/* Summary header */}
+                <div className="flex items-center justify-between rounded-xl border bg-card p-3">
+                  <div className="flex items-center gap-3">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Paralel Arastirma Sonuclari
+                    </p>
+                    {failedSources.length > 0 && (
+                      <div className="flex items-center gap-1 text-xs text-amber-700">
+                        <TriangleAlert className="h-3.5 w-3.5" />
+                        {failedSources.length} kaynak hata verdi
+                      </div>
+                    )}
+                  </div>
+                  <Badge
+                    variant={
+                      parallelResult.report.status === 'completed'
+                        ? 'success'
+                        : parallelResult.report.status === 'partial'
+                          ? 'warning'
+                          : 'danger'
+                    }
+                  >
+                    {parallelResult.report.status === 'completed'
+                      ? 'Tamamlandi'
+                      : parallelResult.report.status === 'partial'
+                        ? `Kismi (${completedSources.length}/${sourceRuns.filter(s => s.status !== 'skipped').length})`
+                        : 'Basarisiz'}
+                  </Badge>
                 </div>
 
-                {/* Summary */}
-                <p className="text-sm">
-                  {latestRun?.report?.summary ||
-                    latestRun?.summary ||
-                    researchProfile?.lastRunSummary ||
-                    'Sonuc bekleniyor...'}
-                </p>
-
-                {/* Orchestrate stats */}
-                {latestRun?.decisionsFound != null && (
-                  <div className="flex flex-wrap gap-3">
-                    <div className="rounded-lg border bg-emerald-50 px-3 py-2 text-center">
-                      <p className="text-lg font-bold text-emerald-700">{latestRun.decisionsFound}</p>
-                      <p className="text-[10px] text-emerald-600">Karar Bulundu</p>
-                    </div>
-                    <div className="rounded-lg border bg-blue-50 px-3 py-2 text-center">
-                      <p className="text-lg font-bold text-blue-700">{latestRun.legislationFound}</p>
-                      <p className="text-[10px] text-blue-600">Mevzuat Bulundu</p>
-                    </div>
-                    {latestRun.toolCallCount > 0 && (
-                      <div className="rounded-lg border bg-violet-50 px-3 py-2 text-center">
-                        <p className="text-lg font-bold text-violet-700">{latestRun.toolCallCount}</p>
-                        <p className="text-[10px] text-violet-600">Tool Cagrisi</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Source run cards (from /run endpoint) */}
-                {latestRun?.sourceRuns?.length > 0 && (
-                  <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-                    {latestRun.sourceRuns.map((source: any) => (
-                      <div key={source.sourceType} className="rounded-lg border p-3">
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="text-sm font-medium">
-                            {sourceLabels[source.sourceType] || source.sourceName}
-                          </p>
-                          <Badge
-                            variant={
-                              source.status === 'completed'
-                                ? 'success'
-                                : source.status === 'failed'
-                                  ? 'danger'
-                                  : 'secondary'
-                            }
-                          >
-                            {source.status === 'completed'
-                              ? 'Basarili'
-                              : source.status === 'failed'
-                                ? 'Hata'
-                                : source.status}
-                          </Badge>
-                        </div>
-                        <p className="mt-2 whitespace-pre-wrap text-sm">{source.summary}</p>
-                      </div>
+                {/* Per-source result cards */}
+                <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                  {sourceRuns
+                    .filter((s) => s.status !== 'skipped')
+                    .map((source) => (
+                      <SourceResultCard
+                        key={source.sourceType}
+                        source={source}
+                        onRetry={
+                          source.status === 'failed'
+                            ? () => {
+                                // Retry whole parallel run for now
+                                handleRunParallel()
+                              }
+                            : undefined
+                        }
+                        retrying={isResearching}
+                      />
                     ))}
+                </div>
+
+                {/* Report summary */}
+                {parallelResult.report.summary && (
+                  <div className="rounded-lg border bg-card/80 p-3">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-2">
+                      Rapor Ozeti
+                    </p>
+                    <p className="text-sm">{parallelResult.report.summary}</p>
                   </div>
                 )}
+              </div>
+            )}
 
-                {/* Full report content (from orchestrate endpoint) */}
-                {latestRun?.reportContent && (
-                  <div>
-                    <button
-                      type="button"
-                      onClick={() => setShowFullReport(!showFullReport)}
-                      className="inline-flex items-center gap-2 text-sm font-medium text-law-accent hover:underline cursor-pointer"
-                    >
-                      <BookOpen className="h-4 w-4" />
-                      {showFullReport ? 'Raporu Gizle' : 'Tam Raporu Goruntule'}
-                      {showFullReport ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-                    </button>
-                    {showFullReport && (
-                      <div className="mt-3 max-h-[600px] overflow-y-auto rounded-lg border bg-white p-4">
-                        <pre className="whitespace-pre-wrap text-sm leading-relaxed font-sans">{latestRun.reportContent}</pre>
-                      </div>
-                    )}
-                  </div>
+            {/* ─── Previous run summary (when no fresh result) ── */}
+            {!parallelResult && !isResearching && researchProfile?.lastRunSummary && (
+              <div className="rounded-xl border bg-card/80 p-4">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-2">
+                  Son Arastirma Sonucu
+                </p>
+                <p className="text-sm">{researchProfile.lastRunSummary}</p>
+                {researchProfile.lastRunAt && (
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    {formatDateTime(researchProfile.lastRunAt)}
+                  </p>
                 )}
               </div>
             )}

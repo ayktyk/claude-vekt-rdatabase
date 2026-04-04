@@ -32,6 +32,7 @@ import {
 } from '../utils/revisionAi.js'
 import { notifyPleadingReady } from '../utils/aiIntegration.js'
 import { getSingleValue } from '../utils/request.js'
+import { saveArtifactToDrive } from '../utils/workspace.js'
 
 const router = Router()
 router.use(authenticate)
@@ -162,7 +163,7 @@ router.post(
       const userId = req.user!.userId
       const caseId = getSingleValue(req.params.caseId)
       if (!caseId) { res.status(400).json({ error: 'Gecersiz dava id.' }); return }
-      const { forceRerun } = req.body as { forceRerun?: boolean }
+      const { forceRerun, documentType } = req.body as { forceRerun?: boolean; documentType?: string }
 
       const caseRecord = await getOwnedCaseRecord(userId, caseId)
       if (!caseRecord) {
@@ -281,6 +282,7 @@ router.post(
         caseType: caseRecord.caseType,
         caseDescription: caseRecord.description,
         courtName: caseRecord.courtName,
+        documentType: (documentType as any) || 'dava_dilekcesi',
         criticalPointSummary: intake?.criticalPointSummary,
         mainLegalAxis: intake?.mainLegalAxis,
         lawyerDirection: intake?.lawyerDirection,
@@ -300,12 +302,13 @@ router.post(
           jobId: job.id,
           caseId,
           artifactType: 'pleading_v1',
-          title: `Dilekce Taslagi v1.${versionNo}`,
+          title: `${documentType === 'ihtarname' ? 'Ihtarname' : documentType === 'cevap_dilekcesi' ? 'Cevap Dilekcesi' : documentType === 'istinaf_dilekcesi' ? 'Istinaf Dilekcesi' : documentType === 'temyiz_dilekcesi' ? 'Temyiz Dilekcesi' : documentType === 'basvuru_dilekcesi' ? 'Basvuru Dilekcesi' : 'Dilekce'} Taslagi v1.${versionNo}`,
           contentPreview: pleadingMarkdown.slice(0, 2000),
           versionNo,
           sourceStepKey: 'generate_v1',
           metadata: JSON.stringify({
             fullContent: pleadingMarkdown,
+            documentType: documentType || 'dava_dilekcesi',
             generatedAt: new Date().toISOString(),
             inputSources: {
               hasIntake: !!intake,
@@ -349,6 +352,11 @@ router.post(
 
       // AI entegrasyon: dilekce hazir bildirimi
       await notifyPleadingReady({ userId, caseId, version: versionNo }).catch(() => {})
+
+      // Google Drive'a kaydet (arka planda)
+      if (caseRecord.automationCaseCode) {
+        saveArtifactToDrive(caseRecord.automationCaseCode, 'pleading_v1', pleadingMarkdown).catch(() => {})
+      }
 
       res.json({
         pleading: { job: { ...job, status: 'review_required' }, artifact },
@@ -757,6 +765,12 @@ router.post(
             updatedAt: new Date(),
           })
           .where(eq(aiJobs.id, jobId))
+      }
+
+      // Google Drive'a kaydet (arka planda)
+      if (caseRecord.automationCaseCode) {
+        saveArtifactToDrive(caseRecord.automationCaseCode, 'revision', revisionReportMarkdown).catch(() => {})
+        saveArtifactToDrive(caseRecord.automationCaseCode, 'pleading_v2', pleadingV2Markdown, 'dilekce-v2.md').catch(() => {})
       }
 
       res.json({

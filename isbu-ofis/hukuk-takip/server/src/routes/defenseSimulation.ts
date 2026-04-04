@@ -23,6 +23,7 @@ import {
 } from '../utils/defenseSimulationAi.js'
 import { notifyDefenseRiskFlag } from '../utils/aiIntegration.js'
 import { getSingleValue } from '../utils/request.js'
+import { saveArtifactToDrive } from '../utils/workspace.js'
 
 const router = Router()
 router.use(authenticate)
@@ -315,6 +316,11 @@ router.post(
       // Risk flag varsa bildirim olustur
       if (hasRiskFlag) {
         await notifyDefenseRiskFlag({ userId, caseId, jobId: job.id }).catch(() => {})
+      }
+
+      // Google Drive'a kaydet (arka planda)
+      if (caseRecord.automationCaseCode) {
+        saveArtifactToDrive(caseRecord.automationCaseCode, 'defense_simulation', simulationMarkdown).catch(() => {})
       }
 
       res.json({

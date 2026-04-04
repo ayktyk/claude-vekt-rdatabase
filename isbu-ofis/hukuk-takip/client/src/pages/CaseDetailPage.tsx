@@ -182,6 +182,7 @@ export default function CaseDetailPage() {
   const [pleadingReviewNotes, setPleadingReviewNotes] = useState('')
   const [pleadingEditMode, setPleadingEditMode] = useState(false)
   const [pleadingEditContent, setPleadingEditContent] = useState('')
+  const [selectedDocumentType, setSelectedDocumentType] = useState<string>('dava_dilekcesi')
   const [defenseReviewNotes, setDefenseReviewNotes] = useState('')
   const [finalReviewNotes, setFinalReviewNotes] = useState('')
 
@@ -1194,52 +1195,71 @@ export default function CaseDetailPage() {
                     )}
                   </div>
 
-                  {/* Üret butonu */}
+                  {/* Belge türü seçici + Üret butonu */}
                   {caseData?.case &&
                     ['draft_ready', 'review_ready', 'completed'].includes(
                       caseData.case.automationStatus
                     ) && (
-                      <div className="flex flex-wrap gap-2">
-                        <button
-                          type="button"
-                          disabled={generatePleading.isPending}
-                          onClick={() => generatePleading.mutate({ forceRerun: false })}
-                          className="inline-flex items-center gap-2 rounded-lg bg-law-accent px-4 py-2 text-sm font-medium text-white hover:bg-[#1d4ed8] disabled:opacity-50"
-                        >
-                          {generatePleading.isPending ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <ScrollText className="h-4 w-4" />
+                      <div className="space-y-3">
+                        <div>
+                          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                            Belge Türü
+                          </label>
+                          <select
+                            value={selectedDocumentType}
+                            onChange={(e) => setSelectedDocumentType(e.target.value)}
+                            className="w-full max-w-xs rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
+                          >
+                            <option value="dava_dilekcesi">Dava Dilekçesi</option>
+                            <option value="ihtarname">İhtarname</option>
+                            <option value="cevap_dilekcesi">Cevap Dilekçesi</option>
+                            <option value="istinaf_dilekcesi">İstinaf Dilekçesi</option>
+                            <option value="temyiz_dilekcesi">Temyiz Dilekçesi</option>
+                            <option value="basvuru_dilekcesi">Başvuru Dilekçesi</option>
+                          </select>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            disabled={generatePleading.isPending}
+                            onClick={() => generatePleading.mutate({ forceRerun: false, documentType: selectedDocumentType as any })}
+                            className="inline-flex items-center gap-2 rounded-lg bg-law-accent px-4 py-2 text-sm font-medium text-white hover:bg-[#1d4ed8] disabled:opacity-50"
+                          >
+                            {generatePleading.isPending ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <ScrollText className="h-4 w-4" />
+                            )}
+                            {pleadingData?.pleading?.artifact
+                              ? 'Yeniden Üret'
+                              : 'Belge Taslağı Üret'}
+                          </button>
+                          {pleadingData?.pleading?.artifact && (
+                            <>
+                              <button
+                                type="button"
+                                disabled={generatePleading.isPending}
+                                onClick={() => generatePleading.mutate({ forceRerun: true, documentType: selectedDocumentType as any })}
+                                className="inline-flex items-center gap-2 rounded-lg border border-law-accent px-4 py-2 text-sm font-medium text-law-accent hover:bg-law-accent/5 disabled:opacity-50"
+                              >
+                                Zorla Yeniden Üret
+                              </button>
+                              <button
+                                type="button"
+                                disabled={exportUdf.isPending}
+                                onClick={() => exportUdf.mutate()}
+                                className="inline-flex items-center gap-2 rounded-lg border border-emerald-500 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-100 disabled:opacity-50"
+                              >
+                                {exportUdf.isPending ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Download className="h-4 w-4" />
+                                )}
+                                UDF İndir
+                              </button>
+                            </>
                           )}
-                          {pleadingData?.pleading?.artifact
-                            ? 'Yeniden Üret'
-                            : 'Dilekçe Taslağı Üret'}
-                        </button>
-                        {pleadingData?.pleading?.artifact && (
-                          <>
-                            <button
-                              type="button"
-                              disabled={generatePleading.isPending}
-                              onClick={() => generatePleading.mutate({ forceRerun: true })}
-                              className="inline-flex items-center gap-2 rounded-lg border border-law-accent px-4 py-2 text-sm font-medium text-law-accent hover:bg-law-accent/5 disabled:opacity-50"
-                            >
-                              Zorla Yeniden Üret
-                            </button>
-                            <button
-                              type="button"
-                              disabled={exportUdf.isPending}
-                              onClick={() => exportUdf.mutate()}
-                              className="inline-flex items-center gap-2 rounded-lg border border-emerald-500 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-100 disabled:opacity-50"
-                            >
-                              {exportUdf.isPending ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <Download className="h-4 w-4" />
-                              )}
-                              UDF İndir
-                            </button>
-                          </>
-                        )}
+                        </div>
                       </div>
                     )}
 
