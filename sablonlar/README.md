@@ -12,6 +12,10 @@ Kullanim sirasi:
 - v1 dilekce sonrasi `revizyon-raporu-template.md`
 - Yeni dosya klasoru kurulurken `dava-klasoru-checklist.md`
 
+Kalici hafiza referansi:
+- Tum drawer yazimi oncesi `mempalace-taksonomi-referansi.md` dosyasina bak
+  (Wing/Hall/Room yapisi, KVKK maskeleme, drawer icerik sablonlari)
+
 Kalici ciktilar repo icine degil Google Drive altina yazilir:
 - Yeni dava: `G:\Drive'im\Hukuk Burosu\Aktif Davalar`
 - Sadece arastirma: `G:\Drive'im\Hukuk Burosu\Bekleyen Davalar`

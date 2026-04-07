@@ -4,6 +4,17 @@ Bu dosya Avukat Aykut'un bürosuna özgü kuralları içerir.
 Claude her dilekçe yazımında ve usul analizinde bu dosyayı oku ve kurallara uy.
 Genel hukuk bilgisi bu dosyadaki büro tercihlerine göre şekillendirilir.
 
+> **Statik vs Dinamik:** Bu dosya bürünün **statik kalıcı kurallarını** içerir
+> (kanun atıfları, mahkeme tercihleri, üslup yasakları, hesaplama kuralları).
+> **Yaşayan tercihler ve seans-bazlı öğrenmeler** MemPalace
+> `wing_buro_aykut/hall_avukat_tercihleri` ve `hall_is_akisi_tercihleri`
+> drawer'larında tutulur. Director Agent her seans başında ADIM -1
+> (MemPalace Wake-up) ile bu drawer'ları context'e yükler.
+>
+> Bu dosya elle güncellenir. MemPalace drawer'ları ajanlar tarafından
+> güncellenir. İkisi çelişirse: **MemPalace daha günceldir** (son tercih
+> orada yazılır), bu dosya temel zemindir.
+
 ---
 
 ## Dilekçe Dili

@@ -22,6 +22,33 @@ Yalniz arastirma komutlarinda veya yeni dava akisinda calisir.
 - `legal.local.md`
 - Kaynak durumu bilgisi
 - Advanced Briefing verisi (varsa)
+- MemPalace wake-up sonuclari (Director Agent ADIM -1'den)
+
+## Hafiza Kontrolu (ZORUNLU - Ise Baslamadan Once)
+
+Arastirma baslamadan once MemPalace'i sorgula:
+
+```text
+mempalace_search "{kritik_nokta}" --wing wing_{dava_turu}
+mempalace_search "{kritik_nokta}" --wing wing_ajan_arastirmaci (yoksa atla)
+```
+
+Aranacak haller:
+- hall_argumanlar -> daha once kullanilmis olgun argumanlar
+- hall_arastirma_bulgulari -> bu konuda buroda toplanmis ham bulgular
+- hall_kararlar -> bilinen Yargitay/HGK kararlari
+- hall_savunma_kaliplari -> karsi taraftan beklenen itirazlar
+
+Eger MEMORY MATCH bulunduysa:
+
+- Raporun "Kullanilan Kaynaklar" bolumune ekle:
+  `Buro hafizasi: wing_{dava_turu} - N drawer eslesmesi`
+- Eslesen drawer'lari sifirdan urettme; mevcut olgun arguman uzerinde
+  ek arastirma yap (ornek: "Bu arguman daha once X davasinda kullanildi,
+  o zaman su 2 yeni Yargitay karari cikti, simdi de su 1 yeni karar var")
+- Raporun ilgili bolumlerinde "Buro hafizasinda mevcut: ..." ibaresi kullan
+
+Eger MEMORY MATCH yoksa: Normal akisla devam et, yeni bir konu acmis olursun.
 
 ## Yapma Listesi
 
@@ -104,6 +131,55 @@ Kayit yolu:
 - Kararlar birbiriyle celisiyor
 - Dahili kaynak var ama hukuki dayanakla uyusmuyor
 - Kritik noktayi destekleyen yeterli guncel karar bulunamadi
+
+## Diary Write (ZORUNLU - Is Bittiginde)
+
+Arastirma raporu kaydedildikten sonra MemPalace'e iki yazim yapilir:
+
+### 1. Ajan Diary
+
+```text
+mempalace_diary_write
+  agent_name: "arastirmaci"
+  content: "Bu arastirmadaki en onemli 3 ogrenme:
+            1) {kritik nokta} icin {kaynak} en zengin sonucu verdi
+            2) {arama terimi} {sonuc sayisi} karar dondurdu, en kullanisli {daire/tarih}
+            3) {celisen karar/sapma uyarisi} not edildi"
+```
+
+Diary icerigi kisa, somut ve tekrar kullanilabilir olmali. KVKK: muvekkil
+adi yok, dava-id'ye atif yok, sadece hukuki oruntu.
+
+### 2. Bulgu Drawer'i
+
+Arastirmadan cikan **olgun** bulguyu (yani guven notu DOGRULANMIS olan ve
+kritik noktayi gercekten karsilayan kisim) kalici drawer olarak yaz:
+
+```text
+mempalace_add_drawer
+  wing: wing_{dava_turu}
+  hall: hall_arastirma_bulgulari
+  room: room_{kisa_konu_slug}
+  content: "Kritik nokta: {nokta}
+            Mevzuat: {kanun-madde}
+            Yargitay: {daire-tarih-esas/karar} - 1 cumle ozet
+            HGK/IBK: {varsa kunye}
+            Arguman: {dilekceye tasinacak ana arguman, 2-3 cumle}
+            Kaynak guven: DOGRULANMIS"
+```
+
+KVKK kontrolu: drawer icerigine gercek isim, TC, IBAN, dava-id KOYMA.
+Drawer paylasilabilir hukuki oruntu olmali, dava ozeti olmamali.
+
+### Promotion Notu
+
+Arastirmaci dogrudan `hall_argumanlar`'a yazmaz. Bir bulgu:
+- 2+ farkli arastirmada tekrar ederse veya
+- Tam davada Belge Yazari tarafindan kullanilirsa
+
+Revizyon Ajani veya Director Agent tarafindan `hall_arastirma_bulgulari`'ndan
+`hall_argumanlar`'a promote edilir. Arastirmacinin gorevi olgun bulgu uretmektir,
+promotion karari onun degildir.
 
 ## Ogrenilmis Dersler
 

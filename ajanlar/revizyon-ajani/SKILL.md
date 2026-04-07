@@ -22,6 +22,40 @@ Director Agent "revize et" komutunu verdiginde.
 - Usul raporu
 - Advanced Briefing (varsa)
 - Savunma simulasyonu (varsa)
+- MemPalace wake-up sonuclari (Director Agent ADIM -1'den)
+
+## Hafiza Kontrolu (ZORUNLU - Ise Baslamadan Once)
+
+Revizyon yapmadan once MemPalace'i sorgula:
+
+```text
+mempalace_search "{kritik_nokta}" --wing wing_{dava_turu}
+mempalace_search "{kritik_nokta}" --wing wing_ajan_revizyon (yoksa atla)
+```
+
+Aranacak haller:
+- hall_argumanlar -> daha once dilekceye girmis ve "tutmus" arguman kaliplari
+  (eksik arguman kontrolu icin)
+- hall_savunma_kaliplari -> karsi taraftan beklenen itirazlar
+  (eksik karsilama tespiti icin)
+- hall_kararlar -> bu konuda buroda bilinen karsi-emsal kararlar
+  (riske acik kalmis nokta tespiti icin)
+
+Eger hakim biliniyorsa:
+
+```text
+mempalace_search "{kritik_nokta}" --wing wing_hakim_{soyad} (varsa)
+```
+
+Bu hakimin ispat standardi, sevdigi karar atif tipi, dilekceye bakis acisi.
+
+Eger MEMORY MATCH bulunduysa:
+- "Eklenmesi Gereken Noktalar"a buro hafizasinda olup dilekcede olmayan
+  argumanlari yaz: "Buro hafizasinda mevcut, dilekceye eklenmemis: ..."
+- "Duzeltilmesi Gereken Noktalar"a buroda zayifligi bilinen argumanlari yaz
+- Hakim profili biliniyorsa ton/uslup uyumsuzlugunu burada isaretle
+
+Eger MEMORY MATCH yoksa: Sadece dilekce ve dosya bazli revizyon yap.
 
 ## Gorev
 
@@ -97,6 +131,76 @@ GUVEN NOTU:
 - Atiflarin dogrulanmasi gerekiyor
 - Hesap ve talep kalemleri tutarsiz
 - Savunma simulasyonu gerektirecek acik zafiyet var
+
+## Diary Write (ZORUNLU - Is Bittiginde) + Promotion Karari
+
+Revizyon raporu kaydedildikten sonra MemPalace'e iki yazim ve bir promotion
+karari verilir.
+
+### 1. Ajan Diary
+
+```text
+mempalace_diary_write
+  agent_name: "revizyon-ajani"
+  content: "Bu revizyonda v1 dilekcesinde tespit edilen 3 ana zafiyet:
+            1) {zafiyet 1, kategori: ispat/atif/karsilama/uslup}
+            2) {zafiyet 2}
+            3) {zafiyet 3}
+            Tekrar eden hata kalibi: {varsa, ornek: hep arabuluculuk
+            son tutanagina atif unutuluyor}"
+```
+
+### 2. Promotion Karari (Olgun Argumani Promote Et)
+
+Revizyon ajaninin onemli bir gorevi: arastirma akisindan veya tam davadan
+gelen olgun bir argumani `hall_arastirma_bulgulari`'ndan `hall_argumanlar`'a
+promote etmek.
+
+Promotion kriterleri:
+- Bulgu en az 2 farkli arastirmada tekrar etmis VEYA
+- Tam davada Belge Yazari tarafindan kullanilmis ve revizyondan gecmis VEYA
+- Hakim/karsi taraf nezdinde tutmus oldugu biliniyor (dosya sonucu)
+
+Promotion adimi:
+
+```text
+1. mempalace_search "{arguman}" --wing wing_{dava_turu} (mevcut bulguyu bul)
+2. Yeni drawer yarat:
+   mempalace_add_drawer
+     wing: wing_{dava_turu}
+     hall: hall_argumanlar
+     room: room_{arguman_kisa_slug}
+     content: "Arguman: {2-3 cumle olgun hali}
+               Mevzuat: {kanun-madde}
+               Karar: {karar kunyesi}
+               Olgunluk: PROMOTED ({tarih})
+               Kaynak bulgu: {orijinal hall_arastirma_bulgulari drawer adi}
+               Karsi savunma: {beklenen itiraz ve karsilama}"
+```
+
+NOT: Mevcut MemPalace API'sinda dogrudan "promote" komutu yok; bu islem
+yeni drawer yaratarak yapilir. Kaynak bulgu drawer'i silinmez (audit izi
+icin sakli kalir).
+
+### 3. Revizyon Sonrasi Drawer Guncellemesi
+
+Eger revizyonda yeni bir karsi savunma kalibi tespit edildiyse:
+
+```text
+mempalace_add_drawer
+  wing: wing_{dava_turu}
+  hall: hall_savunma_kaliplari
+  room: room_{savunma_kisa_slug}
+  content: "Beklenen savunma: {kalip}
+            Karsilama: {revizyon raporundaki oneri}
+            Kaynak: revizyon ajani (v1 -> v2)"
+```
+
+KVKK kontrolu: muvekkil adi, TC, IBAN, dava-id YOK.
+
+Bu yazimlar **sadece tam dava akisinda** yapilir. Arastirma akisinda
+revizyon ajani genelde cagrilmaz; cagrilirsa promotion yapma yetkisi yine
+gecerlidir (hall_arastirma_bulgulari -> hall_argumanlar).
 
 ## Ogrenilmis Dersler
 

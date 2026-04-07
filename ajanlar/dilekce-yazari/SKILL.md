@@ -23,6 +23,38 @@ komutu verdiginde. Usul ve Arastirma ajanlari ciktisini tamamlamis olmali.
 - `dilekce-yazim-kurallari.md`
 - `legal.local.md`
 - Advanced Briefing verisi (varsa)
+- MemPalace wake-up sonuclari (Director Agent ADIM -1'den)
+
+## Hafiza Kontrolu (ZORUNLU - Ise Baslamadan Once)
+
+Dilekce yazmaya baslamadan once MemPalace'i sorgula:
+
+```text
+mempalace_search "{kritik_nokta}" --wing wing_{dava_turu}
+mempalace_search "{kritik_nokta}" --wing wing_ajan_dilekce (yoksa atla)
+```
+
+Aranacak haller:
+- hall_argumanlar -> daha once dilekceye girmis ve tutmus arguman kaliplari
+- hall_savunma_kaliplari -> karsi taraftan beklenen itirazlar (proaktif karsila)
+
+Ayrica, eger dava-ozelinde hakim veya karsi taraf avukati biliniyorsa:
+
+```text
+mempalace_search "{kritik_nokta}" --wing wing_hakim_{soyad} (varsa)
+mempalace_search "{kritik_nokta}" --wing wing_avukat_{soyad} (varsa)
+```
+
+Eger MEMORY MATCH bulunduysa:
+- "Buro hafizasinda mevcut: ..." notuyla dilekcenin "Hukuki Degerlendirme"
+  bolumune entegre et
+- Olgun argumani sifirdan yazma; mevcut kalibi kullan, dava-ozelinde adapte et
+- Beklenen savunma kaliplarini "Risk noktalarini proaktif karsilama" bolumunde
+  acikca karsila
+- Hakim profili biliniyorsa: o hakimin gectikten geceleri uslup ve ispat
+  standardina gore dilekceyi kalibre et
+
+Eger MEMORY MATCH yoksa: Normal akisla devam et.
 
 ## Yapma Listesi
 
@@ -138,6 +170,55 @@ Su durumlarda avukata don, otomatik kaydetme:
 - Belirsiz alacak davasi mi kismi dava mi karari verilemedi
 - Advanced Briefing'de "olmazsa olmaz" olarak isaretlenmis bir talep
   dilekceye yansitilmadi
+
+## Diary Write (ZORUNLU - Is Bittiginde)
+
+Dilekce v1 (veya revize edilmis ise revizyon ajaninin v2 sonrasi) kaydedildikten
+sonra MemPalace'e iki yazim yapilir:
+
+### 1. Ajan Diary
+
+```text
+mempalace_diary_write
+  agent_name: "dilekce-yazari"
+  content: "Bu dilekcede en onemli 3 secim:
+            1) Olgu yapisi {kronoloji/tematik/karma} secildi cunku ...
+            2) Ana arguman omurgasi {kanun-madde + Y. dairesi karari}
+            3) Karsi taraf savunmasi {beklenen itiraz} proaktif karsilandi"
+```
+
+### 2. Arguman Drawer'i (Tam Dava Akisinda)
+
+Dilekceye giren olgun ana argumani kalici drawer olarak yaz:
+
+```text
+mempalace_add_drawer
+  wing: wing_{dava_turu}
+  hall: hall_argumanlar
+  room: room_{arguman_kisa_slug}
+  content: "Arguman: {2-3 cumle ozet}
+            Mevzuat: {kanun-madde}
+            Karar: {daire-tarih-esas/karar}
+            Karsi savunma: {beklenen itiraz ve karsilama yontemi}
+            Kullanim: {hangi olgu kalibinda calisir}"
+```
+
+Ayrica beklenen karsi savunma varsa:
+
+```text
+mempalace_add_drawer
+  wing: wing_{dava_turu}
+  hall: hall_savunma_kaliplari
+  room: room_{savunma_kisa_slug}
+  content: "Beklenen savunma: {kalip}
+            Karsi cevap: {dilekcede kullanilan karsilama}
+            Dayanak: {kanun veya karar}"
+```
+
+KVKK kontrolu: muvekkil adi, TC, IBAN, dava-id YOK. Sadece anonim hukuki kalip.
+
+Arastirma akisinda (Bekleyen Davalar) bu yazimlar YAPILMAZ; dilekce yazari
+zaten arastirma akisinda calistirilmaz.
 
 ## Ogrenilmis Dersler
 

@@ -10,6 +10,14 @@
     "notebooklm": {
       "command": "notebooklm-mcp",
       "args": []
+    },
+    "buro-hafizasi": {
+      "command": "python",
+      "args": ["-m", "mempalace.mcp_server"],
+      "env": {
+        "MEMPALACE_PALACE_PATH": "C:/Users/user/mempalace_palace",
+        "PYTHONIOENCODING": "utf-8"
+      }
     }
   }
 }

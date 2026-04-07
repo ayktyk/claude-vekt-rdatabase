@@ -22,6 +22,32 @@ Arastirma ajanlarindan once calisir.
 - Kritik nokta
 - `legal.local.md`
 - Advanced Briefing verisi (varsa)
+- MemPalace wake-up sonuclari (Director Agent ADIM -1'den)
+- Arastirma raporu (eger Ajan 2 onceden calistiysa)
+
+## Hafiza Kontrolu (ZORUNLU - Ise Baslamadan Once)
+
+Usul iskeletini kurmadan once MemPalace'i sorgula:
+
+```text
+mempalace_search "{dava_turu} usul tuzaklari" --wing wing_{dava_turu}
+mempalace_search "{dava_turu} dava sarti" --wing wing_{dava_turu}
+mempalace_search "{dava_turu}" --wing wing_ajan_usul (yoksa atla)
+```
+
+Aranacak haller:
+- hall_usul_tuzaklari -> daha once goruluş usul hatalari, zamanasimi tuzagi,
+  gorev/yetki sorunu, vekaletname eksigi
+- hall_argumanlar -> bu dava turunde olgun usul argumanlari
+
+Eger MEMORY MATCH bulunduysa:
+- Raporun "Risk Analizi" bolumune ekle: "Buro hafizasinda mevcut: ..."
+- Sifirdan kontrol listesi yazma; mevcut olgun tuzagi guncelle ve dava-ozelinde
+  aktualize et
+- Ornek: "Bu dava turunde gecmiste 3 davada arabuluculuk son tutanagi eksik
+  cikti, kontrol et"
+
+Eger MEMORY MATCH yoksa: Normal akisla devam et.
 
 ## Yapma Listesi
 
@@ -132,6 +158,38 @@ Iscilik hesaplamasi gerekiyorsa:
 - Gorev/yetki konusunda ciddi tereddut var
 - Belirsiz alacak davasi mi kismi dava mi karari net degil
 - Vekaletnamede gerekli ozel yetki yok
+
+## Diary Write (ZORUNLU - Is Bittiginde)
+
+Usul raporu kaydedildikten sonra MemPalace'e iki yazim yapilir:
+
+### 1. Ajan Diary
+
+```text
+mempalace_diary_write
+  agent_name: "usul-uzmani"
+  content: "Bu davada usul acisindan kritik 3 nokta:
+            1) {risk 1, ornek: arabuluculuk son tutanagi sinirda}
+            2) {risk 2, ornek: zamanasimi 3 ay icinde doluyor}
+            3) {risk 3, ornek: belirsiz alacak vs kismi dava karari}"
+```
+
+### 2. Usul Tuzagi Drawer'i
+
+Dava turune ozgu, tekrar kullanilabilir bir usul orurusu cikarsa kalici drawer:
+
+```text
+mempalace_add_drawer
+  wing: wing_{dava_turu}
+  hall: hall_usul_tuzaklari
+  room: room_{tuzak_kisa_slug}
+  content: "Tuzak: {kisa aciklama}
+            Dayanak: {kanun-madde}
+            Kontrol: {raporda kullanilan kontrol cumlesi}
+            Risk seviyesi: {dusuk/orta/yuksek}"
+```
+
+KVKK kontrolu: muvekkil adi, TC, IBAN, dava-id YOK. Sadece anonim usul oruntu.
 
 ## Ogrenilmis Dersler
 

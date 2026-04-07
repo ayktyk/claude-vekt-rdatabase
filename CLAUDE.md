@@ -115,10 +115,17 @@ Genis, konusuz arastirma yapma.
 
 | Arac | Gorev |
 |---|---|
+| MemPalace MCP (`buro-hafizasi`) | Buro IC deneyim hafizasi - gecmis davalar, basarili argumanlar, hakim/avukat profilleri, ajan diary, avukat tercihleri |
 | Vektor DB (`hukuk_ara`) | Buronun kendi kitapligi - doktrin, emsal, dilekce stratejisi semantik aramasi |
 | NotebookLM MCP | Avukatin dava turune gore tuttugu notebook'lar |
 | Google Drive MCP | Klasor olusturma, dosya okuma ve kaydetme |
-| `legal.local.md` | Buro playbook - buronun kendi kurallari ve tercihleri |
+| `legal.local.md` | Buro playbook - buronun statik kurallari ve tercihleri (canli tercih MemPalace'ta) |
+
+Bu uc katman birbirinin yerine GECMEZ:
+- ChromaDB `hukuk-kutuphanesi` -> hukuk kitap corpus'u (doktrin, statik PDF)
+- NotebookLM -> uzman dis kaynak (avukatin sectigi notebook)
+- MemPalace `buro-hafizasi` -> buro ic deneyim (gecmis davalar, ajan diary, avukat tercihleri)
+- Google Drive -> kalici dosya deposu (ham dilekceler, resmi evrak)
 
 NotebookLM notebook listesi sabit degildir. Hangi notebook'un kullanilacagini
 avukat her davada belirtir. Bilinen notebook'lar su an: is hukuku, aile hukuku.
@@ -165,15 +172,19 @@ DIRECTOR AGENT
          `-- AJAN 4: Pazarlama Uzmani
 ```
 
-### AJAN 1: Usul Ajani
-Tetikleyici: Yeni dava parametreleri girildiginde.
-Gorev: Davanin usul iskeletini kurmak.
-Detay ve kurallar: `@ajanlar/usul-uzmani/SKILL.md`
-
-### AJAN 2: Arastirma Ajanlari
+### AJAN 2: Arastirma Ajanlari (ONCE CALISIR)
 Alt isciler: 2A (Vector RAG), 2B (Yargi), 2C (Mevzuat), 2D (NotebookLM/Drive)
 Tetikleyici: Director Agent kritik nokta belirledikten sonra.
 Detay ve kurallar: `@ajanlar/arastirmaci/SKILL.md`
+NotebookLM sorgu kurallari:
+- Her soruda "SADECE KAYNAKLARA GORE CEVAP VER, UYDURMA YAPMA" ibaresi ZORUNLU
+- Iteratif sorgulama: en az 6 soru (hukuki mesele irdeleme) + 4 perspektif sorusu
+  (davaci avukat, davali avukat, bilirkisi, hakim) = TOPLAM en az 10 sorgu
+
+### AJAN 1: Usul Ajani (ARASTIRMADAN SONRA CALISIR)
+Tetikleyici: Ajan 2 arastirmasi tamamlandiginda.
+Gorev: Davanin usul iskeletini kurmak (arastirma bulgulariyla zenginlestirilmis).
+Detay ve kurallar: `@ajanlar/usul-uzmani/SKILL.md`
 
 ### AJAN 3: Belge Yazari
 Tetikleyici: Usul + Arastirma ciktilari tamamlandiginda.
@@ -267,14 +278,15 @@ Sorumluluklari:
 
 Director Agent karar semasi:
 
-- sadece usul sorulmussa -> yalnizca AJAN 1
-- sadece kritik nokta arastirilacaksa -> yalnizca ilgili arastirma ajanlari
-- yeni dava geldiyse -> ADIM 0 + ADIM 0B + ADIM 0C + AJAN 1 + arastirma ajanlari
-- belge yazimi istendiyse -> once gerekli usul/esas ciktilari var mi kontrol et
-- savunma simulasyonu istendiyse -> SAVUNMA SIMULATORU
+- HER KOMUT geldiginde ONCE -> ADIM -1 (MemPalace Wake-up) calistirilir
+- sadece usul sorulmussa -> ADIM -1 + yalnizca AJAN 1
+- sadece kritik nokta arastirilacaksa -> ADIM -1 + ilgili arastirma ajanlari
+- yeni dava geldiyse -> ADIM -1 + ADIM 0 + ADIM 0B + ADIM 0C + arastirma ajanlari + AJAN 1 (sirayla)
+- belge yazimi istendiyse -> ADIM -1 + gerekli usul/esas ciktilari var mi kontrol et
+- savunma simulasyonu istendiyse -> ADIM -1 + SAVUNMA SIMULATORU
 - dilekce kalite gate'inde risk flag ciktiysa -> savunma simulasyonu oner
-- revize et komutu geldiyse -> REVIZYON AJANI
-- blog istendiyse -> AJAN 4
+- revize et komutu geldiyse -> ADIM -1 + REVIZYON AJANI
+- blog istendiyse -> ADIM -1 + AJAN 4
 
 ## Kalite Gate
 
@@ -300,6 +312,99 @@ Ajan 3 cikti uretti:
 
 Hicbir ajan ciktisi "final" olarak isaretlenmez.
 Tum ciktilar "TASLAK" ibaresiyle kaydedilir.
+
+---
+
+## ADIM -1: MemPalace Wake-up (Buro Hafizasi - Her Komutta Zorunlu)
+
+Bu adim Director Agent'in HER komut isleminde ilk yaptigi sey olmalidir.
+Hicbir ajan calistirilmadan once buro ic deneyim hafizasi sorgulanir.
+
+Amac:
+- Ayni kritik noktayi sifirdan uretmek yerine "daha once gordum" eslesmesi sun.
+- Avukat tercihlerini her seferinde tekrar sormak yerine bellek kullan.
+- Ajan diary'lerinden onceki ogrenmeleri context'e enjekte et.
+
+Cagri sirasi:
+
+```text
+1. mempalace_status
+   -> Toplam drawer sayisi, son guncellenen wing'ler, palace sagligi
+   -> ~170 token L0+L1 context
+
+2. mempalace_search "{komut metni veya kritik nokta}" --wing wing_buro_aykut
+   -> Avukat tercihleri (ton, uslup, kvkk, is akisi)
+   -> Ilk 3-5 sonucu context'e dus
+
+3. Tetik turunu belirle:
+   A) "yeni dava: ..." -> tam dava akisi
+   B) "arastir: ..." -> arastirma-talebi akisi
+   C) "blog yap: ..." -> pazarlama akisi (sadece wing_buro_aykut sorgu)
+   D) digerleri -> ilgili wing'i belirle
+
+4. Wing aramasi (her iki ana akis icin):
+   mempalace_search "{kritik nokta}" --wing wing_{dava_turu}
+   -> hall_argumanlar -> olgun argumanlar (dilekceye gidecek)
+   -> hall_arastirma_bulgulari -> ham bulgular (arastirma ajanlarina baslangic)
+   -> hall_kararlar -> bilinen Yargitay/HGK kararlari
+   -> hall_usul_tuzaklari -> usul riskleri
+   -> hall_savunma_kaliplari -> karsi taraftan beklenecek itirazlar
+
+5. SADECE tam dava akisinda ek sorgu:
+   mempalace_search "{kritik nokta}" --wing wing_ajan_davaci
+   mempalace_search "{kritik nokta}" --wing wing_ajan_davali
+   mempalace_search "{kritik nokta}" --wing wing_ajan_bilirkisi
+   mempalace_search "{kritik nokta}" --wing wing_ajan_hakim
+   mempalace_search "{kritik nokta}" --wing wing_ajan_sentez
+   -> Her ajanin diary'si -> onceki ogrenmeler
+
+6. SADECE tam dava akisinda, eger karsi taraf/hakim biliniyorsa:
+   mempalace_search "{kritik nokta}" --wing wing_hakim_{soyad}
+   mempalace_search "{kritik nokta}" --wing wing_avukat_{soyad}
+```
+
+Cikti formati (sonuc Director Agent context'ine girer):
+
+```text
+## MemPalace Wake-up Sonuclari
+
+### Avukat Tercihleri (wing_buro_aykut)
+- [Drawer 1 ozet, distance score]
+- [Drawer 2 ozet, distance score]
+
+### Konu Hafizasi (wing_{dava_turu})
+- hall_argumanlar: N drawer (en alakali 3 tanesi)
+- hall_arastirma_bulgulari: M drawer (en alakali 3 tanesi)
+- hall_kararlar: K drawer
+- hall_usul_tuzaklari: L drawer
+
+### Ajan Diary (sadece tam dava)
+- wing_ajan_davaci: X drawer
+- wing_ajan_davali: Y drawer
+...
+
+### MEMORY MATCH BULDUM (varsa)
+"Bu kritik nokta daha once {tarih} {dava-id}'de calisilmis.
+O zaman su argumanlar isi tutmus: ...
+Avukat su tonu tercih etmis: ...
+Su usul tuzagi cikmis: ..."
+```
+
+Onemli kurallar:
+
+- Bulunan drawer'lar sadece OKUNUR, bu adimda yazma yapilmaz.
+- "Daha once gordum" eslesmesi varsa bunu RAPORDA belirt, sifirdan uretme.
+- MemPalace MCP erisilemiyorsa: Director Agent uyari verir, adimi atlar, ama
+  diger ajanlara "MEMPALACE BAGLI DEGIL" notu iletilir. Sistem yine de calisir.
+- Arastirma-talebi akisinda aktor wing'leri (wing_hakim_*, wing_avukat_*)
+  SORGULANMAZ. Hakim ve karsi taraf bilinmeyen oldugundan anlamsizdir.
+- Drawer eslesmeleri "TASLAK" olarak isaretlenir, hicbiri otomatik kabul
+  edilen final cikti degildir. Avukat son kontrolu yapar.
+
+ADIM -1 tamamlandiktan sonra normal akisa devam edilir:
+- yeni dava ise -> ADIM 0
+- arastirma ise -> dogrudan arastirma ajanlari
+- vb.
 
 ---
 
@@ -362,7 +467,7 @@ Kaynak sorgulama notu:
 
 ## ADIM 0B: Kaynak Sorgulama (Zorunlu - Her Davada)
 
-Drive klasoru olustuktan sonra, Ajan 1 ve Ajan 2 baslamadan once
+Drive klasoru olustuktan sonra, arastirma ajanlari baslamadan once
 avukata su soruyu sor. Tahmin etme, varsayim yapma, direkt sor:
 
 ```text
@@ -379,7 +484,7 @@ Asagidakilerden hangisi hazir ve bu dava icin kullanalim?
 Birden fazla secebilirsin."
 ```
 
-Avukatin cevabini bekle. Cevap gelmeden Ajan 1 ve Ajan 2'yi baslatma.
+Avukatin cevabini bekle. Cevap gelmeden arastirma ajanlarini baslatma.
 
 ### Kaynak Cevabina Gore Davranis
 
@@ -425,6 +530,15 @@ Director Agent, kaynak sorgulama bittikten sonra avukata sorar:
 
 "Detayli briefing yapmak ister misin?
 Bu, arastirma ve dilekce kalitesini onemli olcude artirir."
+
+ONEMLI - MemPalace on-doldurma:
+ADIM -1 sirasinda wing_buro_aykut'tan cekilen tercihler varsa, briefing
+formundaki TON TERCIHI ve MUVEKKIL RISK TOLERANSI alanlari ONCEDEN doldurulur.
+Avukat sadece degisiklik girer, sifirdan doldurmaz.
+
+Ornek:
+"Wing_buro_aykut'tan cekildi: Olculu profesyonel ton, slogan tarzi yasak.
+Bu davada da bu ton korunsun mu? (E/H ya da degisiklik gir)"
 
 EVET derse asagidaki sorulari sor. Her soru opsiyoneldir.
 
@@ -479,6 +593,56 @@ Bu durumda Director Agent sunlardan birini secebilir:
 - arastirma raporunu tazele
 - usul risk raporunu guncelle
 - pazarlama icin anonim icgoru kuyruguna gonder
+
+---
+
+## MemPalace Diary Write Politikasi (Tum Ajanlar)
+
+Her ajan isini bitirdiginde MemPalace'e diary yazimi yapar.
+Bu, sistemin sessions arasi ogrenmesini saglar.
+
+### Genel Diary Write Kurali
+
+Her ajan SKILL.md'sinde su iki adim ZORUNLUDUR:
+
+1. Ise baslarken (Hafiza Kontrolu):
+   - mempalace_search ile gecmis ogrenmeleri sorgula
+   - Bulunursa raporda "MEMORY MATCH: ..." notu kullanilir
+   - Sifirdan uretme, once gecmise bak
+
+2. Is bittiginde (Diary Write):
+   - mempalace_diary_write "{ajan_adi}" "{en onemli 3 ogrenme}"
+   - Argumand kullanilmissa: mempalace_add_drawer ile kalici drawer
+
+### Akis Bazli Yazim Izinleri
+
+| Akis | Yazilabilir Wing'ler |
+|---|---|
+| Tam dava (yeni dava) | Tum wing'ler (dava turu + ajan + buro + aktor) |
+| Arastirma-talebi (arastir) | wing_{dava_turu}/hall_arastirma_bulgulari + wing_buro_aykut + arastirmaci/usul-uzmani diary'leri |
+| Belge yazimi | wing_ajan_dilekce_yazari/hall_diary |
+| Blog/pazarlama | wing_buro_aykut (avukat blog tercih notlari) |
+
+ONEMLI: Arastirma-talebi akisinda hakim/karsi taraf wing'lerine yazim YOKTUR.
+Cunku hakim ve karsi taraf belli degildir, anlamsiz veri olusur.
+
+### Promotion Kurali (Otomatik Olgun-Argumana Cevirme)
+
+Bir drawer hall_arastirma_bulgulari'nda 2+ kez ayni kritik nokta icin
+kullanildiginda VEYA bir tam davada arguman olarak dogrulandiginda:
+-> Director Agent otomatik olarak hall_argumanlar'a kopyalar.
+
+Bu, dusuk olgunluktan yuksek olgunluga gecis mekanizmasidir.
+
+### KVKK Yazim Kurali
+
+Drawer'a yazilirken her zaman:
+- TC kimlik -> [TC_NO]
+- Gercek muvekkil ad-soyad -> [Muvekkil] veya rumuz
+- IBAN -> [IBAN]
+- Telefon -> [TEL]
+
+Yargitay/HGK karar metnindeki kisi adlari aynen kalir (kamuya ait karardir).
 
 ---
 
