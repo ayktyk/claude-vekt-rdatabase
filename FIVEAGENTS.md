@@ -338,21 +338,41 @@ BASLATICI: Director Agent
   |        Sorgu: kritik noktanin semantik karsiligi
   |        Cikti: doktrin + emsal stratejisi + benzerlik skoru
   |
-  +---> [2B] YARGI CLI
+  +---> [2B] YARGI CLI  (DERIN ITERATIF PROTOKOL - ZORUNLU)
   |        Araclar: yargi bedesten search/doc
-  |        Sorgu: kritik nokta + daire filtreli arama
-  |        - Yargitay kararlari (son 2 yil)
-  |        - HGK kararlari
-  |        - IBK kararlari
-  |        Cikti: kunye + ozet + tam metin
+  |        Mod: Her zaman derin, tek-shot yasak, Max Effort thinking
+  |        Minimum: 15 sorgu / 6 faz
   |
-  +---> [2C] MEVZUAT CLI
-  |        Araclar: mevzuat search/doc/article/tree
-  |        Sorgu: ilgili kanun maddeleri
-  |        - Tam metin cekimi
-  |        - Madde degisiklik kontrolu
-  |        - Gerekce cekimi
-  |        Cikti: mevzuat tam metni + guncellik notu
+  |        Faz 1: Terim uretimi (5-7 alternatif + daire tespiti)
+  |        Faz 2: Genis tarama (ana terim + HGK + IBK + alternatif)
+  |        Faz 3: Daraltilmis arama (tarih + daire filtreleri)
+  |        Faz 4: TEMPORAL EVOLUTION - Son 5 Yil Seyri (ZORUNLU)
+  |               - 2021, 2022, 2023, 2024, 2025 yil-yil ayri sorgu
+  |               - HGK yil-araligi ek sorgulari
+  |               - Hakim gorus kirilimi + kirillma noktasi tespiti
+  |        Faz 5: Celiski + bozma + karsit arguman taramasi (min 2)
+  |        Faz 6: Tam metin okuma (min 5 karar)
+  |        Gap Check: HGK var mi, son 12 ay karar var mi,
+  |                   celiski var mi, temporal seyir tamamlandi mi
+  |
+  |        Cikti: kunye + ozet + tam metin + SON 5 YIL SEYRI ANALIZI
+  |              (trend, kirillma noktasi, olu kararlar, bugunku
+  |               yerlesik uygulama, dilekcede kullanilacak kararlar)
+  |
+  +---> [2C] MEVZUAT CLI  (DERIN ITERATIF PROTOKOL - ZORUNLU)
+  |        Araclar: mevzuat search/doc/article/tree/gerekce
+  |        Mod: Her zaman derin, tek-shot yasak, Max Effort thinking
+  |        Minimum: 8 sorgu / 4 faz
+  |
+  |        Faz 1: Ana kanun - search + tree + article
+  |        Faz 2: Degisiklik gecmisi - gerekce + history
+  |               (olay tarihine gore dogru versiyon tespiti)
+  |        Faz 3: Ilgili madde zinciri - onceki/sonraki madde +
+  |               atif yapilan maddeler
+  |        Faz 4: Alt mevzuat - yonetmelik + teblig + genelge
+  |
+  |        Cikti: mevzuat tam metni + gerekce + degisiklik
+  |               tarihcesi + yonetmelik/teblig + atif zinciri
   |
   +---> [2D] NOTEBOOKLM
            Araclar: NotebookLM MCP
@@ -388,9 +408,10 @@ BASLATICI: Director Agent
   `-- 02-Arastirma/arastirma-raporu.md
       Icerik:
       - Kullanilan kaynaklar (her kolun listesi)
-      - Ilgili mevzuat
+      - Ilgili mevzuat (+ gerekce + degisiklik gecmisi)
       - Guncel Yargitay kararlari
       - HGK / IBK kararlari
+      - SON 5 YIL ICTIHAT SEYRI ANALIZI (2B Faz 4 ciktisi)
       - Vektor DB bulgulari
       - NotebookLM iteratif bulgu ozeti
       - Celiskili noktalar

@@ -111,6 +111,25 @@ Sistemin iki bilgi katmani vardir. Her arac yalnizca kendi katmanina aittir.
 Bu katman yalnizca avukatin isaret ettigi kritik nokta icin calistirilir.
 Genis, konusuz arastirma yapma.
 
+**ONEMLI - Her Zaman Derin Mod (v2.0):** Yargi CLI ve Mevzuat CLI her
+sorguda **iteratif derin protokol** ile calisir. Hibrit mod yoktur,
+tek-shot sorgu yasaktir. Protokol hem `arastir:` hem `yeni dava`
+komutlarinda her zaman aktiftir.
+
+Minimum sorgu kurali:
+- **Yargi CLI:** min 15 sorgu. Icerisinde 5 yil-bazli temporal evolution
+  (2021-2025 yil-yil), min 2 HGK sorgusu, min 2 celiski/bozma taramasi,
+  min 5 karar tam metin okuma zorunlu.
+- **Mevzuat CLI:** min 8 sorgu. Icerisinde gerekce cekimi, madde degisiklik
+  tarihcesi, min 2 yonetmelik/teblig, atif yapilan diger maddeler zorunlu.
+
+Bu protokol **Max Effort thinking** ile calistirilir. Her iterasyon
+arasinda ajan karar noktalarinda durup muhakeme eder (hangi terim iyi
+sonuc verdi, bir sonraki sorguyu nereye daraltmaliyim, temporal kirillma
+noktasi hangi HGK karari ile olustu vs.).
+
+Detay: `@ajanlar/arastirmaci/SKILL.md` -> "Derin Arama Protokolu" bolumu.
+
 ### Dahili Katman - Buronun kendi bilgisi
 
 | Arac | Gorev |
