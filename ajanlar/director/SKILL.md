@@ -72,32 +72,12 @@ Opsiyonel ama etkili girdiler:
 
 ## KVKK Seviye 2 Maskeleme Kontrolu (ZORUNLU - Her Yeni Dava)
 
-Avukat `yeni dava: ...` komutu verdiginde Director ILK once sunlari kontrol eder:
+`yeni dava` komutunda 3 kontrol (ADIM -1 ile paralel):
+1. Komut maskeli mi? (`[MUVEKKIL_1]` token kullanildi mi) — degilse UYARI ver, `python scripts/maske.py add ...` hatirlat
+2. Dava-ID var mi? (`xxx-yyy-2026-nnn` formati) — yoksa sor
+3. `config/masks/<dava-id>.json` var mi? — yoksa avukati maske.py add'e yonlendir
 
-1. **Komut maskeli mi?** Avukat `[MUVEKKIL_1]`, `[KARSI_TARAF_1]` gibi token'lar
-   kullaniyor mu? Ham muvekkil adi, TC veya adres komutta var mi?
-   - **Var ise** (ham PII gorulduyse): Director UYARI verir:
-     ```
-     UYARI - KVKK Seviye 2 ihlal tespiti
-     Komutunuzda ham muvekkil verisi gozukuyor (TC / ad / adres).
-     Lutfen once 'scripts/maske.py' ile maskeleyip tekrar deneyin.
-     Ornek:
-       python scripts/maske.py --dict <dava-id> add --muvekkil "Ad" ...
-     Sonra komutu MASKELI sekilde girin.
-     ```
-   - Avukat "devam et yine de" derse: Director yine calistirir ama session
-     sonunda MemPalace diary'ye `kvkk_ihlali: true` notu dusurur.
-
-2. **Dava-ID belirtildi mi?** `dava-id: xxx-yyy-2026-nnn` formatinda olmali.
-   - Yoksa Director sorar: "Bu dava icin dava-ID nedir? (dict dosya adi icin gerek)"
-
-3. **Dict dosyasi var mi?** `config/masks/<dava-id>.json` mevcut mu?
-   - Yoksa Director hatirlatir: "Dict dosyasi bulunamadi. Once `maske.py add` ile
-     muvekkil/karsi taraf/adres ekleyin, sonra komutu tekrarlayin."
-
-Bu kontrol ADIM -1 (MemPalace Wake-up) ile paralel yapilir.
-
-Detay: `MASKELEME-KILAVUZU.md`, `FIVEAGENTS.md` § KVKK Seviye 2 Maskeleme bolumu.
+Detay protokol: `MASKELEME-KILAVUZU.md`, `FIVEAGENTS.md` § KVKK Seviye 2.
 
 ## Hafiza Kontrolu (ZORUNLU - Her Komutta)
 
@@ -139,35 +119,15 @@ Cikti formati: Tum sonuclar "MemPalace Wake-up Sonuclari" basligi altinda
 Director Agent context'ine girer. Avukat Tercihleri + Konu Hafizasi +
 Ajan Diary (sadece tam dava) + MEMORY MATCH (varsa) bolumleri olusturulur.
 
-### QMD Wake-up (YAPISIZ Hafiza — MemPalace Sonrasi)
+### QMD Wake-up (Opsiyonel — MemPalace Sonrasi)
 
-MemPalace sorgulari tamamlandiktan sonra QMD ile proje genelinde ek arama:
+MemPalace bittikten sonra: `qmd search "{komut}" --collection proje-bilgi` ile tamamlayici arama.
+Compaction sonrasi devam icin: `qmd search "checkpoint" --collection sessions`.
+QMD erisilemiyorsa atla. MemPalace ZORUNLU, QMD opsiyonel.
 
-```text
-qmd search "{komut/kritik nokta}" --collection proje-bilgi
-```
-
-QMD sonuclari MemPalace sonuclariyla BIRLESTIRILIR:
-- MemPalace match → ONCELIKLI (yapilandirilmis, olgunluk dogrulanmis)
-- QMD match → TAMAMLAYICI (proje genelinde beklenmedik baglanti)
-- Her iki kaynak "MemPalace + QMD Wake-up Sonuclari" basliginda raporlanir
-
-Session kesilmisse (compaction sonrasi devam):
-```text
-qmd search "checkpoint" --collection sessions
-```
-→ En son checkpoint dosyasindan kalinan yeri bul, ajanlara ilet.
-
-QMD erisilemiyorsa: Adimi atla, sadece MemPalace ile devam et.
-
-Onemli kurallar:
-- Drawer'lar sadece OKUNUR, bu adimda yazma yapilmaz
-- Eslesmeler varsa RAPORDA belirt, sifirdan uretme
-- MemPalace MCP erisilemiyorsa: uyari ver, adimi atla, ajanlara
-  "MEMPALACE BAGLI DEGIL" notu ilet
-- QMD erisilemiyorsa: uyari ver, adimi atla (QMD opsiyonel, MemPalace zorunlu)
-- Arastirma-talebi akisinda aktor wing'leri SORGULANMAZ (hakim/karsi taraf belirsiz)
-- Drawer eslesmeleri "TASLAK" isaretlenir, otomatik kabul edilmez
+Wake-up kurallari: drawer'lar sadece OKUNUR (yazma yok), eslesmeler RAPORDA belirt,
+MCP fail uyarisi ajanlara iletilir, arastirma-talebi akisinda aktor wing'leri sorgulanmaz,
+drawer'lar otomatik kabul edilmez (TASLAK isareti).
 
 ## Yapma Listesi
 
@@ -180,52 +140,26 @@ Onemli kurallar:
 
 ## Gorev
 
-### ADIM 0: Dava Hafizasini Ac
+### ADIM 0 / 0B / 0C: Drive + Kaynak + Briefing
 
-Yeni dava komutu aldiginda Google Drive MCP ile dava klasoru kur:
-
+**ADIM 0 — Drive klasoru:**
 - Yeni dava: `G:\Drive'im\Hukuk Burosu\Aktif Davalar\[YIL]-[SIRA] [Muvekkil] - [Tur]\`
-  Alt klasorler: 01-Usul, 02-Arastirma, 03-Sentez-ve-Dilekce, 04-Muvekkil-Belgeleri, 05-Durusma-Notlari
-- Sadece arastirma: `G:\Drive'im\Hukuk Burosu\Bekleyen Davalar\[YIL]-[SIRA] [Konu] - Arastirma\`
-  Alt klasorler: 00-Talep.md, 01-Arastirma, 02-Notlar
+  + 5 alt klasor (01-Usul, 02-Arastirma, 03-Sentez-ve-Dilekce, 04-Muvekkil-Belgeleri, 05-Durusma-Notlari)
+- Sadece arastirma: `Bekleyen Davalar\[YIL]-[SIRA] [Konu] - Arastirma\` + 2 alt (01-Arastirma, 02-Notlar)
 
-Klasoru olusturduktan sonra Drive linkini ver.
+**ADIM 0B — Kaynak sorgu (ZORUNLU, avukat cevabini BEKLE):**
+NotebookLM / Drive / Masaustu / Claude Projects / Yok / Henuz hazirlamadim.
+Cevaba gore: NotebookLM secilirse Ajan 2D notebook'u sorgular; Drive secilirse
+2D Drive klasorunu okur; "Yok" ise yalnizca Yargi+Mevzuat ile devam, rapora
+"Dahili kaynak kullanilmadi" notu dus.
 
-### ADIM 0B: Kaynak Sorgulama (ZORUNLU - Her Davada)
-
-Drive klasoru olustuktan sonra avukata kaynak formu sor:
-NotebookLM / Google Drive / Masaustu dosya / Claude Projects / Hazir kaynak yok /
-Kaynagi henuz hazirlamadim. Birden fazla secilebilir.
-
-Avukatin cevabini BEKLE. Cevap gelmeden arastirma ajanlarini baslatma.
-
-| Cevap | Aksiyon |
-|---|---|
-| NotebookLM secildi | Ajan 2, belirtilen notebook'u sorgular |
-| Google Drive secildi | Ajan 2, Drive MCP ile belirtilen klasoru okur |
-| Masaustu / yerel dosya | "Yukler misin veya icerigini yapistirir misin?" de |
-| Claude Projects secildi | Avukattan proje icerigi yapistirmasini iste |
-| Hazir kaynak yok | Ajan 2 yalnizca Yargi + Mevzuat CLI. Rapora "Dahili kaynak kullanilmadi" notu |
-| Henuz hazirlamadim | "Kaynagi hazirlayalim mi, kaynaksiz devam mi?" sor, bekle |
-
-### ADIM 0C: Advanced Briefing (Opsiyonel ama Tavsiye Edilen)
-
-Kaynak sorgulama bittikten sonra: "Detayli briefing yapmak ister misin?" sor.
-
-MemPalace on-doldurma: wing_buro_aykut'tan cekilen tercihler varsa TON TERCIHI
-ve MUVEKKIL RISK TOLERANSI ONCEDEN doldurulur. Avukat sadece degisiklik girer.
-
-EVET derse 8 soruyu sor (her biri opsiyonel): DAVA TEORISI, KRITIK RISK,
-KARSI TARAF BEKLENTISI, MUVEKKIL RISK TOLERANSI (Agresif/Dengeli/Muhafazakar),
-TON TERCIHI (Sert/Olculu/Uzlasma), OLMAZSA OLMAZ TALEPLER, EKSIK BILGI, SOMUT VERILER.
-
-Kayit: `G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\00-Briefing.md`
-Sablon: `@sablonlar/advanced-briefing-template.md`
-
-Bu veri tum ajanlara girdi olarak iletilir:
-- Ajan 1: risk ve ton -> usul raporu
-- Ajan 2: karsi taraf beklentisi -> arama odagi
-- Ajan 3: ton tercihi + olmazsa olmaz talepler -> dilekce
+**ADIM 0C — Advanced Briefing (opsiyonel):**
+"Detayli briefing yapmak ister misin?" sor. EVET ise 8 opsiyonel soru:
+DAVA TEORISI / KRITIK RISK / KARSI TARAF BEKLENTISI / RISK TOLERANSI
+(Agresif/Dengeli/Muhafazakar) / TON (Sert/Olculu/Uzlasma) / OLMAZSA OLMAZ TALEPLER /
+EKSIK BILGI / SOMUT VERILER. wing_buro_aykut'tan ton + risk on-doldurulur.
+Kayit `00-Briefing.md`, sablon `@sablonlar/advanced-briefing-template.md`.
+Veri Ajan 1 (usul ton/risk), Ajan 2 (arama odagi), Ajan 3 (ton + talepler) icin context.
 
 ### Ajan Calistirma Sirasi
 
@@ -253,84 +187,34 @@ Director Agent dogrudan hukuki rapor URETMEZ. Ciktisi uc sekildir:
 
 ### Kalite Gate Matrisi
 
-#### Gate 1: Post-Arastirma (Ajan 2 ciktisi)
+#### Gate 1: Post-Arastirma (Ajan 2)
+**PASS:** >=15 Yargi + >=8 Mevzuat sorgu, >=2 HGK/IBK, >=5 tam metin, 5-yil temporal,
+>=2 celiski/bozma, 0 dogrulanmamis atif, GUVEN NOTU mevcut.
+**FAIL:** Ajan 2'ye spesifik eksik talimati. Risk flag varsa -> avukata bildir.
 
-| Kriter | PASS kosulu |
-|---|---|
-| Toplam sorgu | >= 15 Yargi + >= 8 Mevzuat |
-| HGK/IBK sorgusu | >= 2 |
-| Tam metin okunan karar | >= 5 |
-| Temporal evolution (5 yil) | Tamamlandi |
-| Celiski/bozma taramasi | >= 2 sorgu |
-| Dogrulanmamis atif | 0 (hepsi "dogrulanmasi gerekir" notlu olmali) |
-| GUVEN NOTU | Mevcut |
+#### Gate 2: Post-Usul (Ajan 1)
+**PASS:** Gorevli/yetkili mahkeme + kanun maddesi, yetkili adliye eslemesi
+(HSK/adalet.gov.tr URL+tarih VEYA `RISK FLAG: Yetkili Adliye dogrulanamadi`),
+dava sarti kontrol, zamanasimi/hak dusurucu tarihli, harc guncellik notu,
+eksik evrak analizi, >=15 checklist (iscilik), GUVEN NOTU.
+**FAIL:** Ajan 1'e spesifik eksik. Yetkili adliye RISK FLAG'li -> avukata sor, Ajan 3'e gonderme.
 
-PASS -> Ajan 1'e ilet. FAIL -> Ajan 2'ye spesifik eksik talimati, tekrar calistir.
-Risk flag varsa -> avukata bildir, otomatik iletme.
+#### Gate 3: Post-Dilekce (Ajan 3)
+**PASS:** Utandirma testi (muvekkil karsisi utanma) HAYIR, >=2 Yargitay atif,
+hesaplama-usul tutarliligi, zamanasimi savunma pozisyonu, arabuluculuk tutanagi atfi,
+0 dogrulanmamis atif, "Ozetle/Sonuc olarak" YOK, GUVEN NOTU.
+**FAIL:** Ajan 3'e spesifik sorun. Risk flag -> savunma simulasyonu oner.
 
-#### Gate 2: Post-Usul (Ajan 1 ciktisi)
+#### Gate 4: Post-Nihai Dilekce (Revizyon Ajani v2 + UDF)
+v2/istinaf/temyiz icin ek kapi (v1'de calismaz). Format avukat onayli (Selin Uyar 2026-003, 2026-04-22).
+**PASS:** `dilekce-v2.{md,docx,udf}` Drive'da mevcut, UDF >1KB, zipfile valid,
+format_id="1.7", leftMargin="70.87", content.xml CDATA YAML-free, en az 1
+Alignment="1" (baslik) + Numbered="true" + bold/underline (section).
+Uretim: `python scripts/md_to_udf.py "<drive-yolu>/dilekce-v2.md"`
+**PASS aksiyonu:** "NIHAI paket hazir (MD+DOCX+UDF), UYAP oncesi `maske.py unmask` calistir."
+**FAIL:** Revizyon Ajani UDF tekrar uretir; sustained failure -> avukata manuel UYAP Editor yolu.
 
-| Kriter | PASS kosulu |
-|---|---|
-| Gorevli/yetkili mahkeme | Kanun maddesi yazili |
-| Yetkili adliye eslemesi | En az 1 resmi kaynak (HSK / adalet.gov.tr / adliye sitesi) URL+tarih ile rapora yazili VEYA `RISK FLAG: Yetkili Adliye dogrulanamadi` etiketi mevcut |
-| Dava sarti (arabuluculuk vb.) | Kontrol edildi |
-| Zamanasimi / hak dusurucu sureler | Tarihle birlikte |
-| Harc tahmini | Guncellik notu mevcut |
-| Eksik evrak analizi | Dava turune uygun |
-| Checklist madde sayisi | >= 15 (iscilik icin) |
-| GUVEN NOTU | Mevcut |
-
-PASS -> Ajan 3'e ilet. FAIL -> Ajan 1'e spesifik eksik talimati.
-Yetkili adliye RISK FLAG'li ise avukata soru olarak ilet, otomatik
-Ajan 3'e gonderme.
-
-#### Gate 3: Post-Dilekce (Ajan 3 ciktisi)
-
-| Kriter | PASS kosulu |
-|---|---|
-| Utandirma testi | "Muvekkilin karsisinda utanir miyim?" HAYIR |
-| Yargitay atif sayisi | >= 2 |
-| Hesaplama tutarliligi | Usul raporuyla eslesme |
-| Zamanasimi savunmasi | Pozisyon alinmis |
-| Arabuluculuk tutanagi atfi | Mevcut |
-| Dogrulanmamis atif | 0 |
-| AI dili kontrolu | "Ozetle", "Sonuc olarak" YOK |
-| GUVEN NOTU | Mevcut |
-
-PASS -> Avukata "taslak hazir". FAIL -> Ajan 3'e spesifik sorun.
-Risk flag'i varsa -> savunma simulasyonu oner.
-
-#### Gate 4: Post-Nihai Dilekce (Revizyon Ajani v2 ciktisi + UDF)
-
-v2 NIHAI / istinaf / temyiz dilekceleri icin ek kapi. v1 icin
-calismaz. Format avukat onayli (Selin Uyar 2026-003, 2026-04-22).
-
-| Kriter | PASS kosulu |
-|---|---|
-| MD cikti | `dilekce-v2.md` Drive'da mevcut |
-| DOCX cikti | `dilekce-v2.docx` Drive'da mevcut |
-| UDF cikti | `dilekce-v2.udf` Drive'da mevcut |
-| UDF dosya boyutu | > 1 KB |
-| UDF ZIP gecerliligi | `zipfile.is_zipfile` True |
-| UDF format_id | `format_id="1.7"` (2.udf referansiyla uyumlu) |
-| UDF kenar boslugu | `leftMargin="70.87"` (dilekce standardi, ~2.5 cm) |
-| UDF icerik | `content.xml` mevcut, CDATA icinde YAML frontmatter YOK |
-| UDF yapisal zenginlik | En az 1 `Alignment="1"` (baslik) + `Numbered="true"` (numarali talep) + `bold="true" underline="true"` (section heading) elemani |
-
-Uretim komutu:
-```bash
-python scripts/md_to_udf.py "<drive-yolu>/dilekce-v2.md"
-```
-
-PASS -> Avukata "NIHAI paket hazir (MD+DOCX+UDF), UYAP yuklemesi
-oncesi `maske.py unmask` ile gercek veriye cevirin."
-FAIL -> Revizyon Ajani'na UDF uretim hatasi bildirilir; Ajan
-scripts/md_to_udf.py'yi tekrar calistirir. Sustained failure ->
-avukata manuel donusum yolunu hatirlat (UYAP Editor ile DOCX->UDF).
-
-Hicbir ajan ciktisi "final" olarak isaretlenmez.
-Tum ciktilar "TASLAK" ibaresiyle kaydedilir.
+Tum ciktilar "TASLAK" — hicbiri "final" isaretlenmez.
 
 ## Kalite Kontrol
 
@@ -380,39 +264,19 @@ Su durumlarda avukata donulmeli, ajan hatti otomatik ilerletilmemeli:
 
 ## Diary Write (ZORUNLU - Is Bittiginde)
 
-### 1. Ajan Diary
+**1. Ajan Diary:** Her orkestrasyon sonu `mempalace_diary_write agent_name=director`
+ile 3 not: (1) komut tipi, (2) Gate 1-4 PASS/FAIL sonuclari, (3) en onemli ogrenim.
 
-Her orkestrasyon tamamlandiginda (yeni dava, arastirma-talebi, vb.)
-MemPalace'e diary yaz:
+**2. Promotion:** `hall_arastirma_bulgulari`'nda 2+ kez ayni kritik nokta veya
+tam davada arguman olarak dogrulanan drawer -> `hall_argumanlar`'a promote
+(`mempalace_add_drawer`, kaynak silinmez).
 
-```text
-mempalace_diary_write
-  agent_name: "director"
-  content: "Bu orkestrasyon hakkinda 3 onemli not:
-            1) Komut tipi: {yeni dava / arastirma / dilekce / vb.}
-            2) Kalite gate sonuclari: {Gate 1: PASS/FAIL, Gate 2: PASS/FAIL, ...}
-            3) Ogrenim: {en onemli gozlem - ornek: bu dava turunde
-               Ajan 2 ilk seferde HGK bulamadi, 2. denemede buldu}"
-```
+**Yazim izinleri:** Tam dava -> tum wing'ler. Arastirma-talebi ->
+`wing_{dava_turu}/hall_arastirma_bulgulari` + `wing_buro_aykut` + ajan diary.
+Belge yazimi -> `wing_ajan_dilekce_yazari/hall_diary`. Blog -> `wing_buro_aykut`.
 
-### 2. Promotion Karari (Otomatik Olgun-Argumana Cevirme)
-
-Bir drawer `hall_arastirma_bulgulari`'nda 2+ kez ayni kritik nokta icin
-kullanildiginda VEYA tam davada arguman olarak dogrulandiginda:
-Director Agent `hall_argumanlar`'a promote eder (mempalace_add_drawer ile
-yeni drawer yaratir, kaynak drawer silinmez).
-
-### Akis Bazli Yazim Izinleri
-
-| Akis | Yazilabilir Wing'ler |
-|---|---|
-| Tam dava | Tum wing'ler (dava turu + ajan + buro + aktor) |
-| Arastirma-talebi | wing_{dava_turu}/hall_arastirma_bulgulari + wing_buro_aykut + ajan diary |
-| Belge yazimi | wing_ajan_dilekce_yazari/hall_diary |
-| Blog/pazarlama | wing_buro_aykut |
-
-KVKK: TC -> [TC_NO], muvekkil adi -> [Muvekkil], IBAN -> [IBAN], telefon -> [TEL].
-Yargitay/HGK karar metnindeki kisi adlari aynen kalir (kamuya ait).
+**KVKK:** TC -> [TC_NO], muvekkil -> [Muvekkil], IBAN -> [IBAN], telefon -> [TEL].
+Yargitay/HGK karar metnindeki isimler aynen kalir (kamuya ait).
 
 ---
 
