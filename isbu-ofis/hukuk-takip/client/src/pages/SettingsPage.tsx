@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { useAuth } from '@/hooks/useAuth'
 import { api } from '@/lib/axios'
 import { toast } from 'sonner'
@@ -17,6 +17,9 @@ import {
   Eye,
   EyeOff,
   Trash2,
+  Calendar,
+  RefreshCw,
+  AlertCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -114,6 +117,76 @@ export default function SettingsPage() {
   const [geminiKey, setGeminiKey] = useState(() => localStorage.getItem('gemini_api_key') || '')
   const [showGeminiKey, setShowGeminiKey] = useState(false)
   const hasGeminiKey = !!localStorage.getItem('gemini_api_key')
+
+  // Google Calendar entegrasyonu
+  const { data: calendarStatus, isLoading: calendarLoading } = useQuery<{
+    configured: boolean
+    calendarLabel: string | null
+    reminderDays: number
+    timeZone: string
+    mode: string
+  }>({
+    queryKey: ['calendar', 'integration'],
+    queryFn: async () => (await api.get('/calendar/integration')).data,
+    staleTime: 60_000,
+  })
+
+  const [calendarDebug, setCalendarDebug] = useState<any | null>(null)
+
+  type ResyncFailure = {
+    type: 'task' | 'hearing'
+    id: string
+    title: string | null
+    date: string | null
+    error: string
+  }
+  const [resyncFailures, setResyncFailures] = useState<ResyncFailure[] | null>(null)
+
+  const resyncMutation = useMutation({
+    mutationFn: async () => (await api.post('/calendar/resync')).data,
+    onSuccess: (data) => {
+      if (data.failedCount > 0 && data.hint) {
+        toast.error(
+          `Senkronizasyon başarısız (${data.failedCount}). ${data.hint}`,
+          { duration: 15000 }
+        )
+      } else if (data.failedCount > 0) {
+        toast.error(
+          `${data.syncedHearings} duruşma, ${data.syncedTasks} görev senkronlandı. ${data.failedCount} başarısız — ilk hata: ${data.firstError || 'bilinmiyor'}`,
+          { duration: 15000 }
+        )
+      } else {
+        toast.success(
+          `Google Calendar güncellendi: ${data.syncedHearings} duruşma, ${data.syncedTasks} görev.`
+        )
+      }
+      // Başarısız kayıtların detayını UI'a taşı — tarih/başlık/hata görünür olsun
+      setResyncFailures(Array.isArray(data.failures) && data.failures.length > 0 ? data.failures : null)
+      // Her resync sonrası otomatik debug çalıştır ki hataları anında görsün
+      if (data.failedCount > 0) {
+        runDebug()
+      }
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.error || 'Senkronizasyon başarısız.')
+    },
+  })
+
+  const debugMutation = useMutation({
+    mutationFn: async () => (await api.get('/calendar/debug')).data,
+    onSuccess: (data) => {
+      setCalendarDebug(data)
+      if (data.ok) toast.success('Bağlantı testi başarılı.')
+      else toast.error('Bağlantı testi: bazı adımlar başarısız. Detaylar aşağıda.')
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.error || 'Test başarısız.')
+    },
+  })
+
+  function runDebug() {
+    debugMutation.mutate()
+  }
 
   // Şifre değiştirme
   const [currentPassword, setCurrentPassword] = useState('')
@@ -345,6 +418,202 @@ export default function SettingsPage() {
             Her istek sırasında anahtarınız sunucuya gönderilir ve işlem sonrası bellekten silinir.
             Sunucudaki .env dosyasında da varsayılan anahtar tanımlıysa, kişisel anahtarınız öncelikli kullanılır.
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Google Calendar Entegrasyonu */}
+      <Card>
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Calendar className="h-4 w-4 text-law-accent" />
+            Google Calendar Entegrasyonu
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Duruşma ve görev hatırlatmaları Google Calendar'a otomatik eklenir.
+            Süresi dolmadan {calendarStatus?.reminderDays ?? 3} gün önce popup + e-posta bildirimi gönderilir.
+          </p>
+
+          {calendarLoading ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" /> Durum kontrol ediliyor...
+            </div>
+          ) : calendarStatus?.configured ? (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between rounded-lg border bg-green-50 p-3 dark:bg-green-950/30">
+                <div className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  <div>
+                    <p className="text-sm font-medium text-green-800 dark:text-green-300">
+                      Bağlı
+                    </p>
+                    <p className="text-xs text-green-700/80 dark:text-green-400/80">
+                      Takvim: {calendarStatus.calendarLabel} · Saat dilimi: {calendarStatus.timeZone}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap justify-end gap-2">
+                <button
+                  onClick={runDebug}
+                  disabled={debugMutation.isPending}
+                  className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-50 cursor-pointer"
+                >
+                  {debugMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4" />
+                  )}
+                  Bağlantıyı Test Et
+                </button>
+                <button
+                  onClick={() => resyncMutation.mutate()}
+                  disabled={resyncMutation.isPending}
+                  className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-50 cursor-pointer"
+                >
+                  {resyncMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4" />
+                  )}
+                  Tüm Kayıtları Senkronize Et
+                </button>
+              </div>
+
+              {/* Debug sonucu — her adımın durumu */}
+              {calendarDebug && (
+                <div
+                  className={`rounded-lg border p-3 text-xs ${
+                    calendarDebug.ok
+                      ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/30'
+                      : 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/30'
+                  }`}
+                >
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="font-semibold">
+                      Bağlantı Testi:{' '}
+                      {calendarDebug.ok ? (
+                        <span className="text-green-700 dark:text-green-400">BAŞARILI</span>
+                      ) : (
+                        <span className="text-red-700 dark:text-red-400">BAŞARISIZ</span>
+                      )}
+                    </p>
+                    <button
+                      onClick={() => setCalendarDebug(null)}
+                      className="text-[11px] text-muted-foreground hover:underline"
+                    >
+                      Kapat
+                    </button>
+                  </div>
+                  <ol className="space-y-2">
+                    {(calendarDebug.steps || []).map((step: any, i: number) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <span
+                          className={`mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white ${
+                            step.ok ? 'bg-green-600' : 'bg-red-600'
+                          }`}
+                        >
+                          {step.ok ? '✓' : '✗'}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-mono text-[11px] font-semibold">
+                            {i + 1}. {step.name}
+                          </p>
+                          {step.detail && (
+                            <p className="mt-0.5 whitespace-pre-wrap break-all text-[11px] text-muted-foreground">
+                              {step.detail}
+                            </p>
+                          )}
+                          {step.error && (
+                            <p className="mt-0.5 whitespace-pre-wrap break-all rounded bg-red-100 p-1.5 font-mono text-[11px] text-red-800 dark:bg-red-900/40 dark:text-red-300">
+                              {step.error}
+                            </p>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+
+              {/* Başarısız senkron listesi — hangi kaydın neden düştüğü burada net */}
+              {resyncFailures && resyncFailures.length > 0 && (
+                <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs dark:border-red-800 dark:bg-red-950/30">
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="font-semibold text-red-800 dark:text-red-300">
+                      Senkronlanamayan Kayıtlar ({resyncFailures.length})
+                    </p>
+                    <button
+                      onClick={() => setResyncFailures(null)}
+                      className="text-[11px] text-muted-foreground hover:underline"
+                    >
+                      Kapat
+                    </button>
+                  </div>
+                  <div className="max-h-64 overflow-auto">
+                    <table className="w-full text-[11px]">
+                      <thead className="sticky top-0 bg-red-50 text-left text-red-800 dark:bg-red-950/30 dark:text-red-300">
+                        <tr>
+                          <th className="px-1 py-1 font-semibold">Tip</th>
+                          <th className="px-1 py-1 font-semibold">Başlık</th>
+                          <th className="px-1 py-1 font-semibold">Tarih</th>
+                          <th className="px-1 py-1 font-semibold">Hata</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {resyncFailures.map((f) => (
+                          <tr key={`${f.type}-${f.id}`} className="border-t border-red-200 align-top dark:border-red-800">
+                            <td className="px-1 py-1">{f.type === 'task' ? 'Görev' : 'Duruşma'}</td>
+                            <td className="px-1 py-1 break-words">{f.title || '(başlıksız)'}</td>
+                            <td className="px-1 py-1 whitespace-nowrap">
+                              {f.date
+                                ? new Date(f.date).toLocaleString('tr-TR', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })
+                                : '—'}
+                            </td>
+                            <td className="px-1 py-1 break-words font-mono text-[10px] text-red-700 dark:text-red-300">
+                              {f.error}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="mt-2 text-[11px] text-red-700 dark:text-red-300">
+                    İpucu: Listedeki kayıtların tarihlerini kontrol edin. Boş, çok eski (1970 öncesi) veya bozuk tarihler senkronlanamaz.
+                  </p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-950/30">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                <div className="text-xs text-amber-800 dark:text-amber-300">
+                  <p className="font-semibold">Entegrasyon yapılandırılmamış</p>
+                  <p className="mt-1">
+                    Etkinleştirmek için sunucuya aşağıdaki ortam değişkenlerini ekleyin:
+                  </p>
+                  <ul className="ml-4 mt-2 list-disc space-y-0.5 font-mono text-[11px]">
+                    <li>GOOGLE_CALENDAR_ID</li>
+                    <li>GOOGLE_SERVICE_ACCOUNT_EMAIL</li>
+                    <li>GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY</li>
+                  </ul>
+                  <p className="mt-2">
+                    Google Cloud Console → Service Account oluşturun, JSON key indirin,
+                    Calendar API etkinleştirin ve takvimi service account e-postasıyla paylaşın.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

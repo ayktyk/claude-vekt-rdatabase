@@ -1,31 +1,32 @@
 import { useNavigate } from 'react-router-dom'
-import { useDashboard } from '@/hooks/useDashboard'
 import {
-  formatDate,
+  AlertTriangle,
+  Banknote,
+  CalendarClock,
+  ChevronRight,
+  Clock3,
+  ListChecks,
+  MessageSquare,
+  PhoneCall,
+  Scale,
+  TrendingUp,
+  Users,
+} from 'lucide-react'
+import { useDashboard } from '@/hooks/useDashboard'
+import { useStatistics } from '@/hooks/useStatistics'
+import { useConsultationStats } from '@/hooks/useConsultations'
+import {
+  caseStatusLabels,
+  caseTypeLabels,
   formatCurrency,
+  formatDate,
   formatRelativeDate,
   isOverdue,
   taskPriorityLabels,
-  automationStatusLabels,
-  caseStatusLabels,
-  caseTypeLabels,
 } from '@/lib/utils'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import {
-  Scale,
-  TrendingUp,
-  TrendingDown,
-  ListChecks,
-  CalendarClock,
-  ChevronRight,
-  AlertTriangle,
-  Clock,
-  Bot,
-  Users,
-  Banknote,
-} from 'lucide-react'
 
 const priorityVariant: Record<string, 'danger' | 'warning' | 'secondary' | 'outline'> = {
   urgent: 'danger',
@@ -39,41 +40,62 @@ function StatCard({
   value,
   description,
   icon: Icon,
-  iconBg,
-  iconColor,
-  borderColor,
-  trend,
 }: {
   title: string
   value: string | number
   description: string
   icon: React.ElementType
-  iconBg: string
-  iconColor: string
-  borderColor?: string
-  trend?: 'up' | 'down' | 'neutral'
 }) {
-  const TrendIcon = trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : null
   return (
-    <Card className={`relative overflow-hidden card-hover ${borderColor ? `border-l-2 ${borderColor}` : ''}`}>
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between">
-          <div className="space-y-2">
-            <p className="text-[13px] font-medium text-muted-foreground">{title}</p>
-            <p className="text-3xl font-bold tracking-tight font-serif text-law-primary">{value}</p>
-            <p className="flex items-center gap-1 text-xs text-muted-foreground">
-              {TrendIcon && (
-                <TrendIcon className={`h-3 w-3 ${trend === 'up' ? 'text-emerald-500' : 'text-red-500'}`} />
-              )}
-              {description}
-            </p>
+    <Card className="overflow-hidden bg-card shadow-sm">
+      <CardContent className="p-3 sm:p-5">
+        <div className="flex items-start justify-between gap-2 sm:gap-4">
+          <div className="min-w-0 space-y-1 sm:space-y-2">
+            <p className="truncate text-[11px] font-medium text-muted-foreground sm:text-[13px]">{title}</p>
+            <p className="text-xl font-semibold tracking-tight text-law-primary sm:text-3xl">{value}</p>
+            <p className="hidden text-xs text-muted-foreground sm:block">{description}</p>
           </div>
-          <div className={`rounded-lg p-2.5 ${iconBg}`}>
-            <Icon className={`h-5 w-5 ${iconColor}`} />
+          <div className="flex-shrink-0 rounded-xl bg-law-accent/10 p-2 sm:rounded-2xl sm:p-3">
+            <Icon className="h-4 w-4 text-law-accent sm:h-5 sm:w-5" />
           </div>
         </div>
       </CardContent>
-      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-law-gold/50 via-law-gold/15 to-transparent" />
+    </Card>
+  )
+}
+
+function OutstandingStatCard({
+  total,
+  cases,
+  mediations,
+}: {
+  total: string
+  cases: string
+  mediations: string
+}) {
+  const totalNum = parseFloat(total || '0')
+  const caseNum = parseFloat(cases || '0')
+  const medNum = parseFloat(mediations || '0')
+  return (
+    <Card className="overflow-hidden bg-card shadow-sm ring-1 ring-[hsl(var(--gold))]/30">
+      <CardContent className="p-3 sm:p-5">
+        <div className="flex items-start justify-between gap-2 sm:gap-4">
+          <div className="min-w-0 space-y-1 sm:space-y-2">
+            <p className="truncate text-[11px] font-medium text-[hsl(var(--gold))] sm:text-[13px]">
+              Bekleyen Tahsilat
+            </p>
+            <p className="text-xl font-semibold tracking-tight text-foreground sm:text-3xl">
+              {formatCurrency(totalNum)}
+            </p>
+            <p className="hidden text-[11px] text-muted-foreground sm:block">
+              Dava {formatCurrency(caseNum)} · Arabuluculuk {formatCurrency(medNum)}
+            </p>
+          </div>
+          <div className="flex-shrink-0 rounded-xl bg-[hsl(var(--gold))]/15 p-2 sm:rounded-2xl sm:p-3">
+            <TrendingUp className="h-4 w-4 text-[hsl(var(--gold))] sm:h-5 sm:w-5" />
+          </div>
+        </div>
+      </CardContent>
     </Card>
   )
 }
@@ -81,9 +103,9 @@ function StatCard({
 function DashboardSkeleton() {
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i}>
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-5">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <Card key={index}>
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
                 <div className="space-y-3">
@@ -91,30 +113,31 @@ function DashboardSkeleton() {
                   <Skeleton className="h-8 w-16" />
                   <Skeleton className="h-3 w-32" />
                 </div>
-                <Skeleton className="h-10 w-10 rounded-lg" />
+                <Skeleton className="h-12 w-12 rounded-2xl" />
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
-        <Card className="lg:col-span-3">
+
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-5">
+        <Card className="xl:col-span-3">
           <CardHeader>
             <Skeleton className="h-5 w-40" />
           </CardHeader>
           <CardContent className="space-y-3">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="h-12 w-full" />
+            {Array.from({ length: 5 }).map((_, index) => (
+              <Skeleton key={index} className="h-12 w-full" />
             ))}
           </CardContent>
         </Card>
-        <Card className="lg:col-span-2">
+        <Card className="xl:col-span-2">
           <CardHeader>
-            <Skeleton className="h-5 w-32" />
+            <Skeleton className="h-5 w-36" />
           </CardHeader>
           <CardContent className="space-y-3">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="h-14 w-full" />
+            {Array.from({ length: 4 }).map((_, index) => (
+              <Skeleton key={index} className="h-16 w-full" />
             ))}
           </CardContent>
         </Card>
@@ -124,13 +147,26 @@ function DashboardSkeleton() {
 }
 
 export default function DashboardPage() {
-  const { data, isLoading, isError } = useDashboard()
   const navigate = useNavigate()
+  const { data, isLoading, isError } = useDashboard()
+  const { data: stats } = useStatistics()
+  const { data: consultStats } = useConsultationStats()
+
+  const currentMonth = new Date().toISOString().slice(0, 7)
+  const thisMonthCases = stats?.monthlyCases?.find((m: any) => m.month === currentMonth)?.count ?? 0
+  const thisMonthMediations = stats?.monthlyMediations?.find((m: any) => m.month === currentMonth)?.count ?? 0
+  const thisMonthIncomeRow = stats?.monthlyIncome?.find((m: any) => m.month === currentMonth)
+  const thisMonthCaseIncome = thisMonthIncomeRow?.caseAmount ?? '0'
+  const thisMonthMediationIncome = thisMonthIncomeRow?.mediationAmount ?? '0'
+  const thisMonthCollections = thisMonthIncomeRow?.total ?? stats?.monthlyCollections?.find((m: any) => m.month === currentMonth)?.amount ?? '0'
 
   if (isLoading) {
     return (
-      <div>
-        <h1 className="mb-6 page-title">Gösterge Paneli</h1>
+      <div className="space-y-6">
+        <div>
+          <h1 className="page-title">Gösterge Paneli</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Büroluk genel görünümü hazırlanıyor</p>
+        </div>
         <DashboardSkeleton />
       </div>
     )
@@ -138,13 +174,16 @@ export default function DashboardPage() {
 
   if (isError || !data) {
     return (
-      <div>
-        <h1 className="mb-6 page-title">Gösterge Paneli</h1>
-        <Card className="border-red-200 bg-red-50">
+      <div className="space-y-6">
+        <div>
+          <h1 className="page-title">Gösterge Paneli</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Veri cekilemedi</p>
+        </div>
+        <Card className="border-destructive/30 bg-destructive/10">
           <CardContent className="flex items-center gap-3 p-6">
-            <AlertTriangle className="h-5 w-5 text-red-600" />
-            <p className="text-sm text-red-700">
-              Veriler yüklenirken bir hata oluştu. Lütfen sayfayı yenileyin.
+            <AlertTriangle className="h-5 w-5 text-destructive" />
+            <p className="text-sm text-destructive">
+              Veriler yuklenirken hata olustu. Lutfen sayfayi yenileyin.
             </p>
           </CardContent>
         </Card>
@@ -152,164 +191,202 @@ export default function DashboardPage() {
     )
   }
 
-  const {
-    cases,
-    upcomingHearings,
-    pendingTasks,
-    recentCases,
-    financials,
-    outstandingFees,
-  } = data
+  const { cases, upcomingHearings, pendingTasks, recentCases, financials, outstandingFees } = data
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="page-title">Gösterge Paneli</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Büronuzun güncel durumuna genel bakış
-        </p>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <h1 className="page-title">Gösterge Paneli</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Dava, görev, duruşma ve tahsilat akışınıza tek ekrandan bakın.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => navigate('/cases/new')}
+            className="inline-flex items-center gap-2 rounded-xl border bg-card px-4 py-2.5 text-sm font-medium transition hover:bg-muted/50"
+          >
+            <Scale className="h-4 w-4 text-law-accent" />
+            Yeni Dava
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/clients/new')}
+            className="inline-flex items-center gap-2 rounded-xl border bg-card px-4 py-2.5 text-sm font-medium transition hover:bg-muted/50"
+          >
+            <Users className="h-4 w-4 text-law-accent" />
+            Yeni Müvekkil
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/consultations')}
+            className="inline-flex items-center gap-2 rounded-xl border bg-card px-4 py-2.5 text-sm font-medium transition hover:bg-muted/50"
+          >
+            <MessageSquare className="h-4 w-4 text-law-accent" />
+            Yeni Görüşme
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-5">
         <StatCard
           title="Aktif Davalar"
           value={cases?.active ?? 0}
-          description={`Toplam ${cases?.total ?? 0} dava · ${cases?.won ?? 0} kazanildi`}
+          description="Çalışması süren ve temyiz aşamasındakiler dahil"
           icon={Scale}
-          iconBg="bg-law-accent/10"
-          iconColor="text-law-accent"
-          borderColor="border-l-law-accent"
-          trend="neutral"
         />
         <StatCard
-          title="Toplam Tahsilat"
-          value={formatCurrency(financials?.totalCollections)}
-          description="Tüm davalardan toplam"
-          icon={TrendingUp}
-          iconBg="bg-emerald-500/10"
-          iconColor="text-emerald-600"
-          borderColor="border-l-emerald-500"
-          trend="up"
+          title="Potansiyel Davalar"
+          value={cases?.pending ?? 0}
+          description="Pasif dosyalar + potansiyel görüşmeler"
+          icon={Clock3}
         />
         <StatCard
           title="Bekleyen Görevler"
           value={pendingTasks?.length ?? 0}
-          description="Tamamlanmayı bekliyor"
+          description="Takvime alınmış açık işler"
           icon={ListChecks}
-          iconBg="bg-amber-500/10"
-          iconColor="text-amber-600"
-          borderColor="border-l-amber-500"
-          trend="neutral"
         />
         <StatCard
-          title="Yaklaşan Duruşmalar"
-          value={upcomingHearings?.length ?? 0}
-          description="Önümüzdeki 7 gün"
-          icon={CalendarClock}
-          iconBg="bg-purple-500/10"
-          iconColor="text-purple-600"
-          borderColor="border-l-purple-500"
-          trend="neutral"
+          title="Toplam Tahsilat"
+          value={formatCurrency(financials?.totalCollections)}
+          description="Dava + arabuluculuk tüm tahsilatlar"
+          icon={Banknote}
+        />
+        <OutstandingStatCard
+          total={financials?.outstandingTotal || '0'}
+          cases={financials?.outstandingByCases || '0'}
+          mediations={financials?.outstandingByMediations || '0'}
         />
       </div>
 
-      <div className="flex flex-wrap gap-3">
-        <button
-          onClick={() => navigate('/cases/new')}
-          className="inline-flex items-center gap-2 rounded-lg border bg-card px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted/50"
-        >
-          <Scale className="h-4 w-4 text-law-accent" />
-          Yeni Dava
-        </button>
-        <button
-          onClick={() => navigate('/clients/new')}
-          className="inline-flex items-center gap-2 rounded-lg border bg-card px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted/50"
-        >
-          <Users className="h-4 w-4 text-law-accent" />
-          Yeni Müvekkil
-        </button>
-        <button
-          onClick={() => navigate('/tasks')}
-          className="inline-flex items-center gap-2 rounded-lg border bg-card px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted/50"
-        >
-          <ListChecks className="h-4 w-4 text-law-accent" />
-          Görev Ekle
-        </button>
-        <button
-          onClick={() => navigate('/hearings')}
-          className="inline-flex items-center gap-2 rounded-lg border bg-card px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted/50"
-        >
-          <CalendarClock className="h-4 w-4 text-law-accent" />
-          Duruşma Takvimi
-        </button>
+      {/* Bu Ay Özeti */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <Card className="border-l-4 border-l-law-accent">
+          <CardContent className="p-3 sm:p-4">
+            <p className="text-[11px] font-medium text-muted-foreground">Bu Ay Dava</p>
+            <p className="text-xl font-bold text-law-primary">{thisMonthCases}</p>
+          </CardContent>
+        </Card>
+        <Card className="border-l-4 border-l-amber-500">
+          <CardContent className="p-3 sm:p-4">
+            <p className="text-[11px] font-medium text-muted-foreground">Bu Ay Arabuluculuk</p>
+            <p className="text-xl font-bold text-law-primary">{thisMonthMediations}</p>
+          </CardContent>
+        </Card>
+        <Card className="border-l-4 border-l-emerald-500">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] font-medium text-muted-foreground">Bu Ay Tahsilat</p>
+                <p className="text-xl font-bold text-emerald-600">{formatCurrency(thisMonthCollections)}</p>
+              </div>
+            </div>
+            <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] text-muted-foreground">
+              <span>Dava: <span className="font-medium text-foreground">{formatCurrency(thisMonthCaseIncome)}</span></span>
+              <span>Arabuluculuk: <span className="font-medium text-foreground">{formatCurrency(thisMonthMediationIncome)}</span></span>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* AI Otomasyon Durum Paneli */}
-      {data.ai && data.ai.totalActive > 0 && (
-        <Card className="relative overflow-hidden border-l-2 border-l-law-accent">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2 text-base text-law-primary">
-                <Bot className="h-4 w-4 text-law-accent" />
-                AI Otomasyon Durumu
-              </CardTitle>
-              <Badge variant="secondary" className="text-xs">
-                {data.ai.totalActive} dava
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="pb-4">
-            <div className="flex flex-wrap gap-3 mb-3">
-              {Object.entries(data.ai.statusBreakdown || {}).map(([status, count]) => (
+      {/* Ön Görüşmeler Özeti */}
+      <Card className="border-l-4 border-l-law-accent">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-base text-law-primary">
+              <PhoneCall className="h-4 w-4 text-law-accent" />
+              Ön Görüşmeler
+            </CardTitle>
+            <button
+              type="button"
+              onClick={() => navigate('/consultations')}
+              className="inline-flex items-center gap-1 text-xs font-medium text-law-accent transition hover:text-law-primary"
+            >
+              Detay
+              <ChevronRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div>
+              <p className="text-[11px] text-muted-foreground">Bugün</p>
+              <p className="text-lg font-bold text-law-primary">
+                {consultStats?.today ?? 0}
+                <span className="text-xs text-muted-foreground">/{consultStats?.dailyGoal ?? 1}</span>
+              </p>
+              <div className="mt-1 h-1 overflow-hidden rounded-full bg-muted">
                 <div
-                  key={status}
-                  className="flex items-center gap-2 rounded-lg border bg-muted/30 px-3 py-2 text-sm"
-                >
-                  <span className="font-medium text-foreground">
-                    {automationStatusLabels[status] || status}
-                  </span>
-                  <span className="rounded-full bg-law-accent/10 px-2 py-0.5 text-xs font-bold text-law-accent">
-                    {count as number}
-                  </span>
-                </div>
-              ))}
-            </div>
-            {data.ai.activeJobs && data.ai.activeJobs.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Devam Eden AI İşleri
-                </p>
-                {data.ai.activeJobs.map((job: any) => (
-                  <div
-                    key={job.id}
-                    className="flex items-center justify-between rounded-md border bg-card px-3 py-2 text-sm cursor-pointer hover:bg-muted/50 transition-colors"
-                    onClick={() => navigate(`/cases/${job.caseId}`)}
-                  >
-                    <div className="flex items-center gap-2">
-                      <div className={`h-2 w-2 rounded-full ${
-                        job.status === 'in_progress' ? 'bg-blue-500 animate-pulse' :
-                        job.status === 'review_required' ? 'bg-amber-500' : 'bg-muted-foreground'
-                      }`} />
-                      <span className="font-medium">{job.caseTitle}</span>
-                      <span className="text-muted-foreground">·</span>
-                      <span className="text-muted-foreground">{job.title}</span>
-                    </div>
-                    <Badge variant={job.status === 'review_required' ? 'warning' : 'secondary'} className="text-xs">
-                      {job.status === 'in_progress' ? 'Devam Ediyor' :
-                       job.status === 'review_required' ? 'İnceleme Bekliyor' :
-                       job.status === 'queued' ? 'Sırada' : job.status}
-                    </Badge>
-                  </div>
-                ))}
+                  className="h-full rounded-full bg-law-accent transition-all"
+                  style={{
+                    width: `${Math.min(100, Math.round(((consultStats?.today ?? 0) / (consultStats?.dailyGoal || 1)) * 100))}%`,
+                  }}
+                />
               </div>
-            )}
-          </CardContent>
-          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-law-accent/50 via-law-accent/15 to-transparent" />
-        </Card>
-      )}
+            </div>
+            <div>
+              <p className="text-[11px] text-muted-foreground">Bu Hafta</p>
+              <p className="text-lg font-bold text-law-primary">
+                {consultStats?.week ?? 0}
+                <span className="text-xs text-muted-foreground">/{consultStats?.weeklyGoal ?? 5}</span>
+              </p>
+              <div className="mt-1 h-1 overflow-hidden rounded-full bg-muted">
+                <div
+                  className={`h-full rounded-full transition-all ${
+                    (consultStats?.week ?? 0) >= (consultStats?.weeklyGoal ?? 5) ? 'bg-emerald-500' : 'bg-law-accent'
+                  }`}
+                  style={{
+                    width: `${Math.min(100, Math.round(((consultStats?.week ?? 0) / (consultStats?.weeklyGoal || 1)) * 100))}%`,
+                  }}
+                />
+              </div>
+            </div>
+            <div>
+              <p className="text-[11px] text-muted-foreground">Bu Ay</p>
+              <p className="text-lg font-bold text-law-primary">
+                {consultStats?.month ?? 0}
+                <span className="text-xs text-muted-foreground">/{consultStats?.monthlyGoal ?? 20}</span>
+              </p>
+              <div className="mt-1 h-1 overflow-hidden rounded-full bg-muted">
+                <div
+                  className={`h-full rounded-full transition-all ${
+                    (consultStats?.month ?? 0) >= (consultStats?.monthlyGoal ?? 20) ? 'bg-emerald-500' : 'bg-law-accent'
+                  }`}
+                  style={{
+                    width: `${Math.min(100, Math.round(((consultStats?.month ?? 0) / (consultStats?.monthlyGoal || 1)) * 100))}%`,
+                  }}
+                />
+              </div>
+            </div>
+            <div>
+              <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                <TrendingUp className="h-3 w-3" />
+                Dönüşüm
+              </p>
+              <p className="text-lg font-bold text-emerald-600">{consultStats?.conversionRate ?? 0}%</p>
+              <p className="text-[10px] text-muted-foreground">
+                {consultStats?.converted ?? 0} müvekkil oldu
+              </p>
+            </div>
+          </div>
+          <div className="mt-3 flex justify-end">
+            <button
+              type="button"
+              onClick={() => navigate('/consultations')}
+              className="inline-flex items-center gap-1 rounded-lg bg-law-accent px-3 py-1.5 text-xs font-medium text-white hover:opacity-90"
+            >
+              <PhoneCall className="h-3.5 w-3.5" />
+              Yeni Görüşme
+            </button>
+          </div>
+        </CardContent>
+      </Card>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
-        <Card className="lg:col-span-3">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-5">
+        <Card className="xl:col-span-3">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2 text-base text-law-primary">
@@ -317,8 +394,9 @@ export default function DashboardPage() {
                 Yaklaşan Duruşmalar
               </CardTitle>
               <button
+                type="button"
                 onClick={() => navigate('/hearings')}
-                className="flex items-center gap-1 text-xs font-medium text-law-accent transition-colors hover:text-law-primary"
+                className="inline-flex items-center gap-1 text-xs font-medium text-law-accent transition hover:text-law-primary"
               >
                 Tümünü gör
                 <ChevronRight className="h-3.5 w-3.5" />
@@ -327,21 +405,17 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             {!upcomingHearings?.length ? (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-muted-foreground/20">
-                  <CalendarClock className="h-7 w-7 text-muted-foreground/40" />
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Yaklaşan duruşma bulunmuyor
-                </p>
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <CalendarClock className="mb-3 h-10 w-10 text-muted-foreground/30" />
+                <p className="text-sm text-muted-foreground">Yaklaşan duruşma bulunmuyor.</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto max-w-full">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    <tr className="border-b text-left text-xs uppercase tracking-[0.18em] text-muted-foreground">
                       <th className="pb-2 pr-4">Tarih</th>
-                      <th className="pb-2 pr-4">Müvekkil</th>
+                      <th className="pb-2 pr-4">Dava</th>
                       <th className="hidden pb-2 pr-4 md:table-cell">Mahkeme</th>
                       <th className="pb-2">Salon</th>
                     </tr>
@@ -352,32 +426,25 @@ export default function DashboardPage() {
                       return (
                         <tr
                           key={hearing.id}
-                          onClick={() => navigate(`/cases/${hearing.caseId || ''}`)}
-                          className="cursor-pointer transition-colors hover:bg-muted/50"
+                          onClick={() => navigate(`/cases/${hearing.caseId}`)}
+                          className="cursor-pointer transition hover:bg-muted/50"
                         >
                           <td className="py-3 pr-4">
-                            <div className="flex items-center gap-2">
-                              {overdue && (
-                                <span className="h-2 w-2 rounded-full bg-red-500" title="Geçmiş" />
-                              )}
-                              <div>
-                                <p className={`font-medium ${overdue ? 'text-red-600' : ''}`}>
-                                  {formatDate(hearing.hearingDate)}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  {formatRelativeDate(hearing.hearingDate)}
-                                </p>
-                              </div>
+                            <div>
+                              <p className={`font-medium ${overdue ? 'text-red-600' : ''}`}>
+                                {formatDate(hearing.hearingDate)}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {formatRelativeDate(hearing.hearingDate)}
+                              </p>
                             </div>
                           </td>
                           <td className="py-3 pr-4">
-                            <p className="font-medium">{hearing.clientName}</p>
-                            <p className="max-w-[200px] truncate text-xs text-muted-foreground">
-                              {hearing.caseTitle}
-                            </p>
+                            <p className="font-medium">{hearing.caseTitle}</p>
+                            <p className="text-xs text-muted-foreground">{hearing.clientName || '-'}</p>
                           </td>
-                          <td className="hidden py-3 pr-4 md:table-cell">
-                            <p className="text-muted-foreground">{hearing.courtName || '-'}</p>
+                          <td className="hidden py-3 pr-4 md:table-cell text-muted-foreground">
+                            {hearing.courtName || '-'}
                           </td>
                           <td className="py-3">
                             <Badge variant="outline">{hearing.courtRoom || '-'}</Badge>
@@ -392,7 +459,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2">
+        <Card className="xl:col-span-2">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2 text-base text-law-primary">
@@ -400,8 +467,9 @@ export default function DashboardPage() {
                 Bekleyen Görevler
               </CardTitle>
               <button
+                type="button"
                 onClick={() => navigate('/tasks')}
-                className="flex items-center gap-1 text-xs font-medium text-law-accent transition-colors hover:text-law-primary"
+                className="inline-flex items-center gap-1 text-xs font-medium text-law-accent transition hover:text-law-primary"
               >
                 Tümünü gör
                 <ChevronRight className="h-3.5 w-3.5" />
@@ -410,63 +478,153 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             {!pendingTasks?.length ? (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-muted-foreground/20">
-                  <ListChecks className="h-7 w-7 text-muted-foreground/40" />
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Bekleyen görev bulunmuyor
-                </p>
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <ListChecks className="mb-3 h-10 w-10 text-muted-foreground/30" />
+                <p className="text-sm text-muted-foreground">Bekleyen görev bulunmuyor.</p>
               </div>
             ) : (
-              <div className="space-y-1">
-                {pendingTasks.slice(0, 5).map((task: any) => {
-                  const overdue = task.dueDate && isOverdue(task.dueDate)
-                  return (
-                    <div
-                      key={task.id}
-                      onClick={() => navigate('/tasks')}
-                      className="group flex cursor-pointer items-start gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50"
-                    >
-                      <div className="mt-0.5 flex-shrink-0">
-                        <div
-                          className={`h-2 w-2 rounded-full ${
-                            task.priority === 'urgent'
-                              ? 'bg-red-500'
-                              : task.priority === 'high'
-                                ? 'bg-amber-500'
-                                : task.priority === 'medium'
-                                  ? 'bg-blue-400'
-                                  : 'bg-gray-300'
-                          }`}
-                        />
+              <div className="space-y-2">
+                {pendingTasks.slice(0, 5).map((task: any) => (
+                  <button
+                    key={task.id}
+                    type="button"
+                    onClick={() => navigate('/tasks')}
+                    className="flex w-full items-start justify-between gap-3 rounded-xl border p-3 text-left transition hover:bg-muted/50"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="truncate text-sm font-medium">{task.title}</p>
+                        <Badge variant={priorityVariant[task.priority] || 'outline'}>
+                          {taskPriorityLabels[task.priority] || task.priority}
+                        </Badge>
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="truncate text-sm font-medium">{task.title}</p>
-                          <Badge
-                            variant={priorityVariant[task.priority] || 'outline'}
-                            className="flex-shrink-0 px-1.5 py-0 text-[10px]"
-                          >
-                            {taskPriorityLabels[task.priority] || task.priority}
-                          </Badge>
-                        </div>
-                        <p className="truncate text-xs text-muted-foreground">
-                          {task.caseTitle}
-                        </p>
-                        {task.dueDate && (
-                          <div className="mt-1 flex items-center gap-1">
-                            <Clock className={`h-3 w-3 ${overdue ? 'text-red-500' : 'text-muted-foreground'}`} />
-                            <span
-                              className={`text-xs ${overdue ? 'font-medium text-red-600' : 'text-muted-foreground'}`}
-                            >
-                              {formatRelativeDate(task.dueDate)}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      <ChevronRight className="mt-1 h-4 w-4 flex-shrink-0 text-muted-foreground/40 transition-colors group-hover:text-muted-foreground" />
+                      <p className="mt-1 truncate text-xs text-muted-foreground">
+                        {task.caseTitle || 'Genel görev'}
+                      </p>
                     </div>
+                    {task.dueDate && (
+                      <span className="text-xs text-muted-foreground">
+                        {formatRelativeDate(task.dueDate)}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-5">
+        <Card className="xl:col-span-3">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base text-law-primary">
+                <Scale className="h-4 w-4 text-law-accent" />
+                Son Eklenen Davalar
+              </CardTitle>
+              <button
+                type="button"
+                onClick={() => navigate('/cases')}
+                className="inline-flex items-center gap-1 text-xs font-medium text-law-accent transition hover:text-law-primary"
+              >
+                Tümünü gör
+                <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {!recentCases?.length ? (
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <Scale className="mb-3 h-10 w-10 text-muted-foreground/30" />
+                <p className="text-sm text-muted-foreground">Dava bulunmuyor.</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {recentCases.slice(0, 5).map((item: any) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => navigate(`/cases/${item.id}`)}
+                    className="flex w-full items-start justify-between gap-3 rounded-xl border p-3 text-left transition hover:bg-muted/50"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium">{item.title}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {item.clientName || '-'} • {caseTypeLabels[item.caseType] || item.caseType}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <Badge variant="secondary">
+                        {caseStatusLabels[item.status] || item.status}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDate(item.createdAt)}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="xl:col-span-2">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base text-law-primary">
+                <Banknote className="h-4 w-4 text-law-accent" />
+                Beklenen Tahsilatlar
+              </CardTitle>
+              {financials?.outstandingTotal && parseFloat(financials.outstandingTotal) > 0 ? (
+                <div className="text-right">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Toplam</p>
+                  <p className="text-sm font-semibold text-amber-700">
+                    {formatCurrency(financials.outstandingTotal)}
+                  </p>
+                </div>
+              ) : null}
+            </div>
+          </CardHeader>
+          <CardContent>
+            {!outstandingFees?.length ? (
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <Banknote className="mb-3 h-10 w-10 text-muted-foreground/30" />
+                <p className="text-sm text-muted-foreground">Beklenen tahsilat bulunmuyor.</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {outstandingFees.slice(0, 5).map((fee: any) => {
+                  const isMediation = fee.source === 'mediation'
+                  return (
+                    <button
+                      key={`${fee.source || 'case'}-${fee.id}`}
+                      type="button"
+                      onClick={() =>
+                        navigate(isMediation ? `/tools/mediation-files` : `/cases/${fee.id}`)
+                      }
+                      className="flex w-full items-start justify-between gap-3 rounded-xl border p-3 text-left transition hover:bg-muted/50"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <p className="truncate font-medium">{fee.title}</p>
+                          {isMediation ? (
+                            <Badge variant="outline" className="text-[9px]">
+                              Arabuluculuk
+                            </Badge>
+                          ) : null}
+                        </div>
+                        <p className="mt-1 text-xs text-muted-foreground">{fee.clientName || '-'}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-law-primary">
+                          {formatCurrency(fee.remaining)}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Toplam: {formatCurrency(fee.contractedFee)}
+                        </p>
+                      </div>
+                    </button>
                   )
                 })}
               </div>
@@ -474,142 +632,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-
-      {recentCases?.length > 0 && (
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-5">
-          <Card className="xl:col-span-3">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2 text-base text-law-primary">
-                  <Scale className="h-4 w-4 text-law-accent" />
-                  Son Eklenen Davalar
-                </CardTitle>
-                <button
-                  onClick={() => navigate('/cases')}
-                  className="flex items-center gap-1 text-xs font-medium text-law-accent transition-colors hover:text-law-primary"
-                >
-                  Tümünü gör
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      <th className="pb-2 pr-4">Dava</th>
-                      <th className="hidden pb-2 pr-4 sm:table-cell">Müvekkil</th>
-                      <th className="hidden pb-2 pr-4 md:table-cell">Tür</th>
-                      <th className="pb-2 pr-4">Durum</th>
-                      <th className="hidden pb-2 pr-4 xl:table-cell">AI</th>
-                      <th className="hidden pb-2 lg:table-cell">Tarih</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y">
-                    {recentCases.slice(0, 5).map((c: any) => (
-                      <tr
-                        key={c.id}
-                        onClick={() => navigate(`/cases/${c.id}`)}
-                        className="cursor-pointer transition-colors hover:bg-muted/50"
-                      >
-                        <td className="py-3 pr-4">
-                          <p className="font-medium">{c.title}</p>
-                        </td>
-                        <td className="hidden py-3 pr-4 sm:table-cell">
-                          <p className="text-muted-foreground">{c.clientName}</p>
-                        </td>
-                        <td className="hidden py-3 pr-4 md:table-cell">
-                          <p className="text-muted-foreground">
-                            {caseTypeLabels[c.caseType] || c.caseType}
-                          </p>
-                        </td>
-                        <td className="py-3 pr-4">
-                          <Badge
-                            variant={
-                              c.status === 'won'
-                                ? 'success'
-                                : c.status === 'lost'
-                                  ? 'danger'
-                                  : c.status === 'active'
-                                    ? 'default'
-                                    : 'secondary'
-                            }
-                          >
-                            {caseStatusLabels[c.status] || c.status}
-                          </Badge>
-                        </td>
-                        <td className="hidden py-3 pr-4 xl:table-cell">
-                          <Badge variant={c.automationStatus === 'completed' ? 'success' : 'outline'}>
-                            <span className="inline-flex items-center gap-1">
-                              <Bot className="h-3 w-3" />
-                              {automationStatusLabels[c.automationStatus] || c.automationStatus || 'Başlanmadı'}
-                            </span>
-                          </Badge>
-                        </td>
-                        <td className="hidden py-3 lg:table-cell">
-                          <p className="text-xs text-muted-foreground">
-                            {formatDate(c.createdAt)}
-                          </p>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="xl:col-span-2">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base text-law-primary">
-                <Banknote className="h-4 w-4 text-law-accent" />
-                Beklenen Tahsilatlar
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {!outstandingFees?.length ? (
-                <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <Banknote className="mb-2 h-8 w-8 text-muted-foreground/40" />
-                  <p className="text-sm text-muted-foreground">
-                    Beklenen tahsilat bulunmuyor
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {outstandingFees.slice(0, 5).map((fee: any) => (
-                    <button
-                      key={fee.id}
-                      type="button"
-                      onClick={() => navigate(`/cases/${fee.id}`)}
-                      className="flex w-full items-start gap-3 rounded-lg border p-3 text-left transition-colors hover:bg-muted/50"
-                    >
-                      <div className="rounded-lg bg-amber-500/10 p-2">
-                        <Banknote className="h-4 w-4 text-amber-600" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium">{fee.title}</p>
-                        <p className="truncate text-xs text-muted-foreground">
-                          {fee.clientName || 'Müvekkil belirtilmemiş'}
-                        </p>
-                        <div className="mt-1 flex items-center gap-2 text-[11px]">
-                          <span className="text-muted-foreground">
-                            Anlaşılan: {formatCurrency(fee.contractedFee)}
-                          </span>
-                          <span className="text-muted-foreground">·</span>
-                          <span className="font-medium text-amber-600">
-                            Kalan: {formatCurrency(fee.remaining)}
-                          </span>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </div>
   )
 }

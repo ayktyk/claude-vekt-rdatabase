@@ -1,9 +1,20 @@
 import axios from 'axios'
 import { toast } from 'sonner'
+import { clearAuthTokens, getAccessToken, getRefreshToken, setAuthTokens } from './authTokens'
+
+const rawApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim()
+const apiBaseUrl =
+  rawApiBaseUrl && rawApiBaseUrl.length > 0
+    ? rawApiBaseUrl.replace(/\/+$/, '')
+    : '/api'
+
+function buildApiUrl(path: string) {
+  return `${apiBaseUrl}${path.startsWith('/') ? path : `/${path}`}`
+}
 
 export const api = axios.create({
-  baseURL: '/api',
-  withCredentials: true, // httpOnly cookie'leri her istekte gönder
+  baseURL: apiBaseUrl,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -12,6 +23,11 @@ export const api = axios.create({
 api.interceptors.request.use((config) => {
   if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
     delete config.headers['Content-Type']
+  }
+
+  const accessToken = getAccessToken()
+  if (accessToken) {
+    config.headers.Authorization = `Bearer ${accessToken}`
   }
 
   return config
@@ -31,15 +47,12 @@ function processQueue(error: unknown) {
   failedQueue = []
 }
 
-// Response interceptor — merkezi hata yönetimi
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config
 
-    // 401: Token süresi dolmuş — refresh dene
     if (error.response?.status === 401 && !originalRequest._retry) {
-      // Login veya refresh endpoint'lerinde 401 alırsa döngüye girme
       if (originalRequest.url?.includes('/auth/login') || originalRequest.url?.includes('/auth/refresh')) {
         return Promise.reject(error)
       }
@@ -56,14 +69,25 @@ api.interceptors.response.use(
       isRefreshing = true
 
       try {
-        await axios.post('/api/auth/refresh', {}, { withCredentials: true })
+        const refreshToken = getRefreshToken()
+        const refreshResponse = await axios.post(
+          buildApiUrl('/auth/refresh'),
+          { refreshToken },
+          { withCredentials: true }
+        )
+        if (refreshResponse.data?.accessToken || refreshResponse.data?.refreshToken) {
+          setAuthTokens({
+            accessToken: refreshResponse.data.accessToken,
+            refreshToken: refreshResponse.data.refreshToken,
+          })
+        }
         processQueue(null)
         return api(originalRequest)
       } catch (refreshError) {
         processQueue(refreshError)
-        // Refresh başarısız — login'e yönlendir
+        clearAuthTokens()
         if (window.location.pathname !== '/login') {
-          toast.error('Oturum süresi doldu. Tekrar giriş yapın.')
+          toast.error('Oturum suresi doldu. Tekrar giris yapin.')
           window.location.href = '/login'
         }
         return Promise.reject(refreshError)
@@ -72,24 +96,20 @@ api.interceptors.response.use(
       }
     }
 
-    // 403: Yetki yok
     if (error.response?.status === 403) {
-      toast.error('Bu işlem için yetkiniz bulunmuyor.')
+      toast.error('Bu islem icin yetkiniz bulunmuyor.')
     }
 
-    // 422: Validasyon hatası — form'a bırak, global toast yok
     if (error.response?.status === 422) {
       return Promise.reject(error)
     }
 
-    // 500+: Sunucu hatası
     if (error.response?.status >= 500) {
-      toast.error('Sunucu hatası oluştu. Lütfen tekrar deneyin.')
+      toast.error('Sunucu hatasi olustu. Lutfen tekrar deneyin.')
     }
 
-    // Ağ hatası
     if (!error.response) {
-      toast.error('Bağlantı hatası. İnternet bağlantınızı kontrol edin.')
+      toast.error('Baglanti hatasi. Internet baglantinizi kontrol edin.')
     }
 
     return Promise.reject(error)

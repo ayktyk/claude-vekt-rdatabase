@@ -10,12 +10,15 @@
  * Varsayilan olarak KAPALI - "stratejik analiz" komutuyla tetiklenir.
  */
 
+import Anthropic from '@anthropic-ai/sdk';
 import { DAVACI_AVUKAT_PROMPT } from '../agents/prompts/davaci-avukat.prompt';
 import { DAVALI_AVUKAT_PROMPT } from '../agents/prompts/davali-avukat.prompt';
 import { BILIRKISI_PROMPT } from '../agents/prompts/bilirkisi.prompt';
 import { HAKIM_PROMPT } from '../agents/prompts/hakim.prompt';
 import { SENTEZ_STRATEJI_PROMPT } from '../agents/prompts/sentez-strateji.prompt';
 import type { ResearchPackage, AgentRapor, FiveAgentResult } from '../types/dosya-paketi.types';
+
+const anthropicClient = new Anthropic();
 
 // ============================================================
 // LLM Client - Mevcut sistemdeki LLM cagri fonksiyonunu kullan
@@ -35,17 +38,18 @@ interface LLMOptions {
  * Su an placeholder olarak tanimli.
  */
 async function callLLM(prompt: string, options: LLMOptions = {}): Promise<string> {
-  // TODO: Mevcut sisteminizdeki LLM client'i buraya entegre edin.
-  // Ornek:
-  //   import Anthropic from '@anthropic-ai/sdk';
-  //   const client = new Anthropic();
-  //   const response = await client.messages.create({
-  //     model: options.model || 'claude-sonnet-4-20250514',
-  //     max_tokens: options.maxTokens || 4096,
-  //     messages: [{ role: 'user', content: prompt }],
-  //   });
-  //   return response.content[0].text;
-  throw new Error('LLM client henuz entegre edilmedi. callLLM fonksiyonunu kendi sisteminize gore doldurun.');
+  try {
+    const response = await anthropicClient.messages.create({
+      model: options.model || 'claude-opus-4-20250514',
+      max_tokens: options.maxTokens || 4096,
+      messages: [{ role: 'user', content: prompt }],
+    });
+    const textBlock = response.content.find((block) => block.type === 'text');
+    return textBlock ? textBlock.text : '';
+  } catch (error) {
+    console.error('LLM API hatasi:', error);
+    throw new Error(`LLM cagirisi basarisiz: ${error instanceof Error ? error.message : 'Bilinmeyen hata'}`);
+  }
 }
 
 // ============================================================

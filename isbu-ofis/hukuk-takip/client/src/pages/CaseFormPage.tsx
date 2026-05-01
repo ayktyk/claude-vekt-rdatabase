@@ -3,41 +3,41 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
-  createCaseSchema,
-  caseTypeValues,
   caseStatusValues,
-  automationStatusValues,
+  caseTypeValues,
+  createCaseSchema,
   type CreateCaseInput,
+  type UpdateCaseInput,
+  updateCaseSchema,
 } from '@hukuk-takip/shared'
+import { ArrowLeft, Loader2, Plus, Save, Scale } from 'lucide-react'
 import { useCase, useCreateCase, useUpdateCase } from '@/hooks/useCases'
+import { useMobileKeyboardFix } from '@/hooks/useMobileKeyboardFix'
 import { useClients, useCreateClient } from '@/hooks/useClients'
-import { caseTypeLabels, caseStatusLabels, automationStatusLabels } from '@/lib/utils'
+import { caseStatusLabels, caseTypeLabels } from '@/lib/utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { ArrowLeft, Save, Loader2, Scale, Bot, Sparkles, Plus } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+
+type CaseFormValues = CreateCaseInput & Pick<UpdateCaseInput, 'status' | 'closeDate'>
 
 export default function CaseFormPage() {
   const navigate = useNavigate()
   const { id } = useParams()
-  const isEdit = !!id
+  const isEdit = Boolean(id)
 
+  useMobileKeyboardFix()
   const { data: caseData, isLoading: loadingCase } = useCase(id)
   const createCase = useCreateCase()
   const updateCase = useUpdateCase(id || '')
   const { data: clientsData } = useClients({ pageSize: 100 })
+  const createClient = useCreateClient()
 
-  const [aiEnabled, setAiEnabled] = useState(false)
   const [clientDialogOpen, setClientDialogOpen] = useState(false)
   const [newClientName, setNewClientName] = useState('')
   const [newClientPhone, setNewClientPhone] = useState('')
   const [newClientEmail, setNewClientEmail] = useState('')
-  const createClient = useCreateClient()
+
   const clients = clientsData?.data || []
 
   const {
@@ -47,8 +47,8 @@ export default function CaseFormPage() {
     setValue,
     watch,
     formState: { errors },
-  } = useForm<CreateCaseInput>({
-    resolver: zodResolver(createCaseSchema),
+  } = useForm<CaseFormValues>({
+    resolver: zodResolver(isEdit ? updateCaseSchema : createCaseSchema),
     defaultValues: {
       clientId: '',
       caseNumber: '',
@@ -58,54 +58,39 @@ export default function CaseFormPage() {
       title: '',
       description: '',
       startDate: '',
-      automationCaseCode: '',
-      automationStatus: 'not_started',
-      driveFolderPath: '',
-      briefingPath: '',
-      procedurePath: '',
-      researchPath: '',
-      defenseSimulationPath: '',
-      revisionPath: '',
-      pleadingMdPath: '',
-      pleadingUdfPath: '',
       contractedFee: '',
       currency: 'TRY',
       status: 'active',
-    } as any,
+      closeDate: '',
+    },
   })
 
   useEffect(() => {
-    if (isEdit && caseData) {
-      reset({
-        clientId: caseData.clientId || '',
-        caseNumber: caseData.caseNumber || '',
-        courtName: caseData.courtName || '',
-        caseType: caseData.caseType || 'diger',
-        customCaseType: caseData.customCaseType || '',
-        title: caseData.title || '',
-        description: caseData.description || '',
-        startDate: caseData.startDate ? new Date(caseData.startDate).toISOString().split('T')[0] : '',
-        automationCaseCode: caseData.automationCaseCode || '',
-        automationStatus: caseData.automationStatus || 'not_started',
-        driveFolderPath: caseData.driveFolderPath || '',
-        briefingPath: caseData.briefingPath || '',
-        procedurePath: caseData.procedurePath || '',
-        researchPath: caseData.researchPath || '',
-        defenseSimulationPath: caseData.defenseSimulationPath || '',
-        revisionPath: caseData.revisionPath || '',
-        pleadingMdPath: caseData.pleadingMdPath || '',
-        pleadingUdfPath: caseData.pleadingUdfPath || '',
-        contractedFee: caseData.contractedFee || '',
-        currency: caseData.currency || 'TRY',
-        status: caseData.status || 'active',
-      } as any)
-    }
+    if (!isEdit || !caseData) return
+
+    reset({
+      clientId: caseData.clientId || '',
+      caseNumber: caseData.caseNumber || '',
+      courtName: caseData.courtName || '',
+      caseType: caseData.caseType || 'diger',
+      customCaseType: caseData.customCaseType || '',
+      title: caseData.title || '',
+      description: caseData.description || '',
+      startDate: caseData.startDate ? new Date(caseData.startDate).toISOString().split('T')[0] : '',
+      contractedFee: caseData.contractedFee || '',
+      currency: caseData.currency || 'TRY',
+      status: caseData.status || 'active',
+      closeDate: caseData.closeDate ? new Date(caseData.closeDate).toISOString().split('T')[0] : '',
+    })
   }, [caseData, isEdit, reset])
 
   const selectedCaseType = watch('caseType')
+  const selectedStatus = watch('status')
+  const isPending = createCase.isPending || updateCase.isPending
 
   function handleCreateClient() {
     if (!newClientName.trim()) return
+
     createClient.mutate(
       {
         fullName: newClientName.trim(),
@@ -113,11 +98,12 @@ export default function CaseFormPage() {
         email: newClientEmail.trim() || undefined,
       },
       {
-        onSuccess: (res: any) => {
-          const newId = res?.data?.id
+        onSuccess: (response: any) => {
+          const newId = response?.data?.id
           if (newId) {
             setValue('clientId', newId)
           }
+
           setClientDialogOpen(false)
           setNewClientName('')
           setNewClientPhone('')
@@ -127,26 +113,20 @@ export default function CaseFormPage() {
     )
   }
 
-  function onSubmit(data: CreateCaseInput) {
-    const payload = aiEnabled && !isEdit
-      ? { ...data, automationStatus: 'folder_ready' as const }
-      : data
+  function onSubmit(values: CaseFormValues) {
     if (isEdit) {
-      updateCase.mutate(payload, {
+      updateCase.mutate(values, {
         onSuccess: () => navigate(`/cases/${id}`),
       })
-    } else {
-      createCase.mutate(payload, {
-        onSuccess: (res: any) => {
-          const newCaseId = res?.data?.id
-          if (aiEnabled && newCaseId) {
-            navigate(`/cases/${newCaseId}`)
-          } else {
-            navigate('/cases')
-          }
-        },
-      })
+      return
     }
+
+    createCase.mutate(values, {
+      onSuccess: (response: any) => {
+        const newCaseId = response?.data?.id
+        navigate(newCaseId ? `/cases/${newCaseId}` : '/cases')
+      },
+    })
   }
 
   if (isEdit && loadingCase) {
@@ -155,8 +135,8 @@ export default function CaseFormPage() {
         <Skeleton className="h-8 w-48" />
         <Card>
           <CardContent className="space-y-4 p-6">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-10 w-full" />
+            {Array.from({ length: 6 }).map((_, index) => (
+              <Skeleton key={index} className="h-10 w-full" />
             ))}
           </CardContent>
         </Card>
@@ -164,64 +144,56 @@ export default function CaseFormPage() {
     )
   }
 
-  const isPending = createCase.isPending || updateCase.isPending
-
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      {/* Başlık */}
+    <div className="mx-auto max-w-3xl space-y-6">
       <div className="flex items-center gap-4">
         <button
+          type="button"
           onClick={() => navigate(-1)}
-          className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="rounded-xl p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div>
-          <h1 className="page-title">
-            {isEdit ? 'Dava Düzenle' : 'Yeni Dava'}
-          </h1>
+          <h1 className="page-title">{isEdit ? 'Dava Duzenle' : 'Yeni Dava'}</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">
-            {isEdit ? 'Dava bilgilerini güncelleyin' : 'Yeni dava kaydı oluşturun'}
+            {isEdit ? 'Dosya bilgilerini guncelleyin.' : 'Yeni dosya kaydini olusturun.'}
           </p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <Card>
+        <Card className="border-0 shadow-sm">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2 text-base">
               <Scale className="h-4 w-4 text-law-accent" />
-              Dava Bilgileri
+              Temel Dava Bilgileri
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Dava Başlığı */}
             <div>
               <label className="mb-1.5 block text-sm font-medium">
-                Dava Başlığı <span className="text-red-500">*</span>
+                Dava Basligi <span className="text-red-500">*</span>
               </label>
               <input
                 {...register('title')}
-                className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
-                placeholder="Ahmet Yılmaz - İşçilik Alacağı Davası"
+                className="w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
+                placeholder="Ornek: Ahmet Yilmaz iscilik alacagi dosyasi"
               />
-              {errors.title && (
-                <p className="mt-1 text-xs text-red-600">{errors.title.message}</p>
-              )}
+              {errors.title && <p className="mt-1 text-xs text-red-600">{errors.title.message}</p>}
             </div>
 
-            {/* Müvekkil + Dava Türü */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1.5 block text-sm font-medium">
-                  Müvekkil <span className="text-red-500">*</span>
+                  Muvekkil <span className="text-red-500">*</span>
                 </label>
                 <div className="flex gap-2">
                   <select
                     {...register('clientId')}
-                    className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:border-law-accent"
+                    className="w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-law-accent"
                   >
-                    <option value="">Müvekkil seçin</option>
+                    <option value="">Muvekkil secin</option>
                     {clients.map((client: any) => (
                       <option key={client.id} value={client.id}>
                         {client.fullName}
@@ -231,24 +203,22 @@ export default function CaseFormPage() {
                   <button
                     type="button"
                     onClick={() => setClientDialogOpen(true)}
-                    className="flex-shrink-0 rounded-lg border bg-background px-2.5 py-2.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                    title="Yeni müvekkil ekle"
+                    className="rounded-xl border px-3 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                    title="Yeni muvekkil ekle"
                   >
                     <Plus className="h-4 w-4" />
                   </button>
                 </div>
-                {errors.clientId && (
-                  <p className="mt-1 text-xs text-red-600">{errors.clientId.message}</p>
-                )}
+                {errors.clientId && <p className="mt-1 text-xs text-red-600">{errors.clientId.message}</p>}
               </div>
 
               <div>
                 <label className="mb-1.5 block text-sm font-medium">
-                  Dava Türü <span className="text-red-500">*</span>
+                  Dava Turu <span className="text-red-500">*</span>
                 </label>
                 <select
                   {...register('caseType')}
-                  className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:border-law-accent"
+                  className="w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-law-accent"
                 >
                   {caseTypeValues.map((type) => (
                     <option key={type} value={type}>
@@ -256,78 +226,54 @@ export default function CaseFormPage() {
                     </option>
                   ))}
                 </select>
-                {errors.caseType && (
-                  <p className="mt-1 text-xs text-red-600">{errors.caseType.message}</p>
-                )}
+                {errors.caseType && <p className="mt-1 text-xs text-red-600">{errors.caseType.message}</p>}
               </div>
             </div>
 
-            {/* Özel Dava Türü — sadece "diger" seçildiğinde */}
             {selectedCaseType === 'diger' && (
               <div>
-                <label className="mb-1.5 block text-sm font-medium">
-                  Özel Dava Türü
-                </label>
+                <label className="mb-1.5 block text-sm font-medium">Ozel Dava Turu</label>
                 <input
                   {...register('customCaseType')}
-                  className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
-                  placeholder="Örn: Ortaklığın giderilmesi, Tapu iptali..."
+                  className="w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
+                  placeholder="Ornek: Tapu iptali, ortakligin giderilmesi"
                 />
               </div>
             )}
 
-            {/* Esas No + Mahkeme */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-sm font-medium">Esas Numarası</label>
+                <label className="mb-1.5 block text-sm font-medium">Esas Numarasi</label>
                 <input
                   {...register('caseNumber')}
-                  className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
-                  placeholder="2025/1234"
+                  className="w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
+                  placeholder="2026/145"
                 />
               </div>
               <div>
                 <label className="mb-1.5 block text-sm font-medium">Mahkeme</label>
                 <input
                   {...register('courtName')}
-                  className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
-                  placeholder="İstanbul 5. İş Mahkemesi"
+                  className="w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
+                  placeholder="Istanbul 5. Is Mahkemesi"
                 />
               </div>
             </div>
 
-            {/* Dava Durumu (sadece düzenleme modunda) */}
-            {isEdit && (
-              <div>
-                <label className="mb-1.5 block text-sm font-medium">Dava Durumu</label>
-                <select
-                  {...register('status' as any)}
-                  className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:border-law-accent"
-                >
-                  {caseStatusValues.map((s) => (
-                    <option key={s} value={s}>
-                      {caseStatusLabels[s] || s}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {/* Başlangıç Tarihi + Ücret */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-sm font-medium">Başlangıç Tarihi</label>
+                <label className="mb-1.5 block text-sm font-medium">Baslangic Tarihi</label>
                 <input
                   {...register('startDate')}
                   type="date"
-                  className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
+                  className="w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-sm font-medium">Anlaşılan Ücret (₺)</label>
+                <label className="mb-1.5 block text-sm font-medium">Anlasilan Ucret</label>
                 <input
                   {...register('contractedFee')}
-                  className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
+                  className="w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
                   placeholder="25000.00"
                 />
                 {errors.contractedFee && (
@@ -336,191 +282,68 @@ export default function CaseFormPage() {
               </div>
             </div>
 
-            {/* Açıklama */}
-            <div>
-              <label className="mb-1.5 block text-sm font-medium">Açıklama</label>
-              <textarea
-                {...register('description')}
-                rows={4}
-                className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-law-accent focus:ring-2 focus:ring-law-accent/20 resize-none"
-                placeholder="Dava hakkında detaylı açıklama..."
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* AI ile Başlat — sadece yeni dava */}
-        {!isEdit && (
-          <Card className={`relative overflow-hidden transition-all ${aiEnabled ? 'border-law-accent/40 bg-law-accent/5' : ''}`}>
-            <CardContent className="p-5">
-              <div className="flex items-start gap-4">
-                <button
-                  type="button"
-                  onClick={() => setAiEnabled(!aiEnabled)}
-                  className={`relative mt-0.5 flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
-                    aiEnabled ? 'bg-law-accent' : 'bg-muted-foreground/30'
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
-                      aiEnabled ? 'translate-x-6' : 'translate-x-1'
-                    }`}
+            {isEdit && (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium">Dosya Durumu</label>
+                  <select
+                    {...register('status')}
+                    className="w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-law-accent"
+                  >
+                    {caseStatusValues.map((status) => (
+                      <option key={status} value={status}>
+                        {caseStatusLabels[status] || status}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium">Kapanis Tarihi</label>
+                  <input
+                    {...register('closeDate')}
+                    type="date"
+                    disabled={!selectedStatus || !['won', 'lost', 'settled', 'closed'].includes(selectedStatus)}
+                    className="w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-law-accent focus:ring-2 focus:ring-law-accent/20 disabled:cursor-not-allowed disabled:bg-muted/40"
                   />
-                </button>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className={`h-4 w-4 ${aiEnabled ? 'text-law-accent' : 'text-muted-foreground'}`} />
-                    <span className="text-sm font-medium">AI ile Başlat</span>
-                  </div>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Davayı kaydettikten sonra AI Çalışma Alanı otomatik olarak aktifleşir.
-                    Briefing, usul raporu ve araştırma adımları sırayla başlatılabilir.
-                  </p>
-                  {aiEnabled && (
-                    <div className="mt-3 flex items-center gap-2 rounded-md border border-law-accent/20 bg-law-accent/10 px-3 py-2 text-xs text-law-accent">
-                      <Bot className="h-3.5 w-3.5" />
-                      Dava kaydedildikten sonra AI Çalışma Alanı sekmesine yönlendirileceksiniz.
-                    </div>
-                  )}
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        )}
-
-        <Card>
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base">Otomasyon Workspace</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label className="mb-1.5 block text-sm font-medium">Otomasyon Dava Kodu</label>
-                <input
-                  {...register('automationCaseCode')}
-                  className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
-                  placeholder="2026-003-Sezen-iscilik"
-                />
-              </div>
-              <div>
-                <label className="mb-1.5 block text-sm font-medium">Otomasyon Durumu</label>
-                <select
-                  {...register('automationStatus')}
-                  className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:border-law-accent"
-                >
-                  {automationStatusValues.map((status) => (
-                    <option key={status} value={status}>
-                      {automationStatusLabels[status] || status}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+            )}
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium">Drive Klasör Yolu</label>
-              <input
-                {...register('driveFolderPath')}
-                className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
-                placeholder="G:\\Drive'im\\Hukuk Burosu\\Aktif Davalar\\2026-003-Sezen-iscilik"
+              <label className="mb-1.5 block text-sm font-medium">Aciklama</label>
+              <textarea
+                {...register('description')}
+                rows={5}
+                className="w-full resize-none rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
+                placeholder="Dosya ozeti, hedef, riskler, karsi taraf bilgisi ve notlar"
               />
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-sm font-medium">Briefing Dosya Yolu</label>
-              <input
-                {...register('briefingPath')}
-                className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
-                placeholder="...\\00-Briefing.md"
-              />
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-sm font-medium">Araştırma Dosya Yolu</label>
-              <input
-                {...register('researchPath')}
-                className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
-                placeholder="...\\02-Araştırma\\arastirma-raporu.md"
-              />
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-sm font-medium">Usul Raporu Yolu</label>
-              <input
-                {...register('procedurePath')}
-                className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
-                placeholder="...\\01-Usul\\usul-raporu.md"
-              />
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-sm font-medium">Savunma Simülasyonu Yolu</label>
-              <input
-                {...register('defenseSimulationPath')}
-                className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
-                placeholder="...\\02-Araştırma\\savunma-simulasyonu.md"
-              />
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-sm font-medium">Revizyon Raporu Yolu</label>
-              <input
-                {...register('revisionPath')}
-                className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
-                placeholder="...\\03-Sentez-ve-Dilekçe\\revizyon-raporu-v1.md"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label className="mb-1.5 block text-sm font-medium">Dilekçe Markdown Yolu</label>
-                <input
-                  {...register('pleadingMdPath')}
-                  className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
-                  placeholder="...\\dava-dilekcesi-v1.md"
-                />
-              </div>
-              <div>
-                <label className="mb-1.5 block text-sm font-medium">Dilekçe UDF Yolu</label>
-                <input
-                  {...register('pleadingUdfPath')}
-                  className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
-                  placeholder="...\\dava-dilekcesi-v1.udf"
-                />
-              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Butonlar */}
-        <div className="flex items-center justify-end gap-3">
+        <div className="sticky bottom-0 -mx-3 flex flex-col-reverse gap-2 border-t bg-background px-3 py-3 pb-[calc(env(safe-area-inset-bottom)+12px)] shadow-[0_-4px_12px_rgba(0,0,0,0.04)] sm:static sm:mx-0 sm:flex-row sm:items-center sm:justify-end sm:gap-3 sm:border-0 sm:bg-transparent sm:p-0 sm:pb-0 sm:shadow-none">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="rounded-lg border px-4 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted"
+            className="rounded-xl border px-4 py-2.5 text-sm font-medium text-muted-foreground transition hover:bg-muted"
           >
-            İptal
+            Iptal
           </button>
           <button
             type="submit"
             disabled={isPending}
-            className="inline-flex items-center gap-2 rounded-lg bg-law-accent px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:opacity-90 disabled:opacity-50"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-law-accent px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:opacity-90 disabled:opacity-50 sm:w-auto"
           >
-            {isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
-            {isEdit ? 'Güncelle' : 'Kaydet'}
+            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+            {isEdit ? 'Guncelle' : 'Kaydet'}
           </button>
         </div>
       </form>
 
-      {/* Yeni Müvekkil Dialog */}
       <Dialog open={clientDialogOpen} onOpenChange={setClientDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Yeni Müvekkil Ekle</DialogTitle>
+            <DialogTitle>Yeni Muvekkil Ekle</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div>
@@ -529,45 +352,45 @@ export default function CaseFormPage() {
               </label>
               <input
                 value={newClientName}
-                onChange={(e) => setNewClientName(e.target.value)}
-                className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
-                placeholder="Ahmet Yılmaz"
+                onChange={(event) => setNewClientName(event.target.value)}
+                className="w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
+                placeholder="Ad Soyad"
               />
             </div>
             <div>
               <label className="mb-1.5 block text-sm font-medium">Telefon</label>
               <input
                 value={newClientPhone}
-                onChange={(e) => setNewClientPhone(e.target.value)}
-                className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
-                placeholder="05XX XXX XX XX"
+                onChange={(event) => setNewClientPhone(event.target.value)}
+                className="w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
+                placeholder="05xx xxx xx xx"
               />
             </div>
             <div>
               <label className="mb-1.5 block text-sm font-medium">E-posta</label>
               <input
                 value={newClientEmail}
-                onChange={(e) => setNewClientEmail(e.target.value)}
-                className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
-                placeholder="ornek@email.com"
+                onChange={(event) => setNewClientEmail(event.target.value)}
+                className="w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-law-accent focus:ring-2 focus:ring-law-accent/20"
+                placeholder="ornek@mail.com"
               />
             </div>
             <div className="flex justify-end gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => setClientDialogOpen(false)}
-                className="rounded-lg border px-4 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted"
+                className="rounded-xl border px-4 py-2.5 text-sm font-medium text-muted-foreground transition hover:bg-muted"
               >
-                İptal
+                Iptal
               </button>
               <button
                 type="button"
                 onClick={handleCreateClient}
                 disabled={!newClientName.trim() || createClient.isPending}
-                className="inline-flex items-center gap-2 rounded-lg bg-law-accent px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:opacity-90 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-xl bg-law-accent px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:opacity-90 disabled:opacity-50"
               >
                 {createClient.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-                Oluştur
+                Olustur
               </button>
             </div>
           </div>

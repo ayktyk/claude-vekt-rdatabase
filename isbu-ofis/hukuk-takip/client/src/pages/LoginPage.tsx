@@ -7,6 +7,8 @@ import { z } from 'zod'
 import { Gavel, Eye, EyeOff, Loader2, ArrowRight } from 'lucide-react'
 import { toast } from 'sonner'
 import { api } from '@/lib/axios'
+import { setAuthTokens } from '@/lib/authTokens'
+import { writeCachedUser } from '@/lib/authCache'
 
 const loginSchema = z.object({
   email: z.string().email('Geçerli bir e-posta girin'),
@@ -31,7 +33,17 @@ export default function LoginPage() {
   const loginMutation = useMutation({
     mutationFn: (data: LoginForm) => api.post('/auth/login', data),
     onSuccess: (res) => {
+      setAuthTokens({
+        accessToken: res.data.accessToken,
+        refreshToken: res.data.refreshToken,
+      })
       queryClient.setQueryData(['auth', 'me'], res.data.user)
+      writeCachedUser(res.data.user)
+      // Dashboard verisini arka planda prefetch et — login sonrası anında açılsın
+      queryClient.prefetchQuery({
+        queryKey: ['dashboard'],
+        queryFn: async () => (await api.get('/dashboard')).data,
+      })
       navigate('/dashboard', { replace: true })
     },
     onError: (err: { response?: { data?: { error?: string }; status?: number } }) => {

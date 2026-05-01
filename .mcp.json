@@ -2,9 +2,10 @@
   "mcpServers": {
     "hukuk-kutuphanesi": {
       "command": "python",
-      "args": ["D:\\hukuk-vektordb\\mcp-sunucu\\sunucu.py"],
+      "args": ["${HUKUK_VEKTORDB_PATH:-D:/hukuk-vektordb}/mcp-sunucu/sunucu.py"],
       "env": {
-        "HUKUK_DB_YOLU": "D:\\hukuk-vektordb\\vektor-db"
+        "HUKUK_DB_YOLU": "${HUKUK_VEKTORDB_PATH:-D:/hukuk-vektordb}/vektor-db",
+        "HUKUK_VEKTORDB_PATH": "${HUKUK_VEKTORDB_PATH:-D:/hukuk-vektordb}"
       }
     },
     "notebooklm": {
@@ -15,8 +16,16 @@
       "command": "python",
       "args": ["-m", "mempalace.mcp_server"],
       "env": {
-        "MEMPALACE_PALACE_PATH": "C:/Users/user/mempalace_palace",
+        "MEMPALACE_PALACE_PATH": "${MEMPALACE_PALACE_PATH:-C:/Users/user/mempalace_palace}",
         "PYTHONIOENCODING": "utf-8"
+      }
+    },
+    "qmd-hafiza": {
+      "command": "qmd",
+      "args": ["mcp"],
+      "env": {
+        "GGML_CUDA": "0",
+        "NODE_OPTIONS": "--max-old-space-size=4096"
       }
     }
   }

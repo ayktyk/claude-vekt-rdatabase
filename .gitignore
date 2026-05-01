@@ -13,3 +13,31 @@ pilot-output/
 test-output/
 vektordb_v2_pilot/__pycache__/
 vektordb_v2_pilot/*.pyc
+
+# KVKK Seviye 2 Maskeleme — dict dosyaları KVKK gereği git'e girmemeli
+config/masks/*.json
+!config/masks/.gitkeep
+
+# Python cache
+__pycache__/
+*.pyc
+scripts/__pycache__/
+
+# Geçici çalışma dosyaları — KVKK gereği müvekkil verisi içerebilir
+tmp/
+.tmp_arastirma/
+logs/
+.claude/scheduled_tasks.lock
+
+# Yedekler
+isbu-ofis/hukuk-takip/backups/
+
+# Manus araştırma raporları (kişisel notlar)
+MANUS1*.md
+MANUS2*.md
+NEXUS.md
+isbu-ofis/NEXUS.md
+isbu-ofis/PLAN.md
+
+# BRAINSTORMING - yerel notlar
+BRAINSTORMING.md

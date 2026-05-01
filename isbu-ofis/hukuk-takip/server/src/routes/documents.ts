@@ -9,7 +9,6 @@ import { db } from '../db/index.js'
 import { cases, documents } from '../db/schema.js'
 import { authenticate } from '../middleware/auth.js'
 import { getSingleValue } from '../utils/request.js'
-import { buildWorkspaceLayout, syncEvidenceChecklist } from '../utils/workspace.js'
 import {
   MAX_DOCUMENT_FILES_PER_REQUEST,
   MAX_DOCUMENT_FILE_SIZE_BYTES,
@@ -62,7 +61,7 @@ function sanitizeFilename(fileName: string) {
   const baseName = path.basename(fileName, path.extname(fileName))
   const extension = path.extname(fileName)
   const safeBaseName = baseName
-    .replace(/[^a-zA-Z0-9çğıöşüÇĞİÖŞÜ._\s-]+/gu, '-')
+    .replace(/[^a-zA-Z0-9Ã§ÄŸÄ±Ã¶ÅŸÃ¼Ã‡ÄÄ°Ã–ÅÃœ._\s-]+/gu, '-')
     .replace(/\s+/g, '-')
     .replace(/-{2,}/g, '-')
     .replace(/^-+|-+$/g, '')
@@ -93,9 +92,7 @@ function getUploadedFiles(req: Request) {
 async function cleanupTemporaryFiles(files: Express.Multer.File[]) {
   await Promise.all(
     files.map(async (file) => {
-      if (!file.path) {
-        return
-      }
+      if (!file.path) return
 
       try {
         await fs.unlink(file.path)
@@ -123,13 +120,11 @@ async function runUploadMiddleware(req: Request, res: Parameters<typeof uploadMi
   })
 }
 
-async function getOwnedCaseWithWorkspace(userId: string, caseId: string) {
+async function getOwnedCase(userId: string, caseId: string) {
   const [caseRecord] = await db
     .select({
       id: cases.id,
       title: cases.title,
-      caseType: cases.caseType,
-      driveFolderPath: cases.driveFolderPath,
     })
     .from(cases)
     .where(and(eq(cases.id, caseId), eq(cases.userId, userId)))
@@ -138,37 +133,7 @@ async function getOwnedCaseWithWorkspace(userId: string, caseId: string) {
   return caseRecord ?? null
 }
 
-async function syncChecklistForCase(
-  caseId: string,
-  driveFolderPath?: string | null,
-  caseType?: string | null
-) {
-  if (!driveFolderPath) {
-    return false
-  }
-
-  const checklistPath = buildWorkspaceLayout(driveFolderPath).files.evidenceChecklistPath
-  const caseDocuments = await db
-    .select({
-      fileName: documents.fileName,
-      createdAt: documents.createdAt,
-      description: documents.description,
-    })
-    .from(documents)
-    .where(eq(documents.caseId, caseId))
-
-  const syncedDocuments = caseDocuments.filter((document) =>
-    isSupportedDocumentFile(document.fileName)
-  )
-
-  return syncEvidenceChecklist(checklistPath, syncedDocuments, { caseType })
-}
-
-function buildStorageDirectory(caseRecord: { id: string; driveFolderPath: string | null }) {
-  if (caseRecord.driveFolderPath) {
-    return path.win32.join(caseRecord.driveFolderPath, '04-Muvekkil-Belgeleri', '00-Ham')
-  }
-
+function buildStorageDirectory(caseRecord: { id: string }) {
   return path.join(LOCAL_DOCUMENTS_ROOT, caseRecord.id)
 }
 
@@ -211,7 +176,7 @@ router.post('/', async (req, res) => {
       return
     }
 
-    const caseRecord = await getOwnedCaseWithWorkspace(req.user!.userId, caseId)
+    const caseRecord = await getOwnedCase(req.user!.userId, caseId)
     if (!caseRecord) {
       await cleanupTemporaryFiles(uploadedFiles)
       res.status(404).json({ error: 'Dava bulunamadi.' })
@@ -249,7 +214,6 @@ router.post('/', async (req, res) => {
     }
 
     await cleanupTemporaryFiles(uploadedFiles)
-    await syncChecklistForCase(caseId, caseRecord.driveFolderPath, caseRecord.caseType)
 
     res.status(201).json({
       uploadedCount: createdDocuments.length,
@@ -284,8 +248,6 @@ router.get('/:id/download', async (req, res) => {
         id: documents.id,
         fileName: documents.fileName,
         fileUrl: documents.fileUrl,
-        caseId: documents.caseId,
-        driveFolderPath: cases.driveFolderPath,
       })
       .from(documents)
       .innerJoin(cases, eq(documents.caseId, cases.id))
@@ -323,9 +285,6 @@ router.delete('/:id', async (req, res) => {
       .select({
         id: documents.id,
         fileUrl: documents.fileUrl,
-        caseId: documents.caseId,
-        caseType: cases.caseType,
-        driveFolderPath: cases.driveFolderPath,
       })
       .from(documents)
       .innerJoin(cases, eq(documents.caseId, cases.id))
@@ -337,11 +296,7 @@ router.delete('/:id', async (req, res) => {
       return
     }
 
-    const canDelete =
-      isPathInside(LOCAL_DOCUMENTS_ROOT, document.fileUrl) ||
-      (document.driveFolderPath ? isPathInside(document.driveFolderPath, document.fileUrl) : false)
-
-    if (canDelete) {
+    if (isPathInside(LOCAL_DOCUMENTS_ROOT, document.fileUrl)) {
       try {
         await fs.unlink(document.fileUrl)
       } catch (error: any) {
@@ -352,8 +307,6 @@ router.delete('/:id', async (req, res) => {
     }
 
     await db.delete(documents).where(eq(documents.id, documentId))
-    await syncChecklistForCase(document.caseId, document.driveFolderPath, document.caseType)
-
     res.json({ message: 'Belge silindi.' })
   } catch (error) {
     console.error('[Documents][Delete]', error)

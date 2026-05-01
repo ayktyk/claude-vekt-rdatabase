@@ -6,7 +6,7 @@ import { db } from '../db/index.js'
 import { users } from '../db/schema.js'
 import { validate } from '../middleware/validate.js'
 import { authenticate, type JwtPayload } from '../middleware/auth.js'
-import { loginSchema } from '@hukuk-takip/shared'
+import { loginSchema } from '../../../shared/dist/index.js'
 
 const router = Router()
 
@@ -30,6 +30,8 @@ function parseDurationMs(dur: string): number {
 const ACCESS_TOKEN_MAX_AGE = parseDurationMs(ACCESS_TOKEN_EXPIRES as string)
 const REFRESH_TOKEN_MAX_AGE = parseDurationMs(REFRESH_TOKEN_EXPIRES as string)
 
+type SameSiteValue = 'lax' | 'strict' | 'none'
+
 function generateAccessToken(payload: JwtPayload): string {
   return jwt.sign(payload, process.env.JWT_SECRET!, {
     expiresIn: ACCESS_TOKEN_EXPIRES,
@@ -42,24 +44,46 @@ function generateRefreshToken(payload: JwtPayload): string {
   })
 }
 
-function setTokenCookies(res: import('express').Response, accessToken: string, refreshToken: string) {
+function getCookieBaseOptions(): import('express').CookieOptions {
   const isProduction = process.env.NODE_ENV === 'production'
+  const sameSite =
+    (process.env.COOKIE_SAME_SITE as SameSiteValue | undefined) ||
+    (isProduction ? 'none' : 'lax')
+  const secure =
+    process.env.COOKIE_SECURE != null
+      ? process.env.COOKIE_SECURE === 'true'
+      : isProduction || sameSite === 'none'
+
+  return {
+    httpOnly: true,
+    secure,
+    sameSite,
+    path: '/',
+    domain: process.env.COOKIE_DOMAIN || undefined,
+  }
+}
+
+function setTokenCookies(res: import('express').Response, accessToken: string, refreshToken: string) {
+  const cookieOptions = getCookieBaseOptions()
 
   res.cookie('access_token', accessToken, {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: 'lax',
+    ...cookieOptions,
     maxAge: ACCESS_TOKEN_MAX_AGE,
-    path: '/',
   })
 
   res.cookie('refresh_token', refreshToken, {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: 'lax',
+    ...cookieOptions,
     maxAge: REFRESH_TOKEN_MAX_AGE,
-    path: '/',
   })
+}
+
+function getRefreshTokenFromRequest(req: import('express').Request) {
+  const refreshTokenFromBody =
+    typeof req.body?.refreshToken === 'string' && req.body.refreshToken.trim().length > 0
+      ? req.body.refreshToken.trim()
+      : null
+
+  return refreshTokenFromBody || req.cookies?.refresh_token || null
 }
 
 // ─── POST /api/auth/login ─────────────────────────────────────────────────────
@@ -96,6 +120,8 @@ router.post('/login', validate(loginSchema), async (req, res) => {
   setTokenCookies(res, accessToken, refreshToken)
 
   res.json({
+    accessToken,
+    refreshToken,
     user: {
       id: user.id,
       email: user.email,
@@ -109,7 +135,7 @@ router.post('/login', validate(loginSchema), async (req, res) => {
 // ─── POST /api/auth/refresh ───────────────────────────────────────────────────
 
 router.post('/refresh', async (req, res) => {
-  const refreshToken = req.cookies?.refresh_token
+  const refreshToken = getRefreshTokenFromRequest(req)
 
   if (!refreshToken) {
     res.status(401).json({ error: 'Oturum süresi doldu.' })
@@ -138,7 +164,11 @@ router.post('/refresh', async (req, res) => {
 
     setTokenCookies(res, newAccessToken, newRefreshToken)
 
-    res.json({ message: 'Token yenilendi.' })
+    res.json({
+      message: 'Token yenilendi.',
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+    })
   } catch {
     res.status(401).json({ error: 'Oturum süresi doldu. Tekrar giriş yapın.' })
     return
@@ -249,8 +279,10 @@ router.put('/password', authenticate, async (req, res) => {
 // ─── POST /api/auth/logout ────────────────────────────────────────────────────
 
 router.post('/logout', (_req, res) => {
-  res.clearCookie('access_token', { path: '/' })
-  res.clearCookie('refresh_token', { path: '/' })
+  const cookieOptions = getCookieBaseOptions()
+
+  res.clearCookie('access_token', cookieOptions)
+  res.clearCookie('refresh_token', cookieOptions)
   res.json({ message: 'Çıkış yapıldı.' })
 })
 

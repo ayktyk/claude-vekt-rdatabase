@@ -1,10 +1,11 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import { api } from '@/lib/axios'
 import { toast } from 'sonner'
 import type { CreateCaseInput, UpdateCaseInput } from '@hukuk-takip/shared'
 
 export function useCases(params?: {
   search?: string
+  statusGroup?: string
   status?: string
   caseType?: string
   page?: number
@@ -16,6 +17,8 @@ export function useCases(params?: {
       const res = await api.get('/cases', { params })
       return res.data
     },
+    placeholderData: keepPreviousData,
+    staleTime: 1000 * 60 * 2,
   })
 }
 
@@ -27,6 +30,27 @@ export function useCase(id: string | undefined) {
       return res.data
     },
     enabled: !!id,
+  })
+}
+
+// Tek roundtrip — dava + ilişkili tüm veri
+export function useCaseDetail(id: string | undefined) {
+  return useQuery({
+    queryKey: ['cases', id, 'detail'],
+    queryFn: async () => {
+      const res = await api.get(`/cases/${id}/detail`)
+      return res.data as {
+        case: any
+        hearings: any[]
+        tasks: any[]
+        expenses: any[]
+        collections: any[]
+        notes: any[]
+        documents: any[]
+      }
+    },
+    enabled: !!id,
+    staleTime: 1000 * 60 * 2,
   })
 }
 
@@ -192,29 +216,6 @@ export function useDeleteCase() {
     },
     onError: () => {
       toast.error('Dava silinemedi.')
-    },
-  })
-}
-
-export function useInitializeCaseWorkspace(id: string) {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: async () => {
-      const res = await api.post(`/cases/${id}/initialize-workspace`)
-      return res.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cases'] })
-      queryClient.invalidateQueries({ queryKey: ['cases', id] })
-      queryClient.invalidateQueries({ queryKey: ['cases', id, 'tasks'] })
-      queryClient.invalidateQueries({ queryKey: ['cases', id, 'notes'] })
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
-      toast.success('AI Workspace hazirlandi.')
-    },
-    onError: (error: any) => {
-      const message = error?.response?.data?.error || 'AI Workspace hazirlanamadi.'
-      toast.error(message)
     },
   })
 }

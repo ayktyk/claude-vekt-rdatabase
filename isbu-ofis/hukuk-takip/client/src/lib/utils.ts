@@ -30,6 +30,32 @@ export function isOverdue(date: string | Date | null | undefined): boolean {
   return isPast(new Date(date))
 }
 
+/**
+ * <input type="datetime-local"> değerini ("2026-04-30T14:00" gibi, saat dilimi yok)
+ * client'ın YEREL saatine göre ISO string'e çevirir. Sunucu UTC'deyse saat +3 kayması
+ * olmaması için bunu yolla. Boş/geçersiz değerler boş döner.
+ *
+ * Örn: İstanbul'da "2026-04-30T14:00" → "2026-04-30T11:00:00.000Z"
+ */
+export function localInputToISO(value: string | null | undefined): string {
+  if (!value) return ''
+  const d = new Date(value)
+  if (Number.isNaN(d.getTime())) return ''
+  return d.toISOString()
+}
+
+/**
+ * ISO string'i ("2026-04-30T11:00:00.000Z") <input type="datetime-local"> için
+ * local formatına çevirir: "2026-04-30T14:00". TZ offset kullanıcının yereline göre.
+ */
+export function isoToLocalInput(value: string | Date | null | undefined): string {
+  if (!value) return ''
+  const d = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(d.getTime())) return ''
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
 export function formatCurrency(
   amount: number | string | null | undefined,
   currency = 'TRY'
@@ -64,21 +90,11 @@ export const caseStatusLabels: Record<string, string> = {
   yargitayda: 'Yargıtayda',
   'yargıtayda': 'Yargıtayda',
   'yargÄ±tayda': 'Yargıtayda',
-  passive: 'Pasif',
+  passive: 'Potansiyel',
   closed: 'Kapatıldı',
   won: 'Kazanıldı',
   lost: 'Kaybedildi',
   settled: 'Uzlaşıldı',
-}
-
-export const automationStatusLabels: Record<string, string> = {
-  not_started: 'Başlanmadı',
-  folder_ready: 'Klasör Hazır',
-  briefing_ready: 'Briefing Hazır',
-  research_ready: 'Araştırma Hazır',
-  draft_ready: 'Taslak Hazır',
-  review_ready: 'Revizyon Aşaması',
-  completed: 'Tamamlandı',
 }
 
 export const taskStatusLabels: Record<string, string> = {

@@ -13,6 +13,54 @@ Yapay zeka oldugun hicbir cikti da belli olmamali.
 Uslup: kisa, net, resmi. Kararlari ve mevzuati kaynak goster.
 Her cikti TASLAK'tir. Avukat son kontrolu yapar.
 
+## KVKK Seviye 2 Maskeleme Protokolu (ZORUNLU)
+
+Muvekkil verisi LLM'e (Anthropic / Google) gitmeden once `scripts/maske.py` ile
+maskelenir. Avukat yeni dava acarken komutu MASKELI sekilde verir:
+
+```
+Yeni dava: [MUVEKKIL_1] (kiraya veren) + [MUVEKKIL_2] (tapu maliki)
+Karsi taraf: [KARSI_TARAF_1]
+Tasinmaz: [ADRES_2]
+Dava-ID: selin-uyar-2026-003
+```
+
+Tum ASAMA ciktilari maskeli verilerle uretilir. Dilekce v2 NIHAI sonrasi
+avukat `python maske.py --dict DAVA-ID unmask dilekce-v2.md dilekce-v2.final.md`
+komutuyla gercek veriye cevirir ve UYAP'a yukler.
+
+Detay: `MASKELEME-KILAVUZU.md`
+TC, IBAN, Telefon, E-posta **otomatik** maskelenir (regex tabanli).
+Isim ve adres **manuel** dict'e eklenir (avukat dava acmadan once).
+
+Dict dosyalari: `config/masks/{dava-id}.json` (yerel disk, git disi, KVKK gereği).
+
+## Cikti Formati
+
+Her ASAMA ciktisi MD formatinda uretilir. Ayrica `scripts/md_to_docx.py` ile
+otomatik DOCX'e cevrilir (avukat Word'de duzenleme icin).
+
+**UDF uretimi yalnizca NIHAI DILEKCE icin** yapilir:
+- v2 NIHAI (ASAMA 7 ciktisi), istinaf, temyiz dilekceleri
+- Uretim: `python scripts/md_to_udf.py <input.md>`
+- `scripts/md_to_udf.py` structure-aware Python generator'dir
+  (udf-cli kullanmaz, proje kokundeki `2.udf` referans sablonuyla
+  birebir uyumlu format uretir). Avukat onayli format
+  (Selin Uyar 2026-003 davasinda, dilekce-v3.udf, 2026-04-22).
+- Cikti ozellikleri: `format_id="1.7"`, 70.87 pt margin, Times New
+  Roman 12 (hvl-default), ortalanmis bold baslik, bold+underline
+  label+`<tab>`+value taraf bloklari, bold+underline section heading,
+  `Numbered=true LeftIndent=25.0` numarali talepler, sag-hizali imza.
+- Cikti: ayni klasorde `.udf` uzantili dosya (MD + DOCX + UDF uclusu).
+- Detay: `@ajanlar/revizyon-ajani/SKILL.md` -> "UDF Uretimi" bolumu.
+
+Taslak ASAMA'lar (v1 dilekce, usul raporu, arastirma, stratejik analiz,
+savunma simulasyonu, briefing, hesaplama vb.) yalnizca MD + DOCX
+uretir. UDF URETMEZ — UYAP'a gitmez, revizyona tabi.
+
+UYAP yuklemesi oncesi avukat `python scripts/maske.py unmask` ile
+maskeli dilekceyi gercek veriye cevirir.
+
 ## Kalici Kayit Politikasi
 
 Kalici dava ve arastirma ciktisi yerel diske degil, yalnizca Google Drive'a kaydedilir.
@@ -38,9 +86,6 @@ Bu kuralin sonucu:
 ```text
 ~/hukuk-otomasyon/
 |-- CLAUDE.md
-|-- SONCLAUDE.md
-|-- ALLSKILL.md
-|-- PLAN.md
 |-- legal.local.md
 |-- dilekce-yazim-kurallari.md
 |-- .mcp.json
@@ -55,15 +100,11 @@ Bu kuralin sonucu:
 |   |-- dilekce-yazari/
 |   |   |-- system-prompt.md
 |   |   `-- SKILL.md
-|   |-- pazarlama/
-|   |   |-- system-prompt.md
-|   |   `-- SKILL.md
 |   |-- savunma-simulatoru/
 |   |   `-- SKILL.md
 |   `-- revizyon-ajani/
 |       `-- SKILL.md
 |-- aktif-davalar/ (ARTIK KULLANILMIYOR - GOOGLE DRIVE'A TASINDI)
-|-- blog-icerikleri/
 |-- bilgi-tabani/
 |-- sablonlar/
 `-- config/
@@ -105,23 +146,53 @@ Sistemin iki bilgi katmani vardir. Her arac yalnizca kendi katmanina aittir.
 
 | Arac | Gorev |
 |---|---|
-| `yargi` CLI | Yargitay, Danistay, HGK, IBK karari aramasi (`yargi bedesten search/doc`) |
-| `mevzuat` CLI | Kanun, KHK, yonetmelik, teblig arama ve tam metin (`mevzuat search/doc/article/tree`) |
+| Yargi MCP (`mcp__claude_ai_Yarg_MCP__*`) | **BIRINCIL** - Yargitay/Danistay/HGK/IBK/AYM/Uyusmazlik/Sayistay/KVKK/Rekabet/KIK arama + tam metin (`search_bedesten_unified`, `search_anayasa_unified`, `get_bedesten_document_markdown`, `check_government_servers_health`). Claude Opus 4.7 MAX EFFORT. |
+| Mevzuat MCP (`mcp__claude_ai_Mevuzat_MCP__*`) | **BIRINCIL** - Kanun/KHK/Tuzuk/Yonetmelik/Teblig/CBK arama + icerik + madde agaci + gerekce (`search_mevzuat`, `search_kanun`, `search_within_*`, `get_mevzuat_content`, `get_mevzuat_madde_tree`, `get_mevzuat_gerekce`). Mulga denetimi icin zorunlu. Claude Opus 4.7 MAX EFFORT. |
+| `yargi` CLI | **FALLBACK** - Yargi MCP basarisiz olursa devreye girer (`yargi bedesten search/doc`) |
+| `mevzuat` CLI | **FALLBACK** - Mevzuat MCP basarisiz olursa devreye girer (`mevzuat search/doc/article/tree`) |
+
+**MCP-Birincil Kurali:** 2B Yargi ve 2C Mevzuat cagrilari her zaman MCP'den baslar.
+CLI'lar yalniz MCP timeout/hata durumunda otomatik fallback olarak calisir. Her
+fallback olayi rapora `mcp_fallback_used: true` notu ile yazilir.
 
 Bu katman yalnizca avukatin isaret ettigi kritik nokta icin calistirilir.
 Genis, konusuz arastirma yapma.
 
-**ONEMLI - Her Zaman Derin Mod (v2.0):** Yargi CLI ve Mevzuat CLI her
-sorguda **iteratif derin protokol** ile calisir. Hibrit mod yoktur,
-tek-shot sorgu yasaktir. Protokol hem `arastir:` hem `yeni dava`
-komutlarinda her zaman aktiftir.
+**ONEMLI - Her Zaman Derin Mod (v2.0):** Yargi MCP ve Mevzuat MCP her
+sorguda **iteratif derin protokol** ile calisir (Claude Opus 4.7 **MAX
+EFFORT thinking**). Hibrit mod yoktur, tek-shot sorgu yasaktir. Protokol
+hem `arastir:` hem `yeni dava` komutlarinda her zaman aktiftir. Yargi
+CLI / Mevzuat CLI yalniz MCP fail durumunda fallback olarak devreye girer.
+
+**2B → 2C Sirali Akis (paralelden CIKARILDI):** 2B Yargi MCP detayli karar
+arastirmasi yapar → bulunan kararlarin atif yaptigi mevzuat maddelerini cikarir
+→ 2C Mevzuat MCP o maddeleri ceker → her madde icin **mulga/guncel denetimi**
+yapar → mulga maddeye dayanan kararlar **elenir** (raporda kullanilmaz). Detay:
+`@FIVEAGENTS.md` -> "ASAMA 2 detay diyagrami" + "Mulga Eleme Protokolu" bolumu.
+`@ajanlar/arastirmaci/SKILL.md` -> "Bolum 2.5 - 2B → 2C Sirali Zincir" bolumu.
 
 Minimum sorgu kurali:
-- **Yargi CLI:** min 15 sorgu. Icerisinde 5 yil-bazli temporal evolution
-  (2021-2025 yil-yil), min 2 HGK sorgusu, min 2 celiski/bozma taramasi,
+- **Yargi MCP:** min 15 sorgu. Icerisinde 5 yil-bazli temporal evolution
+  (2021-2026 yil-yil), min 2 HGK sorgusu, min 2 celiski/bozma taramasi,
   min 5 karar tam metin okuma zorunlu.
-- **Mevzuat CLI:** min 8 sorgu. Icerisinde gerekce cekimi, madde degisiklik
+- **Mevzuat MCP:** min 8 sorgu. Icerisinde gerekce cekimi, madde degisiklik
   tarihcesi, min 2 yonetmelik/teblig, atif yapilan diger maddeler zorunlu.
+  Ek olarak: 2B'nin verdiği atif maddelerinin **mulga/guncel denetimi**
+  ZORUNLUDUR (yururluk + mulga tarihi + olay tarihi versiyonu + zimni ilga).
+  **EK ZORUNLULUK: Normlar Hiyerarsisi denetimi** — her bulunan mevzuat
+  hukmu hiyerarsik seviyeye etiketlenir (Anayasa/Antlasma/Kanun/CBK/
+  Tuzuk/Yonetmelik/Teblig). Alt norm ust normu daraltiyorsa veya ayni
+  basamakta catisma varsa Lex Superior/Specialis/Posterior kurallariyla
+  cozumlenir. CBK varsa munhasir kanun alani denetimi yapilir.
+  Detay: `@FIVEAGENTS.md` -> "Normlar Hiyerarsisi: Mevzuat Arastirma Motoru"
+  bolumu ve `@ajanlar/arastirmaci/SKILL.md` -> "Normlar Hiyerarsisi
+  Protokolu" bolumu.
+
+**LLM Web Arastirmasi (Fallback):** Mevzuat CLI'nin ulasamadigi mevzuat
+icin (cok yeni mevzuat, ozel kurum yonetmelikleri, milletlerarasi
+antlasmalar, AYM norm denetimi kararlari) arastirmaci ajan LLM web
+arastirmasi yapar. Fallback ciktisinda kaynak URL ve yayim tarihi
+ZORUNLU belirtilir. Rapor etiketi: "KAYNAK: LLM Web - [URL] - [Tarih]"
 
 Bu protokol **Max Effort thinking** ile calistirilir. Her iterasyon
 arasinda ajan karar noktalarinda durup muhakeme eder (hangi terim iyi
@@ -135,8 +206,10 @@ Detay: `@ajanlar/arastirmaci/SKILL.md` -> "Derin Arama Protokolu" bolumu.
 | Arac | Gorev |
 |---|---|
 | MemPalace MCP (`buro-hafizasi`) | Buro IC deneyim hafizasi - gecmis davalar, basarili argumanlar, hakim/avukat profilleri, ajan diary, avukat tercihleri |
-| Vektor DB (`hukuk_ara`) | Buronun kendi kitapligi - doktrin, emsal, dilekce stratejisi semantik aramasi |
-| NotebookLM MCP | Avukatin dava turune gore tuttugu notebook'lar |
+| Vektor DB (`hukuk_ara`) | Buronun kendi kitapligi - doktrin, emsal, dilekce stratejisi semantik aramasi (2A) |
+| NotebookLM MCP | Avukatin dava turune gore tuttugu notebook'lar (2D) |
+| Literatur MCP (`mcp__claude_ai_Literat_r_MCP__*`) | **2E** - DergiPark akademik dergi aramasi (Turkce hakemli makaleler), PDF tam metin (`pdf_to_html`), atif zinciri (`get_article_references`) - Claude Desktop user-level konfig |
+| Yoktez MCP (`mcp__claude_ai_Yoktez_MCP__*`) | **2E** - YOK Ulusal Tez Merkezi aramasi (`search_yok_tez_detailed`) ve tez tam metni sayfa-sayfa Markdown (`get_yok_tez_document_markdown`) - Claude Desktop user-level konfig |
 | Google Drive MCP | Klasor olusturma, dosya okuma ve kaydetme |
 | `legal.local.md` | Buro playbook - buronun statik kurallari ve tercihleri (canli tercih MemPalace'ta) |
 
@@ -164,62 +237,144 @@ Kaynak turleri ve erisim yontemleri:
 
 ---
 
-## Ajan Yapisi
+## Ajan Yapisi (v3 - 15 ajan, iki katmanli)
 
-Sistemde tek katmanli degil, orkestrasyon katmanli bir yapi vardir.
-Ana kural: isi ureten ajanlarla isi dagitan ajan ayni sey degildir.
+Sistem 1 Director + 14 uzman ajan (6 operasyonel + 5 perspektif + 3 destek)
+ile calisir. Ana kural: isi ureten ajanlarla isi dagitan ajan ayni sey degildir.
 
 ```text
 AVUKAT
   |
   |  Dava ozeti + kritik nokta + varsa kaynak
   v
-DIRECTOR AGENT
+DIRECTOR AGENT  (orkestrasyon, kullanici-kontrollu 7 ASAMA)
   |
-  |-- dava hafizasini acar
-  |-- kaynak sorgulamasini yonetir
-  |-- advanced briefing toplar
-  |-- hangi ajanlarin calisacagini secer
-  |-- kalite gate uygular
-  `-- siradaki adima karar verir
-         |
-         |-- AJAN 1: Usul Ajani
-         |-- AJAN 2: Arastirma Ajanlari
-         |-- AJAN 3: Belge Yazari
-         |-- SAVUNMA SIMULATORU
-         |-- REVIZYON AJANI
-         `-- AJAN 4: Pazarlama Uzmani
+  +-- OPERASYONEL KATMAN (6 ajan)
+  |     - Arastirmaci (4 alt isci: 2A Vector / 2B Yargi / 2C Mevzuat / 2D NotebookLM+Drive)
+  |     - Usul Uzmani
+  |     - Belge Yazari (dilekce / ihtarname / sozlesme)
+  |     - Savunma Simulatoru
+  |     - Revizyon Ajani
+  |     - Muvekkil Iletisim Ajani
+  |
+  +-- PERSPEKTIF KATMAN (5 ajan - ASAMA 4 stratejik analiz)
+  |     - 4A Davaci Avukat
+  |     - 4B Davali Avukat
+  |     - 4C Bilirkisi
+  |     - 4D Hakim
+  |     - 4E Sentez & Strateji (dilekce yazim rehberi uretir)
+  |
+  `-- DESTEK KATMAN (3 ajan)
+        - Hesaplama Ajani (iscilik alacaklari)
+        - Otonom Dongu (haftalik ictihat taramasi)
+        - MemPalace Wake-up / Diary Write
 ```
 
-### AJAN 2: Arastirma Ajanlari (ONCE CALISIR)
-Alt isciler: 2A (Vector RAG), 2B (Yargi), 2C (Mevzuat), 2D (NotebookLM/Drive)
-Tetikleyici: Director Agent kritik nokta belirledikten sonra.
-Detay ve kurallar: `@ajanlar/arastirmaci/SKILL.md`
-NotebookLM sorgu kurallari:
+### 7 ASAMA Workflow (`yeni dava: ...` tam akisinda)
+
+`yeni dava: ...` komutu geldiginde Director su 7 asamayi KULLANICI
+KONTROLLU olarak yurutur. Her asama basinda su formatta bildirim verir,
+avukat "devam" demeden bir sonraki asamaya GECMEZ.
+
+```
+[ASAMA N: {asama adi}]
+Motor: {gemini | claude}
+Model: {model-id}
+Fallback: {kullanildi / kullanilmadi}
+Giris: {okunan dosyalar}
+Beklenen cikti: {uretilcek dosya}
+```
+
+| ASAMA | Ad | Ajanlar | Cikti |
+|---|---|---|---|
+| 0 | MemPalace Wake-up | Destek | (context enjeksiyon) |
+| 1 | Hazirlik + Briefing | Director | `00-Briefing.md` |
+| 2 | Hibrit Arastirma (3 paralel kol + 1 sirali zincir) | Arastirmaci (2A + 2D + 2E paralel; 2B → 2C sirali) | `02-Arastirma/arastirma-raporu.md` |
+| 3 | Usul Raporu | Usul Uzmani | `01-Usul/usul-raporu.md` |
+| 4 | 5 Ajan Stratejik Analiz | 4A+4B+4C+4D+4E | `02-Arastirma/stratejik-analiz.md` |
+| 5 | Dilekce v1 | Belge Yazari | `03-Sentez-ve-Dilekce/dilekce-v1.md` |
+| 6 | Savunma Simulasyonu | Savunma Simulatoru | `02-Arastirma/savunma-simulasyonu.md` |
+| 7 | Dilekce v2 NIHAI | Revizyon Ajani | `03-Sentez-ve-Dilekce/dilekce-v2.md` |
+
+Avukat her asama sonunda soyle yanit verir:
+- `devam` -> sonraki asama
+- `atla` -> bu asama atlanir (Director sebebini sorar)
+- `motor degistir` -> alternatif motorla ayni asama yeniden calistirilir
+- `dur` -> akis durdurulur, `devam et` ile resume edilir
+
+Bu protokol SADECE `yeni dava: ...` tam akisinda uygulanir.
+Tekil komutlar (`dilekce yaz`, `arastir: ...`, `usul: ...`,
+`stratejik analiz: ...`, `revize et: ...`) tek-asama tek-cikti
+komutlaridir, durmadan calisir.
+
+### ASAMA 2 - Arastirma Ajanlari (3 paralel kol + 1 sirali zincir + 1 yeni)
+Alt isciler:
+- **Paralel kollar:** 2A (Vector RAG), 2D (NotebookLM/Drive), 2E (Akademik Doktrin: DergiPark + YOK Tez)
+- **Sirali zincir:** 2B (Yargi MCP) → 2C (Mevzuat MCP, atif maddeleri + mulga eleme)
+
+Detay: `@ajanlar/arastirmaci/SKILL.md` Bolum 1-3.
+
+**Normlar Hiyerarsisi (Zorunlu):** Mevzuat bulgulari Anayasa/Antlasma(m.90/5)/
+Kanun/OHAL CBK/IBK/CBK/Tuzuk/Yonetmelik/Teblig basamaklarina etiketlenir.
+Catisma Lex Superior / Specialis / Posterior ile cozulur. CBK varsa
+munhasir kanun alani denetimi yapilir. Detay: `@FIVEAGENTS.md` -> Normlar
+Hiyerarsisi bolumu.
+
+**NotebookLM kurallari:**
 - Her soruda "SADECE KAYNAKLARA GORE CEVAP VER, UYDURMA YAPMA" ibaresi ZORUNLU
-- Iteratif sorgulama: en az 6 soru (hukuki mesele irdeleme) + 4 perspektif sorusu
-  (davaci avukat, davali avukat, bilirkisi, hakim) = TOPLAM en az 10 sorgu
+- Iteratif: en az 6 hukuki mesele sorusu + 4 perspektif sorusu = minimum 10 sorgu
 
-### AJAN 1: Usul Ajani (ARASTIRMADAN SONRA CALISIR)
-Tetikleyici: Ajan 2 arastirmasi tamamlandiginda.
-Gorev: Davanin usul iskeletini kurmak (arastirma bulgulariyla zenginlestirilmis).
-Detay ve kurallar: `@ajanlar/usul-uzmani/SKILL.md`
+**LLM Web Arastirmasi (Fallback):** Mevzuat CLI'nin ulasamadigi mevzuat
+icin (cok yeni, ozel kurum yonetmelikleri, milletlerarasi antlasmalar,
+AYM norm denetimi) LLM web arastirmasi yapilir. Kaynak URL + tarih
+ZORUNLU. Etiket: "KAYNAK: LLM Web - [URL] - [Tarih]".
 
-### AJAN 3: Belge Yazari
-Tetikleyici: Usul + Arastirma ciktilari tamamlandiginda.
-Detay ve kurallar: `@ajanlar/dilekce-yazari/SKILL.md`
+### ASAMA 3 - Usul Uzmani
+Arastirma bulgulariyla zenginlestirilmis usul iskeletini kurar.
+Detay: `@ajanlar/usul-uzmani/SKILL.md`.
 
-### AJAN 4: Pazarlama Uzmani
-Tetikleyici: `blog yap: [konu]` komutu veya haftalik otonom dongu.
-Detay ve kurallar: `@ajanlar/pazarlama/SKILL.md`
+**Yetkili Mahkeme — Adliye Esleme Protokolu (Zorunlu):** Usul Uzmani
+yetkili mahkeme belirtirken IKI ADIMLI yol izler:
+  (A) Mevzuat: HMK/TBK vb. maddelerden gorevli tur + yer yetkisi.
+  (B) Somut ilce/mahalle -> bagli adliye: WebSearch/WebFetch ile
+      guvenilir kaynaklardan (HSK, adalet.gov.tr, ilgili adliye resmi
+      sitesi) dogrulanir. Raporda kaynak URL + tarih ZORUNLU.
+Dogrulanamazsa `RISK FLAG: Yetkili Adliye dogrulanamadi` yazilir.
+Istanbul gibi cok-adliyeli sehirlerde bu protokol atlanirsa UYAP
+yanlis yonlendirmesi riski olusur (Selin Uyar 2026-003 davasinda
+yasanan Zeytinburnu-Cağlayan/Bakirkoy karisikligi ornegi).
+Detay: `@ajanlar/usul-uzmani/SKILL.md` -> "Yetkili Mahkeme —
+Adliye Esleme Protokolu" bolumu.
 
-### SAVUNMA SIMULATORU
-Tetikleyici: `savunma simule et: [dava-id]` komutu veya dilekce kalite gate'inde risk flag cikmasi.
-Detay ve kurallar: `@ajanlar/savunma-simulatoru/SKILL.md`
+### ASAMA 4 - 5 Ajan Stratejik Analiz (YENI)
+4A Davaci Avukat + 4B Davali Avukat + 4C Bilirkisi + 4D Hakim paralel
+calisir, 4E Sentez bunlari birlestirir ve dilekce yazim rehberi uretir.
+Karar: KIRMIZI (blokla) / YESIL (devam) / SARTLI (kosul ekle).
+Hata toleransi (Promise.allSettled): 4/4 tam, 3/4 uyarili, 2/4 sinirli
+(DUSUK GUVEN flag), 1-0/4 BASARISIZ.
+Detay: `@FIVEAGENTS.md`.
 
-### REVIZYON AJANI
-Tetikleyici: `revize et: [dava-id]` komutu veya Ajan 3 v1 taslagi tamamlandiktan sonra.
-Detay ve kurallar: `@ajanlar/revizyon-ajani/SKILL.md`
+### ASAMA 5 - Belge Yazari (Dilekce v1)
+Usul + Arastirma + Stratejik Analiz ciktilarini birlestirip ilk taslak.
+Cikti: `dilekce-v1.md` + `.docx` (UDF URETILMEZ — v1 taslak).
+Detay: `@ajanlar/dilekce-yazari/SKILL.md`.
+
+### ASAMA 6 - Savunma Simulatoru
+Tetikleyici: `savunma simule et: [dava-id]` veya ASAMA 5 kalite gate'i.
+Detay: `@ajanlar/savunma-simulatoru/SKILL.md`.
+
+### ASAMA 7 - Revizyon Ajani (Dilekce v2 NIHAI)
+Tetikleyici: `revize et: [dava-id]` veya ASAMA 6 sonrasi.
+**Nihai cikti:** `dilekce-v2.md` + `dilekce-v2.docx` + `dilekce-v2.udf`
+uclusu Drive'a yazilir. UDF uretimi `scripts/md_to_udf.py` ile zorunlu.
+Istinaf/Temyiz dilekceleri de ayni uclu paketle uretilir.
+Detay: `@ajanlar/revizyon-ajani/SKILL.md` -> "UDF Uretimi" bolumu.
+
+### 4 Kalite Kapisi
+- Kapi 1: Arastirma + Normlar Hiyerarsisi (ASAMA 2 sonu)
+- Kapi 2: Usul (ASAMA 3 sonu)
+- Kapi 3: Stratejik Analiz (ASAMA 4 sonu - YENI)
+- Kapi 4: Dilekce v2 (ASAMA 7 sonu)
 
 ## Iscilik Alacaklari Hesaplama
 
@@ -283,7 +438,6 @@ Sorumluluklari:
    - sadece usul
    - sadece arastirma
    - sadece belge yazimi
-   - blog/pazarlama
    - hesaplama
    - savunma simulasyonu
    - revizyon
@@ -297,15 +451,29 @@ Sorumluluklari:
 
 Director Agent karar semasi:
 
-- HER KOMUT geldiginde ONCE -> ADIM -1 (MemPalace Wake-up) calistirilir
-- sadece usul sorulmussa -> ADIM -1 + yalnizca AJAN 1
-- sadece kritik nokta arastirilacaksa -> ADIM -1 + ilgili arastirma ajanlari
-- yeni dava geldiyse -> ADIM -1 + ADIM 0 + ADIM 0B + ADIM 0C + arastirma ajanlari + AJAN 1 (sirayla)
-- belge yazimi istendiyse -> ADIM -1 + gerekli usul/esas ciktilari var mi kontrol et
-- savunma simulasyonu istendiyse -> ADIM -1 + SAVUNMA SIMULATORU
+- HER KOMUT geldiginde ONCE -> ASAMA 0 (MemPalace Wake-up) calistirilir
+- `yeni dava: ...` geldiyse -> **7 ASAMA kullanici-kontrollu akis** baslar
+  (ASAMA 0 -> 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7). Her asama basi model
+  bildirimi + "devam" onayi zorunlu. Detay: yukaridaki "7 ASAMA Workflow"
+  tablosu.
+- `usul: ...` -> ASAMA 0 + yalnizca Usul Uzmani
+- `arastir: ...` -> ASAMA 0 + tum arastirma alt-iscileri (2A+2D+2E paralel + 2B→2C sirali zincir)
+- `stratejik analiz: ...` -> ASAMA 0 + 5 Ajan (4A-4E) paralel+sentez
+- `dilekce v1: ...` / `dilekce yaz` -> ASAMA 0 + Belge Yazari (ciktilar
+  var mi kontrol)
+- `savunma simule et: ...` -> ASAMA 0 + Savunma Simulatoru
+- `revize et: ...` -> ASAMA 0 + Revizyon Ajani (dilekce v2 uretir)
+- `muvekkil bilgilendir: ...` / `strateji degerlendir: ...` /
+  `arastir bilirkisi: ...` / `sozlesme incele: ...` /
+  `istinaf yaz: ...` / `temyiz yaz: ...` -> ASAMA 0 + ilgili alt-modul
 - dilekce kalite gate'inde risk flag ciktiysa -> savunma simulasyonu oner
-- revize et komutu geldiyse -> ADIM -1 + REVIZYON AJANI
-- blog istendiyse -> ADIM -1 + AJAN 4
+
+**ONEMLI:** ADIM -1 / ADIM 0 / ADIM 0B / ADIM 0C eski (v2) terminolojisinde
+asagidaki bolumlerde detayli kurallari iceriyor. v3 mapping:
+- ADIM -1 = ASAMA 0 (MemPalace Wake-up)
+- ADIM 0 + 0B + 0C = ASAMA 1 (Hazirlik + Kaynak Sorgulama + Briefing)
+Eski ADIM heading'leri kural metni icin korunur, yeni komutlarda ASAMA
+terminolojisi kullanilir.
 
 ## Kalite Gate
 
@@ -331,6 +499,139 @@ Ajan 3 cikti uretti:
 
 Hicbir ajan ciktisi "final" olarak isaretlenmez.
 Tum ciktilar "TASLAK" ibaresiyle kaydedilir.
+
+### Gemini Self-Review Kalite Gate Adimi
+
+Bir ajan (Gemini motoru ile) cikti urettiginde, sonraki ajana iletmeden
+once ikinci bir Gemini cagrisi "denetleyici" olarak calistirilir.
+
+Akis:
+1. Ajan ciktisi uretir (motor: Gemini)
+2. Director Agent `gemini-bridge.sh self_review` ile ikinci cagri yapar
+3. Self-review hata listesi doner (kritik / minor / atif dogrulama)
+4. Karar:
+   - KABUL -> normal kalite gate devami
+   - REVIZYON GEREK -> Director, ajana duzeltme listesi ile tekrar gonderir
+   - YENIDEN YAZ -> ciktinin tamami iptal, ajan yeniden calistirilir
+5. 2 self-review dongusunde temizlenmeyen cikti Claude'a devredilir
+
+Prompt: `prompts/gemini/self_review.md`
+
+---
+
+## Model Routing (Hibrit Motor Secimi)
+
+Sistem haritasi (14 uzman ajan + Director) ve 7 ASAMA workflow'u DEGISMEZ.
+Her ajanin arkasinda hangi motorun (Claude veya Gemini) calisacagi
+`config/model-routing.json` dosyasindan okunur.
+
+**7 ASAMA kullanici-kontrollu protokolunde** her asama basinda Director
+motor + model bilgisini bildirir (yukaridaki "7 ASAMA Workflow" bolumune
+bak). Avukat "motor degistir" diyerek tek seferlik override yapabilir.
+
+### Calisma Modlari
+
+| Mod | Davranis |
+|---|---|
+| `auto` | Config'teki default motoru kullan, sorma |
+| `ask` | Her tetikte avukata "Bu is icin Claude mu Gemini mi?" diye sor |
+| `fixed` | Sadece belirtilen motoru kullan, fallback dahi yok |
+
+Global mod `config/model-routing.json` -> `default_mode` alanindadir.
+Komut satirinda `--model claude|gemini` flag'i ile tek seferlik override
+yapilabilir.
+
+### Task -> Default Motor Haritasi
+
+| Task Tipi | Ajan | Default Motor | Fallback |
+|---|---|---|---|
+| Kritik nokta tespiti | Director on-adim | Gemini | Claude |
+| Usul raporu | Ajan 1 (Usul Uzmani) | Gemini | Claude |
+| Arastirma sentezi | Ajan 2 (Arastirmaci) | Gemini | Claude |
+| Dilekce yazimi | Ajan 3 (Belge Yazari) | Gemini | Claude |
+| Savunma simulasyonu | Savunma Simulatoru | Gemini | Claude |
+| Revizyon | Revizyon Ajani | Gemini | Claude |
+| Self-review (kalite gate) | Director on-adim | Gemini | - (tek zincir) |
+
+### Claude'da Kalici (Gemini'ye Gitmez)
+
+- Director Agent orkestrasyonu
+- MCP cagrilari (MemPalace, Drive, NotebookLM, Calendar, Gmail)
+- Yargi CLI ve Mevzuat CLI cagrilari
+- PII mask/unmask islemi
+- Iscilik alacaklari hesaplama modulu
+- MemPalace diary write karari
+
+### Fallback Politikasi
+
+1. Gemini cagrisi yapilir
+2. Basarisiz -> 2. deneme
+3. Hala basarisiz -> Claude devralir
+4. Auth hatasi -> avukata PowerShell komutu gosterilir: `gemini /auth`
+5. Her fallback event'i `fallback_used: true` metadata'si ile ciktida isaretlenir
+
+### Komut Sirasinda Model Secimi
+
+`default_mode: ask` ise Director her ajan cagirmadan once:
+
+```text
+"Usul raporu hazirlamak uzereyim.
+Motor: [1] Gemini (default)  [2] Claude
+Sec (Enter = default):"
+```
+
+Avukat cevabi MemPalace'a `wing_buro_aykut/hall_model_tercihleri`
+drawer'ina yazilir, sonraki benzer tasklarda tercih olarak sunulur.
+
+### Model Metadata (Her Ciktida Zorunlu)
+
+Gemini veya Claude fark etmez, her ajan ciktisinin basina YAML frontmatter eklenir:
+
+```yaml
+---
+model: gemini-3.1-pro-preview | claude-opus-4.7
+engine: gemini | claude
+task_type: usul_raporu | arastirma_sentezi | dilekce_yazimi | ...
+run_id: {ISO_timestamp}-{pid}
+attempt: 1 | 2
+fallback_used: false | true
+timestamp_utc: 2026-04-14T12:34:56Z
+status: TASLAK
+---
+```
+
+- `gemini-bridge.sh` Gemini ciktilarina bunu otomatik ekler
+- Director Agent Claude fallback ciktilarina ayni formati manuel ekler
+- MemPalace'a drawer yazilirken bu metadata drawer payload'inin icinde saklanir
+- Avukat hangi ciktinin hangi motordan geldigini tek bakista gorur
+
+### Fallback Event Log
+
+Her Gemini cagrisi (basarili veya basarisiz) `logs/model-events.jsonl`
+dosyasina bir satir yazar:
+
+```json
+{"ts":"...","run_id":"...","task":"...","model":"...","engine":"gemini","attempt":N,"fallback_used":false,"status":"ok|failed"}
+```
+
+Haftalik rapor: Gemini first-pass success rate, fallback orani, task bazli dagilim.
+Director Agent otonom dongude bu dosyayi tarayip benchmark kayar mi diye ozet uretir.
+
+### MemPalace `hall_model_tercihleri` Drawer Sablonu
+
+```yaml
+wing: wing_buro_aykut
+hall: hall_model_tercihleri
+drawer:
+  task_type: dilekce_yazimi
+  tercih_edilen_motor: gemini
+  son_guncelleme: 2026-04-14
+  gerekce: "Son 5 taslaktaki dilinden memnun, fallback yok"
+  fallback_count_son_30_gun: 0
+```
+
+Bu drawer'lar avukat `default_mode: ask` sectiginde dolmaya baslar;
+ileride `auto` moduna gecilirse bu tercihler default olarak kullanilir.
 
 ---
 
@@ -358,8 +659,7 @@ Cagri sirasi:
 3. Tetik turunu belirle:
    A) "yeni dava: ..." -> tam dava akisi
    B) "arastir: ..." -> arastirma-talebi akisi
-   C) "blog yap: ..." -> pazarlama akisi (sadece wing_buro_aykut sorgu)
-   D) digerleri -> ilgili wing'i belirle
+   C) digerleri -> ilgili wing'i belirle
 
 4. Wing aramasi (her iki ana akis icin):
    mempalace_search "{kritik nokta}" --wing wing_{dava_turu}
@@ -596,7 +896,6 @@ Iki modda calisir:
 2. Buronun aktif dava turleriyle ilgili yeni kararlari filtrele.
 3. Kritik degisiklik varsa Director Agent'a bildirim uret.
 4. Raporu `bilgi-tabani/haftalik-ictihat-{tarih}.md` dosyasina kaydet.
-5. Blog'a cevrilecek ilginc kararlari isaretle.
 
 ### Mod 2 - Olay Tetiklemeli Akis
 
@@ -611,7 +910,6 @@ Bu durumda Director Agent sunlardan birini secebilir:
 - yalnizca bilgi notu uret
 - arastirma raporunu tazele
 - usul risk raporunu guncelle
-- pazarlama icin anonim icgoru kuyruguna gonder
 
 ---
 
@@ -640,7 +938,6 @@ Her ajan SKILL.md'sinde su iki adim ZORUNLUDUR:
 | Tam dava (yeni dava) | Tum wing'ler (dava turu + ajan + buro + aktor) |
 | Arastirma-talebi (arastir) | wing_{dava_turu}/hall_arastirma_bulgulari + wing_buro_aykut + arastirmaci/usul-uzmani diary'leri |
 | Belge yazimi | wing_ajan_dilekce_yazari/hall_diary |
-| Blog/pazarlama | wing_buro_aykut (avukat blog tercih notlari) |
 
 ONEMLI: Arastirma-talebi akisinda hakim/karsi taraf wing'lerine yazim YOKTUR.
 Cunku hakim ve karsi taraf belli degildir, anlamsiz veri olusur.
@@ -714,16 +1011,67 @@ Google Calendar MCP ile ekle:
 
 ---
 
+## Session Checkpoint Protokolu (Lossless Koruma)
+
+Uzun session'larda (derin arastirma, tam dava akisi) context window
+dolmasindan kaynaklanan bilgi kaybi onlenir.
+
+### Checkpoint Kurali
+
+Her 5 sorgu sonrasi (Yargi CLI, Mevzuat CLI, NotebookLM) ara bulgu notu yaz:
+
+```text
+# Arastirma Checkpoint - {tarih} {saat}
+
+## Konu: {kritik nokta}
+## Durum: {kacinci sorgu / toplam beklenen}
+
+## Tamamlanan Sorgular:
+1. "{terim1}" -> {N} sonuc, {K} alakali, en iyi: {karar id}
+2. "{terim2}" -> ...
+
+## Bulunan Kritik Kararlar:
+- {Daire} {Tarih} {Esas/Karar} — {1 satir ozet}
+
+## Henuz Aranmamis Terimler:
+- "{terim3}", "{terim4}"
+
+## Sonraki Adim:
+- {ne yapilacak}
+```
+
+Checkpoint dosyasi:
+- Drive dava klasorune kaydedilir (02-Arastirma/checkpoint-{saat}.md)
+- QMD otomatik indexler (sessions koleksiyonu)
+- Session kesilirse yeni session'da "arastirmaya devam et" komutuyla
+  checkpoint'tan devam edilir
+
+### Pre-Compaction State Dump
+
+Context window %70'e ulastiginda otomatik state dump:
+1. Aktif task durumu -> checkpoint.md
+2. Degisen dosyalar -> checkpoint.md
+3. Alinan kararlar -> checkpoint.md
+4. QMD indexle
+5. Compaction sonrasi -> QMD'den state restore et
+
+---
+
 ## Hata Yonetimi ve Sik Yapilan Hatalar
 
 | Sorun | Yapilacak |
 |---|---|
-| Yargi CLI sonuc dondurmuyor | 2-3 farkli terim dene. Hala yoksa: "Manuel arama onerilir." Daire bazli filtrele. |
-| Mevzuat CLI'da madde yok | mevzuat.gov.tr'den dogrulama oner. |
+| **Yargi MCP basarisiz** | 5 sn bekle, 2. deneme MCP. Hala fail → Yargi CLI fallback otomatik devreye girer. CLI da fail → rapora `[MCP+CLI HATASI]` notu, manuel arama onerisi. Rapora `mcp_fallback_used: true`. |
+| **Mevzuat MCP basarisiz** | Ayni pattern: 2 MCP denemesi → Mevzuat CLI fallback → rapora `mcp_fallback_used: true` notu. |
+| **Mulga eleme sonrasi 5'in altinda gecerli karar kaldi** | 2B'ye geri don, 3 alternatif terimle yeni arama. Hala 5 alti ise rapora `[YETERSIZ KARAR]` flag + manuel arama onerisi. |
+| Yargi CLI sonuc dondurmuyor (fallback) | 2-3 farkli terim dene. Hala yoksa: "Manuel arama onerilir." Daire bazli filtrele. |
+| Mevzuat CLI'da madde yok (fallback) | mevzuat.gov.tr'den dogrulama oner. |
 | NotebookLM erisilemiyor | Avukata bildir, adimi atla, dilekcede "dahili kaynak eksik" notu dus. |
+| **Literatur MCP CAPTCHA basarisiz** | Yeniden dene; basarisiz olursa rapora `[Literatur MCP HATASI]` notu, akademik bulgu eksik flag'i. |
+| **Yoktez MCP tez bulunamadi** | Daha genis terim dene, basarisiz olursa rapora not dus. |
 | Harc tarifesi guncel degil | "Bu hesaplama [yil] tarifesine goredir, UYAP'tan dogrulayin." notu ekle. |
 | Dilekce yapay zeka gibi gorunuyor | `sablonlar/` klasorune onaylanmis dilekceler ekle, uslubu buna gore duzelt. |
-| MCP baglanti hatasi | `~/.claude/settings.json` dosyasindaki MCP ayarlarini kontrol et. |
+| MCP baglanti hatasi | `~/.claude/settings.json` ve Claude Desktop user-level MCP ayarlarini kontrol et. |
 
 ---
 
@@ -731,22 +1079,46 @@ Google Calendar MCP ile ekle:
 
 | Komut | Calisan Ajan |
 |---|---|
-| `yeni dava: [isim], [tur] / ozet: [...] / kritik nokta: [...]` | Director Agent + ilgili tum hat |
-| `usul: [dava turu]` | Sadece Ajan 1 |
-| `arastir: [kritik nokta]` | Director Agent + arastirma ajanlari |
-| `arastir vector: [kritik nokta]` | Arastirma - Vector RAG |
-| `arastir yargi: [kritik nokta]` | Arastirma - Yargi |
-| `arastir mevzuat: [kritik nokta]` | Arastirma - Mevzuat |
-| `arastir notebook: [kritik nokta]` | Arastirma - NotebookLM / Drive |
-| `dilekce yaz` | Sadece Ajan 3 |
-| `ihtarname yaz` | Sadece Ajan 3 |
-| `sozlesme yaz` | Sadece Ajan 3 |
+| `yeni dava: [isim], [tur] / ozet: [...] / kritik nokta: [...]` | Director + 7 ASAMA kullanici-kontrollu tam akis |
+| `devam` / `atla` / `motor degistir` / `dur` / `devam et` | 7 ASAMA kontrol komutlari |
+| `usul: [dava turu]` | Sadece Usul Uzmani |
+| `arastir: [kritik nokta]` | Director + 2A+2D+2E paralel + 2B→2C sirali zincir |
+| `arastir vector: [kritik nokta]` | Arastirma - 2A Vector RAG |
+| `arastir yargi: [kritik nokta]` | Arastirma - 2B Yargi MCP (CLI fallback) |
+| `arastir mevzuat: [kritik nokta]` | Arastirma - 2C Mevzuat MCP (CLI fallback) |
+| `arastir notebook: [kritik nokta]` | Arastirma - 2D NotebookLM / Drive |
+| `arastir akademik: [kritik nokta]` | Arastirma - 2E Akademik Doktrin (DergiPark + YOK Tez) |
+| `stratejik analiz: [dava-id]` | 5 Ajan (4A Davaci + 4B Davali + 4C Bilirkisi + 4D Hakim + 4E Sentez) |
+| `dilekce v1: [dava-id]` | Belge Yazari (ilk taslak — ASAMA 5 esdegeri) |
+| `dilekce yaz` | Belge Yazari (v1 taslak — `dilekce v1:` ile ayni) |
+| `ihtarname yaz` | Belge Yazari |
+| `sozlesme yaz` | Belge Yazari |
 | `hesapla: giris:[tarih], cikis:[tarih], net:[TL], yemek:[TL], servis:[TL], fesih:[tur]` | Hesaplama modulu |
 | `hesapla kidem: [parametreler]` | Sadece kidem tazminati |
 | `hesapla ise iade: [parametreler]` | Sadece ise iade modulu |
 | `briefing: [dava-id]` | Advanced Briefing formu |
 | `savunma simule et: [dava-id]` | Savunma Simulatoru |
 | `revize et: [dava-id]` | Revizyon Ajani |
-| `blog yap: [konu]` | Ajan 4 |
+| `arastir bilirkisi: [dava-id] [rapor-dosyasi]` | Arastirmaci (Bilirkisi Denetleme alt-modu) |
+| `swot arastir: [dava-id]` | Arastirmaci (SWOT Strateji alt-modu — kullanici-bilgilendirme banner'li) |
+| `sozlesme incele: [dosya-yolu]` | Arastirmaci (Sozlesme Inceleme alt-modu) |
+| `istinaf yaz: [dava-id]` | Dilekce Yazari (Istinaf/Temyiz alt-modu) |
+| `temyiz yaz: [dava-id]` | Dilekce Yazari (Istinaf/Temyiz alt-modu) |
+| `muvekkil bilgilendir: [dava-id]` | Director (Muvekkil Bilgilendirme alt-modu) |
+| `strateji degerlendir: [dava-id]` | Director (Strateji Degerlendirme — Gemini-primary + Claude fallback) |
 | `ictihat tara` | Otonom dongu |
 | `sure ekle: [tarih, tur]` | Calendar MCP |
+
+---
+
+## isbu-ofis Alt Projesi (Baglanti Notu)
+
+`isbu-ofis/hukuk-takip/` dizini bagimsiz bir web uygulamasidir.
+Kendi CLAUDE.md'si `isbu-ofis/hukuk-takip/CLAUDE.md` yolundadir ve
+bu ana otomasyon sistemiyle DOGRUDAN entegre degildir.
+
+Baglanti stratejisi:
+- isbu-ofis icinde calisirken `isbu-ofis/hukuk-takip/CLAUDE.md` referans dosyadir
+- Ana hukuk otomasyon sisteminde calisirken BU dosya referanstir
+- Iki sistem arasinda paylasilan veri yok (ayri .env, ayri DB)
+- Gelecekte entegrasyon planlanirsa: Drive API veya ortak vektor DB uzerinden

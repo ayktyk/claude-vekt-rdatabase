@@ -133,6 +133,14 @@ YYYY/XXXX E., YYYY/XXXX K. sayılı kararında...
 - Yapay zekâ üslubu: "Özetle", "Sonuç olarak", "Bu bağlamda" ile başlayan
   paragraflar, gereksiz tekrarlar, genelleyici ifadeler
 
+**Üslup fingerprint (zorunlu referans):**
+Bu dosya Tekin'in genel kuralları içerir. Avukat Aykut'un kişisel üslubu
+(yasak geçiş kelimeleri listesi, numaralandırma formatı, KONU kapanış
+varyantları, emsal karar atıf şablonları, NETİCE-TALEP giriş kalıpları)
+`ajanlar/dilekce-yazari/uslup-aykut.md` dosyasında toplanmıştır. Dilekçe
+yazarı ajan iki dosyayı birlikte okur; çatışma olması halinde uslup-aykut.md
+geçerlidir (kişisel üslup Tekin'in genel tavsiyesini override eder).
+
 ---
 
 ## 8. Spesifik Sorular İçin

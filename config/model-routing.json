@@ -1,0 +1,80 @@
+{
+  "_comment": "Her gorev icin model routing. 'default' otomatik modda kullanilir. 'options' sirali: [1], [2], [3] secim sirasi. Benchmark avukat manuel olarak gunceller.",
+  "_benchmark_ref": "Avukat manuel karari (2026-04-20): Gemini 3 Pro Turk hukukunda onde. Gemini kapasite hatasi olursa Flash, o da olmazsa Claude fallback. TRLawBench (https://github.com/saidsurucu/TRLawBench) henuz leaderboard degil — referans.",
+  "_model_validation_2026_04_28": "Avukat istegi uzerine Gemini 3.1 Pro Preview'a yukseltildi. Test sonuclari: gemini-3.1-pro-preview API'de mevcut (429 MODEL_CAPACITY_EXHAUSTED hatasi alinabiliyor — model var, kapasite degisken). gemini-3-flash-preview OK. claude-opus-4.7 son fallback. Kapasite gun icinde dolup bosalabilir, fallback zinciri bu yuzden var.",
+  "_last_updated": "2026-04-28",
+
+  "mode": "auto",
+  "_mode_values": "auto = varsayilan, sormaz | ask = her adimda sor | fixed = sadece default kullan",
+
+  "gorevler": {
+    "kritik_nokta_tespiti": {
+      "default": "gemini-3.1-pro-preview",
+      "options": ["gemini-3.1-pro-preview", "gemini-3-flash-preview", "claude-opus-4.7"],
+      "aciklama": "Muvekkil belgelerini okuyup hukuki uyusmazlik tespiti"
+    },
+    "arama_plani": {
+      "default": "gemini-3.1-pro-preview",
+      "options": ["gemini-3.1-pro-preview", "gemini-3-flash-preview", "claude-opus-4.7"],
+      "aciklama": "Yargi CLI ve Mevzuat CLI icin sorgu terimi listesi + filtre plani uretmek"
+    },
+    "usul_raporu": {
+      "default": "gemini-3.1-pro-preview",
+      "options": ["gemini-3.1-pro-preview", "gemini-3-flash-preview", "claude-opus-4.7"],
+      "aciklama": "Ajan 1 usul iskeleti + zamanasimi + harc"
+    },
+    "arastirma_sentezi": {
+      "default": "gemini-3.1-pro-preview",
+      "options": ["gemini-3.1-pro-preview", "gemini-3-flash-preview", "claude-opus-4.7"],
+      "aciklama": "CLI ciktilarini esas raporuna cevirme (Ajan 2 sentez)"
+    },
+    "dilekce_yazimi": {
+      "default": "gemini-3.1-pro-preview",
+      "options": ["gemini-3.1-pro-preview", "gemini-3-flash-preview", "claude-opus-4.7"],
+      "aciklama": "Ajan 3 dilekce/ihtarname/sozlesme taslagi"
+    },
+    "savunma_simulasyonu": {
+      "default": "gemini-3.1-pro-preview",
+      "options": ["gemini-3.1-pro-preview", "gemini-3-flash-preview", "claude-opus-4.7"],
+      "aciklama": "Karsi taraf perspektifi + risk flag"
+    },
+    "revizyon": {
+      "default": "gemini-3.1-pro-preview",
+      "options": ["gemini-3.1-pro-preview", "gemini-3-flash-preview", "claude-opus-4.7"],
+      "aciklama": "v1 dilekce -> v2 iyilestirilmis"
+    },
+    "self_review": {
+      "default": "gemini-3.1-pro-preview",
+      "options": ["gemini-3.1-pro-preview", "gemini-3-flash-preview", "claude-opus-4.7"],
+      "aciklama": "Kalite gate - Gemini kendi ciktisini elestirir"
+    },
+
+    "_claude_kalici": {
+      "_aciklama": "Bu gorevler HER ZAMAN Claude'da kalir, routing'e girmez",
+      "liste": [
+        "Director Agent orkestrasyon",
+        "MemPalace MCP cagrilari",
+        "Google Drive MCP",
+        "Yargi CLI cagrilari",
+        "Mevzuat CLI cagrilari",
+        "NotebookLM MCP",
+        "PII maskeleme/demaskeleme",
+        "QA gate kontrol listesi",
+        "Hesaplama modulu (deterministic formul)"
+      ]
+    }
+  },
+
+  "fallback_siralamasi": {
+    "_aciklama": "Gemini 3.1 Pro preview kapasite yoksa (HTTP 429 MODEL_CAPACITY_EXHAUSTED) Flash Preview ikincil secenek. Flash da basarisizsa Claude devralir.",
+    "sira": ["gemini-3.1-pro-preview", "gemini-3-flash-preview", "claude-opus-4.7"],
+    "_kapasite_notu": "Preview modellerde Google sunucusunda anlik kapasite problemi olusabilir; kullanici quota'si ile alakasizdir."
+  },
+
+  "fallback": {
+    "gemini_max_retry": 2,
+    "gemini_retry_delay_sec": 5,
+    "fallback_to": "claude-opus-4.7",
+    "log_fallback_to_mempalace": true
+  }
+}

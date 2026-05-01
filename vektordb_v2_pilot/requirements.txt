@@ -1,4 +1,0 @@
-PyMuPDF
-Pillow
-chromadb
-google-generativeai
