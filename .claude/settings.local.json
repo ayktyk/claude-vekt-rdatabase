@@ -100,7 +100,6 @@
       "Bash(ls -la /tmp/yargi-arama/doc_*.md)",
       "Bash(PYTHONIOENCODING=utf-8 NO_COLOR=1 yargi bedesten doc 1199704100)",
       "mcp__buro-hafizasi__mempalace_status",
-      "mcp__hukuk-kutuphanesi__hukuk_ara",
       "mcp__buro-hafizasi__mempalace_add_drawer",
       "mcp__buro-hafizasi__mempalace_diary_write",
       "Bash(PYTHONIOENCODING=utf-8 NO_COLOR=1 \"/c/Users/user/.local/bin/nlm.exe\" notebook list --json)",

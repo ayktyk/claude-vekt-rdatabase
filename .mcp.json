@@ -1,13 +1,5 @@
 {
   "mcpServers": {
-    "hukuk-kutuphanesi": {
-      "command": "python",
-      "args": ["${HUKUK_VEKTORDB_PATH:-D:/hukuk-vektordb}/mcp-sunucu/sunucu.py"],
-      "env": {
-        "HUKUK_DB_YOLU": "${HUKUK_VEKTORDB_PATH:-D:/hukuk-vektordb}/vektor-db",
-        "HUKUK_VEKTORDB_PATH": "${HUKUK_VEKTORDB_PATH:-D:/hukuk-vektordb}"
-      }
-    },
     "notebooklm": {
       "command": "notebooklm-mcp",
       "args": []

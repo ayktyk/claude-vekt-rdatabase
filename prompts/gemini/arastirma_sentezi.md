@@ -16,7 +16,6 @@ Sana su context verilecek:
 - Kritik nokta (avukattan)
 - Yargi CLI ham ciktilari (min 15 sorgu + min 5 tam karar metni)
 - Mevzuat CLI ham ciktilari (min 8 sorgu, gerekce, madde tarihcesi)
-- Vektor DB ciktilari
 - NotebookLM ciktilari (varsa)
 - Gecmis MemPalace drawerlari (varsa)
 
@@ -45,7 +44,6 @@ GUVEN NOTU:
 ## 1. Kullanilan Kaynaklar
 - Yargi CLI: ...
 - Mevzuat CLI: ...
-- Vektor DB: ...
 - NotebookLM: ...
 
 ## 2. Ilgili Mevzuat
@@ -67,17 +65,14 @@ GUVEN NOTU:
 ## 6. Celiski ve Sapma Uyarilari
 [Kararlar arasi celiski. Yerlesik uygulamadan sapma.]
 
-## 7. Vektor DB + Doktrin Bulgulari
-[Kitap, sayfa, arguman yapisi]
-
-## 8. Kritik Noktaya Cevap
+## 7. Kritik Noktaya Cevap
 [Ozlu cevap, bulgulara dayali]
 
-## 9. Dilekceye Tasinacak Argumanlar
+## 8. Dilekceye Tasinacak Argumanlar
 1. [Arguman] — Dayanak: [karar/mevzuat]
 2. ...
 
-## 10. Eksikler
+## 9. Eksikler
 - [Bulunamayan karar tipi]
 - [Avukatin ek arastirma yapmasi gereken nokta]
 ```

@@ -40,8 +40,7 @@ Her komutta. Hicbir ajan Director Agent'in siniflandirmasi olmadan baslamaz.
 |---|---|
 | `yeni dava: [isim], [tur]` | ADIM -1 + ADIM 0 + ADIM 0B + ADIM 0C + Ajan 2 (arastirma) + Ajan 1 (usul) |
 | `usul: [dava turu]` | ADIM -1 + yalnizca Ajan 1 |
-| `arastir: [kritik nokta]` | ADIM -1 + 2A+2D+2E paralel + 2B→2C sirali zincir (mulga eleme dahil) |
-| `arastir vector: [...]` | ADIM -1 + Ajan 2A (Vector RAG) |
+| `arastir: [kritik nokta]` | ADIM -1 + 2D+2E paralel + 2B→2C sirali zincir (mulga eleme dahil) |
 | `arastir yargi: [...]` | ADIM -1 + Ajan 2B (Yargi MCP, CLI fallback) |
 | `arastir mevzuat: [...]` | ADIM -1 + Ajan 2C (Mevzuat MCP, CLI fallback) |
 | `arastir notebook: [...]` | ADIM -1 + Ajan 2D (NotebookLM/Drive) |
@@ -112,23 +111,29 @@ Cagri sirasi:
 
 ```text
 1. mempalace_status -> palace sagligi, toplam drawer, son guncelleme
-2. mempalace_search "{komut/kritik nokta}" --wing wing_buro_aykut -> avukat tercihleri
+2. mempalace_search "{komut/kritik nokta}" --wing wing_buro_aykut --limit 2
 3. Tetik turunu belirle:
    A) "yeni dava" -> tam dava    B) "arastir" -> arastirma-talebi
    C) "blog yap" -> pazarlama    D) digerleri -> ilgili wing
 4. Wing aramasi (A ve B akislarinda):
-   mempalace_search "{kritik nokta}" --wing wing_{dava_turu}
+   mempalace_search "{kritik nokta}" --wing wing_{dava_turu} --limit 2
    -> hall_argumanlar, hall_arastirma_bulgulari, hall_kararlar,
       hall_usul_tuzaklari, hall_savunma_kaliplari
    Ek (strateji komutlarinda):
-   mempalace_search "{dava tipi}" --wing wing_buro_aykut --hall hall_strateji_tercihleri
-   -> avukatin gecmis dava/uzlasma tercihleri, gecmis karar gerekceleri
-5. SADECE tam dava akisinda ajan diary sorgulari:
+   mempalace_search "{dava tipi}" --wing wing_buro_aykut --hall hall_strateji_tercihleri --limit 2
+5. SADECE tam dava akisinda ajan diary sorgulari (her biri --limit 2):
    wing_ajan_davaci, wing_ajan_davali, wing_ajan_bilirkisi,
    wing_ajan_hakim, wing_ajan_sentez
 6. SADECE tam dava + karsi taraf/hakim biliniyorsa:
-   wing_hakim_{soyad}, wing_avukat_{soyad}
+   wing_hakim_{soyad}, wing_avukat_{soyad} (--limit 2)
 ```
+
+**!! MemPalace LIMIT KURALI (ZORUNLU - 2026-05-02 sonrasi)**
+Tum mempalace_search cagrilarinda `limit: 2` (default 5) zorunlu.
+- Her search 5 sonuc x ~8KB = 40KB JSON donduruyordu (LLM 30+ sn yorumluyor)
+- limit:2 ile ~16KB, LLM ~10 sn yorumluyor → 3x hizlanma
+- Daha fazla bilgi gerekiyorsa 2. sorgu ile spesifik wing/room filter yap
+- ASLA `limit > 3` kullanma (cache yanit boyutu kritik)
 
 Cikti formati: Tum sonuclar "MemPalace Wake-up Sonuclari" basligi altinda
 Director Agent context'ine girer. Avukat Tercihleri + Konu Hafizasi +

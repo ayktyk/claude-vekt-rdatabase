@@ -125,6 +125,16 @@ dusunmelidir.
 **Thinking budget:** Claude Opus 4.7 **MAX EFFORT thinking**
 **Min sorgu sayilari (15, 6 faz, vb.) DEGISMEZ — sadece arac MCP olur.**
 
+**!! RATE LIMIT KURALI (ZORUNLU - 2026-05-02 sonrasi)**
+Bedesten API rate limit getirdi (HTTP 429 Too Many Requests).
+- **HER yargi search arasina MIN 3 saniye bekleme** zorunlu (Bash `sleep 3`)
+- **PARALEL BATCH YASAK** — 5 sorguyu ayni anda gondermek 429 verir
+- Sira: sorgu_1 → bekle 3sn → sorgu_2 → bekle 3sn → ...
+- 15 sorgu icin minimum sure: 15 × 3 = 45 sn bekleme + sorgu suresi
+- 429 alirsa: 60 sn bekle, ayni sorguyu 1 kez yeniden dene
+- 2. kez 429 olursa: o spesifik sorguyu atla, raporda "[RATE LIMIT - manuel arama gerek]" not dus
+- Sorgular arasi delay icin Director Bash kullanir: `sleep 3 && <next call>`
+
 MCP arac listesi:
 - `search_bedesten_unified` - Yargitay/Danistay/yerel mahkeme genel arama
 - `search_anayasa_unified` - Anayasa Mahkemesi norm denetimi + bireysel basvuru
@@ -307,6 +317,15 @@ Director Agent'a UYARI gonderilir.
 **Fallback:** Mevzuat CLI (`mevzuat search/doc/article/tree/gerekce`) - sadece MCP fail durumunda
 **Thinking budget:** Claude Opus 4.7 **MAX EFFORT thinking**
 **Min sorgu sayilari (8, 4 faz, vb.) DEGISMEZ — sadece arac MCP olur.**
+
+**!! page_size ≤20 KURALI (ZORUNLU - 2026-05-02 sonrasi)**
+Mevzuat API max 20 kayit dondurur, daha fazlasi `data.pageSize=Kayit sayisi 20'den fazla olamaz`
+hatasi verir.
+- **`page_size` parametresi HER zaman 20 veya altinda** olmali
+- **Default 25 KULLANMA** — explicit `page_size: 20` (veya daha az) ver
+- Daha fazla sonuc gerekiyorsa pagination kullan: `page_size: 20, page: 1`, sonra `page: 2` ...
+- Bedesten yargi MCP'sinde de ayni pattern: `pageSize` veya `page_size` her zaman ≤20
+- Yargi MCP'de de RATE LIMIT KURALI uygulanir (yukaridaki Bolum 1)
 
 MCP arac listesi:
 - `search_mevzuat` - unified arama (tum mevzuat tipleri, Solr/Lucene operatorlerli)
@@ -752,9 +771,8 @@ GUVEN NOTU:
 # Arastirma Raporu - [Kritik Nokta]
 
 ## Kullanilan Kaynaklar
-- Vektor DB: [Bulunan kaynak sayisi ve kategorileri]
-- Yargi CLI: [Arama terimleri ve sonuc sayisi]
-- Mevzuat CLI: [Cekilen kanun maddeleri]
+- Yargi MCP: [Arama terimleri ve sonuc sayisi]
+- Mevzuat MCP: [Cekilen kanun maddeleri]
 - Dahili: [NotebookLM notebook adi / Drive klasoru / Kullanilmadi]
 
 ## Ilgili Mevzuat (Normlar Hiyerarsisi Analizli)
@@ -885,9 +903,6 @@ nasil evrildigini gormek, guncel ictihat kaymasini kacirmamak.
 ### Dilekceye Tasinacak Doktrin Gorusleri
 - "Ogretide X gorus hakimdir (Yazar, Yil; Yazar2, Yil)..."
 
-## Vektor DB Bulgulari (Doktrin + Strateji - Buro Yerel)
-[Kaynak adi, benzerlik skoru, arguman yapisi]
-
 ## Celiskili Noktalar ve Sapma Uyarilari
 [Kararlar arasi celiski veya yerlesik uygulamadan sapma]
 
@@ -942,7 +957,6 @@ Mevzuat CLI tarafi:
 - [ ] **LLM Web fallback kullanildiysa kaynak URL + tarih eklendi mi?**
 
 Sentez tarafi:
-- [ ] Vektor DB bulgulari Yargi veya Mevzuat ile dogrulandi mi?
 - [ ] Dahili kaynak kullanildiysa kaynagin adi acik yazildi mi?
 - [ ] Celiskili uygulama varsa rapora acikca yazildi mi?
 - [ ] Dilekceye Tasinacak Argumanlar bolumu temporal evolution ile uyumlu mu?

@@ -206,7 +206,6 @@ Detay: `@ajanlar/arastirmaci/SKILL.md` -> "Derin Arama Protokolu" bolumu.
 | Arac | Gorev |
 |---|---|
 | MemPalace MCP (`buro-hafizasi`) | Buro IC deneyim hafizasi - gecmis davalar, basarili argumanlar, hakim/avukat profilleri, ajan diary, avukat tercihleri |
-| Vektor DB (`hukuk_ara`) | Buronun kendi kitapligi - doktrin, emsal, dilekce stratejisi semantik aramasi (2A) |
 | NotebookLM MCP | Avukatin dava turune gore tuttugu notebook'lar (2D) |
 | Literatur MCP (`mcp__claude_ai_Literat_r_MCP__*`) | **2E** - DergiPark akademik dergi aramasi (Turkce hakemli makaleler), PDF tam metin (`pdf_to_html`), atif zinciri (`get_article_references`) - Claude Desktop user-level konfig |
 | Yoktez MCP (`mcp__claude_ai_Yoktez_MCP__*`) | **2E** - YOK Ulusal Tez Merkezi aramasi (`search_yok_tez_detailed`) ve tez tam metni sayfa-sayfa Markdown (`get_yok_tez_document_markdown`) - Claude Desktop user-level konfig |
@@ -214,7 +213,6 @@ Detay: `@ajanlar/arastirmaci/SKILL.md` -> "Derin Arama Protokolu" bolumu.
 | `legal.local.md` | Buro playbook - buronun statik kurallari ve tercihleri (canli tercih MemPalace'ta) |
 
 Bu uc katman birbirinin yerine GECMEZ:
-- ChromaDB `hukuk-kutuphanesi` -> hukuk kitap corpus'u (doktrin, statik PDF)
 - NotebookLM -> uzman dis kaynak (avukatin sectigi notebook)
 - MemPalace `buro-hafizasi` -> buro ic deneyim (gecmis davalar, ajan diary, avukat tercihleri)
 - Google Drive -> kalici dosya deposu (ham dilekceler, resmi evrak)
@@ -250,7 +248,7 @@ AVUKAT
 DIRECTOR AGENT  (orkestrasyon, kullanici-kontrollu 7 ASAMA)
   |
   +-- OPERASYONEL KATMAN (6 ajan)
-  |     - Arastirmaci (4 alt isci: 2A Vector / 2B Yargi / 2C Mevzuat / 2D NotebookLM+Drive)
+  |     - Arastirmaci (3 alt isci: 2B Yargi / 2C Mevzuat / 2D NotebookLM+Drive / 2E Akademik)
   |     - Usul Uzmani
   |     - Belge Yazari (dilekce / ihtarname / sozlesme)
   |     - Savunma Simulatoru
@@ -289,7 +287,7 @@ Beklenen cikti: {uretilcek dosya}
 |---|---|---|---|
 | 0 | MemPalace Wake-up | Destek | (context enjeksiyon) |
 | 1 | Hazirlik + Briefing | Director | `00-Briefing.md` |
-| 2 | Hibrit Arastirma (3 paralel kol + 1 sirali zincir) | Arastirmaci (2A + 2D + 2E paralel; 2B → 2C sirali) | `02-Arastirma/arastirma-raporu.md` |
+| 2 | Hibrit Arastirma (2 paralel kol + 1 sirali zincir) | Arastirmaci (2D + 2E paralel; 2B → 2C sirali) | `02-Arastirma/arastirma-raporu.md` |
 | 3 | Usul Raporu | Usul Uzmani | `01-Usul/usul-raporu.md` |
 | 4 | 5 Ajan Stratejik Analiz | 4A+4B+4C+4D+4E | `02-Arastirma/stratejik-analiz.md` |
 | 5 | Dilekce v1 | Belge Yazari | `03-Sentez-ve-Dilekce/dilekce-v1.md` |
@@ -307,9 +305,9 @@ Tekil komutlar (`dilekce yaz`, `arastir: ...`, `usul: ...`,
 `stratejik analiz: ...`, `revize et: ...`) tek-asama tek-cikti
 komutlaridir, durmadan calisir.
 
-### ASAMA 2 - Arastirma Ajanlari (3 paralel kol + 1 sirali zincir + 1 yeni)
+### ASAMA 2 - Arastirma Ajanlari (2 paralel kol + 1 sirali zincir)
 Alt isciler:
-- **Paralel kollar:** 2A (Vector RAG), 2D (NotebookLM/Drive), 2E (Akademik Doktrin: DergiPark + YOK Tez)
+- **Paralel kollar:** 2D (NotebookLM/Drive), 2E (Akademik Doktrin: DergiPark + YOK Tez)
 - **Sirali zincir:** 2B (Yargi MCP) → 2C (Mevzuat MCP, atif maddeleri + mulga eleme)
 
 Detay: `@ajanlar/arastirmaci/SKILL.md` Bolum 1-3.
@@ -780,7 +778,7 @@ Kaynak sorgulama notu:
 - Bu adimdan once AJAN 1 veya herhangi bir arastirma ajani baslatilmaz.
 - NotebookLM secilirse notebook adi dava hafizasina kaydedilir.
 - Google Drive secilirse klasor arastirma hattina kaynak olarak baglanir.
-- Hazir kaynak yoksa temel hat Vektor DB + Yargi + Mevzuat olarak baslar.
+- Hazir kaynak yoksa temel hat Yargi + Mevzuat olarak baslar.
 
 ---
 
@@ -902,7 +900,6 @@ Iki modda calisir:
 Tetikler:
 - yeni dava acildi
 - Drive'a yeni dava belgesi dustu
-- Vektor DB'ye yeni kaynak eklendi
 - belirli konuda yeni HGK / IBK / bozma karari bulundu
 - NotebookLM calisma notebook'u guncellendi
 
@@ -1061,8 +1058,11 @@ Context window %70'e ulastiginda otomatik state dump:
 
 | Sorun | Yapilacak |
 |---|---|
+| **Yargi MCP HTTP 429 (rate limit)** | Bedesten API rate limit getirdi. Sorgu basina **min 3 sn bekleme** zorunlu. **Paralel batch YASAK** — sira: sorgu_1 → sleep 3 → sorgu_2. 429 alirsa 60 sn bekle + 1 retry, sonra `[RATE LIMIT - manuel arama]` not dus. |
+| **Mevzuat MCP "Kayit sayisi 20'den fazla olamaz"** | Default `page_size=25` API'de fail eder. **Her zaman `page_size: 20`** ver (veya altinda). Daha fazla sonuc icin pagination: `page_size: 20, page: 1` → `page: 2` ... |
 | **Yargi MCP basarisiz** | 5 sn bekle, 2. deneme MCP. Hala fail → Yargi CLI fallback otomatik devreye girer. CLI da fail → rapora `[MCP+CLI HATASI]` notu, manuel arama onerisi. Rapora `mcp_fallback_used: true`. |
 | **Mevzuat MCP basarisiz** | Ayni pattern: 2 MCP denemesi → Mevzuat CLI fallback → rapora `mcp_fallback_used: true` notu. |
+| **MemPalace devasa response (her search 8KB+)** | mempalace_search'lerde **her zaman `limit: 2`** ver (default 5 → 40KB JSON, LLM 30sn yorumlar; limit:2 → 16KB, ~10sn). `limit > 3` ASLA kullanma. |
 | **Mulga eleme sonrasi 5'in altinda gecerli karar kaldi** | 2B'ye geri don, 3 alternatif terimle yeni arama. Hala 5 alti ise rapora `[YETERSIZ KARAR]` flag + manuel arama onerisi. |
 | Yargi CLI sonuc dondurmuyor (fallback) | 2-3 farkli terim dene. Hala yoksa: "Manuel arama onerilir." Daire bazli filtrele. |
 | Mevzuat CLI'da madde yok (fallback) | mevzuat.gov.tr'den dogrulama oner. |
@@ -1082,8 +1082,7 @@ Context window %70'e ulastiginda otomatik state dump:
 | `yeni dava: [isim], [tur] / ozet: [...] / kritik nokta: [...]` | Director + 7 ASAMA kullanici-kontrollu tam akis |
 | `devam` / `atla` / `motor degistir` / `dur` / `devam et` | 7 ASAMA kontrol komutlari |
 | `usul: [dava turu]` | Sadece Usul Uzmani |
-| `arastir: [kritik nokta]` | Director + 2A+2D+2E paralel + 2B→2C sirali zincir |
-| `arastir vector: [kritik nokta]` | Arastirma - 2A Vector RAG |
+| `arastir: [kritik nokta]` | Director + 2D+2E paralel + 2B→2C sirali zincir |
 | `arastir yargi: [kritik nokta]` | Arastirma - 2B Yargi MCP (CLI fallback) |
 | `arastir mevzuat: [kritik nokta]` | Arastirma - 2C Mevzuat MCP (CLI fallback) |
 | `arastir notebook: [kritik nokta]` | Arastirma - 2D NotebookLM / Drive |

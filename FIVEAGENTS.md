@@ -14,7 +14,7 @@ Sistem, dilekceyi **en sona birakir**. Dilekce yazilmadan once:
 1. Belgeler tam anlamiyla okunur ve olgusal resim cikarilir
 2. Briefing avukatla birlikte netlestirilir
 3. Hukuki kritik noktalar belirlenir
-4. Derin arastirma yapilir (Yargi MCP → Mevzuat MCP sirali zincir + mulga eleme; Vektor DB + NotebookLM + Akademik Doktrin paralel)
+4. Derin arastirma yapilir (Yargi MCP → Mevzuat MCP sirali zincir + mulga eleme; NotebookLM + Akademik Doktrin paralel)
 5. Usul raporu araştirma bulgulariyla zenginlestirilmis halde yazilir
 6. 5 ajanli stratejik analiz tum dosyaya yapilir
 7. Dilekce v1 bu stratejinin yonlendirmesi altinda yazilir
@@ -137,7 +137,7 @@ Detay: `BRAINSTORMING.md` § 1.5 + `MASKELEME-KILAVUZU.md`.
 
 - API anahtarlari yalniz `config/.env`de saklanir, hic bir ciktiya eklenmez
 - Drive paylasim ayari yalniz buro hesabi
-- MemPalace, QMD, Vektor DB %100 lokal kalir (ham veri icerebilir, Anthropic'e gitmez)
+- MemPalace, QMD %100 lokal kalir (ham veri icerebilir, Anthropic'e gitmez)
 - Anthropic Zero Data Retention (ZDR) Enterprise planda — Console'dan kontrol edilecek
 - Session bitince `config/masks/*.json` dict dosyalari gorunur olur; uzun
   vadede encrypt edilebilir (ag/loop sonrasi)
@@ -166,7 +166,6 @@ basarisiz olursa Claude Opus 4.7 (1M context) devralir.
 | 0 | Director | **Claude** | claude-opus-4.7 | (sabit, MCP) | - |
 | 1 (briefing) | Director | Gemini | gemini-3.1-pro-preview | `kritik_nokta_tespiti` | claude-opus-4.7 |
 | 1 (arama plani) | Director | Gemini | gemini-3.1-pro-preview | `arama_plani` | claude-opus-4.7 |
-| 2A (Vektor DB) | Arastirmaci | **Hibrit** | Claude (MCP) + Gemini (sentez) | `arastirma_sentezi` | claude-opus-4.7 |
 | 2B (Yargi MCP) | Arastirmaci | **Hibrit** | Claude (MCP, **MAX EFFORT**) + CLI fallback + Gemini (sentez) | `arastirma_sentezi` | claude-opus-4.7 |
 | 2C (Mevzuat MCP) | Arastirmaci | **Hibrit** | Claude (MCP, **MAX EFFORT**) + CLI fallback + Gemini (sentez); **2B'ye sirali bagimli** | `arastirma_sentezi` | claude-opus-4.7 |
 | 2D (NotebookLM) | Arastirmaci | **Hibrit** | Claude (MCP) + Gemini (sentez) | `arastirma_sentezi` | claude-opus-4.7 |
@@ -320,7 +319,6 @@ AVUKAT
   |
   +-- PARALEL KOLLAR ---------------------------------------------
   |   |
-  |   |-- [2A] Vektor DB ------> doktrin + emsal stratejisi (buro yerel)
   |   |-- [2D] NotebookLM -----> buro kaynaklari (ITERATIF SORGU)
   |   |         |
   |   |         |  NotebookLM Sorgu Kurallari:
@@ -604,7 +602,7 @@ resim cikarilir ve kritik noktalar netlestirilir.
 ### ASAMA 2: Derin Arastirma (3 paralel kol + 1 sirali zincir)
 
 > **Motor:** Hibrit | **MCP cagrilari (birincil):** Claude (claude-opus-4.7, **MAX EFFORT thinking**) | **CLI cagrilari (fallback):** Claude | **Sentez & arama plani:** Gemini (gemini-3.1-pro-preview) | **Routing:** `arastirma_sentezi` | **Fallback model:** claude-opus-4.7
-> Yargi MCP, Mevzuat MCP, NotebookLM, Vektor DB, Literatur MCP, Yoktez MCP cagrilari Claude'da kalir; donen kararlari rapora ceviren sentez Gemini'de yapilir.
+> Yargi MCP, Mevzuat MCP, NotebookLM, Literatur MCP, Yoktez MCP cagrilari Claude'da kalir; donen kararlari rapora ceviren sentez Gemini'de yapilir.
 
 **MCP-Birincil + CLI Fallback Kurali (2B + 2C):** Yargi/Mevzuat MCP her zaman
 once cagrilir. Basarisiz olursa (timeout, 5xx, ToolError) 5 sn bekle, 2. deneme.
@@ -613,7 +611,7 @@ notu ile yazilir. ASAMA 2 basinda `check_government_servers_health` ile saglik
 kontrolu yapilir; sunucu down ise CLI fallback otomatik tetiklenir.
 
 **Akis Yapisi:**
-- **Paralel kollar (eszamanli):** 2A Vektor DB, 2D NotebookLM, 2E Akademik Doktrin
+- **Paralel kollar (eszamanli):** 2D NotebookLM, 2E Akademik Doktrin
 - **Sirali zincir:** 2B Yargi MCP → 2C Mevzuat MCP → Mulga/Guncel Denetimi → Eleme
 - 2C, 2B'nin verdigi atif maddeleri olmadan calismaya BASLAYAMAZ
 
@@ -624,8 +622,6 @@ BASLATICI: Director Agent
   |
   |  3 paralel kolu ayni anda tetikler + 2B → 2C sirali zinciri ayri yurutur:
   |
-  +---> [2A] VEKTOR DB (paralel)
-  |        Araclar: hukuk_ara MCP
   |        Sorgu: kritik noktanin semantik karsiligi
   |        Cikti: doktrin + emsal stratejisi + benzerlik skoru
   |
@@ -775,7 +771,6 @@ TUM KOLLAR + SIRALI ZINCIR TAMAMLANDIKTAN SONRA KONSOLIDE RAPOR
         * YOK tezleri + ilgili sayfalar
         * Doktrin celiskileri (varsa)
         * Dilekceye tasinacak doktrin gorusleri ("Ogretide X gorus...")
-      - Vektor DB bulgulari (buro ici doktrin)
       - NotebookLM iteratif bulgu ozeti
       - Celiskili noktalar
       - Guncellik kontrolu
@@ -1238,7 +1233,6 @@ Sistemin adim adim yaptiklari:
 
 [ASAMA 2 - DERIN ARASTIRMA] (3 paralel kol + 1 sirali zincir)
   Paralel kollar ayni anda:
-  - 2A Vektor DB: "fazla mesai bordro esasli degisiklik" sorgulari
   - 2D NotebookLM: iteratif 10 sorgu (6 irdeleme + 4 perspektif)
   - 2E Akademik Doktrin: DergiPark + YOK Tez (5 makale + 3 tez sorgu)
   Sirali zincir:
@@ -1399,7 +1393,6 @@ Ne yapiyorsun?
 | `yeni dava: [isim], [tur] / ozet: ... / kritik nokta: ...` | Director + Tam 7 ASAMA | Tum dava klasoru |
 | `briefing: [dava-id]` | Director (Asama 1) | `00-Briefing.md + .docx` |
 | `arastir: [konu]` | Arastirmaci (Asama 2 — Bekleyen Davalar) | `arastirma-raporu.md + .docx` |
-| `arastir vector: [konu]` | Arastirmaci 2A (Vektor DB) | Bulgu listesi |
 | `arastir yargi: [konu]` | Arastirmaci 2B (Yargi MCP, CLI fallback) | Yargitay/HGK kararlari + atif maddeleri |
 | `arastir mevzuat: [konu]` | Arastirmaci 2C (Mevzuat MCP, CLI fallback) | Kanun maddeleri + normlar hiyerarsisi + mulga denetim |
 | `arastir notebook: [konu]` | Arastirmaci 2D (NotebookLM) | Iteratif sorgu sonuclari |
@@ -1739,7 +1732,6 @@ GGML_CUDA=0 qmd search "arama terimi" -c ajan-arastirmaci -n 5  # Manuel arama
 |--------|---------|-------------|
 | Yargi CLI | Yargitay, Danistay, HGK, IBK kararlari | `yargi bedesten search "terim"` |
 | Mevzuat CLI | Kanun, yonetmelik, teblig tam metin | `mevzuat search "kanun adi"` |
-| Vektor DB | Buronun hukuk kitapligi (doktrin, emsal) | `hukuk_ara()` MCP otomatik |
 | NotebookLM | Avukatin dava turune ozel notebook'lari | NotebookLM MCP otomatik |
 | Google Drive | Dosya okuma/yazma, dava klasoru | Drive MCP otomatik |
 | MemPalace | Buro ic deneyim hafizasi | buro-hafizasi MCP otomatik |
@@ -1836,7 +1828,6 @@ STRATEJI (G+C)   -> strateji degerlendir: [dava-id]
 
 ALT KOMUTLAR (Hedefli arastirma)
 ----------------------------------------------------------------------
-arastir vector: [konu]    (sadece Vektor DB)
 arastir yargi: [konu]     (sadece Yargi CLI)
 arastir mevzuat: [konu]   (sadece Mevzuat CLI)
 arastir notebook: [konu]  (sadece NotebookLM)
@@ -1885,7 +1876,6 @@ UDF              -> python md_to_udf.py <input.md>  (sadece nihai)
 - [x] Google Drive bagli (`G:\Drive'im\Hukuk Burosu`)
 - [x] MemPalace aktif (`buro-hafizasi` MCP)
 - [x] QMD kurulu ve indexli (310 dosya, 1411 chunk)
-- [x] Vektor DB calisir durumda (`hukuk-kutuphanesi` MCP)
 - [x] NotebookLM bagli (`notebooklm` MCP)
 - [x] `scripts/maske.py` calistiriliyor (KVKK Seviye 2)
 - [x] `scripts/md_to_docx.py` calistiriliyor (DOCX zorunlu)
