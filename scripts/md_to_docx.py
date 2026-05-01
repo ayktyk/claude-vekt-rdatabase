@@ -219,6 +219,16 @@ if __name__ == '__main__':
         print('Kullanim: python md_to_docx.py <kaynak_klasor> [hedef_klasor]')
         sys.exit(1)
 
-    src = Path(sys.argv[1])
-    dst = Path(sys.argv[2]) if len(sys.argv) > 2 else None
-    convert_folder(src, dst)
+    # Faz 1.4 profiling wrapper
+    try:
+        import os as _os
+        sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+        from _timing import TimedScript
+        with TimedScript(__file__):
+            src = Path(sys.argv[1])
+            dst = Path(sys.argv[2]) if len(sys.argv) > 2 else None
+            convert_folder(src, dst)
+    except ImportError:
+        src = Path(sys.argv[1])
+        dst = Path(sys.argv[2]) if len(sys.argv) > 2 else None
+        convert_folder(src, dst)

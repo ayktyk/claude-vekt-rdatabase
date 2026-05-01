@@ -13,6 +13,9 @@
 
 set -uo pipefail
 
+# === FAZ 1.1 PROFILING: Wall-clock timing baslangici ===
+PROFILE_START_NS=$(date +%s%N)
+
 TASK_TYPE="${1:-}"
 CONTEXT_FILE="${2:-}"
 OUTPUT_FILE="${3:-}"
@@ -92,6 +95,41 @@ while (( ATTEMPT < MAX_RETRY )); do
     # Basarili - metadata header ekle
     RUN_ID="$(date +%Y%m%dT%H%M%S)-$$"
     TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+    # === FAZ 1.1 PROFILING: Token + duration ölçümleri ===
+    PROFILE_END_NS=$(date +%s%N)
+    DURATION_MS=$(( (PROFILE_END_NS - PROFILE_START_NS) / 1000000 ))
+
+    # Char tabanlı token tahmini (Türkçe ~4 char/token; Gemini CLI henüz token API vermez)
+    INPUT_CHARS=$(wc -c < "$TMP_INPUT" 2>/dev/null || echo 0)
+    OUTPUT_CHARS=$(wc -c < "$OUTPUT_FILE" 2>/dev/null || echo 0)
+    INPUT_TOKENS_EST=$(( INPUT_CHARS / 4 ))
+    OUTPUT_TOKENS_EST=$(( OUTPUT_CHARS / 4 ))
+
+    # stderr'de token sayısı varsa parse et (Gemini CLI verbose veya gelecek sürümleri)
+    INPUT_TOKENS=$(grep -oE '"?inputTokens"?[: =]+[0-9]+' "${OUTPUT_FILE}.err" 2>/dev/null | grep -oE '[0-9]+' | head -1)
+    INPUT_TOKENS=${INPUT_TOKENS:-$INPUT_TOKENS_EST}
+    OUTPUT_TOKENS=$(grep -oE '"?outputTokens"?[: =]+[0-9]+' "${OUTPUT_FILE}.err" 2>/dev/null | grep -oE '[0-9]+' | head -1)
+    OUTPUT_TOKENS=${OUTPUT_TOKENS:-$OUTPUT_TOKENS_EST}
+    CACHED_TOKENS=$(grep -oE '"?cachedTokens"?[: =]+[0-9]+' "${OUTPUT_FILE}.err" 2>/dev/null | grep -oE '[0-9]+' | head -1)
+    CACHED_TOKENS=${CACHED_TOKENS:-0}
+
+    # Fallback model (model chain'de geçildi mi)
+    if (( MODEL_IDX > 0 )); then
+      ORIG_MODEL="${MODEL_CHAIN[0]}"
+      FALLBACK_MODEL="$GEMINI_MODEL"
+      FALLBACK_USED_VAL=true
+    else
+      ORIG_MODEL="$GEMINI_MODEL"
+      FALLBACK_MODEL=""
+      FALLBACK_USED_VAL=false
+    fi
+    RETRY_COUNT=$(( ATTEMPT - 1 ))
+
+    # ASAMA + DAVA_ID env var'dan (Director set etmeli)
+    ASAMA_VAL="${ASAMA:-unknown}"
+    DAVA_ID_VAL="${DAVA_ID:-unknown}"
+
     TMP_OUT="$(mktemp -t gemini-out-XXXXXX.md)"
     {
       echo "---"
@@ -100,23 +138,28 @@ while (( ATTEMPT < MAX_RETRY )); do
       echo "task_type: $TASK_TYPE"
       echo "run_id: $RUN_ID"
       echo "attempt: $ATTEMPT"
-      echo "fallback_used: false"
+      echo "fallback_used: $FALLBACK_USED_VAL"
       echo "timestamp_utc: $TS"
       echo "status: TASLAK"
+      echo "duration_ms: $DURATION_MS"
+      echo "input_tokens_est: $INPUT_TOKENS"
+      echo "output_tokens_est: $OUTPUT_TOKENS"
+      echo "asama: $ASAMA_VAL"
+      echo "dava_id: $DAVA_ID_VAL"
       echo "---"
       echo
       cat "$OUTPUT_FILE"
     } > "$TMP_OUT"
     mv "$TMP_OUT" "$OUTPUT_FILE"
 
-    # Event log
+    # Event log — Faz 1.1 genişletilmiş şema (geriye uyumlu, eski alanlar korundu)
     LOG_DIR="$REPO_ROOT/logs"
     mkdir -p "$LOG_DIR"
-    printf '{"ts":"%s","run_id":"%s","task":"%s","model":"%s","engine":"gemini","attempt":%d,"fallback_used":false,"status":"ok"}\n' \
-      "$TS" "$RUN_ID" "$TASK_TYPE" "$GEMINI_MODEL" "$ATTEMPT" >> "$LOG_DIR/model-events.jsonl"
+    printf '{"ts":"%s","run_id":"%s","task":"%s","model":"%s","engine":"gemini","attempt":%d,"fallback_used":%s,"status":"ok","duration_ms":%d,"input_tokens":%d,"output_tokens":%d,"cached_tokens":%d,"retry_count":%d,"fallback_model":"%s","asama":"%s","dava_id":"%s"}\n' \
+      "$TS" "$RUN_ID" "$TASK_TYPE" "$GEMINI_MODEL" "$ATTEMPT" "$FALLBACK_USED_VAL" "$DURATION_MS" "$INPUT_TOKENS" "$OUTPUT_TOKENS" "$CACHED_TOKENS" "$RETRY_COUNT" "$FALLBACK_MODEL" "$ASAMA_VAL" "$DAVA_ID_VAL" >> "$LOG_DIR/model-events.jsonl"
 
     rm -f "${OUTPUT_FILE}.err"
-    echo "[gemini-bridge] BASARILI ($TASK_TYPE, run_id=$RUN_ID)" >&2
+    echo "[gemini-bridge] BASARILI ($TASK_TYPE, run_id=$RUN_ID, ${DURATION_MS}ms, ~${OUTPUT_TOKENS} out tokens)" >&2
     exit 0
   else
     EXIT_CODE=$?
@@ -156,9 +199,18 @@ TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 RUN_ID="$(date +%Y%m%dT%H%M%S)-$$"
 LOG_DIR="$REPO_ROOT/logs"
 mkdir -p "$LOG_DIR"
-printf '{"ts":"%s","run_id":"%s","task":"%s","model":"%s","engine":"gemini","attempt":%d,"fallback_used":true,"status":"failed"}\n' \
-  "$TS" "$RUN_ID" "$TASK_TYPE" "$GEMINI_MODEL" "$MAX_RETRY" >> "$LOG_DIR/model-events.jsonl"
 
-echo "[gemini-bridge] $MAX_RETRY deneme basarisiz. Claude fallback'e yonlendiriliyor. (run_id=$RUN_ID)" >&2
+# Faz 1.1: fail event de duration + asama + dava_id içerir
+PROFILE_END_NS=$(date +%s%N)
+DURATION_MS=$(( (PROFILE_END_NS - PROFILE_START_NS) / 1000000 ))
+INPUT_CHARS=$(wc -c < "$TMP_INPUT" 2>/dev/null || echo 0)
+INPUT_TOKENS_EST=$(( INPUT_CHARS / 4 ))
+ASAMA_VAL="${ASAMA:-unknown}"
+DAVA_ID_VAL="${DAVA_ID:-unknown}"
+
+printf '{"ts":"%s","run_id":"%s","task":"%s","model":"%s","engine":"gemini","attempt":%d,"fallback_used":true,"status":"failed","duration_ms":%d,"input_tokens":%d,"output_tokens":0,"retry_count":%d,"asama":"%s","dava_id":"%s"}\n' \
+  "$TS" "$RUN_ID" "$TASK_TYPE" "$GEMINI_MODEL" "$MAX_RETRY" "$DURATION_MS" "$INPUT_TOKENS_EST" "$MAX_RETRY" "$ASAMA_VAL" "$DAVA_ID_VAL" >> "$LOG_DIR/model-events.jsonl"
+
+echo "[gemini-bridge] $MAX_RETRY deneme basarisiz. Claude fallback'e yonlendiriliyor. (run_id=$RUN_ID, ${DURATION_MS}ms)" >&2
 rm -f "${OUTPUT_FILE}.err"
 exit 2

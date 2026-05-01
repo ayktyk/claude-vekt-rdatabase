@@ -282,4 +282,12 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    # Faz 1.4 profiling wrapper (graceful: _timing yoksa normal çalışır)
+    try:
+        import os as _os, sys as _sys
+        _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+        from _timing import TimedScript
+        with TimedScript(__file__):
+            main()
+    except ImportError:
+        main()

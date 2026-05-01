@@ -158,6 +158,26 @@
             "command": "bash -c 'if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE \"rm -rf|sudo rm|dd if=\"; then echo \"TEHLIKE: Yikim komutu engellendi!\" && exit 2; fi'"
           }
         ]
+      },
+      {
+        "matcher": "mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash 'C:/Users/user/Desktop/projelerim/aktif projeler/Vektör Database li Otomasyon Claude Code/hooks/mcp-timing-pre.sh'"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash 'C:/Users/user/Desktop/projelerim/aktif projeler/Vektör Database li Otomasyon Claude Code/hooks/mcp-timing-post.sh'"
+          }
+        ]
       }
     ]
   }

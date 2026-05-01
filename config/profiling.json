@@ -1,0 +1,18 @@
+{
+  "_aciklama": "Faz 1 profiling instrumentation feature flag. enabled=false yapinca tum timing log'lari kapanir, sistem eski davranisina doner.",
+  "enabled": true,
+  "_olusturma_tarihi": "2026-05-01",
+  "_son_guncelleme": "2026-05-01",
+  "log_paths": {
+    "model_events": "logs/model-events.jsonl",
+    "mcp_timings": "logs/mcp-timings.jsonl",
+    "script_timings": "logs/script-timings.jsonl",
+    "idle_times": "logs/idle-times.jsonl",
+    "hook_spike": "tmp/hook-spike.log"
+  },
+  "kvkk_kontrol": {
+    "tool_input_log_yasak": true,
+    "tool_response_log_yasak": true,
+    "yalnizca_loglanan": ["tool_name", "tool_use_id", "ts_ns", "asama", "dava_id", "status"]
+  }
+}

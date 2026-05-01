@@ -542,3 +542,80 @@ donusum oruntusu onerisini ses verilir.
   Simulatoru yerine Arastirmaci'ya baglandi (avukat karari), banner
   ile kullaniciya bildirme zorunlu. Sozlesme inceleme domaini acildi.
   Strateji degerlendirmesi Gemini-birincil + Claude-fallback.
+
+---
+
+## Profiling Talimati (Faz 1 - 2026-05-01)
+
+Sistemde profiling instrumentation aktif. Director bunu opsiyonel olarak
+kullanir, ana akisi bozmaz. Sadece 3 ek davranis:
+
+### 1. ASAMA + DAVA_ID dosya yazimi
+
+Her komut isleminin basinda Director `tmp/current-asama.txt` ve
+`tmp/current-dava-id.txt` dosyalarini gunceller. Bu dosyalar hook
+script'leri (`hooks/mcp-timing-pre.sh`, `hooks/mcp-timing-post.sh`)
+tarafindan okunur, MCP timing log'una eklenir.
+
+```bash
+mkdir -p tmp
+echo "ASAMA_NO" > tmp/current-asama.txt   # Ornek: "ASAMA 2 - Arastirma"
+echo "DAVA_ID" > tmp/current-dava-id.txt  # Ornek: "test-selin-uyar-2026-001"
+```
+
+ASAMA degisikliginde dosyalar guncellenir. Komut bittiginde "idle" yazilir:
+```bash
+echo "idle" > tmp/current-asama.txt
+echo "idle" > tmp/current-dava-id.txt
+```
+
+### 2. ASAMA bildirim formatinda timing satirlari
+
+7 ASAMA bildirim formatina iki satir ekle (LLM-emit, opsiyonel cross-validate):
+
+```
+[ASAMA N: {asama adi}]
+Motor: {gemini|claude}
+Model: {model-id}
+Fallback: {kullanildi|kullanilmadi}
+Giris: {okunan dosyalar}
+Beklenen cikti: {uretilcek dosya}
+asama_start_ns: {date +%s%N degeri}
+[... ajan calisir ...]
+asama_end_ns: {date +%s%N degeri}
+asama_sure_sn: {hesaplama}
+```
+
+Bu satirlar opsiyoneldir; deterministik timing zaten hooks tarafindan
+yakalanir. LLM emit unutursa sistem bozulmaz.
+
+### 3. Gemini-bridge cagrilarinda env var
+
+Director Bash ile `gemini-bridge.sh` cagirirken ASAMA + DAVA_ID env var
+set eder:
+
+```bash
+ASAMA="ASAMA 2" DAVA_ID="test-selin-uyar-2026-001" \
+  bash scripts/gemini-bridge.sh arama_plani context.md output.md
+```
+
+Bridge bu env var'lari `logs/model-events.jsonl`'a yazar.
+
+### Profiling kapatma (rollback)
+
+Avukat profiling'i kapatmak isterse:
+```bash
+echo '{"enabled": false}' > config/profiling.json
+```
+
+Tum hook'lar ve script'ler bu flag'i okur, kapaliysa log yazmaz.
+Sistem eski davranisina doner. Tek komutla geri al:
+```bash
+echo '{"enabled": true}' > config/profiling.json
+```
+
+Profiling raporu uretmek icin:
+```bash
+python scripts/timing-report.py --pilot-davalar 5
+# Cikti: docs/timing-analysis-{tarih}.md
+```
