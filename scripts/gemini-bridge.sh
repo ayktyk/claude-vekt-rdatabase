@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # gemini-bridge.sh
-# Claude Director Agent bunu cagirir. Context + prompt template birlestirip
+# Gemini Director Agent bunu cagirir. Context + prompt template birlestirip
 # Gemini CLI'ye yollar, temiz markdown cevabi doner.
 #
 # Kullanim:
@@ -9,7 +9,7 @@
 # Ornek:
 #   scripts/gemini-bridge.sh usul_raporu /tmp/dava-ctx.md /tmp/usul-v1.md
 #
-# Fallback: 2x deneme, sonra exit code 2 -> Claude Director devralir.
+# Fallback: 2x deneme, sonra exit code 1 -> Hata doner (Baska fallback kalmadi).
 
 set -uo pipefail
 
@@ -28,7 +28,52 @@ fi
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PROMPT_FILE="$REPO_ROOT/prompts/gemini/${TASK_TYPE}.md"
+CONFIG_FILE="$REPO_ROOT/config/model-routing.json"
 
+if [[ ! -f "$CONFIG_FILE" ]]; then
+  echo "HATA: Config dosyasi yok: $CONFIG_FILE" >&2
+  exit 2
+fi
+
+# === CONFIG-AWARE: task'in engine + model'ini config'ten oku (PROMPT KONTROLUNDEN ONCE) ===
+# Python ile JSON parse (jq Windows git-bash'te her zaman olmayabilir, Python her yerde var)
+# NOT: REPO_ROOT'taki Turkce karakterler Python'a path uzerinden bozuk gidiyor; cd'lenip
+# goreceli path ile aciyoruz (encoding sorunu cozumu).
+read_config() {
+  local key_path="$1"
+  ( cd "$REPO_ROOT" && python -X utf8 -c "
+import json, sys
+try:
+    with open('config/model-routing.json', 'r', encoding='utf-8') as f:
+        cfg = json.load(f)
+    keys = '$key_path'.split('.')
+    val = cfg
+    for k in keys:
+        val = val[k]
+    print(val)
+except (KeyError, FileNotFoundError, json.JSONDecodeError):
+    sys.exit(1)
+" 2>/dev/null )
+}
+
+# 1) Task'in engine'ini al
+TASK_ENGINE=$(read_config "tasks.${TASK_TYPE}.engine")
+TASK_MODEL=$(read_config "tasks.${TASK_TYPE}.model")
+
+# 2) Eger engine = "claude" ise bridge bypass et (Director Claude path'inde devam etsin)
+# Bu kontrol prompt + context kontrolunden ONCE yapilir — Claude task'larin prompt sablonu yok zaten
+if [[ "$TASK_ENGINE" == "claude" ]]; then
+  echo "[gemini-bridge] task=$TASK_TYPE engine=claude -> bridge bypass (Claude path sinyali)" >&2
+  exit 99
+fi
+
+# 3) Eger engine bilinmiyor / config'te yoksa, default olarak gemini path
+if [[ -z "$TASK_ENGINE" ]]; then
+  echo "[gemini-bridge] UYARI: task=$TASK_TYPE config'te yok, default gemini path" >&2
+  TASK_ENGINE="gemini"
+fi
+
+# Gemini path: prompt + context kontrolu, sonra Gemini CLI auth
 if [[ ! -f "$PROMPT_FILE" ]]; then
   echo "HATA: Prompt sablonu yok: $PROMPT_FILE" >&2
   exit 1
@@ -59,15 +104,38 @@ MAX_RETRY=2
 RETRY_DELAY=5
 ATTEMPT=0
 
-# Model listesi: birinci basarisiz/kapasite-yok ise ikinciye dus
-# GEMINI_MODEL env var tek model zorlar; bos ise fallback zinciri calisir
+# Model listesi: config-aware
+# 1. Oncelik: GEMINI_MODEL env var (avukat manuel override)
+# 2. Oncelik: config/model-routing.json -> tasks.<task>.model + fallback.gemini_chain
+# 3. Fallback (config bos ise): hardcoded preview chain
 if [[ -n "${GEMINI_MODEL:-}" ]]; then
   MODEL_CHAIN=("$GEMINI_MODEL")
+elif [[ -n "$TASK_MODEL" ]]; then
+  # Once task-specific model, sonra config'ten fallback chain
+  CHAIN_RAW=$(python -c "
+import json
+try:
+    with open('$CONFIG_FILE', 'r', encoding='utf-8') as f:
+        cfg = json.load(f)
+    chain = cfg.get('fallback', {}).get('gemini_chain', [])
+    primary = cfg.get('tasks', {}).get('$TASK_TYPE', {}).get('model', '')
+    # Primary model en basta, sonra zincirin geri kalani (duplikasyonu kaldirarak)
+    full = [primary] + [m for m in chain if m != primary]
+    print(' '.join(full))
+except Exception:
+    pass
+" 2>/dev/null)
+  if [[ -n "$CHAIN_RAW" ]]; then
+    read -ra MODEL_CHAIN <<< "$CHAIN_RAW"
+  else
+    MODEL_CHAIN=("$TASK_MODEL" "gemini-3-flash-preview")
+  fi
 else
   MODEL_CHAIN=("gemini-3.1-pro-preview" "gemini-3-flash-preview")
 fi
 MODEL_IDX=0
 GEMINI_MODEL="${MODEL_CHAIN[$MODEL_IDX]}"
+echo "[gemini-bridge] Model chain: ${MODEL_CHAIN[*]}" >&2
 
 while (( ATTEMPT < MAX_RETRY )); do
   ATTEMPT=$((ATTEMPT + 1))
@@ -211,6 +279,6 @@ DAVA_ID_VAL="${DAVA_ID:-unknown}"
 printf '{"ts":"%s","run_id":"%s","task":"%s","model":"%s","engine":"gemini","attempt":%d,"fallback_used":true,"status":"failed","duration_ms":%d,"input_tokens":%d,"output_tokens":0,"retry_count":%d,"asama":"%s","dava_id":"%s"}\n' \
   "$TS" "$RUN_ID" "$TASK_TYPE" "$GEMINI_MODEL" "$MAX_RETRY" "$DURATION_MS" "$INPUT_TOKENS_EST" "$MAX_RETRY" "$ASAMA_VAL" "$DAVA_ID_VAL" >> "$LOG_DIR/model-events.jsonl"
 
-echo "[gemini-bridge] $MAX_RETRY deneme basarisiz. Claude fallback'e yonlendiriliyor. (run_id=$RUN_ID, ${DURATION_MS}ms)" >&2
+echo "[gemini-bridge] $MAX_RETRY deneme basarisiz. Kapasite sorunu veya genel hata olustu. Lutfen daha sonra tekrar deneyin. (run_id=$RUN_ID, ${DURATION_MS}ms)" >&2
 rm -f "${OUTPUT_FILE}.err"
-exit 2
+exit 1

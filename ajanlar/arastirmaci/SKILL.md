@@ -933,6 +933,63 @@ arasinda ajan su karar noktalarini dusunmelidir:
 
 Bu, tek-shot aramada olmayan bir muhakeme katmanidir ve kalitenin temelidir.
 
+---
+
+## Sentez Asamasi — ZORUNLU Gemini Bridge Cagrisi
+
+Tum kollar (2B+2C+2D+2E) tamamlandiktan sonra konsolide arastirma raporunu
+ben yazmiyorum, **Gemini'ye yaziyorum**. Claude (yani ben) MCP cagrilarini
+yapip ham bulgulari toplar; rapora cevirme islemi Gemini'de yapilir.
+
+### Akis
+
+1. **Ham bulgulari topla (Claude path):**
+   - 2B Yargi MCP -> bulunan kararlar + atif maddeleri
+   - 2C Mevzuat MCP -> kanunlar + mulga eleme tablosu
+   - 2D NotebookLM -> 10 iteratif sorgu cevaplari
+   - 2E Akademik -> makale + tez bulgulari + atif zinciri
+   - Hepsi tek context dosyasina yaz: `tmp/.gemini-input-{dava-id}-asama2.md`
+
+2. **Bridge cagir:**
+   ```bash
+   ASAMA=2 DAVA_ID="<dava-id>" \
+     bash scripts/gemini-bridge.sh arastirma_sentezi \
+       tmp/.gemini-input-{dava-id}-asama2.md \
+       tmp/.gemini-output-{dava-id}-asama2.md
+   ```
+
+3. **Exit code kontrol:**
+
+   | Exit | Anlam | Davranis |
+   |------|-------|----------|
+   | 0 | Gemini basarili | Cikti oku, kalite kapisi uygula, raporu kaydet |
+   | 99 | engine=claude path | Claude ile sentez yaz |
+   | 1 | Hata: 2x fail | Fallback log + Claude ile yaz, `fallback_used: true` |
+   | 3 | gemini CLI yok | "npm install" oner, Claude ile devam |
+   | 4 | OAuth auth | "gemini /auth" oner, Claude ile devam |
+
+4. **Cikti dogrulama (Kalite Kapisi 1):**
+   - [ ] 15 Yargi sorgu listesi (kunye + ozet) raporda var mi?
+   - [ ] Min 5 karar tam metin kunye var mi?
+   - [ ] `02-Arastirma/atif-maddeleri.json` doldu mu?
+   - [ ] `02-Arastirma/mulga-eleme.json` doldu mu?
+   - [ ] Normlar Hiyerarsisi etiketleri var mi?
+   - [ ] Celiskili kararlar bolumu var mi?
+   - [ ] NotebookLM 10 sorgu cevabi raporda var mi?
+   - [ ] 2E Akademik bulgular var mi?
+   - [ ] Engine: gemini frontmatter var mi?
+
+5. **Eksik varsa:** Sadece eksik mini-kolu (orn. NotebookLM 3 sorgu eksikse,
+   sadece o 3 sorguyu) tekrar calistir. Tum Faz 2'yi bastan baslatma.
+
+### Asla
+
+- Bridge'i atla ve dogrudan ben sentez yaz (config Gemini diyorsa)
+- KVKK ihlali: `tmp/.gemini-input-*` dosyasinda muvekkil HAM adi olmasin
+  (zaten Claude bunu maskeli context'le hazirliyor, ama ek kontrol)
+- Sentez ciktisinda atif maddesi denetimi atla (mulga eleme onceden 2C'de yapilir,
+  bu noktada zaten temiz set var)
+
 ## Cikti Formati
 
 ```markdown

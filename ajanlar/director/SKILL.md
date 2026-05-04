@@ -489,3 +489,108 @@ Profiling raporu uretmek icin:
 python scripts/timing-report.py --pilot-davalar 5
 # Cikti: docs/timing-analysis-{tarih}.md
 ```
+
+---
+
+## Faz 2 Progress Ledger Talimati (Faz B - 2026-05-04)
+
+Avukat 33 dakika ekran beyaz beklemesin diye Director ASAMA 2 boyunca
+canli progress ledger yazar. `scripts/progress_helper.sh` araci kullanilir.
+
+### Run Lifecycle
+
+**Komut basinda (yeni dava / arastir / vb.):**
+```bash
+# Yeni run baslat — run_id uretilir, ledger acilir
+bash scripts/progress_helper.sh init {dava-id}
+# Eger CASE_DIR ortam degiskeni set edilirse ledger Drive'a yazilir,
+# yoksa tmp/'ye yazilir
+CASE_DIR="G:/Drive'im/Hukuk Burosu/Aktif Davalar/2026-007 Ahmet" \
+  bash scripts/progress_helper.sh init ahmet-2026-007
+```
+
+**Her MCP cagrisi sonrasi:**
+```bash
+bash scripts/progress_helper.sh log 2B yargi_search \
+  '{"query_no":4,"query_label":"temporal_2024","status":"ok","duration_ms":4384,"result_count":18,"selected_count":2}'
+```
+
+**Cagri tipi → phase eslemesi:**
+- 2B Yargi MCP cagrilari → phase=`2B`
+- 2C Mevzuat MCP cagrilari → phase=`2C`
+- 2D NotebookLM cagrilari → phase=`2D`
+- 2E Akademik (DergiPark/YOKTez) → phase=`2E`
+- 5 ajan stratejik analiz → phase=`4A` / `4B` / `4C` / `4D` / `4E`
+- Bridge cagrilari → phase=`{asama}_bridge`
+
+**60 saniye sessizlik kirinca (canli durum):**
+```bash
+bash scripts/progress_helper.sh still_working "Yargi sonuclarini skorluyorum, 5 sn icinde tam metin adaylari hazir"
+```
+
+**Ozet durum (avukata canli ekrana yazdirma — opsiyonel):**
+```bash
+bash scripts/progress_helper.sh status
+# Cikti: run_id, dava_id, ledger path, son 5 olay
+```
+
+**Komut sonunda:**
+```bash
+bash scripts/progress_helper.sh end
+```
+
+### Progress Ledger Format
+
+Her satir KVKK guvenli JSON (yerel dosya, harici servise gitmez):
+```json
+{
+  "ts": "2026-05-04T18:20:11Z",
+  "run_id": "20260504T182000-1234-ahmet-2026-007",
+  "phase": "2B",
+  "step": "yargi_search",
+  "query_no": 4,
+  "query_label": "temporal_2024",
+  "status": "ok",
+  "duration_ms": 4384,
+  "result_count": 18,
+  "selected_count": 2,
+  "rate_limit_wait_ms": 0
+}
+```
+
+### Avukat Canli Izleme
+
+Avukat baska terminalde ledger'i tail edebilir:
+```bash
+bash scripts/progress_helper.sh tail
+# veya:
+tail -f tmp/.faz2-progress.jsonl
+```
+
+### Canli Durum Bildirimi (Opsiyonel)
+
+Director her 30-60 sn'de avukata ozet bildirir (LLM-emit):
+
+```
+FAZ 2 DURUM — run 20260504T182000-1234-ahmet
+2B Yargı:    7/15 sorgu, 2/5 tam metin, 0 rate-limit, son 4.1s
+2C Mevzuat:  bekliyor (2B atif maddeleri lazim)
+2D NotebookLM: 4/10 soru, Q4 polling 82s (SLOW flag)
+2E Akademik:  3/8 arama, 1 makale tam metin
+Geçen sure: 06:42
+Sonraki adim: Yargi temporal_2025
+```
+
+### Faz 2 Ledger ile Eski Profiling Etkilesimi
+
+- `tmp/current-asama.txt` ve `tmp/current-dava-id.txt` (Faz 1) DEGISMEZ
+- Yeni `tmp/current-run-id.txt` ve `.faz2-progress.jsonl` (Faz B) eklenir
+- MCP timing hook'lari (eski, Faz 1) `mcp-timings.jsonl`'a yazmaya devam eder
+- `.faz2-progress.jsonl` ek detay (query_label, result_count vb.) icin
+
+### Asla
+
+- KVKK ihlali: ledger'a HAM muvekkil adi/TC/IBAN yazma. `query_label`'da
+  sadece kavramsal etiket (orn: `temporal_2024`, `HGK`, `bozma`)
+- Bos query_label ile log yaz: her cagriya anlamli etiket ver
+- Run sonunda `end` cagrisini atla (current-run-id.txt sonraki run'i bozar)
