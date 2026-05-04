@@ -7,14 +7,23 @@ Versiyon: 2.0 (Derin iteratif protokol + temporal evolution)
 
 ## Motor
 
-- Default: Gemini 3 Pro Preview (arastirma sentezi, rapor yazimi)
-- Fallback: Claude Opus 4.6 (2x Gemini fail -> Claude devralir)
-- Claude'da kalir: MCP cagrilari (MemPalace, Drive, NotebookLM), Yargi CLI,
-  Mevzuat CLI, PII mask/unmask, checkpoint yazimi
-- Prompt: `prompts/gemini/arastirma_sentezi.md`
-- Self-review: Gemini 2. cagri (prompts/gemini/self_review.md) kalite gate'te calisir
-- Config: `config/model-routing.json` -> `arastirma_sentezi`
-- Override: `--model claude` ile tek seferlik Claude'a geri don
+**TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/model-routing.json`'dan
+okunur. Bu dosyada hardcoded model adi YOKTUR.
+
+- **arastirma_sentezi** task'i icin engine + model: `config/model-routing.json` ->
+  `tasks.arastirma_sentezi.engine` ve `tasks.arastirma_sentezi.model`
+- **MCP/CLI cagrilari** (MemPalace, Drive, NotebookLM, Literatur, Yoktez,
+  Yargi MCP, Mevzuat MCP, ve CLI fallback'lari) icin engine: `config/model-routing.json` ->
+  `tasks.{yargi_mcp|mevzuat_mcp|notebooklm_mcp|akademik_mcp}.engine`
+- **arama_plani** task'i (sorgu terimi listesi uretmek): `config/model-routing.json` ->
+  `tasks.arama_plani.engine` ve `model`
+- **self_review** task'i (kalite gate, ciktinin kendi denetimi): `config/model-routing.json` ->
+  `tasks.self_review.engine` ve `model`
+- **Fallback chain:** `config/model-routing.json` -> `fallback.gemini_chain` ve
+  `fallback.final_fallback`
+- **Override:** `--model claude` veya `--model gemini` ile tek seferlik manuel
+  override (Director Agent komutu)
+- **Prompt sablonlari:** `prompts/gemini/arastirma_sentezi.md`, `prompts/gemini/self_review.md`
 
 ---
 
@@ -122,18 +131,68 @@ dusunmelidir.
 
 **Birincil arac:** Yargi MCP (`mcp__claude_ai_Yarg_MCP__*`)
 **Fallback:** Yargi CLI (`yargi bedesten search/doc`) - sadece MCP fail durumunda
-**Thinking budget:** Claude Opus 4.7 **MAX EFFORT thinking**
+**Thinking budget:** Engine + model `config/model-routing.json` -> ilgili task'tan okunur, MAX EFFORT thinking aktif
 **Min sorgu sayilari (15, 6 faz, vb.) DEGISMEZ — sadece arac MCP olur.**
 
-**!! RATE LIMIT KURALI (ZORUNLU - 2026-05-02 sonrasi)**
-Bedesten API rate limit getirdi (HTTP 429 Too Many Requests).
-- **HER yargi search arasina MIN 3 saniye bekleme** zorunlu (Bash `sleep 3`)
-- **PARALEL BATCH YASAK** — 5 sorguyu ayni anda gondermek 429 verir
-- Sira: sorgu_1 → bekle 3sn → sorgu_2 → bekle 3sn → ...
-- 15 sorgu icin minimum sure: 15 × 3 = 45 sn bekleme + sorgu suresi
-- 429 alirsa: 60 sn bekle, ayni sorguyu 1 kez yeniden dene
-- 2. kez 429 olursa: o spesifik sorguyu atla, raporda "[RATE LIMIT - manuel arama gerek]" not dus
-- Sorgular arasi delay icin Director Bash kullanir: `sleep 3 && <next call>`
+**!! RATE LIMIT KURALI v2 (2026-05-04 — Avukat karari: SKIP YOK, ISRARCI BEKLE)**
+
+Avukatin acik tercihi: "Yargi MCP rate limit'e takilma durumunda da bekleyip
+dogru kararlari bulsun. Eger yeterli veri yoksa [bildirsin]."
+
+Bedesten API HTTP 429 dondurebilir. Davranis:
+
+- **HER yargi search arasina MIN 1.5 saniye bekleme** (eski 3 sn kuralinin yerine —
+  test sonucuna gore guncellenebilir, daha dusuk degerlerde de kabul edilir
+  ama Bedesten paralel batch hicbir zaman istemiyor)
+- **PARALEL BATCH YASAK** — 1 server icin ayni anda 1 sorgu (concurrency=1)
+- Sira: sorgu_1 → bekle 1.5sn → sorgu_2 → bekle 1.5sn → ...
+- 15 sorgu icin minimum bekleme: 15 × 1.5 = 22.5 sn (eski 45 sn yerine, 50% kazanc)
+
+**429 alindiginda — Israrcı Backoff (Skip YOK):**
+
+| Deneme | Bekleme | Sonraki |
+|--------|---------|---------|
+| 1. fail | 15 sn | retry |
+| 2. fail | 30 sn | retry |
+| 3. fail | 60 sn | retry |
+| 4. fail | 120 sn (2 dk) | retry |
+| 5. fail | 300 sn (5 dk) | retry |
+| 6+. fail | — | **Avukata canli bildirim, manuel karar** |
+
+**6+. fail durumunda Director Agent avukata sorar:**
+
+```
+"Yargi API rate limit israrci. Bu sorgu icin 8+ dakika bekledim.
+ [a] 5 dk daha bekle ve tekrar dene
+ [b] Bu sorguyu atla, ama Eksik Sorgular listesine ekle
+ [c] Faz 2'yi durdurmam, manuel arama oneririm
+ Kararınız?"
+```
+
+**Asla otomatik skip yok.** Sorgu ya tamamlanir ya da avukat manuel onayla atlatir.
+
+**Diger kollar 429 beklerken paralel devam eder:**
+- 2D NotebookLM async kol cevaplarini toplamaya devam eder
+- 2E Akademik kol cevaplarini toplamaya devam eder
+- 2C Mevzuat (eger 2B'nin yeterli atif maddesi geldiyse) baslayabilir
+- Faz 2'nin tamami kilitlenmez
+
+**Yetersiz veri raporu (sadece veri yoksa):**
+
+Eger 15 sorgudan Y tanesi tamamlanmadiysa (rate limit israrciligi + avukat
+onayiyla atlanan sorgular), arastirma raporunun basina sunu dus:
+
+```
+[YETERSIZ VERI] Yargi MCP'den 15 hedef sorgudan Y eksik kaldi.
+Eksik sorgular: [liste]
+Sebep: Rate limit israrcı (+ avukat onayli atlama)
+Oneri: Manuel arama veya yeniden calistirma
+```
+
+**Eskisi gibi 5xx/timeout davranisi:** 1 retry (5 sn sonra), sonra Yargi CLI
+fallback otomatik (frontmatter'a `mcp_fallback_used: true` notu).
+
+Sorgular arasi delay icin Director Bash kullanir: `sleep 1.5 && <next call>`.
 
 MCP arac listesi:
 - `search_bedesten_unified` - Yargitay/Danistay/yerel mahkeme genel arama
@@ -315,7 +374,7 @@ Director Agent'a UYARI gonderilir.
 
 **Birincil arac:** Mevzuat MCP (`mcp__claude_ai_Mevuzat_MCP__*`)
 **Fallback:** Mevzuat CLI (`mevzuat search/doc/article/tree/gerekce`) - sadece MCP fail durumunda
-**Thinking budget:** Claude Opus 4.7 **MAX EFFORT thinking**
+**Thinking budget:** Engine + model `config/model-routing.json` -> ilgili task'tan okunur, MAX EFFORT thinking aktif
 **Min sorgu sayilari (8, 4 faz, vb.) DEGISMEZ — sadece arac MCP olur.**
 
 **!! page_size ≤20 KURALI (ZORUNLU - 2026-05-02 sonrasi)**
@@ -637,6 +696,124 @@ analizi, zimni ilga, LLM Web fallback).
 | Mulga/yururluk kontrolu | her madde icin 4 kontrol zorunlu |
 | Eleme sonrasi gecerli karar | min 5 (altinda 2B'ye geri donus) |
 | "Gecerli/Elenen" tablolari | her ikisi de raporda zorunlu |
+
+---
+
+### Bolum 2.7 - 2D NotebookLM Iteratif Protokolu (Disiplinli + Async Paralel Kol)
+
+**Birincil arac:** NotebookLM MCP (`mcp__notebooklm__*`)
+**Notebook:** Avukatin sectigi (`is_hukuk`, `aile_hukuku`, vb. — ADIM 0B'de belirlenir)
+**Ne zaman calisir:** ASAMA 2'de **async paralel kol** olarak (2B sirali zincirini bloklamaz)
+
+**Avukat karari (2026-05-04):** "NotebookLM arastirmasi degerli, 10 sorgu kesinlikle yapilsin.
+Iteratif olsun, mevcut yonergeye sadik."
+
+#### Sorgu Disiplini (10 Iteratif Sorgu — KORUNUR)
+
+Mevcut FIVEAGENTS.md ASAMA 2D yonergesi degismez:
+
+**Bolum A: Hukuki Irdeleme (en az 6 soru, iteratif)**
+- Q1: Temel hukuki cerceve (kritik nokta etrafinda)
+- Q2: Taraflarin sorumluluk alanlari
+- Q3: Ispat yukumlulugu
+- Q4: Temerrud / faiz / sure
+- Q5: Celiskili noktalar / karsi argumanlar
+- Q6: Emsal ictihat analizi (NotebookLM'in kaynak gosterdikleri)
+
+**Bolum B: 5 Ajan Perspektifleri (4 soru)**
+- Q+1: Davaci avukat bakis acisi
+- Q+2: Davali avukat bakis acisi
+- Q+3: Bilirkisi bakis acisi
+- Q+4: Hakim bakis acisi
+
+Her sorguda SABIT ibare: **"SADECE KAYNAKLARA GORE CEVAP VER, UYDURMA YAPMA"**.
+
+#### YENI: 47 Sorguya Cikma Uyarisi (Disiplin)
+
+Sakarya davasinda 47 sorgu yapilmisti — bu **kalite degil, balon**. Yeni kural:
+
+- **Hard cap: 12 sorgu** (10 zorunlu + en fazla 2 takip sorusu)
+- **Tekrar yasak:** Ayni temaya farkli kelimelerle 11+ sorgu yapiyorsan,
+  yeni bilgi getirmiyor demektir → DUR. Mevcut bulgularla sentezle.
+- **Doygunluk tespiti:** 2 ardisik sorgu cevabi onceki sorgulardan farkli sey
+  getirmiyorsa "NotebookLM bulgulari doygunluga ulasti — 11. sorgu yok" notu
+  rapora dusulur.
+
+#### YENI: Async Paralel Kol (Hiz Kazanci)
+
+NotebookLM 2D **ASLA Faz 2'yi bloklamaz**:
+
+1. Director Agent ASAMA 2 basinda 2D'yi background task olarak baslatir
+2. 2B Yargi MCP + 2C Mevzuat MCP sirali zinciri kendi temposunda ilerler
+3. 2E Akademik kol da paralel calisir
+4. NotebookLM cevaplari geldikce arastirma raporuna eklenir
+5. **2B+2C bitti, 2D hala devam ediyorsa:**
+   - Director makul sure bekler (5 dakika)
+   - Sonra mevcut NotebookLM cevaplariyla sentez yapar
+   - Gec gelen cevaplar checkpoint olarak isaretlenir, raporun
+     "NotebookLM Ek Bulgulari (Geç Geldi)" bolumune eklenir
+
+#### YENI: Tek Sorgu Soft Timeout (3 dakika)
+
+Tek bir NotebookLM sorgusu **3 dakikayi** gecerse:
+
+- Rapora `SLOW_NOTEBOOKLM_Q{n}` flag yazilir
+- **Sorgu IPTAL EDILMEZ** — polling devam eder
+- Arastirmaci sonraki sorguya gecer, ama mevcut sorgunun cevabi geldiginde rapora ekler
+- Bu, hizi keser ama kaliteyi kesmez
+
+#### YENI: Toplam Soft Cap (15 dakika)
+
+NotebookLM 2D toplam suresi 15 dakikayi gecerse:
+
+- Mevcut tamamlanan sorgu sayisini raporda not et
+- "NotebookLM 10 sorgudan X tanesi tamamlandi, kalan Y geç gelirse eklenecek" flag dus
+- ASAMA 2'nin diger kollari ve ASAMA 3+ devam eder
+
+#### KVKK Notu (NotebookLM)
+
+NotebookLM Google ABD'dedir. Sorgularda HAM muvekkil adi/TC/adres KULLANMA.
+Sadece kritik nokta + genel dava turu yaz (mevcut KVKK kuralina sadik kal).
+
+#### 2D Cikti Formati
+
+```markdown
+## NotebookLM Iteratif Bulgular (Bolum 2D)
+
+**Notebook:** is_hukuk
+**Toplam sorgu:** 10/10 tamamlandi (veya 8/10 — 2 takipte)
+**Sure:** 4 dakika 32 saniye
+**Disiplin:** ✓ 11+ sorguya cikilmadi
+
+### Bolum A — Hukuki Irdeleme
+- Q1 [Temel cerceve]: [NotebookLM cevap ozeti, kaynak]
+- Q2 [Sorumluluk]: [...]
+- ...
+- Q6 [Emsal]: [...]
+
+### Bolum B — 5 Ajan Perspektifi
+- Q+1 [Davaci]: [...]
+- Q+2 [Davali]: [...]
+- Q+3 [Bilirkisi]: [...]
+- Q+4 [Hakim]: [...]
+
+### Doygunluk Notu (varsa)
+"11. sorgu eklenmedi cunku Q9-Q10 ayni cevap kalibini verdi."
+
+### Geç Gelen Bulgular (varsa)
+"Q4 cevabi 4 dakika sonra geldi, sentez raporuna eklenmistir."
+```
+
+#### Bolum 2.7 Zorunlu Minimum
+
+| Metrik | Minimum |
+|---|---|
+| Sorgu sayisi | 10 (6 hukuki + 4 perspektif), takip dahil max 12 |
+| Async paralel | 2D 2B/2C'yi bloklamaz |
+| KVKK ibare | Her sorguda "SADECE KAYNAKLARA GORE CEVAP VER, UYDURMA YAPMA" |
+| Tek sorgu soft timeout | 3 dakika (skip yok, polling devam) |
+| Toplam soft cap | 15 dakika |
+| Doygunluk tespiti | 2 ardisik benzer cevap → DUR |
 
 ---
 

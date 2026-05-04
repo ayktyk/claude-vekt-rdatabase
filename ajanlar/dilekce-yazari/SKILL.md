@@ -7,14 +7,13 @@ Versiyon: 1.1
 
 ## Motor
 
-- Default: Gemini 3 Pro Preview (dilekce/ihtarname/sozlesme yazimi)
-- Fallback: Claude Opus 4.6
-- Claude'da kalir: Hesaplama sonuclarinin dilekceye enjeksiyonu,
-  MCP cagrilari, UYAP formatina donusturme
-- Prompt: `prompts/gemini/dilekce_yazimi.md`
-- Self-review: Gemini 2. cagri (kritik) + Revizyon Ajani (6 boyut)
-- Config: `config/model-routing.json` -> `dilekce_yazimi`
-- Override: `--model claude`
+**TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/model-routing.json`'dan okunur.
+
+- **dilekce_yazimi** task'i: `config/model-routing.json` -> `tasks.dilekce_yazimi.engine` ve `model`
+- **Claude'da kalir:** hesaplama sonuclarinin dilekceye enjeksiyonu, MCP cagrilari, UYAP/UDF formatina donusturme — bunlar arac kullanimidir, hukuki uretim degildir
+- **Self-review:** `tasks.self_review.engine` (kritik) + Revizyon Ajani (7 boyut)
+- **Prompt sablonu:** `prompts/gemini/dilekce_yazimi.md`
+- **Override:** `--model claude` veya `--model gemini` ile tek seferlik manuel
 
 ---
 

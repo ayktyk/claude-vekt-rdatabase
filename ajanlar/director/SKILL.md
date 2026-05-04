@@ -7,15 +7,16 @@ Versiyon: 1.0
 
 ## Motor
 
-- Default: Claude Opus 4.6 (KALICI - Director orkestrasyon Claude'da kalir)
-- Fallback: YOK - Director tek motor
-- Gemini'ye gitmez: komut siniflandirma, ajan secimi, kalite gate,
-  MCP cagrilari, MemPalace wake-up, PII mask/unmask, kaynak sorgulama
-- Alt ajanlari cagirirken `config/model-routing.json` okur, her ajana
+**TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/model-routing.json`'dan okunur.
+
+- **Director** task'i: `config/model-routing.json` -> `tasks.director` (engine: claude, koordinasyon ve orkestrasyon)
+- **Fallback:** YOK - Director tek motor (Claude). Hukuki uretim degildir, koordinasyondur.
+- **Gemini'ye gitmez:** komut siniflandirma, ajan secimi, kalite gate,
+  MCP cagrilari, MemPalace wake-up, PII mask/unmask, kaynak sorgulama (hepsi `tasks.mcp_arac_yonetimi` ve `tasks.director` engine: claude)
+- **Alt ajanlari cagirirken** `config/model-routing.json` okur, her ajana
   kendi motorunu (Gemini veya Claude) ayarlar
-- `default_mode: ask` ise her ajan cagrisi oncesi avukata motor sorar
-- Kritik nokta tespiti Director'un on-adimidir; bu adim icin Gemini cagirir
-  (prompt: `prompts/gemini/kritik_nokta_tespiti.md`)
+- `mode: ask` ise her ajan cagrisi oncesi avukata motor sorar
+- **Kritik nokta tespiti** Director'un on-adimidir; bu adim icin engine: `config/model-routing.json` -> `tasks.kritik_nokta_tespiti.engine` (varsayilan claude — muvekkil belgelerini MCP ile okur)
 
 ---
 

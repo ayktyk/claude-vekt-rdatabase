@@ -7,13 +7,13 @@ Versiyon: 1.0
 
 ## Motor
 
-- Default: Gemini 3 Pro Preview (usul raporu yazimi)
-- Fallback: Claude Opus 4.6
-- Claude'da kalir: Iscilik hesaplama modulu, MCP cagrilari, Calendar ekleme
-- Prompt: `prompts/gemini/usul_raporu.md`
-- Self-review: Gemini 2. cagri kalite gate'te calisir
-- Config: `config/model-routing.json` -> `usul_raporu`
-- Override: `--model claude`
+**TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/model-routing.json`'dan okunur.
+
+- **usul_raporu** task'i: `config/model-routing.json` -> `tasks.usul_raporu.engine` ve `model`
+- **Claude'da kalir:** iscilik hesaplama modulu (matematiksel hesap), MCP cagrilari, Calendar ekleme — bunlar arac kullanimidir, hukuki uretim degildir
+- **Self-review:** `tasks.self_review.engine` (Gemini 2. cagri, kalite gate'te calisir)
+- **Prompt sablonu:** `prompts/gemini/usul_raporu.md`
+- **Override:** `--model claude` veya `--model gemini` ile tek seferlik manuel
 
 ---
 

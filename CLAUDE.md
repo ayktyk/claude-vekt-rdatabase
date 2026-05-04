@@ -146,8 +146,8 @@ Sistemin iki bilgi katmani vardir. Her arac yalnizca kendi katmanina aittir.
 
 | Arac | Gorev |
 |---|---|
-| Yargi MCP (`mcp__claude_ai_Yarg_MCP__*`) | **BIRINCIL** - Yargitay/Danistay/HGK/IBK/AYM/Uyusmazlik/Sayistay/KVKK/Rekabet/KIK arama + tam metin (`search_bedesten_unified`, `search_anayasa_unified`, `get_bedesten_document_markdown`, `check_government_servers_health`). Claude Opus 4.7 MAX EFFORT. |
-| Mevzuat MCP (`mcp__claude_ai_Mevuzat_MCP__*`) | **BIRINCIL** - Kanun/KHK/Tuzuk/Yonetmelik/Teblig/CBK arama + icerik + madde agaci + gerekce (`search_mevzuat`, `search_kanun`, `search_within_*`, `get_mevzuat_content`, `get_mevzuat_madde_tree`, `get_mevzuat_gerekce`). Mulga denetimi icin zorunlu. Claude Opus 4.7 MAX EFFORT. |
+| Yargi MCP (`mcp__claude_ai_Yarg_MCP__*`) | **BIRINCIL** - Yargitay/Danistay/HGK/IBK/AYM/Uyusmazlik/Sayistay/KVKK/Rekabet/KIK arama + tam metin (`search_bedesten_unified`, `search_anayasa_unified`, `get_bedesten_document_markdown`, `check_government_servers_health`). Engine: `config/model-routing.json` -> `tasks.yargi_mcp` (MAX EFFORT thinking). |
+| Mevzuat MCP (`mcp__claude_ai_Mevuzat_MCP__*`) | **BIRINCIL** - Kanun/KHK/Tuzuk/Yonetmelik/Teblig/CBK arama + icerik + madde agaci + gerekce (`search_mevzuat`, `search_kanun`, `search_within_*`, `get_mevzuat_content`, `get_mevzuat_madde_tree`, `get_mevzuat_gerekce`). Mulga denetimi icin zorunlu. Engine: `config/model-routing.json` -> `tasks.mevzuat_mcp` (MAX EFFORT thinking). |
 | `yargi` CLI | **FALLBACK** - Yargi MCP basarisiz olursa devreye girer (`yargi bedesten search/doc`) |
 | `mevzuat` CLI | **FALLBACK** - Mevzuat MCP basarisiz olursa devreye girer (`mevzuat search/doc/article/tree`) |
 
@@ -159,10 +159,12 @@ Bu katman yalnizca avukatin isaret ettigi kritik nokta icin calistirilir.
 Genis, konusuz arastirma yapma.
 
 **ONEMLI - Her Zaman Derin Mod (v2.0):** Yargi MCP ve Mevzuat MCP her
-sorguda **iteratif derin protokol** ile calisir (Claude Opus 4.7 **MAX
-EFFORT thinking**). Hibrit mod yoktur, tek-shot sorgu yasaktir. Protokol
-hem `arastir:` hem `yeni dava` komutlarinda her zaman aktiftir. Yargi
-CLI / Mevzuat CLI yalniz MCP fail durumunda fallback olarak devreye girer.
+sorguda **iteratif derin protokol** ile calisir. Engine + thinking budget
+`config/model-routing.json` -> `tasks.yargi_mcp` ve `tasks.mevzuat_mcp`'den
+okunur (MAX EFFORT thinking aktif). Hibrit mod yoktur, tek-shot sorgu
+yasaktir. Protokol hem `arastir:` hem `yeni dava` komutlarinda her zaman
+aktiftir. Yargi CLI / Mevzuat CLI yalniz MCP fail durumunda fallback
+olarak devreye girer.
 
 **2B → 2C Sirali Akis (paralelden CIKARILDI):** 2B Yargi MCP detayli karar
 arastirmasi yapar → bulunan kararlarin atif yaptigi mevzuat maddelerini cikarir

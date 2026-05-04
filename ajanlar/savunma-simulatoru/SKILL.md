@@ -7,13 +7,13 @@ Versiyon: 1.0
 
 ## Motor
 
-- Default: Gemini 3 Pro Preview (karsi taraf perspektifi simulasyonu)
-- Fallback: Claude Opus 4.6
-- Claude'da kalir: MCP cagrilari, dilekce dosyasi okuma
-- Prompt: `prompts/gemini/savunma_simulasyonu.md`
-- Self-review: Gemini 2. cagri kalite gate'te calisir
-- Config: `config/model-routing.json` -> `savunma_simulasyonu`
-- Override: `--model claude`
+**TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/model-routing.json`'dan okunur.
+
+- **savunma_simulasyonu** task'i: `config/model-routing.json` -> `tasks.savunma_simulasyonu.engine` ve `model`
+- **Claude'da kalir:** MCP cagrilari, dilekce dosyasi okuma
+- **Self-review:** `tasks.self_review.engine` (kalite gate'te calisir)
+- **Prompt sablonu:** `prompts/gemini/savunma_simulasyonu.md`
+- **Override:** `--model claude` veya `--model gemini` ile tek seferlik manuel
 
 ---
 

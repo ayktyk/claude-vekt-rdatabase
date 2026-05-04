@@ -7,13 +7,13 @@ Versiyon: 1.0
 
 ## Motor
 
-- Default: Gemini 3 Pro Preview (7 boyutlu dilekce denetimi)
-- Fallback: Claude Opus 4.6
-- Claude'da kalir: MCP cagrilari, dilekce v1/v2 dosya yonetimi
-- Prompt: `prompts/gemini/revizyon.md`
-- Self-review: Kendisi zaten denetci rolunde; self-review bu ajanda uygulanmaz
-- Config: `config/model-routing.json` -> `revizyon`
-- Override: `--model claude`
+**TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/model-routing.json`'dan okunur.
+
+- **revizyon** task'i: `config/model-routing.json` -> `tasks.revizyon.engine` ve `model`
+- **Claude'da kalir:** MCP cagrilari, dilekce v1/v2 dosya yonetimi, UDF format uretimi (`scripts/md_to_udf.py`)
+- **Self-review:** Kendisi zaten denetci rolunde; self-review bu ajanda uygulanmaz
+- **Prompt sablonu:** `prompts/gemini/revizyon.md`
+- **Override:** `--model claude` veya `--model gemini` ile tek seferlik manuel
 
 ---
 
