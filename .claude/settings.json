@@ -1,0 +1,18 @@
+{
+  "_comment": "Proje-level Claude Code ayarlari. Kullanici-specific permission'lar settings.local.json'da. Bu dosya gitlenir, ekibin tamami kullanir.",
+  "_doctrine": "Faz C: Model regresyon hook'u. Belge yazari uretim ajanlarinin ciktisi config/model-routing.json'a uyumlu mu kontrol eder.",
+
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash hooks/check-model-regression.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

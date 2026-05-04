@@ -594,3 +594,133 @@ Sonraki adim: Yargi temporal_2025
   sadece kavramsal etiket (orn: `temporal_2024`, `HGK`, `bozma`)
 - Bos query_label ile log yaz: her cagriya anlamli etiket ver
 - Run sonunda `end` cagrisini atla (current-run-id.txt sonraki run'i bozar)
+
+---
+
+## ASAMA 4: 5 Ajanli Stratejik Analiz — Gercek Paralel Sub-Agent Spawn (Faz C)
+
+ASAMA 4'te 4 perspektif ajani **gercek paralel** spawn edilir, sentez sirali calisir.
+Mevcut "tek-context'te 5 perspektif yazma" yontemi YASAK — performans ve kalite kaybi
+oluyor. Plan'da Faz C ile gercek implement edildi.
+
+### Sub-Agent Dosyalari (Hazir)
+
+```
+.claude/agents/
+├── davaci-avukat.md     (4A)
+├── davali-avukat.md     (4B)
+├── bilirkisi.md         (4C)
+├── hakim.md             (4D)
+└── sentez-strateji.md   (4E — sentez, sirali)
+```
+
+### Spawn Mantigi
+
+ASAMA 4 baslarken Director **AYNI mesaj icinde 4 Agent tool cagrisi yapar** (paralel):
+
+```
+Agent(subagent_type="davaci-avukat", description="ASAMA 4A perspektif",
+      prompt="Research package: {00-Briefing.md + arastirma-raporu.md + usul-raporu.md ozeti}")
+Agent(subagent_type="davali-avukat", description="ASAMA 4B perspektif",
+      prompt=ayni_research_package)
+Agent(subagent_type="bilirkisi", description="ASAMA 4C perspektif",
+      prompt=ayni_research_package + hesaplama_dosyalari)
+Agent(subagent_type="hakim", description="ASAMA 4D perspektif",
+      prompt=ayni_research_package)
+```
+
+4 Agent paralel calisir. Hepsi tamamlandiginda:
+
+```
+Agent(subagent_type="sentez-strateji", description="ASAMA 4E sentez",
+      prompt=research_package + 4_perspektif_ciktilari)
+```
+
+5E sentez ardi sira yapilir cunku 4 perspektifin ciktisina ihtiyaci var.
+
+### Hata Toleransi (Promise.allSettled)
+
+| Tamamlanan | Karar |
+|------------|-------|
+| 4/4 | Tam sentez, normal akis |
+| 3/4 | Uyarili sentez ("davali perspektifi eksik" notu, NotebookLM gibi DUSUK GUVEN flag) |
+| 2/4 | SINIRLI sentez + DUSUK GUVEN flag, avukata bildir |
+| 1-0/4 | BASARISIZ — ASAMA 4 yeniden calistir, max 2 kez |
+
+Director, hangi ajanlarin tamamlandigini izlemek icin cikti dosyalarinin presence'ini kontrol eder.
+
+### Cikti Dosyalari (Stratejik Analiz)
+
+```
+02-Arastirma/
+├── stratejik-analiz-4A-davaci.md
+├── stratejik-analiz-4B-davali.md
+├── stratejik-analiz-4C-bilirkisi.md
+├── stratejik-analiz-4D-hakim.md
+└── stratejik-analiz.md             (4E sentez — Belge Yazari icin rehber)
+```
+
+### Progress Ledger Yazimi
+
+Her sub-agent baslatma + tamamlama progress ledger'a yazilir:
+
+```bash
+bash scripts/progress_helper.sh log 4A spawn '{"agent":"davaci-avukat","status":"started"}'
+# ... agent calisir ...
+bash scripts/progress_helper.sh log 4A complete '{"agent":"davaci-avukat","status":"ok","duration_ms":92000}'
+```
+
+### KVKK
+
+Sub-agent prompt'larinda HAM muvekkil verisi YASAK. Research package zaten maskeli
+context icerir. Sub-agent ciktilarinda da `[Muvekkil]`, `[TC_NO]` formatinda kalir.
+
+### Kalite Kapisi (ASAMA 4 Sonu)
+
+- [ ] 4 perspektif dosyasi var mi?
+- [ ] 4E sentez dosyasi var mi (4'unun ozeti + dilekce yazim rehberi)?
+- [ ] Sentez karari belirlenmis mi (KIRMIZI / YESIL / SARTLI)?
+- [ ] DUSUK GUVEN flag varsa avukata gosterildi mi?
+- [ ] Tum dosyalar Drive'a yazildi mi?
+
+Eksik varsa: SADECE eksik perspektifi yeniden spawn et (4'unun hepsini degil).
+
+### Beklenen Sure
+
+- 4 perspektif paralel: ~1.5 dakika (en yavas perspektif suresi kadar)
+- 4E sentez: ~30 saniye
+- **Toplam ASAMA 4: ~2 dakika** (eski tek-context "sahte paralel" 4 dakika idi)
+
+---
+
+## Kalite Kapisi Otomasyonu (Faz C)
+
+ASAMA 2 sonu Director kalite kapisini scriptle dogrular:
+
+```bash
+python scripts/quality_gate.py asama2 "<dava-klasoru>"
+```
+
+Cikti:
+- Exit 0 + "PASS": ASAMA 3 (usul) baslayabilir
+- Exit 1 + "FAIL": Hangi kontrol fail oldu listelenir, sadece eksik mini-kolu yeniden calistir
+
+Kontrol edilen dosyalar (ASAMA 2 sonunda Drive'da olmali):
+- `02-Arastirma/atif-maddeleri.json` — 2B ciktisi (yargi karari + atif maddeleri)
+- `02-Arastirma/mulga-eleme.json` — 2C ciktisi (mulga elemeyi gecmis kararlar)
+
+Schema ornek icin: `scripts/quality_gate.py --help` veya kaynak kodu.
+
+### Kural: valid < 5
+
+Gecerli karar sayisi 5'in altinda ise quality_gate FAIL doner. Director:
+1. 2B'ye geri don, 3 alternatif terimle ek arama yap
+2. Hala 5 alti ise: rapora `[YETERSIZ VERI]` flag dus, avukata bildir,
+   manuel arama veya yeniden calistirma oner
+
+### Asla
+
+- 4 perspektifi tek prompt icinde seri yaz
+- Sentez Agent'i paralelken cagir (sirali zorunlu)
+- 4E ciktisini Belge Yazari'na vermeden ASAMA 5'e gec
+- KVKK ihlali: research package'da HAM veri
