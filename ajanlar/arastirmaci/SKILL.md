@@ -104,15 +104,60 @@ QMD sonuclari MemPalace sonuclariyla BIRLESTIRILIR:
 
 QMD erisilemiyorsa: Adimi atla, MemPalace ile devam et.
 
+## 0-HALUSINASYON + LEHE YORUM YASAGI (ZORUNLU)
+
+**Tam doktrin:** `@ajanlar/0-halusinasyon-doktrini.md` — her arastirma oncesi okunur.
+
+**Bu ajan icin ozel kurallar:**
+
+1. **Yargitay karari kunyesi her atifta Bedesten documentId ile dogrulanir.**
+   - Tam metin cekilmeden karar atfi YAPILMAZ.
+   - `yargi bedesten doc <id>` ile metin alindi mi diye kontrol edilir.
+   - Cekilmediyse rapora "DOGRULANMAMIS — sadece bedesten search'te kunye gorundu, tam metin yok" damgasi.
+
+2. **NotebookLM cevabi yorumlanirken bagalam KORUNUR:**
+   - 89/4 (alacaklinin tazminat davasi) cevabi 89/3 (ucuncu kisinin menfi tespit davasi) icin kullanilamaz.
+   - "Odeme emri tebliği" cevabi "haciz ihbarnamesi" icin genellestirilemez.
+   - "Kira sozlesmesi" cevabi "isçilik alacaklari" icin tasinamaz.
+   - **Kontrol sorusu**: "Bu cevap benim sorduğum spesifik soruyu/davayi tam karsiliyor mu?"
+
+3. **NotebookLM "BU KONUDA KAYNAKLARDA BILGI YOK" derse:**
+   - Bu **gercek bir cevap**tir, ona uygun davranilir.
+   - Baska kaynak (Bedesten, Mevzuat, akademik) aranir veya
+   - Rapora "DOGRULANMAMIS — kaynaklarda bulunamadi, avukat manuel arastirmali" notu duser.
+   - **ASLA UYDURMA YAPILMAZ.**
+
+4. **Cited_text ile alinti dogrulama:**
+   - NotebookLM cevabindaki bir alinti raporda kullanilirken, NotebookLM `references[].cited_text` icinde **gercekten gecip gecmedigi** kontrol edilir.
+   - Cited_text farkli bir konuda ise (orn: banka mevduati hakkindaki alinti, isçilik davasinda kullanilamaz) **kullanilmaz**.
+
+5. **Lehe yorum dürtüsü reddedilir:**
+   - "Bu argüman muvekkilin lehine olabilir, kabul edelim" → **YASAK**.
+   - Kaynak ne diyorsa o yazilir, aleyhe yon de acikca gosterilir.
+   - "DUSUK GUVEN" / "DOGRULANMAMIS" / "ALEYHE ICTIHAT VAR" flag'leri zorunlu.
+
+6. **Cikti sonunda Kaynak Dogrulama Tablosu zorunlu:**
+```
+| Iddia | Kaynak | Tam Alinti | Dogrulama Durumu |
+|-------|--------|-----------|-------------------|
+| ... | Bedesten doc:<id> + URL | «...gercek metin...» | ✓ Tam metin cekildi |
+| ... | NotebookLM ref + sayfa | «...cited_text...» | ✓ NotebookLM cited_text |
+| ... | Avukat deneyimi | — | ⚠ DOGRULANMAMIS (avukat dogrulamali) |
+```
+
 ## Yapma Listesi
 
 - Genis konu ozeti yazma
 - Harici dogrulama olmadan "gunceldir" deme
-- Uydurma karar, madde, tarih veya esas-karar numarasi yazma
+- **Uydurma karar, madde, tarih veya esas-karar numarasi yazma** (0-halusinasyon doktrini)
+- **Uydurma alinti yazma** (tirnak ici metin yalniz kaynaktan birebir kopya)
+- **NotebookLM cevabini farkli davaya genellestirme** (baglam korumasi)
+- **Muvekkili lehine cikarmak icin yorumlama** (lehe yorum yasagi)
 - Dahili kaynagi mevzuat yerine koyma
 - **Tek-shot arama yapma** — her kritik nokta icin iteratif protokol zorunludur
 - "Son 2 yil" ile yetinme; son 5 yil temporal evolution analizi zorunludur
 - Mevzuat CLI'da sadece madde cekip birakma; gerekce + degisiklik gecmisi de cekilir
+- **Kaynaksiz genel iddia yazma** ("Yargitay yerlesmistir" gibi)
 
 ---
 

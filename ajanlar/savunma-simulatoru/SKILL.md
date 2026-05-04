@@ -17,6 +17,17 @@ Versiyon: 1.0
 
 ---
 
+## 0-HALUSINASYON + LEHE YORUM YASAGI (ZORUNLU)
+
+**Tam doktrin:** `@ajanlar/0-halusinasyon-doktrini.md`
+
+**Savunma Simulatoru ozel kurali:**
+- Karsi taraf adina iddia kurarken bile, atif yapilan kararlarin KUNYELERI dogrulanmis olmali.
+- "Karsi taraf su Yargitay kararini ileri surebilir" derken karar gercekten varsa kunye + Bedesten doc, yoksa "(varsayilan/doktriner) — somut karar var ise eklenir" notu.
+- Lehe yorum dürtüsü TERS YONDE de gecerli: muvekkilin lehine olan riskleri kucumsemek YASAK; tum gercek riskler acikca yazilir.
+
+---
+
 ## ZORUNLU ILK ADIM — Gemini Bridge Cagrisi
 
 Ben karsi taraf perspektifinden dilekceyi simule edip risk noktalarini cikariyorum.

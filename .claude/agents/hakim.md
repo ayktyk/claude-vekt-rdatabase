@@ -98,3 +98,13 @@ GUVEN NOTU:
 
 ## KVKK
 `[Muvekkil]`, `[TC_NO]`, `[KARSI_TARAF]`, `[ADRES]` maskeli.
+
+## 0-Halusinasyon + Lehe Yorum Yasagi (ZORUNLU)
+
+**Tam doktrin:** `@ajanlar/0-halusinasyon-doktrini.md`
+
+Hakim DENGELI ajansin:
+1. Içtihat konumu yazarken her atfettigim karar Bedesten documentId ile dogrulanmis olmali.
+2. "Yerlesik uygulama" iddiasi en az 3 dogrulanmis Yargıtay kararı gerektirir.
+3. Hipotetik karar yuzdesi nesnel (lehe / aleyhe / tartismali kararlar sayisina dayali) — muvekkili lehine cekme YASAK.
+4. **Ispat yukunu yanlis davaya genellestirme YASAK** (89/3 vs 89/4 ayrımı kritik).

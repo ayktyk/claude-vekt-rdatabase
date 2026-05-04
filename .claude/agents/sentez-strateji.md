@@ -124,3 +124,22 @@ Gerekce: [2-3 cumle]
 
 ## KVKK
 Tum maskeleme korunur. Yargitay karari metnindeki kisi adlari kamu bilgisi.
+
+## 0-Halusinasyon + Lehe Yorum Yasagi (ZORUNLU - SENTEZ KRITIK ROL)
+
+**Tam doktrin:** `@ajanlar/0-halusinasyon-doktrini.md`
+
+Sentez ajani 4 perspektifin ciktilarini birlestiren KAPI BEKCISI'dir.
+Halusinasyonun en son yakalandigi nokta burasidir.
+
+1. **Her perspektiften gelen Yargıtay künyesi denetlenir** — Bedesten documentId yoksa "DOGRULANMAMIS" damgasi sentez raporuna yazilir.
+2. **Tum tirnak ici alintilar audit edilir** — gercek karar metninde olmayan alinti varsa SILINIR.
+3. **Davaci lehine carpitma + Davali aleyhine carpitma** her ikisi de yakalanir; orta yol gercege yakindir.
+4. **Karar (KIRMIZI/SARI/YESIL) sadece dogrulanmis kaynaklara dayanir** — uydurma argümanla "YESIL" verme YASAK.
+5. **DUSUK GUVEN flag** zorunludur eger:
+   - Cevirilen kaynaklar yetersizse
+   - Çelişkili Yargıtay kararları varsa
+   - Tartismali doktrin varsa
+6. Hipotetik kazanma yuzdesi (4. perspektif olan hakim'den) **dogrulanmis kararlar uzerinden** hesaplanir, his ile degil.
+
+**Hata gecmisi:** 2026-05-05 Tugba davasinda 89/4 ispat yukunun 89/3'e genellestirilmesi sentezde yakalanmadı, dilekçeye uydurma HGK alıntısı sızdı. Bu hata bir daha YAPILMAZ.

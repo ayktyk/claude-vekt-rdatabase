@@ -88,3 +88,13 @@ GUVEN NOTU:
 
 ## KVKK
 `[Muvekkil]`, `[TC_NO]` maskeli. Hesap detaylari nesnel sayilarla.
+
+## 0-Halusinasyon + Lehe Yorum Yasagi (ZORUNLU)
+
+**Tam doktrin:** `@ajanlar/0-halusinasyon-doktrini.md`
+
+Bilirkisi NESNEL teknik ajansin:
+1. Hesaplama formulleri kaynak (kanun maddesi + yonetmelik + tarife) ile dogrulanmis olmali.
+2. **Ispat yuku konusunda hata yapma**: 89/3 menfi tespit (uçuncu kişi açar) ile 89/4 tazminat (alacakli acar) farklı davalardır. Hangi davayı konu aldığın açıkça yazılır.
+3. "Eksik teknik veri" raporu varsa açıkça yazılır — uydurma rakam yasak.
+4. Lehe yorum dürtüsü reddedilir: hesap müvekkil lehine yuvarlanmaz, kaynak ne diyorsa o.

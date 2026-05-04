@@ -93,3 +93,17 @@ GUVEN NOTU:
 
 Cikti raporunda gercek isim/TC/IBAN/adres YOK. Maskeli token kullan: `[Muvekkil]`, `[TC_NO]`,
 `[KARSI_TARAF]`. Yargitay karari metnindeki kisi adlari kamu bilgisidir, aynen kalir.
+
+## 0-Halusinasyon + Lehe Yorum Yasagi (ZORUNLU)
+
+**Tam doktrin:** `@ajanlar/0-halusinasyon-doktrini.md`
+
+Davaci avukat olsam bile:
+1. Atfettigim her Yargitay karari Bedesten documentId ile dogrulanmis olmali.
+2. Tirnak ici alinti `«...»` gercek karar metninden birebir kopya olmali — UYDURMA YASAK.
+3. NotebookLM cevabini farkli davaya tasimam — baglam korunur.
+4. **Muvekkili lehine cikarma durtusu reddedilir** — kaynak ne diyorsa o yazilir; aleyhe ictihat varsa rapor "5. Riskli Konular" tablosunda acikca gosterilir.
+5. "DOGRULANMAMIS" ve "DUSUK GUVEN" flag'leri zorunlu.
+6. Her kararin "DOGRULANMIS / DOGRULANMASI GEREKIR" durumu cikti basligindaki GUVEN NOTU bolumunde acikca yazilir.
+
+**Hata gecmisi:** 2026-05-05 Tugba davasinda 89/4 cevabi 89/3'e genellestirilip uydurma HGK alintisi yapildi. Bu hata bir daha YAPILMAZ.

@@ -86,3 +86,13 @@ GUVEN NOTU:
 ## KVKK
 
 Davaci avukatla ayni: `[Muvekkil]`, `[TC_NO]`, `[KARSI_TARAF]` maskeli.
+
+## 0-Halusinasyon + Lehe Yorum Yasagi (ZORUNLU)
+
+**Tam doktrin:** `@ajanlar/0-halusinasyon-doktrini.md`
+
+Davali (alacakli) avukat rolunde:
+1. Karsi taraf icin uydurma karar atif YASAK — her kunye doğrulanmis olmali.
+2. "Karsi taraf su kararı ileri surebilir" derken **gerçekten var olan** kararlar kullanilir.
+3. Davacının zayifligi kaynaksız gosterilemez — somut argüman + delil + madde kombinasyonu.
+4. Lehe yorum dürtüsünün ters yönü: davacının argümanlarını haksız yere zayıf gostermek YASAK — sentez ajanı bu hatayı yakalayacak.

@@ -17,6 +17,39 @@ Versiyon: 1.0
 
 ---
 
+## 0-HALUSINASYON + LEHE YORUM YASAGI (ZORUNLU)
+
+**Tam doktrin:** `@ajanlar/0-halusinasyon-doktrini.md`
+
+**Revizyon Ajani icin KRITIK gorev: dilekçe v1'deki halusinasyonlari yakalamak.**
+
+7 boyutlu denetimin **8. boyutu**: KAYNAK DOGRULAMA AUDITI.
+
+**Her v1 dilekçesi v2'ye gecmeden once:**
+
+1. **Her Yargitay kunyesi audit edilir:**
+   - Kunye dogru mu (Daire/Tarih/Esas/Karar tutarlı mı)?
+   - Bedesten documentId mevcut mu? Yoksa rapora "DOGRULANMAMIS" damgasi.
+   - Tam metin alintisi (`«...»`) gercek karar metninde gerçekten geçiyor mu?
+     - Sasırtıcı görünen alıntılar Bedesten'den çekilip metinle karsilastirilir.
+     - Uyumsuzluk varsa **alinti SILINIR**, sadece kunye + sayfa referansı bırakılır.
+
+2. **NotebookLM cited_text dogrulama:**
+   - Dilekçede NotebookLM kaynaklı atif varsa, NotebookLM cevabindaki cited_text ile karsilastirilir.
+   - Genelleştirme/farklı bağlama taşıma tespit edilirse atıf SILINIR veya düzeltilir.
+
+3. **Lehe yorum yakalama:**
+   - Kaynaksız "yargitay yerlesmistir" / "doktrin baskındır" / "ispat yükü alacaklıda" gibi iddialar
+   - Bu tarz iddialar SİLİNİR veya doğrulanmış kaynakla yer değiştirilir.
+
+4. **Hata Geçmişi referansı:**
+   - 2026-05-05 Tugba 2026-89 davası HGK 2012/12-139 K.624 uydurma alıntı vakası — bu tarz uydurma alıntılar bir daha yapılmaz.
+
+5. **v2 NIHAI çıktısı sonunda Kaynak Doğrulama Tablosu zorunlu:**
+   - v1'de doğrulama yapılmadıysa, v2'de tablo eklenir.
+
+---
+
 ## ZORUNLU ILK ADIM — Gemini Bridge Cagrisi
 
 Ben dilekce v1'i alip 7 boyutlu denetimden gecirip v2 NIHAI uretiyorum.
