@@ -23,18 +23,27 @@ Director Agent
   +-- 2A Suer Stajyer (YORUNGE BELIRLEYICI — TAVSIYE EDILEN ILK ADIM)
   |    Otomatik komut: `arastir stajyer: {dava-id}`
   |    Cikti: 02-Arastirma/2A-superstajyer-cevap.md
-  |          02-Arastirma/2A-yorunge-talimatlari.md (2B-2E icin)
+  |          02-Arastirma/2A-yorunge-talimatlari.md (alt-moduller icin)
   |    Atlanabilir: avukat "2A atla" derse veya CDP+manuel ikisi de fail ise
   |    Atlandiginda raporda `YORUNGE EKSIK` flag'i konur
   |
   | 2A bittikten sonra (veya atlandiktan sonra):
   |
-  +-- 2D NotebookLM (async paralel kol — bloklamaz)
+  +-- Faz D Arguman.ai (YENI — FAZ 3 2026-05-19, semantik genisletme)
+  |    Otomatik komut: `arastir arguman: {kritik nokta}`
+  |    Cikti: 02-Arastirma/2A-arguman-bulgulari.md
+  |    11M+ karar havuzu (8 koleksiyon), server-side skill'ler
+  |    (caselaw-search/citation-network/karsi-arguman) otomatik tetiklenir
+  |    Her bulgu Yargi-MCP-Pro documentId koprusunden gecirilir
+  |    Atlanabilir: avukat "arguman atla" derse (kredi tasarrufu)
+  |
+  +-- 2D NotebookLM (async paralel kol — bloklamaz, Faz D ile eszamanli)
   |    Zorunlu Girdi: 2A yorunge talimati (varsa) — 2A'nin yan meseleleri
   |
-  +-- 2B Yargı MCP --> 2C Mevzuat MCP (sıralı zincir — atıf maddeleri 2B'den)
-                       --> Mulga Eleme Protokolü (kalite kapısı)
+  +-- 2B Yargı-MCP-Pro --> 2C Yargi-MCP-Pro Mevzuat (sıralı zincir)
+                           --> Mulga Eleme Protokolü (kalite kapısı)
        Zorunlu Girdi (2B): 2A kararlari (TEYIT modunda) + yan meseleler
+                           + Faz D bulgulari (Arguman -> documentId dogrulama)
        Zorunlu Girdi (2C): 2B atif maddeleri + 2A esas mesele
   |
   v
@@ -95,17 +104,20 @@ Tüm kollar tamamlandığında Claude konsolide raporu doğrudan yazar:
 - Yan dosyalar: `atif-maddeleri.json`, `mulga-eleme.json`
 
 ## Kalite Kapısı 1 (ASAMA 2 Bitişi)
+- [ ] 2A Suer Stajyer çalıştı mı veya `YORUNGE EKSIK` flag'i konuldu mu?
+- [ ] Faz D Arguman.ai çalıştı mı (`arastir arguman:` veya tam akış)?
+- [ ] Faz D DOĞRULANMIŞ / DOĞRULANMAMIŞ / HARD FAIL tabloları rapora girdi mi?
 - [ ] 2B 15 sorgu + 5 tam metin var mı?
 - [ ] `atif-maddeleri.json` doldu mu?
 - [ ] 2C 8 sorgu + Normlar Hiyerarşisi etiketli mi?
 - [ ] `mulga-eleme.json` doldu mu? Geçerli karar ≥ 5 mi?
 - [ ] 2D 10 sorgu (veya doygunluk notu) var mı?
-- [ ] 2E DergiPark + YÖK Tez bulgusu var mı?
 - [ ] Sentez Claude tarafından yapıldı mı (`engine: claude` frontmatter)?
-- [ ] Atıf doğrulama [DOĞRULANMIS] etiketli mi?
+- [ ] Atıf doğrulama [DOĞRULANMIŞ] (Pro MCP documentId ile) etiketli mi?
 - [ ] Çelişkili kararlar bölümü var mı?
 - [ ] Güven notu (yüksek/orta/düşük) atandı mı?
 - [ ] mcp_fallback_used flag'i (varsa) belirtildi mi?
+- [ ] (2E DergiPark + YÖK Tez kontrolü 2026-05-19'da KALDIRILDI)
 
 Eksik varsa: SADECE eksik mini-kolu yeniden çalıştır. Tüm Faz 2'yi başlatma.
 
