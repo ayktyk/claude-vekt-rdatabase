@@ -36,8 +36,18 @@ GUVEN NOTU:
 ## Minor Hatalar (Duzeltme onerilir)
 1. ...
 
-## Dogrulanmasi Gereken Atiflar
-- [Karar/madde] - [Neden supheli]
+## Dogrulanmasi Gereken Atiflar (FAZ 4 2026-05-19 — Pro MCP entegre)
+- Her Yargitay/HGK/CGK/Danistay/AYM/AIHM atif kunyesini denetle:
+  - [Karar kunyesi] - Pro MCP `documentId` ile dogrulanmis mi?
+  - documentId YOKSA -> [DOGRULANMAMIS] etiketle, Director'a HARD FAIL flag at
+  - Tirnak ici alinti var mi? Alinti birebir mi (kelime kelime kaynaktan)?
+  - Karar baglamına uygun mu (NotebookLM 89/4 cevabini 89/3'e tasimak gibi
+    genelleme hatasi var mi)?
+- Mevzuat atiflari:
+  - Madde no + tam metin Pro MCP `get_mevzuat_document` ile dogrulanmis mi?
+  - Mulga eleme yapildi mi? Olay tarihi versiyonu kontrol edildi mi?
+- **HARD FAIL kurali (>=2 DOGRULANMAMIS atif):** Cikti Drive'a yazilamaz,
+  YENIDEN YAZ kararni Director'a gonder.
 
 ## Ton Sorunlari (Spesifik)
 - "[yasak ifade]" gecen yer: [satir] -> oneri: "[degistirme]"

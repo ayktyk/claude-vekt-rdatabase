@@ -12,24 +12,42 @@
 ## Ön-koşullar (otomatik)
 1. `tmp/current-run-id.txt` oluştur (yoksa): `{YYYYMMDD}-{HHMMSS}-{dava-id}`
 2. `02-Arastirma/.faz2-progress.jsonl` aç (append mode)
-3. `check_government_servers_health` ile MCP sağlık kontrolü
+3. Pro MCP sağlık kontrolü: `claude mcp list` ile `yargi-mcp-pro` ve `arguman` bağlı doğrulanır (eski `check_government_servers_health` Pro MCP'de yok — FAZ 2 2026-05-19)
 4. ADIM 0B kaynak sorgulamasından çıkan dahili kaynak (NotebookLM notebook adı vb.) yüklenir
 
-## Workflow (Paralel Kollar + Sıralı Zincir)
+## Workflow (Yorunge + Paralel Kollar + Sıralı Zincir)
 
 ```
 Director Agent
   |
-  +-- 2D NotebookLM (async paralel kol — bloklamaz)
+  +-- 2A Suer Stajyer (YORUNGE BELIRLEYICI — TAVSIYE EDILEN ILK ADIM)
+  |    Otomatik komut: `arastir stajyer: {dava-id}`
+  |    Cikti: 02-Arastirma/2A-superstajyer-cevap.md
+  |          02-Arastirma/2A-yorunge-talimatlari.md (2B-2E icin)
+  |    Atlanabilir: avukat "2A atla" derse veya CDP+manuel ikisi de fail ise
+  |    Atlandiginda raporda `YORUNGE EKSIK` flag'i konur
   |
-  +-- 2E Akademik Doktrin (paralel kol — bloklamaz)
+  | 2A bittikten sonra (veya atlandiktan sonra):
+  |
+  +-- 2D NotebookLM (async paralel kol — bloklamaz)
+  |    Zorunlu Girdi: 2A yorunge talimati (varsa) — 2A'nin yan meseleleri
   |
   +-- 2B Yargı MCP --> 2C Mevzuat MCP (sıralı zincir — atıf maddeleri 2B'den)
                        --> Mulga Eleme Protokolü (kalite kapısı)
+       Zorunlu Girdi (2B): 2A kararlari (TEYIT modunda) + yan meseleler
+       Zorunlu Girdi (2C): 2B atif maddeleri + 2A esas mesele
   |
   v
-TÜM KOLLAR + ZİNCİR TAMAMLANINCA → Konsolide Sentez (Gemini Bridge)
+TÜM KOLLAR + ZİNCİR TAMAMLANINCA → Konsolide Sentez (Terminal Claude)
 ```
+
+Yorunge prensibi: 2A varsa 2B-2D onun bulgularini DOGRULAMA + DERINLESTIRME
+modunda calisir (bagimsiz arama degil). 2A atlanmissa eski bagimsiz akis modu.
+
+Not (2026-05-19): 2E Akademik Doktrin kolu (DergiPark + YOK Tez) ASAMA 2'den
+kaldirildi. Semantik karar arama bos­luğunu Arguman.ai (Faz 3 entegrasyonu) ve
+Yargı-MCP-Pro doldurur. Akademik doktrin gerekirse `arastir-notebook` veya
+Yargi-MCP-Pro tam metin atifindan dolayli olarak gelir.
 
 ## Zorunlu Çağrılar (Detayları Alt Komutlarda)
 
@@ -51,11 +69,6 @@ TÜM KOLLAR + ZİNCİR TAMAMLANINCA → Konsolide Sentez (Gemini Bridge)
 - Async — diğer kolları bloklamaz
 - Tek sorgu 3 dk soft timeout, toplam 15 dk soft cap
 
-### 2E Akademik — `/arastir-akademik` protokolü (paralel kol)
-- DergiPark min 5 sorgu + YÖK Tez min 3 sorgu
-- En alakalı 3 makale + 2 tez tam metin
-- Atıf zinciri + doktrin çelişki tespiti
-
 ## Progress Görünürlüğü (Faz B'de devreye girer)
 Her 30-60 sn'de terminal canlı durum:
 ```
@@ -63,21 +76,23 @@ FAZ 2 DURUM — run 20260504-182000-ahmet
 2B Yargı: 7/15 sorgu, 2/5 tam metin, 0 rate-limit, son 4.1s
 2C Mevzuat: bekliyor (2B atıf maddeleri lazım)
 2D NotebookLM: 4/10 soru, Q4 polling 82s
-2E Akademik: 3/8 arama, 1 makale tam metin
 Geçen süre: 06:42
 Sonraki adım: Yargı temporal_2025
 ```
 
 60 sn sessizlikte: `STILL_WORKING: <ne yapıyorum>` satırı.
 
-## Konsolide Sentez — ZORUNLU Bridge Çağrısı
-Tüm kollar tamamlandığında:
-```bash
-ASAMA=2 DAVA_ID="<dava-id>" \
-  bash scripts/gemini-bridge.sh arastirma_sentezi \
-    tmp/.gemini-input-{dava-id}-asama2.md \
-    tmp/.gemini-output-{dava-id}-asama2.md
-```
+## Konsolide Sentez — Terminal Claude (2026-05-13 Antigravity Hibrit)
+
+**DEPRECATED:** Eski `gemini-bridge.sh arastirma_sentezi` çağrısı artık
+yapılmıyor (exit 100). Sentez **terminal Claude** tarafından yazılır;
+MCP çıktıları zaten Claude oturumunda hazır.
+
+Tüm kollar tamamlandığında Claude konsolide raporu doğrudan yazar:
+- Frontmatter: `engine: claude`, `model: claude-opus-4-7`, `status: TASLAK`
+- Format: FIVEAGENTS.md "Cikti Format Kurallari" + Kalite Kapı 1 gereklilikleri
+- Çıktı: `02-Arastirma/arastirma-raporu.md`
+- Yan dosyalar: `atif-maddeleri.json`, `mulga-eleme.json`
 
 ## Kalite Kapısı 1 (ASAMA 2 Bitişi)
 - [ ] 2B 15 sorgu + 5 tam metin var mı?
@@ -86,10 +101,11 @@ ASAMA=2 DAVA_ID="<dava-id>" \
 - [ ] `mulga-eleme.json` doldu mu? Geçerli karar ≥ 5 mi?
 - [ ] 2D 10 sorgu (veya doygunluk notu) var mı?
 - [ ] 2E DergiPark + YÖK Tez bulgusu var mı?
-- [ ] Sentez Gemini ile yapıldı mı (`engine: gemini` frontmatter)?
+- [ ] Sentez Claude tarafından yapıldı mı (`engine: claude` frontmatter)?
 - [ ] Atıf doğrulama [DOĞRULANMIS] etiketli mi?
 - [ ] Çelişkili kararlar bölümü var mı?
 - [ ] Güven notu (yüksek/orta/düşük) atandı mı?
+- [ ] mcp_fallback_used flag'i (varsa) belirtildi mi?
 
 Eksik varsa: SADECE eksik mini-kolu yeniden çalıştır. Tüm Faz 2'yi başlatma.
 

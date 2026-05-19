@@ -1,7 +1,7 @@
 # Savunma Simulatoru -- Skill Dosyasi
 
-Son guncelleme: 2026-03-26
-Versiyon: 1.0
+Son guncelleme: 2026-05-19
+Versiyon: 1.1 (FAZ 4 — Arguman.ai karsi-arguman skill on-sorgu entegrasyonu)
 
 ---
 
@@ -9,11 +9,12 @@ Versiyon: 1.0
 
 **TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/model-routing.json`'dan okunur.
 
-- **savunma_simulasyonu** task'i: `config/model-routing.json` -> `tasks.savunma_simulasyonu.engine` ve `model`
-- **Claude'da kalir:** MCP cagrilari, dilekce dosyasi okuma
-- **Self-review:** `tasks.self_review.engine` (kalite gate'te calisir)
-- **Prompt sablonu:** `prompts/gemini/savunma_simulasyonu.md`
-- **Override:** `--model claude` veya `--model gemini` ile tek seferlik manuel
+- **savunma_simulasyonu** task'i: `config/model-routing.json` -> `tasks.savunma_simulasyonu.engine` (= `antigravity_manual`) ve `model`
+- **Antigravity (sag panel)** uretir; terminal Claude SADECE devir blogu basar
+- **Claude'da kalir:** MCP cagrilari, dilekce dosyasi okuma yardimi (Drive'da hazir bekler)
+- **Self-review:** Antigravity ayni sohbette `prompts/gemini/self_review.md`
+- **Prompt sablonu:** `prompts/gemini/savunma_simulasyonu.md` (Antigravity'ye yapistirilir)
+- **Fallback:** Antigravity erisilemezse "fallback claude" → Claude uretir, `fallback_used: true`
 
 ---
 
@@ -28,51 +29,153 @@ Versiyon: 1.0
 
 ---
 
-## ZORUNLU ILK ADIM — Gemini Bridge Cagrisi
+## ZORUNLU ILK ADIM — Antigravity Devri (2026-05-13 → 3 Batch 2026-05-14)
 
-Ben karsi taraf perspektifinden dilekceyi simule edip risk noktalarini cikariyorum.
-Dogrudan ben yazmiyorum, once Gemini'ye gidiyorum.
+Bu ASAMA hukuki uretimdir, Antigravity sag panelinde Gemini 3.1 Pro yapar.
+Terminal Claude burada SADECE devir blogu basar; savunma simulasyonunu
+dogrudan terminal Claude YAZMAZ.
+
+**ÖNEMLI — BATCH 3 ICINDE (2026-05-14 pilot sonrasi iyilestirme):**
+ASAMA 6 (savunma simulasyonu) artik tek basina devir blogu almaz;
+**BATCH 3** icinde **ADIM B** olarak Antigravity'nin tek sohbetinde uretilir:
+
+> **BATCH 3 akisi:** ADIM A = ASAMA 5 dilekce v1 → ADIM B = bu ajan
+> (savunma simulasyonu, v1'i karsi taraf gozuyle elestir) → ADIM C =
+> ASAMA 7 v2 NIHAI revizyon. Tum batch tek Antigravity sohbetinde
+> yurutulur; context kaybolmaz; v1'in yazim kararlari taze hafizada
+> kalir.
+
+Bu ajan icin pratik etki:
+- **Bagimsiz devir blogu YOK:** Batch 3 master blogunun ortasinda
+  "ADIM B" olarak konumlanir (`ANTIGRAVITY.md` > BATCH 3 sablonu)
+- **Girdi:** Az once ADIM A'da yazilan v1 (sohbette taze) + briefing +
+  usul + stratejik analiz
+- **Cikti:** `02-Arastirma/savunma-simulasyonu.md` (3 ciktinin biri)
+- **Self-review ayrica yapilir:** Risk flag 0 cikarsa "analiz yetersiz"
+  notuyla ADIM B kendi icinde derinlestirilir
+- **DOCX uretimi tum batch bittiginde** yapilir
 
 ### Akis
 
-1. **Context dosyasi hazirla:** `tmp/.gemini-input-{dava-id}-asama6.md`
-   Icerik: dilekce v1 + arastirma raporu + usul raporu + stratejik analiz (4B davali avukat ciktisi)
+1. **On-hazirlik:** Onceki ASAMA ciktilari Drive'da hazir olmali:
+   - 03-Sentez-ve-Dilekce/dilekce-v1.md (ASAMA 5)
+   - 02-Arastirma/arastirma-raporu.md (ASAMA 2)
+   - 01-Usul/usul-raporu.md (ASAMA 3)
+   - 02-Arastirma/stratejik-analiz.md (ASAMA 4 — ozellikle 4B Davali ciktisi)
+   - **YENI — FAZ 4 2026-05-19:** 02-Arastirma/karsi-arguman-onsorgu.md (asagida ADIM 1.5)
 
-2. **Bridge cagir:**
-   ```bash
-   ASAMA=6 DAVA_ID="<dava-id>" \
-     bash scripts/gemini-bridge.sh savunma_simulasyonu \
-       tmp/.gemini-input-{dava-id}-asama6.md \
-       tmp/.gemini-output-{dava-id}-asama6.md
+1.5. **YENI — Arguman.ai `karsi-arguman` On-Sorgu (FAZ 4 — 2026-05-19):**
+
+Antigravity devir blogundan ONCE terminal Claude su sorguyu yapar.
+Arguman.ai sunucu tarafinda `karsi-arguman` skill'i otomatik tetiklenir
+(5 seviyeli tehdit siniflandirmasi).
+
+```python
+# Briefing'den muvekkilin ana hukuki tezini cek (maskeli)
+# Dava turune gore koleksiyon sec (ceza/hukuk/idare/anayasa/aihm/uyusmazlik)
+
+mcp__arguman__search(
+  query="<muvekkilin ana hukuki tezi — doktrinal Turkce>",
+  collection="<dava turu>",
+  top_k=20,
+  expand=True
+)
+```
+
+**Server-side skill ciktisi (otomatik):**
+- KRITIK: pozisyonu yikici karsi-ictihat (HGK/CGK bagliyorsa cok yuksek tehdit)
+- YUKSEK: ciddi risk — Antigravity'nin onceliklendirmesi gerek
+- ORTA: dikkate alinmasi gereken sapma
+- DUSUK: marjinal karsi yaklasim
+- YOK / ILGISIZ: ana akistan sapma
+
+**Cikti dosyasi:** `02-Arastirma/karsi-arguman-onsorgu.md`
+- Frontmatter: `engine: claude`, `mcp: arguman`, `tool: search (karsi-arguman skill)`, `status: TASLAK`
+- Tehdit listesi (5 seviye)
+- Her tehdide ait kararin kunyesi + Yargi-MCP-Pro documentId dogrulamasi
+- KRITIK ve YUKSEK seviyedekilerin tam metni (get_full_text — ucretsiz)
+
+**KVKK kurali:** Sorgu MUVEKKIL ADI/TC ICERMEZ. Briefing'den maskeli
+token'larla hukuki tez kurulur.
+
+**Antigravity devir blogu icin:** Bu cikti 5. dosya olarak eklenir
+(asagidaki devir blogu sablonunda gosterildi).
+
+**Maliyet:** 1 search + ucretsiz get_full_text'ler = ~1 kredi.
+
+2. **Antigravity devir blogu bas (avukata sun):**
+
+   ```
+   ========== ANTIGRAVITY DEVIR BLOGU ==========
+   ASAMA: ASAMA 6 (Savunma Simulasyonu)
+   Dava-ID: {dava-id}
+
+   Sag panele yapistirilacak:
+   --------------------------------------------
+   Asagidaki dosyalari oku:
+     - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\03-Sentez-ve-Dilekce\dilekce-v1.md
+     - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\02-Arastirma\arastirma-raporu.md
+     - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\01-Usul\usul-raporu.md
+     - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\02-Arastirma\stratejik-analiz.md
+        ^ Ozellikle 4B Davali Avukat ciktisindan beklenen itirazlar
+     - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\02-Arastirma\karsi-arguman-onsorgu.md
+        ^ YENI — FAZ 4 2026-05-19: Arguman.ai karsi-arguman skill ciktisi (5 seviyeli tehdit)
+     - prompts/gemini/savunma_simulasyonu.md  (protokol)
+     - prompts/gemini/_ortak-kurallar.md
+
+   Gorev: Karsi taraf avukati gibi dusun, en guclu savunmayi kur.
+   Amac dilekce yazmak DEGIL; muvekkilimizin dilekcesindeki zayif
+   noktalari ve karsi tarafin yapabilecegi en tehlikeli itirazlari
+   tespit etmektir.
+
+   ONCELIKLI GIRDI — karsi-arguman-onsorgu.md:
+     - KRITIK ve YUKSEK seviye tehditler MUTLAKA simulasyona dahil edilir
+     - Her tehdide ait kararin kunyesi savunma simulasyonunda ayrica gecer
+     - "Karsi taraf avukati su KRITIK karari ileri surebilir" formatu
+
+   Cikti formati:
+     - En tehlikeli 5 itiraz (siralama: en kritik basta)
+     - Her itiraza karsi pozisyon onerisi (Revizyon Ajani'na)
+     - Hakimin olasi sorulari + ASAMA 7 icin cevap altyapisi
+     - Risk flag'leri: KIRMIZI / SARI / YESIL
+     - Atif yapilan karsi-karar kunyeleri DOGRULANMIS olmali
+
+   Cikti: G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\02-Arastirma\savunma-simulasyonu.md
+
+   Self-review yap (prompts/gemini/self_review.md):
+     - Risk flag 0 cikarsa "analiz yetersiz" yaz, ek sorgular yap
+     - Karsi taraf adina uydurma karar atfi YASAK
+     - Lehe yorum durtusu TERS YONDE de gecerli: gercek riskler kucumsenemez
+   --------------------------------------------
+
+   Antigravity tamamlayinca buraya don ve "ASAMA 6 bitti" yaz.
+   =============================================
    ```
 
-3. **Exit code kontrol:**
+3. **Avukat onayini bekle:** Avukat "ASAMA 6 bitti" diyene kadar bir
+   sonraki ASAMA'ya gecme.
 
-   | Exit | Anlam | Davranis |
-   |------|-------|----------|
-   | 0 | Gemini basarili | Cikti oku, risk flag'leri ozetle, TASLAK sun |
-   | 99 | engine=claude path | Claude ile simule et |
-   | 1 | Hata: 2x fail | Fallback log + Claude, `fallback_used: true` |
-   | 3 | gemini CLI yok | "npm install" oner, Claude ile devam |
-   | 4 | OAuth auth | "gemini /auth" oner, Claude ile devam |
-
-4. **Cikti dogrulama:**
-   - Davali itirazi 1: zamanasimi (varsa)
-   - Davali itirazi 2: dava sarti (arabuluculuk vb.)
-   - Davali itirazi 3-N: esasa dair karsi argumanlar
-   - Hakim olasi sorgusu: belirsiz alacak vs kismi dava
-   - Risk flag'leri: KIRMIZI / SARI / YESIL siniflandirma
-   - Revizyon Ajani'na onerilen iyilestirmeler listesi
-
-5. **Kalite kapisi:** Cikti `02-Arastirma/savunma-simulasyonu.md` olarak Drive'a yazilir.
-   Eger 0 risk flag bulundu ise: "muhtemelen analiz yetersiz" notu dus, bridge'i tekrar cagir
-   daha derin perspektif iste.
+4. **Avukat onayi sonrasi (Director yapar):**
+   - `qmd update` calistir
+   - `mempalace_diary_write "savunma_simulatoru"` ile bu davadan
+     ogrenilen karsi-itiraz pattern'lerini yaz
+   - `python scripts/md_to_docx.py {dava-klasoru}` calistir
+   - ASAMA 7 (Revizyon) devir blogunu hazirla
 
 ### Asla
 
-- Bridge'i atla
+- Devir blogunu basmadan terminal Claude'da savunma simulasyonu yazma
+- `gemini-bridge.sh` cagirma — DEPRECATED (exit 100)
 - Karsi taraf adina sadece taslak savunma yaz (asil amac risk tespiti)
-- Risk flag uretmeden cikti tamamla
+- Risk flag uretmeden cikti tamamla (her ciktida KIRMIZI/SARI/YESIL zorunlu)
+- Karsi taraf "su Yargitay kararini ileri surebilir" derken kararin
+  varligi dogrulanmamissa "(varsayilan)" notu eklemeden yazma
+
+### Fallback
+
+Antigravity erisilemezse avukat "fallback claude" → terminal Claude
+`prompts/gemini/savunma_simulasyonu.md` protokolune gore savunma
+simulasyonu uretir, frontmatter `engine: claude`, `fallback_used: true`.
 
 ---
 

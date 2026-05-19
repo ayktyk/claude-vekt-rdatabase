@@ -16,9 +16,21 @@ Sana su context verilecek:
 - Arastirma raporu
 - Dilekce taslagi (v1)
 - Muvekkil belgeleri (olgusal veri)
+- **karsi-arguman-onsorgu.md** (Arguman.ai server-side karsi-arguman skill
+  ciktisi — 5 seviyeli tehdit listesi: KRITIK/YUKSEK/ORTA/DUSUK/YOK)
+  — FAZ 4 2026-05-19 entegrasyonu
 
 Senden istenen: Karsi taraf avukati gibi dusunerek 3 en guclu savunma hatti +
 her birinin karsilama stratejisi.
+
+**ONCELIK KURALI (YENI — FAZ 4 2026-05-19):**
+- karsi-arguman-onsorgu.md'de **KRITIK** seviye tehdit varsa → 3 savunma
+  hattindan en az 1'i bu KRITIK karari/doktrini ileri suren savunma olmali
+- **YUKSEK** seviye tehditler savunma hattina alinmaya kuvvetle aday
+- Her savunma hattinin "Yargitay destegi" alaninda Arguman'dan gelen
+  kunye varsa onu kullan (Pro MCP documentId ile dogrulanmis)
+- karsi-arguman ciktisinda DOGRULANMAMIS karar atfi varsa, savunmaya
+  alma — sadece DOGRULANMIS kararlar ileri surulur
 
 ## Cikti Formati
 

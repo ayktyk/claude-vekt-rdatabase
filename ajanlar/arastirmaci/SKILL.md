@@ -1,7 +1,24 @@
 # Arastirmaci -- Skill Dosyasi
 
-Son guncelleme: 2026-04-07
-Versiyon: 2.0 (Derin iteratif protokol + temporal evolution)
+Son guncelleme: 2026-05-19
+Versiyon: 2.1 (FAZ 2 Yargi-MCP-Pro entegrasyonu + FAZ 3 Arguman.ai Faz D eklendi)
+
+## YENI — Faz D Arguman.ai Semantik Genisletme (FAZ 3 — 2026-05-19)
+
+2A Suer Stajyer sonrasi, 2B Yargi oncesi calisan yeni bir kol.
+Detayli protokol: `.claude/commands/arastir-arguman.md`.
+
+**Tetikleyici:** `arastir arguman: [konu]` veya 2A workflow'unda otomatik
+
+**Ozet akis:**
+1. Doktrinal Turkce terim ile `mcp__arguman__search` (8 koleksiyon: ceza/hukuk/idare/anayasa/aihm/uyusmazlik/bgh_*)
+2. Drift denetimi → gerekirse terim revize, expand=False
+3. Min 3 karar tam metin (`mcp__arguman__get_full_text`)
+4. Yargi-MCP-Pro documentId koprusu (esas/karar/daire → search_bedesten_unified → documentId → get_bedesten_document_markdown)
+5. DOGRULANMIS / DOGRULANMAMIS / HARD FAIL etiketleme
+6. Cikti: `02-Arastirma/2A-arguman-bulgulari.md`
+
+**Detay:** Tam protokol `.claude/commands/arastir-arguman.md`'de.
 
 ---
 
@@ -10,20 +27,22 @@ Versiyon: 2.0 (Derin iteratif protokol + temporal evolution)
 **TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/model-routing.json`'dan
 okunur. Bu dosyada hardcoded model adi YOKTUR.
 
-- **arastirma_sentezi** task'i icin engine + model: `config/model-routing.json` ->
-  `tasks.arastirma_sentezi.engine` ve `tasks.arastirma_sentezi.model`
-- **MCP/CLI cagrilari** (MemPalace, Drive, NotebookLM, Literatur, Yoktez,
-  Yargi MCP, Mevzuat MCP, ve CLI fallback'lari) icin engine: `config/model-routing.json` ->
-  `tasks.{yargi_mcp|mevzuat_mcp|notebooklm_mcp|akademik_mcp}.engine`
-- **arama_plani** task'i (sorgu terimi listesi uretmek): `config/model-routing.json` ->
-  `tasks.arama_plani.engine` ve `model`
-- **self_review** task'i (kalite gate, ciktinin kendi denetimi): `config/model-routing.json` ->
-  `tasks.self_review.engine` ve `model`
-- **Fallback chain:** `config/model-routing.json` -> `fallback.gemini_chain` ve
-  `fallback.final_fallback`
-- **Override:** `--model claude` veya `--model gemini` ile tek seferlik manuel
-  override (Director Agent komutu)
-- **Prompt sablonlari:** `prompts/gemini/arastirma_sentezi.md`, `prompts/gemini/self_review.md`
+- **arastirma_sentezi** task'i icin: `engine: claude` (2026-05-13 itibariyla
+  terminal Claude'da kalir; MCP ciktilari ayni oturumda raporlanir, Antigravity'ye
+  copy-paste yorgunlugu olmasin diye)
+- **MCP/CLI cagrilari** (MemPalace, Drive, NotebookLM,
+  Yargi MCP, Mevzuat MCP, ve CLI fallback'lari) icin: `engine: claude`
+  (her zaman terminal Claude — MAX EFFORT thinking)
+- **arama_plani** task'i (sorgu terimi listesi uretmek): `engine: antigravity_manual`
+  (opsiyonel — Antigravity'ye copy-paste blok ile gonderilir; pas gecilebilir)
+- **self_review** task'i: `engine: antigravity_manual` (Antigravity ASAMA
+  ciktisini ayni sohbette kendi denetler; bridge cagrisi YOK)
+- **DEPRECATED Fallback chain:** `fallback.gemini_chain_deprecated` artik
+  kullanilmiyor. Yeni fallback: Antigravity erisilemezse terminal Claude.
+- **Override:** Avukat "fallback claude" yazarak tek seferlik Claude'a cevirebilir
+- **Prompt sablonlari:** `prompts/gemini/arastirma_sentezi.md` (Claude
+  okuyacak ana sentez sablonu), `prompts/gemini/self_review.md` (Antigravity'ye
+  yapistirilir)
 
 ---
 
@@ -123,7 +142,7 @@ QMD erisilemiyorsa: Adimi atla, MemPalace ile devam et.
 
 3. **NotebookLM "BU KONUDA KAYNAKLARDA BILGI YOK" derse:**
    - Bu **gercek bir cevap**tir, ona uygun davranilir.
-   - Baska kaynak (Bedesten, Mevzuat, akademik) aranir veya
+   - Baska kaynak (Bedesten, Mevzuat) aranir veya
    - Rapora "DOGRULANMAMIS — kaynaklarda bulunamadi, avukat manuel arastirmali" notu duser.
    - **ASLA UYDURMA YAPILMAZ.**
 
@@ -172,28 +191,115 @@ sonuc verdi?", "bir sonraki sorguyu hangi acidan yapmaliyim?",
 "bu karar bizim olayimizla gercekten ortsusuyor mu?" sorularini
 dusunmelidir.
 
+### Bolum 0 - Stajyer Yorunge Protokolu (TAVSIYE EDILEN ILK ADIM)
+
+**Birincil arac:** Suer Stajyer sitesi (avukatin Chrome'unda acik oturum)
+**Otomasyon:** `scripts/superstajyer.py` (CDP attach, port 9222)
+**Fallback:** Manuel pano akisi (`Get-Clipboard` ile dosyaya yazma)
+**Detay komut:** `.claude/commands/arastir-stajyer.md` + `arastir-stajyer-cevap.md`
+
+#### Amac
+
+Bolum 1-3'ten ONCE (mumkun ise) Suer Stajyer ile **yorunge belirlemek**.
+2A ciktisi:
+- 5+ Yargitay karari kunyesi + her birine "TEYIT ET" linki
+- Atif yapilan kanun maddeleri (kanun adi + madde no)
+- Karsi tarafin beklenen savunmasi
+- Sapma uyarilari (yerlesik uygulamadan ayrilan noktalar)
+
+2B-2D artik bu yorungeden ilerler: 2B kararlari teyit eder + yan
+meseleler tara, 2C atif maddelerini ceker + mulga eleme, 2D NotebookLM
+2A bulgularini ic kutuphaneyle eslestirir.
+
+#### Akis
+
+1. **Faz A — Prompt Uretimi (Director Faz A):**
+   - `00-Briefing.md` + MemPalace match'leri + advanced briefing oku
+   - `prompts/stajyer/sorgu_protokolu.md` sablonunu KVKK maskeli sekilde doldur
+   - `tmp/2A-stajyer-prompt.md` backup yaz
+
+2. **Faz B — CDP Health Check:**
+   - `curl http://localhost:9222/json/version`
+   - OK ise Faz C; FAIL ise avukata fallback teklifi (manuel pano)
+
+3. **Faz C — CDP Otomasyon (`superstajyer.py run`):**
+   - Playwright `connect_over_cdp` ile mevcut Chrome'a baglan
+   - Suer Stajyer sekmesini bul (varsa) veya yeni sekme + URL'e git
+   - Prompt'u input'a fill, submit
+   - "ARASTIRMA TAMAMLANDI" ibaresine kadar polling (max 10 dk)
+   - Cevabi UTF-8 olarak `02-Arastirma/2A-superstajyer-cevap.md`'ye yaz
+
+4. **Faz D — Ozet + Yorunge Talimati (Director):**
+   - Cevap dosyasini oku (context'e tam metin girer)
+   - Kalite Kapisi 0 kontrolu (5+ karar, teyit linkleri, ARASTIRMA TAMAMLANDI)
+   - `prompts/stajyer/yorunge_talimat_sablonu.md`'yi 2A bulgulariyla doldur
+   - `02-Arastirma/2A-yorunge-talimatlari.md`'ye yaz
+   - Sohbete SADECE OZET dukulur (~500-1000 token)
+
+#### Kalite Kapisi 0 (2A Sonu)
+
+- [ ] Cevapta >=5 Yargitay karari var mi?
+- [ ] Her karar icin "TEYIT ET" linki mevcut mu? (link yoksa o karara
+      "DOGRULANMAMIS" damgasi)
+- [ ] Mevzuat maddeleri en az 3 farkli kaynaktan mi?
+- [ ] Sapma uyarisi bolumu doldurulmus mu?
+- [ ] Son satirda "ARASTIRMA TAMAMLANDI" ibaresi var mi?
+
+FAIL durumunda: avukata "Tekrar sorgu (revize prompt) mu, elimizdekiyle
+devam mi?" sorusu.
+
+#### Atlanabilir Durum
+
+Avukat "2A atla" derse veya CDP+manuel ikisi de basarisizsa, 2B-2D eski
+bagimsiz akis modunda calisir. Ama Director ASAMA 2 raporuna
+**`YORUNGE EKSIK`** flag'i koyar. Yorunge eksikse 2B-2D kalite olcumu
+manuel yapilir (Kalite Kapisi 0 atlanir).
+
+#### Hata Yonetimi
+
+| Senaryo | Aksiyon |
+|---|---|
+| CDP port yanit vermiyor | `scripts\launch-chrome-cdp.ps1` ile Chrome ac, fallback teklifi sun |
+| Suer Stajyer sekmesi yok / login eksik | Avukata "Chrome'da site sekmesine git, login ol, devam" |
+| Config selector PLACEHOLDER | DURDUR, avukata `config/superstajyer.json` "_kurulum_kilavuzu" bolumunu goster |
+| 10 dk timeout | Kismi cevap kaydedildi, avukata yeniden sorgu / devam secimi sor |
+| Cevapta <5 karar | "Yetersiz cevap, revize prompt mu, devam mi?" |
+
+#### KVKK
+
+Prompt Suer Stajyer'e gonderilirken `[MUVEKKIL_1]`, `[TC_1]`, `[ADRES_1]`
+tokenlari aynen korunur (dis kaynak, gercek PII gormez). Cevap dosyasi
+maskeli kalir; nihai dilekce oncesi `scripts/maske.py unmask` ile cozulur.
+
+---
+
 ### Bolum 1 - Yargi MCP Derin Protokolu (6 Faz)
 
-**Birincil arac:** Yargi MCP (`mcp__claude_ai_Yarg_MCP__*`)
+**Zorunlu Girdi:** 2A ciktisi (varsa). 2A yorunge talimatinda gecen kararlar
+TEYIT modunda (`get_bedesten_document_markdown`) cekilir, yan meseleler
+icin ek arama yapilir. 2A yoksa eski bagimsiz akis modu.
+
+**Birincil arac:** Yargi-MCP-Pro (`mcp__yargi-mcp-pro__*`) — FAZ 2 entegrasyonu 2026-05-19
 **Fallback:** Yargi CLI (`yargi bedesten search/doc`) - sadece MCP fail durumunda
 **Thinking budget:** Engine + model `config/model-routing.json` -> ilgili task'tan okunur, MAX EFFORT thinking aktif
-**Min sorgu sayilari (15, 6 faz, vb.) DEGISMEZ — sadece arac MCP olur.**
+**Min sorgu sayilari (15, 6 faz, vb.) DEGISMEZ — sadece arac Pro MCP olur.**
 
-**!! RATE LIMIT KURALI v2 (2026-05-04 — Avukat karari: SKIP YOK, ISRARCI BEKLE)**
+**!! RATE LIMIT KURALI v3 (2026-05-19 — FAZ 2 Pro MCP — gevsetildi)**
 
-Avukatin acik tercihi: "Yargi MCP rate limit'e takilma durumunda da bekleyip
-dogru kararlari bulsun. Eger yeterli veri yoksa [bildirsin]."
+**FAZ 2 (2026-05-19) gunceleme:** Yargi-MCP-Pro pilot testlerinde 429
+gozlenmedi. Eski "min 1.5sn bekleme + israrci backoff" protokolu zorunluluk
+DEGIL, fallback olarak korunur.
 
-Bedesten API HTTP 429 dondurebilir. Davranis:
+**Yeni davranis (Pro MCP):**
 
-- **HER yargi search arasina MIN 1.5 saniye bekleme** (eski 3 sn kuralinin yerine —
-  test sonucuna gore guncellenebilir, daha dusuk degerlerde de kabul edilir
-  ama Bedesten paralel batch hicbir zaman istemiyor)
-- **PARALEL BATCH YASAK** — 1 server icin ayni anda 1 sorgu (concurrency=1)
-- Sira: sorgu_1 → bekle 1.5sn → sorgu_2 → bekle 1.5sn → ...
-- 15 sorgu icin minimum bekleme: 15 × 1.5 = 22.5 sn (eski 45 sn yerine, 50% kazanc)
+- **Sorgular arasi bekleme ZORUNLU degil** — sirali calisma yine onerilir
+  (paralel batch yapilmaz, concurrency=1 mantigi korunur)
+- 429 alinirsa exponential backoff devreye girer: 5 → 15 → 30 → 60 sn, max 4 retry
+- 4+. fail durumunda avukata canli bildirim, manuel karar
+- Eski 1.5sn bekleme + 5-iterasyon backoff protokolu (v2) sadece test
+  sirasinda 429 patlamasi olursa geri alinir
 
-**429 alindiginda — Israrcı Backoff (Skip YOK):**
+**Eski v2 protokolu (referans amacli korunur, DEPRECATED 2026-05-19):**
 
 | Deneme | Bekleme | Sonraki |
 |--------|---------|---------|
@@ -218,7 +324,6 @@ Bedesten API HTTP 429 dondurebilir. Davranis:
 
 **Diger kollar 429 beklerken paralel devam eder:**
 - 2D NotebookLM async kol cevaplarini toplamaya devam eder
-- 2E Akademik kol cevaplarini toplamaya devam eder
 - 2C Mevzuat (eger 2B'nin yeterli atif maddesi geldiyse) baslayabilir
 - Faz 2'nin tamami kilitlenmez
 
@@ -239,17 +344,16 @@ fallback otomatik (frontmatter'a `mcp_fallback_used: true` notu).
 
 Sorgular arasi delay icin Director Bash kullanir: `sleep 1.5 && <next call>`.
 
-MCP arac listesi:
-- `search_bedesten_unified` - Yargitay/Danistay/yerel mahkeme genel arama
-- `search_anayasa_unified` - Anayasa Mahkemesi norm denetimi + bireysel basvuru
-- `search_emsal_detailed_decisions` - emsal kararlar
-- `search_uyusmazlik_decisions` - Uyusmazlik Mahkemesi
-- `search_kvkk_decisions`, `search_rekabet_kurumu_decisions`,
-  `search_kik_v2_decisions`, `search_sayistay_unified`,
-  `search_bddk_decisions`, `search_sigorta_tahkim_decisions`,
-  `search_gib_ozelge` - ozel mahkemeler ve kurullar
-- `get_bedesten_document_markdown` (+ tum get_*_document_markdown) - tam metin
-- `check_government_servers_health` - ASAMA 2 basinda saglik kontrolu
+Pro MCP arac listesi (3 esas tool — FAZ 2 2026-05-19):
+- `mcp__yargi-mcp-pro__search_bedesten_unified` — Yargitay/Danistay/Yerel/Istinaf/KYB arama (court_types[] enum); birimAdi enum H1-H23/C1-C23/HGK/CGK/D1-D17/IBK/...; phrase Bedesten Solr dialect (AND/OR/NOT UPPERCASE, +/-/"exact"/grouping — NO wildcards/fuzzy)
+- `mcp__yargi-mcp-pro__get_bedesten_document_markdown` — documentId → tam metin Markdown (cached)
+- `mcp__yargi-mcp-pro__legal_research_guide` — meta rehber (cached, free, opsiyonel)
+
+NOT: Eski 9+ ayrı tool (`search_anayasa_unified`, `search_emsal_*`, `search_uyusmazlik_*`,
+`search_kvkk_*`, `search_rekabet_*`, `search_kik_v2_*`, `search_sayistay_*`, `search_bddk_*`,
+`search_sigorta_tahkim_*`, `search_gib_ozelge`) Pro MCP'de **search_bedesten_unified**'a
+konsolide oldu — `court_types[]` parametresi ile filtrelenir. `check_government_servers_health`
+Pro MCP'de **yok** (kaldirildi — `claude mcp list` ile baglanti dogrulanir).
 
 **Atif Madde Cikarimi (2C girdisi - YENI):** Tam metni okunan her karar icin,
 kararin atif yaptigi mevzuat maddeleri cikarilir (TBK m.X, Is K. m.Y, ...) ve
@@ -417,37 +521,54 @@ Director Agent'a UYARI gonderilir.
 
 ### Bolum 2 - Mevzuat MCP Derin Protokolu (4 Faz + Mulga Denetim)
 
-**Birincil arac:** Mevzuat MCP (`mcp__claude_ai_Mevuzat_MCP__*`)
+**Zorunlu Girdi:** 2A ciktisi (varsa) + 2B'nin atif maddeleri
+(`atif-maddeleri.json`). 2A yorunge talimatinda gecen maddeler ve 2B
+kararlarinin atif yaptigi maddeler bu bolumde cekilir + mulga denetimi
+yapilir. 2A yoksa eski bagimsiz akis modu.
+
+**Birincil arac:** Yargi-MCP-Pro (`mcp__yargi-mcp-pro__*`) — FAZ 2 entegrasyonu 2026-05-19
 **Fallback:** Mevzuat CLI (`mevzuat search/doc/article/tree/gerekce`) - sadece MCP fail durumunda
 **Thinking budget:** Engine + model `config/model-routing.json` -> ilgili task'tan okunur, MAX EFFORT thinking aktif
-**Min sorgu sayilari (8, 4 faz, vb.) DEGISMEZ — sadece arac MCP olur.**
+**Min sorgu sayilari (8, 4 faz, vb.) DEGISMEZ — sadece arac Pro MCP olur.**
 
-**!! page_size ≤20 KURALI (ZORUNLU - 2026-05-02 sonrasi)**
-Mevzuat API max 20 kayit dondurur, daha fazlasi `data.pageSize=Kayit sayisi 20'den fazla olamaz`
-hatasi verir.
+**!! page_size ≤20 KURALI (ZORUNLU — Pro MCP'de de korunur)**
+Pro MCP `search_mevzuat` upstream hard cap'i `page_size <= 20`. Daha fazla `Kayit
+sayisi 20'den fazla olamaz` hatasi doner. Tool schema'da `maximum: 20` enforced.
 - **`page_size` parametresi HER zaman 20 veya altinda** olmali
-- **Default 25 KULLANMA** — explicit `page_size: 20` (veya daha az) ver
-- Daha fazla sonuc gerekiyorsa pagination kullan: `page_size: 20, page: 1`, sonra `page: 2` ...
-- Bedesten yargi MCP'sinde de ayni pattern: `pageSize` veya `page_size` her zaman ≤20
-- Yargi MCP'de de RATE LIMIT KURALI uygulanir (yukaridaki Bolum 1)
+- **Default 25 KULLANMA** — explicit `page_size: 20` ver
+- Pagination kullan: `page_size: 20, page: 1`, sonra `page: 2` ...
+- `search_bedesten_unified` icin Bedesten cap 100 (Pro MCP schema'da `maximum: 100`)
+- Rate limit Pro MCP'de gozlenmedi (yukaridaki Bolum 1 v3 gevsetilmis protokolu)
 
-MCP arac listesi:
-- `search_mevzuat` - unified arama (tum mevzuat tipleri, Solr/Lucene operatorlerli)
-  Solr operatorler: `+term1 +term2`, `"exact phrase"`, `wildcard*`, `fuzzy~`, `"proximity"~5`, `boost^2`
-- `search_kanun`, `search_khk`, `search_tuzuk`, `search_kurum_yonetmelik`,
-  `search_teblig`, `search_cbk`, `search_cbyonetmelik`, `search_cbgenelge`,
-  `search_cbbaskankarar` - tip-bazli arama
-- `search_within_*` - tip-bazli icerik araması (semantic + AND/OR/NOT)
-- `get_mevzuat_content` - mevzuat tam metni
-- `get_mevzuat_madde_tree` - madde agaci / TOC + yururluk durumu (mulga denetim icin)
-- `get_mevzuat_gerekce` - gerekce
-- `get_teblig_content`, `get_cbgenelge_content`, `get_cbbaskankarar_content`
+Pro MCP arac listesi (3 esas tool — FAZ 2 2026-05-19):
+- `mcp__yargi-mcp-pro__search_mevzuat` — 12 mevzuat tipi global arama. Tipleri:
+  KANUN, KHK, TUZUK, YONETMELIK, CB_KARARNAME, CB_YONETMELIK, CB_KARAR (PDF/OCR),
+  CB_GENELGE (PDF/OCR), KKY (kurum yonetmelik), UY (universite yonetmelik), TEBLIGLER, MULGA.
+  Parametreler: `mevzuat_adi` (title plain), `phrase` (Mevzuat Solr — +/-/"exact"/wildcard*/fuzzy~/"a b"~5/boost^N;
+  **AND/OR/NOT literal BREAK eder**), `mevzuat_no` (direkt kanun no), `mevzuat_tur_list[]`,
+  `resmi_gazete_tarihi_start/end`, `page`, `page_size` (max 20).
+- `mcp__yargi-mcp-pro__search_within_mevzuat` — tek mevzuat ici local boolean
+  (Solr DEGIL — `AND`/`OR`/`NOT` UPPERCASE calisir + adjacent words implicit AND).
+  `mevzuat_id` (search_mevzuat'tan), `query`, `sort_by` (relevance/document_order),
+  `page_size` (1-50, default 25).
+- `mcp__yargi-mcp-pro__get_mevzuat_document` — polimorfik fetch:
+  `id_type="mevzuat"` → tam metin (auto-chunk >50KB), `id_type="madde"` → tek madde,
+  `id_type="gerekce"` → yasama gerekcesi, `id_type="outline"` → bolum/madde tree (`madde_id` listesi).
+  PDF tipleri (`CB_KARAR`, `CB_GENELGE`) Mistral OCR'lı.
 
-**ARAC ESLEME (CLI komutu → MCP karsiligi):**
-- `mevzuat search "X" -t KANUN` → `search_kanun(name="X")` veya `search_mevzuat(query="X", type="KANUN")`
-- `mevzuat tree <id>` → `get_mevzuat_madde_tree(mevzuat_id="<id>")`
-- `mevzuat article <id>` → `get_mevzuat_content(mevzuat_id="<id>", madde="<no>")`
-- `mevzuat gerekce <id>` → `get_mevzuat_gerekce(mevzuat_id="<id>")`
+NOT: Eski 9 tip-bazli search tool (`search_kanun`, `search_khk`, `search_tuzuk`,
+`search_kurum_yonetmelik`, `search_teblig`, `search_cbk`, `search_cbyonetmelik`,
+`search_cbgenelge`, `search_cbbaskankarar`) Pro MCP'de tek `search_mevzuat` +
+`mevzuat_tur_list[]` altında birlesti. Eski 3 fetch tool (`get_mevzuat_content`,
+`get_mevzuat_madde_tree`, `get_mevzuat_gerekce`) tek `get_mevzuat_document` +
+`id_type` enum'a indirgendi.
+
+**ARAC ESLEME (eski → Pro MCP karsiligi):**
+- `mevzuat search "X" -t KANUN` → `search_mevzuat(phrase="X", mevzuat_tur_list=["KANUN"])` veya `search_mevzuat(mevzuat_adi="X", mevzuat_tur_list=["KANUN"])`
+- `search_kanun(kanun_no=N)` → `search_mevzuat(mevzuat_no="N", mevzuat_tur_list=["KANUN"])`
+- `mevzuat tree <id>` veya `get_mevzuat_madde_tree(mevzuat_id="<id>")` → `get_mevzuat_document(id="<id>", id_type="outline")`
+- `mevzuat article <id>` veya `get_mevzuat_content(madde_id="<id>")` → `get_mevzuat_document(id="<id>", id_type="madde")`
+- `mevzuat gerekce <id>` veya `get_mevzuat_gerekce(mevzuat_id="<id>")` → `get_mevzuat_document(id="<id>", id_type="gerekce")`
 
 Mevzuat MCP de derin mod. Kanun maddesini cekip birakmak YASAK.
 Gerekce + degisiklik tarihcesi + ilgili yonetmelik hep toplanir.
@@ -671,11 +792,11 @@ icin, kararin atif yaptigi mevzuat maddeleri **cikarilir** ve liste olarak
 
 #### Adim 2 — 2C Mevzuat MCP Atif Maddelerini Cek
 
-2B'nin verdigi atif madde listesi uzerinden iterasyon:
-- `search_mevzuat(query="<kanun adi>")` → kanun ID'si
-- `get_mevzuat_madde_tree(mevzuat_id="<id>")` → madde agaci + ilgili madde
-- `get_mevzuat_content(mevzuat_id="<id>", madde="<no>")` → bugunkü guncel metin
-- `get_mevzuat_gerekce(mevzuat_id="<id>")` → gerekce
+2B'nin verdigi atif madde listesi uzerinden iterasyon (Pro MCP — FAZ 2):
+- `search_mevzuat(phrase="<kanun adi>", page_size=20)` veya `search_mevzuat(mevzuat_no="<no>", mevzuat_tur_list=["KANUN"])` → mevzuat_id
+- `get_mevzuat_document(id="<mevzuat_id>", id_type="outline")` → madde agaci + madde_id listesi
+- `get_mevzuat_document(id="<madde_id>", id_type="madde")` → bugunkü guncel metin
+- `get_mevzuat_document(id="<gerekce_id veya mevzuat_id>", id_type="gerekce")` → gerekce (varsa)
 
 #### Adim 3 — Mulga / Guncel Denetimi (her madde icin ZORUNLU)
 
@@ -746,6 +867,10 @@ analizi, zimni ilga, LLM Web fallback).
 
 ### Bolum 2.7 - 2D NotebookLM Iteratif Protokolu (Disiplinli + Async Paralel Kol)
 
+**Zorunlu Girdi:** 2A ciktisi (varsa). 2A esas mesele + yan meseleler +
+karsi taraf savunmasi + sapma uyarilari NotebookLM sorgularinin odagini
+belirler. 2A yoksa avukatin kritik noktasi direkt sorgu temeli.
+
 **Birincil arac:** NotebookLM MCP (`mcp__notebooklm__*`)
 **Notebook:** Avukatin sectigi (`is_hukuk`, `aile_hukuku`, vb. — ADIM 0B'de belirlenir)
 **Ne zaman calisir:** ASAMA 2'de **async paralel kol** olarak (2B sirali zincirini bloklamaz)
@@ -790,8 +915,7 @@ NotebookLM 2D **ASLA Faz 2'yi bloklamaz**:
 
 1. Director Agent ASAMA 2 basinda 2D'yi background task olarak baslatir
 2. 2B Yargi MCP + 2C Mevzuat MCP sirali zinciri kendi temposunda ilerler
-3. 2E Akademik kol da paralel calisir
-4. NotebookLM cevaplari geldikce arastirma raporuna eklenir
+3. NotebookLM cevaplari geldikce arastirma raporuna eklenir
 5. **2B+2C bitti, 2D hala devam ediyorsa:**
    - Director makul sure bekler (5 dakika)
    - Sonra mevcut NotebookLM cevaplariyla sentez yapar
@@ -862,109 +986,6 @@ Sadece kritik nokta + genel dava turu yaz (mevcut KVKK kuralina sadik kal).
 
 ---
 
-### Bolum 3 - 2E Akademik Doktrin Protokolu (YENI - 6 Faz)
-
-**Birincil aralar:**
-- Literatur MCP (`mcp__claude_ai_Literat_r_MCP__*`):
-  - `search_articles` - DergiPark akademik makale arama (yil/tip/sira filtreli)
-  - `pdf_to_html` - makale PDF'inin tam metni
-  - `get_article_references` - makalenin atif zinciri
-- Yoktez MCP (`mcp__claude_ai_Yoktez_MCP__*`):
-  - `search_yok_tez_detailed` - YOK Ulusal Tez Merkezi arama
-  - `get_yok_tez_document_markdown` - tez tam metni (sayfa-sayfa Markdown)
-
-**Tetikleyici komut:** `arastir akademik: [kritik nokta]`
-**Tam akista:** ASAMA 2'de paralel kol olarak otomatik calisir.
-
-#### Faz 1 - DergiPark Makale Arama (Query 1-5)
-
-```
-search_articles(query="{ana terim}")
-search_articles(query="{alternatif 1}", year_start=2020)
-search_articles(query="{alternatif 2}", type="research")
-search_articles(query="{spesifik alt-kavram}", year_start=2018)
-search_articles(query="{ilgili yarg karari konusu}")
-```
-
-En alakali 3 makaleye odaklan.
-
-#### Faz 2 - YOK Tez Arama (Query 6-8)
-
-```
-search_yok_tez_detailed(query="{ana terim}", tez_turu="doktora")
-search_yok_tez_detailed(query="{alternatif}", tez_turu="yuksek-lisans")
-search_yok_tez_detailed(query="{spesifik alt-kavram}")
-```
-
-Son 7 yil filtresi. En alakali 2 teze odaklan.
-
-#### Faz 3 - Tam Metin Okuma
-
-```
-pdf_to_html(article_url="<url1>")  # en alakali makale 1
-pdf_to_html(article_url="<url2>")  # en alakali makale 2
-pdf_to_html(article_url="<url3>")  # en alakali makale 3
-```
-
-```
-get_yok_tez_document_markdown(tez_no="<no1>", page_start=X, page_end=X+15)  # ilgili bolum
-get_yok_tez_document_markdown(tez_no="<no2>", page_start=Y, page_end=Y+15)  # ilgili bolum
-```
-
-**ZORUNLU SINIRLAMA:** YOK tezleri 200-400 sayfa olabilir. Tum tez cekme
-YASAK (context tasarrufu). TOC'tan kritik nokta icin **2-3 ilgili bolum**
-secilir, sayfa araliklariyla cekilir.
-
-#### Faz 4 - Atif Zinciri
-
-```
-get_article_references(article_url="<en guclu makale>")
-```
-
-Referans listesinden Yargitay karari/IBK varsa 2B'ye flag dus.
-
-#### Faz 5 - Doktrin Celiski Tespiti
-
-Yazar A: X gorus → Yazar B: Y gorus catismasi varsa raporda belirt.
-Hangisi "hakim gorus" / "baskin gorus" / "azinlik"?
-
-#### Faz 6 - Atif Dogrulama
-
-Her atif icin etiket:
-- `[DOGRULANMIS]` — pdf_to_html ile tam metin okundu, gorus icerikle uyumlu
-- `[DOGRULANMASI GEREKIR]` — sadece ozet/kunye var
-- `[BULUNAMADI]` — arama sonuc dondurmedi → UYDURMA YAZMA
-
-#### Doktrin-Ictihat Celiski Kurali (KRITIK)
-
-2E doktrin gorusu 2B Yargitay karariyla **celisiyorsa**:
-- **Yargitay gorusu asildir** (baglayici ictihat)
-- Doktrin gorusu destekleyici/elestirel ek olarak kullanilir
-- **Tek basina doktrin baglayici emsal yerine GECEMEZ**
-- Dilekcede "Ogretide X gorus hakimdir/baskindir (Yazar, Yil)..." tarzi
-  destekleyici kullanim — Yargitay karari yerine degil, yaninda
-
-#### KVKK Notu (2E)
-
-DergiPark + YOK Turkiye sunucusu, kamuya acik veri. Sorgulara muvekkil
-tokenı ([MUVEKKIL_X], [TC_N]) yansitma — doktrin sorgusu kisiye degil
-hukuki probleme yapilir. Ornek:
-- YANLIS: "[MUVEKKIL] kira tespit davasi"
-- DOGRU: "kira tespit davasi TBK 344/3 hak nesafet uygulamasi"
-
-#### 2E Zorunlu Minimum
-
-| Metrik | Minimum |
-|---|---|
-| DergiPark sorgu | 5 |
-| YOK Tez sorgu | 3 |
-| Tam metin okunan makale | 3 |
-| Tam metin okunan tez (ilgili sayfa) | 2 |
-| Atif zinciri cekilen makale | 1 |
-| Atif dogrulama etiketleri | her atif icin zorunlu |
-
----
-
 ### Max Effort Thinking Kurali
 
 Her iki protokol de **Max Effort** thinking ile calisir. Iterasyon
@@ -980,40 +1001,43 @@ Bu, tek-shot aramada olmayan bir muhakeme katmanidir ve kalitenin temelidir.
 
 ---
 
-## Sentez Asamasi — ZORUNLU Gemini Bridge Cagrisi
+## Sentez Asamasi — Claude'da Kalir (2026-05-13)
 
-Tum kollar (2B+2C+2D+2E) tamamlandiktan sonra konsolide arastirma raporunu
-ben yazmiyorum, **Gemini'ye yaziyorum**. Claude (yani ben) MCP cagrilarini
-yapip ham bulgulari toplar; rapora cevirme islemi Gemini'de yapilir.
+Tum kollar (2B+2C+2D) tamamlandiktan sonra konsolide arastirma raporunu
+**terminal Claude** yazar. MCP ciktilari zaten Claude oturumunda ham olarak
+mevcut — copy-paste yorgunlugu olusmasin ve butunluk korunsun diye sentez
+Antigravity'ye gitmez.
 
-### Akis
+**Karar gerekcesi (2026-05-13):** Diger ASAMA'lar Antigravity'ye tasinirken
+ASAMA 2 sentezi Claude'da birakildi. Cunku:
+- MCP ciktilari (kunye, ozet, tam metin) Claude oturumunda ham veri olarak
+  uretiliyor; baska panele tasimak gereksiz cevirme yapar
+- Sentez teknik bir derleme isi (yapilandirilmis rapora cevirme), hukuki
+  yaratici uretim degil
+- Antigravity'ye gitse 4 paralel kolun ciktisi tek dosyada toplanip
+  yapistirilmali — buyuk context, hata riski
 
-1. **Ham bulgulari topla (Claude path):**
-   - 2B Yargi MCP -> bulunan kararlar + atif maddeleri
-   - 2C Mevzuat MCP -> kanunlar + mulga eleme tablosu
-   - 2D NotebookLM -> 10 iteratif sorgu cevaplari
-   - 2E Akademik -> makale + tez bulgulari + atif zinciri
-   - Hepsi tek context dosyasina yaz: `tmp/.gemini-input-{dava-id}-asama2.md`
+**DEPRECATED:** Eski `scripts/gemini-bridge.sh arastirma_sentezi` cagrisi
+2026-05-13 itibariyla devre disi. Bridge cagrilirsa exit 100 doner.
 
-2. **Bridge cagir:**
-   ```bash
-   ASAMA=2 DAVA_ID="<dava-id>" \
-     bash scripts/gemini-bridge.sh arastirma_sentezi \
-       tmp/.gemini-input-{dava-id}-asama2.md \
-       tmp/.gemini-output-{dava-id}-asama2.md
-   ```
+### Akis (Yeni)
 
-3. **Exit code kontrol:**
+1. **Ham bulgulari topla (Claude path — paralel + sirali zincir):**
+   - 2B Yargi MCP -> bulunan kararlar + atif maddeleri + son 5 yil seyri
+   - 2C Mevzuat MCP -> kanunlar + mulga eleme tablosu + normlar hiyerarsisi
+   - 2D NotebookLM -> 10 iteratif sorgu cevaplari (6 irdeleme + 4 perspektif)
 
-   | Exit | Anlam | Davranis |
-   |------|-------|----------|
-   | 0 | Gemini basarili | Cikti oku, kalite kapisi uygula, raporu kaydet |
-   | 99 | engine=claude path | Claude ile sentez yaz |
-   | 1 | Hata: 2x fail | Fallback log + Claude ile yaz, `fallback_used: true` |
-   | 3 | gemini CLI yok | "npm install" oner, Claude ile devam |
-   | 4 | OAuth auth | "gemini /auth" oner, Claude ile devam |
+2. **Konsolide raporu Claude yazar:**
+   - `02-Arastirma/arastirma-raporu.md` — terminal Claude doğrudan yazar
+   - Format: FIVEAGENTS.md "Cikti Format Kurallari" + Kalite Kapi 1
+     gereksinimlerine birebir uyar
+   - Frontmatter: `engine: claude`, `model: claude-opus-4-7`,
+     `status: TASLAK`
+   - Yan dosyalar:
+     - `02-Arastirma/atif-maddeleri.json` (2B → 2C zinciri girdisi)
+     - `02-Arastirma/mulga-eleme.json` (eleme tablosu)
 
-4. **Cikti dogrulama (Kalite Kapisi 1):**
+3. **Kalite Kapisi 1 (Claude self-check):**
    - [ ] 15 Yargi sorgu listesi (kunye + ozet) raporda var mi?
    - [ ] Min 5 karar tam metin kunye var mi?
    - [ ] `02-Arastirma/atif-maddeleri.json` doldu mu?
@@ -1021,19 +1045,27 @@ yapip ham bulgulari toplar; rapora cevirme islemi Gemini'de yapilir.
    - [ ] Normlar Hiyerarsisi etiketleri var mi?
    - [ ] Celiskili kararlar bolumu var mi?
    - [ ] NotebookLM 10 sorgu cevabi raporda var mi?
-   - [ ] 2E Akademik bulgular var mi?
-   - [ ] Engine: gemini frontmatter var mi?
+   - [ ] Mulga eleme sonrasi >= 5 GECERLI karar kaldi mi?
+   - [ ] DOGRULANMAMIS atif sayisi raporda yazildi mi?
+   - [ ] mcp_fallback_used flag'i (varsa) belirtildi mi?
 
-5. **Eksik varsa:** Sadece eksik mini-kolu (orn. NotebookLM 3 sorgu eksikse,
+4. **Eksik varsa:** Sadece eksik mini-kolu (orn. NotebookLM 3 sorgu eksikse,
    sadece o 3 sorguyu) tekrar calistir. Tum Faz 2'yi bastan baslatma.
+
+5. **Avukata sun:** Rapor hazir; bir sonraki ASAMA (ASAMA 3 Usul Raporu)
+   Antigravity'ye gidecek — devir blogu hazirla.
 
 ### Asla
 
-- Bridge'i atla ve dogrudan ben sentez yaz (config Gemini diyorsa)
-- KVKK ihlali: `tmp/.gemini-input-*` dosyasinda muvekkil HAM adi olmasin
-  (zaten Claude bunu maskeli context'le hazirliyor, ama ek kontrol)
-- Sentez ciktisinda atif maddesi denetimi atla (mulga eleme onceden 2C'de yapilir,
-  bu noktada zaten temiz set var)
+- `gemini-bridge.sh` cagirma — DEPRECATED (exit 100)
+- Sentez raporunu Antigravity'ye yaptir (MCP ciktilari Claude'da kaldi,
+  copy-paste yorgunlugu olmasin)
+- KVKK ihlali: rapora ham muvekkil verisi yazma (zaten Claude maskeli
+  context'le calisiyor, ama ek kontrol)
+- Sentez ciktisinda atif maddesi denetimi atla (mulga eleme onceden 2C'de
+  yapilmis, bu noktada zaten temiz set var)
+- 5 GECERLI karar altinda kalan raporu "yeterli" diye sun (geri don, 3
+  alternatif terimle yeniden 2B)
 
 ## Cikti Formati
 
@@ -1155,16 +1187,10 @@ nasil evrildigini gormek, guncel ictihat kaymasini kacirmamak.
 - **Dilekcede kullanilacak:** [En guncel + en guclu 2-3 karar, kunyeleriyle]
 - **Risk:** [Yargitay'in yakin zamanda yon degistirebilecegi sinyal var mi?]
 
-## Akademik Doktrin ve Tez Bulgulari (2E - YENI)
-
-### DergiPark Makaleleri
-[Yazar (Yil). "Baslik". Dergi, Cilt(Sayi), Sayfa. DOI/URL — DOGRULANMIS / GEREKIR]
-- Gorus ozeti: [2-3 cumle]
-- Dilekcede kullanim: "Ogretide X gorus hakimdir/baskindir" tarzi destekleyici
-
-### YOK Tezleri
-[Yazar (Yil). "Baslik". Universite/Enstitu, [Yuksek Lisans/Doktora] Tezi. Tez No.]
-- Ilgili bulgu: [bizim kritik noktamizla ortuden kisim, sayfa no ile]
+[NOT: 2E Akademik Doktrin bolumu 2026-05-19 tarihinde kaldirildi.
+Akademik kaynak gerekirse `arastir-notebook` (avukatin notebook'lari) veya
+Yargi-MCP-Pro tam metin atifi uzerinden gelir. Faz 3 sonrasi Arguman.ai
+semantik aramasi 11M+ karar havuzundan akademik gorus de getirebilir.]
 - Etiket: [DOGRULANMIS / GEREKIR]
 
 ### Doktrin Celiskileri (varsa)
@@ -1267,15 +1293,6 @@ mempalace_diary_write
             3) {celisen karar/sapma uyarisi} not edildi"
 ```
 
-**2E icin ek diary (akademik doktrin alt-modu calistiysa):**
-```text
-mempalace_diary_write
-  agent_name: "arastirmaci-2E"
-  content: "Akademik doktrin bulgulari:
-            1) DergiPark'ta {kritik nokta} icin {N} makale, en kullanisli {Yazar Yil}
-            2) YOK Tezde {M} ilgili tez, en alakali {Yazar Yil Universite}
-            3) Doktrin celiskisi: {varsa Yazar A vs B} / Yargitay ile uyum: {EVET/HAYIR}"
-```
 
 **2B+2C icin ek diary (mulga eleme calistiysa):**
 ```text
@@ -1328,8 +1345,6 @@ promotion karari onun degildir.
 | **Yargi MCP basarisiz** | 5 sn bekle, 2. deneme MCP. Hala fail → Yargi CLI fallback otomatik devreye girer. CLI da fail → rapora `[MCP+CLI HATASI]` notu, manuel arama onerisi. Rapora `mcp_fallback_used: true` GUVEN NOTU. |
 | **Mevzuat MCP basarisiz** | Ayni pattern: 2 MCP denemesi → Mevzuat CLI fallback → rapora `mcp_fallback_used: true` notu. |
 | **Mulga eleme sonrasi 5'in altinda gecerli karar kaldi** | 2B'ye geri don, 3 alternatif terimle yeni arama. Hala 5 alti → rapora `[YETERSIZ KARAR]` flag + manuel arama onerisi. |
-| **Literatur MCP CAPTCHA basarisiz** (2E) | Yeniden dene; basarisiz olursa rapora `[Literatur MCP HATASI]` notu, akademik bulgu eksik flag. |
-| **Yoktez MCP tez bulunamadi** (2E) | Daha genis terim dene, basarisiz olursa rapora not dus. Uydurma tez YAZMA. |
 | MCP baglanti hatasi (MemPalace veya NotebookLM) | Director Agent'a bildir, adimi atla, rapordaki "Kullanilan Kaynaklar" bolumune `[MCP HATASI: {arac}]` notu ekle. Arastirmaya diger kaynaklarla devam et. |
 | Yargi CLI sonuc donmuyor (fallback) | 3 alternatif arama terimi dene (es anlam, kanun maddesi, daire numarasi). Hala sonuc yoksa rapora "MANUEL ARAMA ONERILIR - {terim} icin sonuc bulunamadi" notu ekle. Uydurma karar YAZMA. |
 | Mevzuat CLI madde bulunamadi (fallback) | Kanun numarasi ve madde numarasini ayri dene. Hala yoksa "mevzuat.gov.tr'den dogrulama onerilir" notu ekle. |

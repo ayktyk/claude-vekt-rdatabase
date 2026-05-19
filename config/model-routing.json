@@ -1,17 +1,26 @@
 {
-  "_comment": "Hibrit motor haritasi. Claude = MCP + koordinasyon + arac kullanimi. Gemini = hukuki uretim (analiz, sentez, dilekce, revizyon).",
-  "_avukat_karari_2026_05_04": "Avukat Aykut hibrit modeli onayladi: tum uretim Gemini, koordinasyon+MCP Claude.",
-  "_doctrine_source": "Bu dosya TEK dogruluk kaynagidir (Single Source of Truth). Diger SKILL.md ve CLAUDE.md dosyalarinda hardcoded model adi yer ALMAZ; hepsi bu config'e referans verir.",
-  "_last_updated": "2026-05-04",
+  "_comment": "Hibrit motor haritasi. Claude = MCP + arastirma + koordinasyon. Antigravity (Gemini 3.1 Pro) = hukuki uretim (usul, 5 ajan, dilekce, simulasyon, revizyon). Antigravity manuel devir: terminal Claude copy-paste blogu basar, avukat sag panele yapistirir, Antigravity Drive'a yazar.",
+  "_avukat_karari_2026_05_13": "Avukat Aykut Antigravity hibrit mimarisini onayladi: bridge devre disi, MCP/arastirma terminal Claude'da, hukuki uretim Antigravity sag panelinde.",
+  "_doctrine_source": "Bu dosya TEK dogruluk kaynagidir (Single Source of Truth). Diger SKILL.md ve CLAUDE.md dosyalarinda hardcoded motor adi yer ALMAZ; hepsi bu config'e referans verir.",
+  "_history": {
+    "2026-05-04": "Hibrit motor (Claude+Gemini bridge) onaylandi",
+    "2026-05-13": "Antigravity hibrit mimarisine gecildi. Bridge DEPRECATED.",
+    "2026-05-19": "FAZ 2: Yargi-MCP-Pro entegrasyonu (Senaryo B - ayri toollar). Eski mcp__claude_ai_Yarg_MCP__* + mcp__claude_ai_Mevuzat_MCP__* yerine mcp__yargi-mcp-pro__* aktif. yargi_mcp + mevzuat_mcp task'lari AYRI kalir (siraili zincir 2B->2C korunur). 9 spesifik mevzuat toolu (search_kanun/search_khk/...) tek search_mevzuat + mevzuat_tur_list[] altinda birlesti. Rate-limit 3sn protokolu gevsetildi (zorunluluk degil, fallback). 2E Akademik decommissioned (Faz 1, 2026-05-19)."
+  },
+  "_last_updated": "2026-05-19",
 
   "mode": "auto",
   "_mode_values": "auto = config'tek default, sormaz | ask = her ASAMA basinda avukata sor | fixed = sadece default kullan, fallback yok",
+
+  "handoff_protocol": "antigravity_copy_paste",
+  "handoff_template_dir": "prompts/gemini/",
+  "_handoff_aciklama": "engine='antigravity_manual' olan tasklarda terminal Claude devir blogu basar; avukat Antigravity sag paneline yapistirir; Antigravity uretip Drive'a yazar; avukat terminale doner 'ASAMA X bitti' der; Claude qmd update + MemPalace diary yapar ve bir sonraki ASAMA'ya gecer.",
 
   "tasks": {
     "director": {
       "engine": "claude",
       "model": "claude-opus-4-7",
-      "aciklama": "Director Agent: workflow orkestrasyonu, ASAMA gecisleri, kalite kapilari, kullanici-kontrol komutlari (devam/atla/dur/motor-degistir)"
+      "aciklama": "Director Agent: workflow orkestrasyonu, ASAMA gecisleri, kalite kapilari, kullanici-kontrol komutlari (devam/atla/dur/motor-degistir), Antigravity devir bloklari uretimi"
     },
     "mcp_arac_yonetimi": {
       "engine": "claude",
@@ -21,79 +30,111 @@
     "yargi_mcp": {
       "engine": "claude",
       "model": "claude-opus-4-7",
-      "aciklama": "Yargi MCP (Bedesten/HGK/IBK) sorgu yonetimi, queue uzerinden cagri"
+      "mcp_server": "yargi-mcp-pro",
+      "tool_prefix": "mcp__yargi-mcp-pro__",
+      "tools": ["search_bedesten_unified", "get_bedesten_document_markdown", "legal_research_guide", "udf_format_guide"],
+      "aciklama": "Yargi-MCP-Pro (Bedesten/HGK/IBK) sorgu yonetimi. ASAMA 2B esas tool: search_bedesten_unified (phrase Solr - AND/OR/NOT/+/-/exact, NO wildcards), birimAdi enum (H1-H23/C1-C23/HGK/D1-D17/IBK), court_types[]. Tam metin: get_bedesten_document_markdown(documentId). FAZ 2 2026-05-19."
     },
     "mevzuat_mcp": {
       "engine": "claude",
       "model": "claude-opus-4-7",
-      "aciklama": "Mevzuat MCP sorgulari, kanun cache, mulga eleme"
+      "mcp_server": "yargi-mcp-pro",
+      "tool_prefix": "mcp__yargi-mcp-pro__",
+      "tools": ["search_mevzuat", "search_within_mevzuat", "get_mevzuat_document"],
+      "aciklama": "Yargi-MCP-Pro Mevzuat sorgulari (12 tip: KANUN/KHK/TUZUK/YONETMELIK/CB_KARARNAME/CB_YONETMELIK/CB_KARAR/CB_GENELGE/KKY/UY/TEBLIGLER/MULGA). ASAMA 2C esas tool: search_mevzuat (phrase Mevzuat Solr - +/-/exact/wildcard*/fuzzy~/proximity, AND/OR/NOT BREAK eder; mevzuat_tur_list[] ile tip filtresi; mevzuat_no ile direkt kanun no). Tek kanun ici boolean: search_within_mevzuat. Polimorfik fetch: get_mevzuat_document(id, id_type=mevzuat/madde/gerekce/outline). FAZ 2 2026-05-19."
+    },
+    "arguman_ai": {
+      "engine": "claude",
+      "model": "claude-opus-4-7",
+      "mcp_server": "arguman",
+      "tool_prefix": "mcp__arguman__",
+      "tools": ["search", "case_lookup", "find_similar", "get_full_text", "infaz_hesaplama"],
+      "collections": ["ceza", "hukuk", "idare", "anayasa", "aihm", "uyusmazlik", "bgh_straf", "bgh_zivil"],
+      "aciklama": "Arguman.ai - 11M+ Turk+uluslararasi mahkeme karari (semantik+keyword hibrit, Cohere multilingual + BM25 + RRF + opsiyonel neural rerank). 2A Stajyer sonrasi semantik genisletme: search(query, collection, top_k, expand, daire, yil_min/max). Provenance objesi (point_id, court, daire, esas, karar, tarih, ECLI). Nokta atisi: case_lookup. Tam metin: get_full_text. Infaz hesaplama: infaz_hesaplama (1 kredi, LLM). FAZ 3 entegrasyonu - 2026-05-19."
     },
     "notebooklm_mcp": {
       "engine": "claude",
       "model": "claude-opus-4-7",
       "aciklama": "NotebookLM async paralel kol — 10 iteratif sorgu, polling"
     },
-    "akademik_mcp": {
-      "engine": "claude",
-      "model": "claude-opus-4-7",
-      "aciklama": "DergiPark + YOK Tez MCP cagrilari"
-    },
     "kritik_nokta_tespiti": {
       "engine": "claude",
       "model": "claude-opus-4-7",
       "aciklama": "Muvekkil belgelerini okuyup hukuki uyusmazlik tespiti (MCP araclari ile dosya okuma)"
     },
-
-    "arama_plani": {
-      "engine": "gemini",
-      "model": "gemini-3.1-pro-preview",
-      "aciklama": "Yargi/Mevzuat/Akademik icin sorgu terimi listesi + filtre plani uretmek (hukuki strateji)"
+    "stajyer_prompt_uret": {
+      "engine": "claude",
+      "model": "claude-opus-4-7",
+      "aciklama": "2A Stajyer modulu Faz A: 00-Briefing okur, MemPalace match'leri ekler, prompts/stajyer/sorgu_protokolu.md sablonunu KVKK maskeli sekilde doldurur, tmp/2A-stajyer-prompt.md'ye yazar. CDP otomasyonu (scripts/superstajyer.py) deterministik script oldugu icin ayri motor task'i gerektirmez."
     },
     "arastirma_sentezi": {
-      "engine": "gemini",
+      "engine": "claude",
+      "model": "claude-opus-4-7",
+      "aciklama": "MCP/CLI ciktilarini ASAMA 2 esas raporuna cevirme. Claude'da kalir cunku ham MCP ciktilari ayni oturumda uretiliyor; copy-paste yorgunlugu olusmasin diye Antigravity'ye gitmez. 2026-05-13 karari."
+    },
+
+    "arama_plani": {
+      "engine": "antigravity_manual",
       "model": "gemini-3.1-pro-preview",
-      "aciklama": "MCP/CLI ciktilarini ASAMA 2 esas raporuna cevirme (Arastirmaci sentez)"
+      "prompt_template": "prompts/gemini/arama_plani.md",
+      "aciklama": "Yargi/Mevzuat/Akademik icin sorgu terimi listesi + filtre plani uretmek. Antigravity sag panel."
     },
     "usul_raporu": {
-      "engine": "gemini",
+      "engine": "antigravity_manual",
       "model": "gemini-3.1-pro-preview",
-      "aciklama": "Usul Uzmani: yetkili mahkeme, zamanasimi, harc, risk analizi"
+      "prompt_template": "prompts/gemini/usul_raporu.md",
+      "aciklama": "Usul Uzmani (ASAMA 3): yetkili mahkeme, zamanasimi, harc, risk analizi. Antigravity sag panel."
     },
     "stratejik_analiz": {
-      "engine": "gemini",
+      "engine": "antigravity_manual",
       "model": "gemini-3.1-pro-preview",
-      "aciklama": "ASAMA 4: 5 ajan stratejik analiz (4A-4E sub-agent ciktilarinin sentezi)"
+      "prompt_template": "prompts/gemini/stratejik_analiz.md",
+      "aciklama": "ASAMA 4: 5 ajan stratejik analiz (4A-4E). Antigravity sag panelde paralel sohbet veya tek-sohbet siralı."
     },
     "dilekce_yazimi": {
-      "engine": "gemini",
+      "engine": "antigravity_manual",
       "model": "gemini-3.1-pro-preview",
-      "aciklama": "Belge Yazari: dilekce v1 / ihtarname / sozlesme taslagi (ASAMA 5)"
+      "prompt_template": "prompts/gemini/dilekce_yazimi.md",
+      "aciklama": "Belge Yazari (ASAMA 5): dilekce v1 / ihtarname / sozlesme taslagi. Antigravity sag panel."
     },
     "savunma_simulasyonu": {
-      "engine": "gemini",
+      "engine": "antigravity_manual",
       "model": "gemini-3.1-pro-preview",
-      "aciklama": "Savunma Simulatoru: karsi taraf perspektifi + risk flag (ASAMA 6)"
+      "prompt_template": "prompts/gemini/savunma_simulasyonu.md",
+      "aciklama": "Savunma Simulatoru (ASAMA 6): karsi taraf perspektifi + risk flag. Antigravity sag panel."
     },
     "revizyon": {
-      "engine": "gemini",
+      "engine": "antigravity_manual",
       "model": "gemini-3.1-pro-preview",
-      "aciklama": "Revizyon Ajani: v1 dilekce -> v2 NIHAI (ASAMA 7)"
+      "prompt_template": "prompts/gemini/revizyon.md",
+      "aciklama": "Revizyon Ajani (ASAMA 7): v1 dilekce -> v2 NIHAI. Antigravity sag panel."
+    },
+    "blog_yazimi": {
+      "engine": "antigravity_manual",
+      "model": "gemini-3.1-pro-preview",
+      "prompt_template": "prompts/gemini/blog_yazimi.md",
+      "image_generation": true,
+      "image_tool": "imagen_nano_banana",
+      "aciklama": "Blog Yazari (THEMIS): SEO uyumlu hukuki blog yazisi + kapak gorseli. Iki tetik: serbest konu (blog yaz: [konu]) veya dava sonrasi (blog yaz dava: [dava-id]). 6 katman Aykut Sesi + 22 alan frontmatter v3 + Imagen kapak. Antigravity sag panel. Cikti: blog.md + blog.cms.md + blog.mail.md + kapak.png. Self-review HARD FAIL -> Drive'a yazilmaz."
     },
     "self_review": {
-      "engine": "gemini",
+      "engine": "antigravity_manual",
       "model": "gemini-3.1-pro-preview",
-      "aciklama": "Kalite gate: Gemini kendi ciktisini elestirir (her uretim sonrasi)"
+      "prompt_template": "prompts/gemini/self_review.md",
+      "aciklama": "Kalite gate: Antigravity kendi ciktisini elestirir (her uretim sonrasi, ayni sohbette)."
     }
   },
 
   "fallback": {
-    "_aciklama": "Gemini 3.1 Pro Preview kapasite yoksa (HTTP 429 MODEL_CAPACITY_EXHAUSTED) Flash Preview ikincil. Hicbiri calismazsa final fallback Claude (frontmatter'a fallback_used: true notu eklenir).",
-    "gemini_chain": ["gemini-3.1-pro-preview", "gemini-3-flash-preview"],
-    "gemini_max_retry": 2,
-    "gemini_retry_delay_sec": 5,
+    "_aciklama_2026_05_13": "Antigravity hibrit mimarisine gecildi. Asagidaki gemini_chain alanlari DEPRECATED — sadece rollback icin korunuyor. Yeni fallback: Antigravity erisilemezse terminal Claude hukuki uretimi yapar (final_fallback).",
+    "_deprecated_2026_05_13": true,
+    "gemini_chain_deprecated": ["gemini-3.1-pro-preview", "gemini-3-flash-preview"],
+    "gemini_max_retry_deprecated": 2,
+    "gemini_retry_delay_sec_deprecated": 5,
     "final_fallback": {
       "engine": "claude",
-      "model": "claude-opus-4-7"
+      "model": "claude-opus-4-7",
+      "aciklama": "Antigravity erisilemez/cevap vermezse veya avukat 'fallback claude' derse terminal Claude bu ASAMA'yi uretir. Cikti frontmatter: engine: claude, fallback_used: true."
     },
     "log_fallback_to_mempalace": true,
     "log_fallback_to_event_log": "logs/model-events.jsonl"
