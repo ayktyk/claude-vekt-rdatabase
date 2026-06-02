@@ -1,0 +1,55 @@
+{
+  "_comment": "Schema.org Person author bilgisi. THEMIS blog yazisi yazarken bu dosyadan okuyup JSON-LD'ye yerlestirir. sameAs URL'leri E-E-A-T sinyali icin Google'a yazarin kim oldugunu gosterir.",
+  "_kullanim": "Avukat Aykut asagidaki URL'leri kendi gercek profilleriyle doldurmaIidir. Bos string '' kalan alanlar schema'ya YAZILMAZ.",
+  "_son_guncelleme": "2026-05-17",
+
+  "name": "Av. Aykut Yesilkaya",
+  "jobTitle": "Avukat",
+  "knowsLanguage": ["tr", "en"],
+  "alumniOf": "",
+  "worksFor": {
+    "@type": "LegalService",
+    "name": "Vega Hukuk Istanbul",
+    "url": "",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Istanbul",
+      "addressCountry": "TR"
+    }
+  },
+  "memberOf": [
+    {
+      "@type": "Organization",
+      "name": "Istanbul Barosu",
+      "url": "https://www.istanbulbarosu.org.tr"
+    }
+  ],
+  "sameAs": [
+    "",
+    "",
+    "",
+    ""
+  ],
+  "_sameAs_aciklama": "Sirayla doldurulacak: 1) LinkedIn URL, 2) X (Twitter) URL, 3) Istanbul Barosu profil sayfasi URL'i (varsa baro no'lu), 4) Vega Hukuk Istanbul kendi site profil sayfasi. Daha fazla varsa diziye ekle.",
+
+  "barReg": {
+    "_aciklama": "Istanbul Barosu kayit no — disclaimer + imza blogunda kullanilir",
+    "baroId": "20096838578",
+    "baroAdi": "Istanbul Barosu"
+  },
+
+  "contact": {
+    "_aciklama": "Blog CTA'larinda gosterilebilir (telefon NUMARASI degil, randevu sayfasi link verilir)",
+    "randevuUrl": "",
+    "iletisimUrl": "",
+    "email": ""
+  },
+
+  "brand": {
+    "name": "Vega Hukuk Istanbul",
+    "tagline": "",
+    "logoUrl": "",
+    "primaryColor": "",
+    "_aciklama": "Blog yayim sonrasi kapak gorseline marka logosu / renk eklemek istersen buradan oku (NOT: blog gorselinde logo gozukmemeli — TBB reklam riski). Brand info CMS panelinde marka tutarlilgi icin kullanilabilir."
+  }
+}

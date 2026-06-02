@@ -50,6 +50,41 @@ Yargitay 12. HD T.27.09.2016 E.2016/17416 K.2016/19934
 - 2026-05-06 Seydi Ahmet Baskaya 2025/139 davasi: Hibrit motor (Claude+Gemini) ASAMA basi bildirim ve sonu self-review yapilmadan tum cikti tek elden Claude tarafindan uretildi. Avukat farketti, Gemini self-review devreye alindi: 35+ format/uslup ihlali ve 1 HARD FAIL bulundu. **Hibrit Motor Zorunluluk Doktrini yazildi.**
 - **2026-05-17 Sahte Icra Mesaji blog (THEMIS v1):** Hizir `search_bedesten_unified`'in dondurdugu 30,939 sonuc icinden ilk 6 Bedesten ID'yi alip karar metinlerini ACMADAN Gemini'ye devir bloguna gomdu. Tum karar tarihleri 2026-04 oldugu icin avukat suphelendi, "uydurma karar atfi" uyarisini verdi. Bedesten document API 502 oldugu icin doğrulama yapılamadi, atıflar "yerleski uygulama" formuluyle degistirildi. **Sistemik fix:** `ajanlar/blog-yazari/SKILL.md` §1.5 + `prompts/gemini/blog_yazimi.md`'ye **Document Fetch Verification Zorunlulugu** eklendi: search listesinde gorunmek = atif YAPMAK icin yetmez; her Bedesten ID `get_bedesten_document_markdown` ile acilip konuyla ilgili oldugu teyit edilmeden Gemini'ye gonderilmez. `verified: true` flag'i olmayan karar Gemini protokolünde reddedilir. API down -> kunye verilmez, "yerlesik uygulama" formulu zorunlu.
 
+## Doktrin Zorunluluk Kapıları (Çalıştırılabilir — 2026-06-02)
+
+0-Halüsinasyon + Anti-Sycophancy doktrini artık YALNIZ metin değil; **çalıştırılabilir
+kapılarla** zorlanır. Kanonik kaynak: `prompts/_doktrin-preamble.md` +
+`scripts/doktrin_contract.py` (SENTINEL `<!-- DOKTRIN-PREAMBLE v1 -->`, 8 clause token,
+Kaynak Doğrulama Tablosu grameri, TBB ifadeleri, KVKK allowlist). Tüm dış-prompt
+yüzeyleri (16 Gemini prompt + Süper Stajyer + 5 perspektif ajanı + arastir/blog
+komutları + devir blokları) bu doktrini inline taşır.
+
+**Air-gap gerçeği:** Gemini devir bloğunu avukat ELLE yapıştırır ve çıktıyı doğrudan
+Drive'a yazar; hiçbir hook Gemini çıktısını yakalayamaz. Güven üç katmanlıdır:
+1. **`doktrin_lint.py`** (prompt-side, LIVE): prompt yüzeyleri + devir blokları SENTINEL
+   + 8 clause taşıyor mu. Prompt dosyası Edit/Write edilince hook otomatik çalışır (FAZ 4).
+2. **SENTINEL echo** (köprü): preamble Gemini'ye SENTINEL'i çıktıya yazdırır; dönen
+   dosyada yoksa doktrin ulaşmamış → `cikti_dogrula.py` HARD FAIL.
+3. **`cikti_dogrula.py`** (output-side YAPISAL, LIVE) + **bağımsız Claude reviewer**
+   (BAĞLAYICI): dönen Drive dosyası indirilir, yapısal kontrol (SENTINEL, Kaynak tablosu,
+   Aleyhe beyanı, TBB, KVKK) yapılır; AYRICA terminal Claude **bağımsız** (aynı-sohbet
+   self-review DEĞİL) her documentId'yi Pro MCP ile yeniden çekip alıntıyı kıyaslar.
+   İkisi de PASS olmadan çıktı avukata/Gmail/MemPalace'a GİTMEZ.
+
+**Kapı yerleşimi (her oturum bunu uygular):**
+| Yüzey | Komut | Ne zaman |
+|---|---|---|
+| Prompt dosyaları + devir blokları | `python scripts/doktrin_lint.py` | Edit/Write hook + manuel |
+| Araştırma sentezi (`arastirma-raporu.md` / `arastirma-cevabi.md`) | `python scripts/cikti_dogrula.py <dosya> --dict {dava-id}` + `quality_gate.py asama2` | ASAMA 2 sonu (Kalite Kapısı 1) |
+| Gemini batch dönüşü (usul/stratejik/dilekçe/savunma/revizyon) | `cikti_dogrula.py <dosya> --dict {dava-id}` + bağımsız reviewer | "ASAMA N bitti" → indirilen dosyada |
+| Blog çıktısı | `python scripts/blog_validator.py <blog.md> --dict {dava-id}` (PENDING FAZ 3) | Gmail `create_draft` ÖNCESİ — BLOCKING |
+| MemPalace künye taşıyan drawer | `cikti_dogrula.py` | `mempalace_add_drawer` ÖNCESİ; promotion yalnız `verified:true` |
+
+**Kritik:** `cikti_dogrula.py` YAPISAL kapıdır — documentId'nin gerçekliğini DOĞRULAYAMAZ.
+İçerik-eşleşme (her documentId'yi Pro MCP ile teyit + alıntı kıyas) **bağımsız Claude
+adımıdır**, script onun yerine GEÇMEZ. Detay + faz durumu:
+`~/.claude/plans/ultrathink-workflow-claude-code-setup-pl-fluffy-frost.md`.
+
 ## Antigravity Hibrit Mimarisi (2026-05-13 — Avukatin direktifi)
 
 **Avukatin acik talimati (2026-05-13):**
@@ -148,6 +183,18 @@ dongusu oldugu icin tek sohbette birlestirildi. ASAMA 3 ve 4 ayri kaldi
 
    Protokol: prompts/gemini/{task_type}.md
    Ortak kurallar: prompts/gemini/_ortak-kurallar.md
+
+   >>> DOKTRİN (ZORUNLU — tam metin: prompts/_doktrin-preamble.md) <<<
+   <!-- DOKTRIN-PREAMBLE v1 -->
+   - UYDURMA YARGITAY/HGK/İBK kararı atfı YASAK — verilen künyeler ÖNCEDEN doğrulandı; SEN yeniden karar arama, verilmeyen künye = uydurma riski.
+   - Karar metni ALINTISI UYDURULAMAZ (tırnak alıntı birebir kaynaktan).
+   - BAĞLAM KORUNMALI — bir fıkranın cevabı başka fıkraya genellenemez.
+   - Avukatı memnun etmek için LEHE YORUM YASAK; ALEYHE İÇTİHAT açıkça gösterilir.
+   - "KAYNAK YOK" demek dürüstlüktür — uydurma ile doldurma HARD FAIL.
+   - Kritik kuralda ÇİFT KAYNAK şart.
+   - Çıktının BAŞINA `<!-- DOKTRIN-PREAMBLE v1 -->` satırını AYNEN echo et.
+   - Çıktının SONUNA KAYNAK DOĞRULAMA tablosu (| İddia | Kaynak | documentId | Tam Alıntı | Doğrulama |) + "Aleyhe içtihat: VAR/YOK/ARANMADI" beyanı ekle.
+   >>> DOKTRİN SONU <<<
 
    Gorev: {batch-spesifik talimat}
    Cikti(lar): {hedef yol(lar)}
@@ -1380,6 +1427,7 @@ Context window %70'e ulastiginda otomatik state dump:
 | `arastir mevzuat: [kritik nokta]` | Arastirma - 2C Mevzuat MCP (CLI fallback) |
 | `arastir notebook: [kritik nokta]` | Arastirma - 2D NotebookLM / Drive |
 | `arastir arguman: [kritik nokta]` | Arastirma - Faz D Arguman.ai semantik genisletme (11M+ karar, 8 koleksiyon) + Yargi-MCP-Pro dogrulama koprusu - FAZ 3 2026-05-19 |
+| `arastir danisma: [hukuki soru]` | **Hızlı Araştırma Modülü** (`@ARASTIRMA.md`) — müvekkil adayı sorusu için bağımsız hat. Süper Stajyer + Argüman.ai + Yargı Pro doğrulama + Mülga denetimi. Çıktı: `G:\Drive'ım\Hukuk Bürosu\Research\{tarih}-{slug}\arastirma-cevabi.md`. Dava akışına dokunmaz. |
 | `stratejik analiz: [dava-id]` | 5 Ajan (4A Davaci + 4B Davali + 4C Bilirkisi + 4D Hakim + 4E Sentez) |
 | `dilekce v1: [dava-id]` | Belge Yazari (ilk taslak — ASAMA 5 esdegeri) |
 | `dilekce yaz` | Belge Yazari (v1 taslak — `dilekce v1:` ile ayni) |

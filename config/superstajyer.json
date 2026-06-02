@@ -1,0 +1,61 @@
+{
+  "_comment": "Suer Stajyer (app.sstajyer.com) CDP otomasyon konfigurasyonu. 2026-05-15 canli kurulum sonucu dolduruldu.",
+  "_kurulum_kilavuzu": [
+    "Bu dosya zaten dolduruldu. UI degisirse Chrome DevTools (F12 -> Inspect) ile selectorlari guncelle.",
+    "1. scripts/launch-chrome-cdp.ps1 ile Chrome ac (CDP-Profile, port 9222)",
+    "2. Suer Stajyer'e login ol (oturum kalir)",
+    "3. python scripts/superstajyer.py health -> '[OK] CDP baglandi' gormeli"
+  ],
+  "_son_guncelleme": "2026-05-15",
+
+  "url": "https://app.sstajyer.com/",
+  "url_match": "sstajyer",
+  "_url_match_aciklama": "Acik sekmenin URL'inde bu string varsa o sekme kullanilir; yoksa yeni sekme acilir + URL'e gidilir.",
+
+  "prompt_selector": ".ProseMirror[contenteditable=\"true\"]",
+  "_prompt_aciklama": "TipTap/ProseMirror rich-text editor. fill() yerine click + keyboard.type kullanilmali (contenteditable).",
+
+  "prompt_method": "type",
+  "_prompt_method_aciklama": "'type' = click + Ctrl+A + Delete + keyboard.type (ProseMirror icin). 'fill' = klasik input/textarea fill.",
+
+  "submit_selector": null,
+  "_submit_aciklama": "null = Enter tusu ile gonderilir (canli test 2026-05-15: Enter sorguyu gonderiyor, yeni /chat/{uuid} URL'i olusuyor).",
+
+  "response_selector": "main",
+  "_response_aciklama": "Sayfada tek <main> elementi var; soru + cevap + ictihat matrisi hepsi icinde. Sidebar ayri (data-slot=sidebar).",
+
+  "completion_marker": "ARASTIRMA TAMAMLANDI",
+  "_completion_marker_aciklama": "Cevabin son satirinda bu ibare gorulurse cevap tamamlanmis sayilir. prompts/stajyer/sorgu_protokolu.md sablonu Suer Stajyer'e bu ibareyle bitirme talimati verir. Bos string verilirse stabilite (degismeyen uzunluk) ile bitis tespit edilir.",
+
+  "timeout_sec": 600,
+  "_timeout_aciklama": "Tur-basina maksimum bekleme suresi (saniye). Suer Stajyer 100 sayfa cevap uretebiliyor — 10 dk yeterli.",
+
+  "poll_interval_sec": 3,
+  "_poll_interval_aciklama": "Her N saniyede bir response container okunur.",
+
+  "stability_ticks": 5,
+  "_stability_aciklama": "[ESKI/tek-shot] completion_marker bulunamazsa, uzunluk N tick boyunca degismediyse 'tamamlandi' kabul edilir. Cok-turlu motorda yerini turn_stability_ticks aldi.",
+
+  "_COK_TURLU_AYARLAR": "Asagidakiler send_turn_and_wait (run / run-batch) cok-turlu motorunu yonetir. Amac: insan-gibi, toplu, bekleyerek sorgu — 1 satirlik pes pese soru spam'ini engellemek.",
+
+  "turn_delay_sec": 4,
+  "_turn_delay_aciklama": "Her tur GONDERILMEDEN once beklenen taban gecikme (saniye). Insan-gibi tempo.",
+
+  "turn_delay_jitter_sec": 3,
+  "_turn_delay_jitter_aciklama": "turn_delay_sec uzerine eklenen 0..N rastgele jitter (saniye). Mekanik ritmi kirar.",
+
+  "idle_stable_ticks": 3,
+  "_idle_stable_aciklama": "Gondermeden once: <main> metni N tick boyunca degismiyorsa 'onceki uretim bitti' kabul edilir (uretim surerken gonderme kilidi = spam onleme).",
+
+  "min_growth_chars": 30,
+  "_min_growth_aciklama": "Bir turun 'cevap basladi' sayilmasi icin metin pre_len + len(prompt) + bu kadar karakter buyumeli. Soru yankisini ve modelin ilk-token gecikmesini 'bitti' sanmayi onler.",
+
+  "turn_stability_ticks": 6,
+  "_turn_stability_aciklama": "Cevap basladiktan sonra uzunluk N tick boyunca sabitse tur 'tamamlandi' kabul edilir. tek-shot stability_ticks'ten yuksek tutulur (model duraksamasini erken 'bitti' sanmamak icin).",
+
+  "max_turns": 5,
+  "_max_turns_aciklama": "run-batch'te izin verilen maksimum tur sayisi. Kacak dongu + spam koruma tavani. Az sayida TOPLU batch hedeflenir (genelde 2-3).",
+
+  "batch_separator": "===BATCH===",
+  "_batch_separator_aciklama": "run-batch dosyasinda turlari ayiran isaret. Her parca ayri (gruplu) bir tur olur; son parca ARASTIRMA TAMAMLANDI ile biter."
+}

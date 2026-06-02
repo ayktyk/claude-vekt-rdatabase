@@ -1,0 +1,29 @@
+name: doktrin-ci
+# Dava araştırma + blog doktrin kapıları CI. Yalnız ilgili yollar değişince çalışır.
+on:
+  push:
+    paths: ['scripts/**', 'prompts/**', 'CLAUDE.md', 'ANTIGRAVITY.md', '.claude/**', 'requirements.txt']
+  pull_request:
+    paths: ['scripts/**', 'prompts/**', 'CLAUDE.md', 'ANTIGRAVITY.md', '.claude/**', 'requirements.txt']
+
+jobs:
+  doktrin-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install deps
+        run: pip install -r requirements.txt
+      - name: Trust-gate tests
+        run: python -m pytest scripts/tests -q
+      - name: Doktrin lint (tüm prompt yüzeyleri + devir blokları)
+        run: python scripts/doktrin_lint.py
+      - name: Ruff (WARN-only — yeni dosyalar + testler)
+        continue-on-error: true
+        run: |
+          pip install ruff
+          ruff check scripts/doktrin_contract.py scripts/doktrin_lint.py \
+            scripts/cikti_dogrula.py scripts/blog_validator.py scripts/inject_doktrin.py \
+            scripts/tests/ || true

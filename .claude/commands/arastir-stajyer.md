@@ -1,3 +1,13 @@
+<!-- DOKTRIN-PREAMBLE v1 -->
+> **0-HALÜSİNASYON + ANTI-SYCOPHANCY (zorunlu — tam metin: `prompts/_doktrin-preamble.md`):**
+> - UYDURMA YARGITAY/HGK/İBK kararı atfı YASAK — her künye Bedesten documentId ile doğrulanır; doğrulanmayan "DOĞRULANMAMIŞ" damgalanır.
+> - Karar metni ALINTISI UYDURULAMAZ — tırnak içi alıntı birebir kaynaktan.
+> - BAĞLAM KORUNMALI — bir fıkranın cevabı başka fıkraya genellenemez.
+> - Avukatı memnun etmek için LEHE YORUM YASAK; ALEYHE İÇTİHAT açıkça gösterilir, gizlenmez.
+> - "KAYNAK YOK" demek dürüstlüktür — sayı doldurmak için uydurma atıf HARD FAIL.
+> - Kritik kuralda ÇİFT KAYNAK şart.
+> - Çıktının sonunda KAYNAK DOĞRULAMA tablosu (| İddia | Kaynak | documentId | Tam Alıntı | Doğrulama |) + "Aleyhe içtihat: VAR/YOK/ARANMADI" beyanı ZORUNLU.
+
 # /arastir stajyer — 2A Yorunge Belirleyici (CDP Otomasyonu)
 
 `$ARGUMENTS` formati: `[dava-id]` (orn: `2026-003`)
@@ -42,10 +52,17 @@ gecisi onaylatir.
    `{{BRIEFING}}` placeholder'lari briefing dosyasindaki maskeli verilerle
    degistir.
 
-4. **Backup yaz:**
+4. **Cok-turlu batch kur (zorunlu — spam onleme):**
+   Sorguyu TEK mesaj degil, **2-3 GRUPLU tur** olarak kur. ASLA 1 satirlik
+   kisa pes pese soru. `===BATCH===` ayraciyla turlari ayir:
+   - Tur 1: preamble (dava kimligi + kritik nokta + ozet + briefing) + Baslik 1-3
+   - Tur 2: Baslik 4-5 (+ Tur 1'in zayif noktalarini derinlestir)
+   - Tur 3: Baslik 6-7 (+ kalan bosluklar)
+   Sadece SON tur "ARASTIRMA TAMAMLANDI" ile biter; ara turlar icermez.
    ```
-   Write tmp/2A-stajyer-prompt.md (doldurulmus prompt)
+   Write tmp/2A-stajyer-batch.md (===BATCH=== ayracli 2-3 tur)
    ```
+   (Detay: `prompts/stajyer/sorgu_protokolu.md` -> "Tur Yapisi" + "Doldurma Notu".)
 
 ### Faz B: CDP Health Check
 
@@ -64,32 +81,43 @@ Chrome CDP modunda acik degil (port 9222 yanit vermiyor).
 Iki secenek:
   1. scripts\launch-chrome-cdp.ps1 ile Chrome'u baslat,
      Suer Stajyer'e login ol, sonra "devam" yaz.
-  2. Manuel fallback: tmp/2A-stajyer-prompt.md icerigi panoda
-     (otomatik Set-Clipboard ile). Chrome'u normal ac, Suer Stajyer'de
-     yapistir, cevap geldikten sonra `2A cevap al: {dava-id}` komutu ver.
+  2. Manuel fallback: tmp/2A-stajyer-batch.md turleri panoda. Chrome'u
+     normal ac, Suer Stajyer'de turleri SIRAYLA yapistir — her turun cevabi
+     TAM gelmeden sonrakini yapistirma (insan-gibi bekle). Son turun
+     cevabindan sonra `2A cevap al: {dava-id}` komutu ver.
 
 Tercih?
 ```
 
 Avukatin secimini bekle. Secim 1: Chrome acilmasini bekle, tekrar curl
-ile dogrula. Secim 2: prompt icerigini `Set-Clipboard` ile panoya yaz, dur.
+ile dogrula. Secim 2: batch turlerini `Set-Clipboard` ile panoya yaz, dur.
 
-### Faz C: CDP Otomasyon (superstajyer.py run)
+### Faz C: CDP Otomasyon (cok-turlu, insan-gibi, bekleyerek)
+
+**Planli sira (onerilen — turlar arasi spam imkansiz):**
 
 ```bash
-python scripts/superstajyer.py run \
-  --prompt-file tmp/2A-stajyer-prompt.md \
+python scripts/superstajyer.py run-batch \
+  --batch-file tmp/2A-stajyer-batch.md \
   --output "G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\02-Arastirma\2A-superstajyer-cevap.md" \
   --config config/superstajyer.json
 ```
 
+Script her turdan once "onceki uretim bitti mi" boslta-kilidi + insan-gibi
+gecikme uygular; turlar `===BATCH===` ile ayrilir, sadece son tur
+"ARASTIRMA TAMAMLANDI" bekler. Tum konusma cikti dosyasina birikir.
+
+**Adaptif alternatif (daha guclu iterasyon):** her turu `superstajyer.py run
+--prompt-file <tur-N> --output <cevap>` ile gonder, cevabi oku, zayif/supheli
+noktalari gruplayip sonraki turu uret, tekrar `run`. Her `run` onceki uretim
+bitene kadar bekledigi icin pes pese cagri dahi guvenli serilesir.
+
 Cikis kodlari (script icinde dokumante):
-- 0 -> basari, Drive'a yazildi
+- 0 -> basari, Drive'a yazildi (tum turlar tamam)
 - 10 -> CDP yok (avukata bildir + fallback teklif)
 - 20 -> Suer Stajyer sekmesi bulunamadi (login eksik veya selector hatali)
-- 30 -> Cevap timeout (kismi cevap kaydedildi, avukata "yine de devam mi?" sor)
-- 40 -> Config eksik/hatali (avukata `config/superstajyer.json` selector
-   dolduma rehberi goster)
+- 30 -> Tur timeout (kismi konusma kaydedildi, avukata "yine de devam mi?" sor)
+- 40 -> Config/batch eksik-hatali (max_turns asimi veya ayrac sorunu dahil)
 - 50 -> Playwright hatasi (logu goster)
 
 Script "[OK] yazildi: ..." mesaji verirse Faz D'ye gec.
@@ -191,7 +219,7 @@ Yorunge eklesmesi gerekli durumlar (hall_arastirma_bulgulari'na yazma):
 
 ## Output
 
-- `tmp/2A-stajyer-prompt.md` — gonderilen prompt (backup)
+- `tmp/2A-stajyer-batch.md` — gonderilen 2-3 turluk batch (===BATCH=== ayracli, backup)
 - `G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\02-Arastirma\2A-superstajyer-cevap.md` — ham cevap
 - `G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\02-Arastirma\2A-yorunge-talimatlari.md` — 2B-2E icin yorunge
 - Sohbete sadece OZET dokulur (500-1000 token)

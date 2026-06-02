@@ -145,6 +145,18 @@ Aşağıdaki dosyaları oku:
 Protokol: prompts/gemini/usul_raporu.md
 Ortak kurallar: prompts/gemini/_ortak-kurallar.md
 
+>>> DOKTRİN (ZORUNLU — tam metin: prompts/_doktrin-preamble.md) <<<
+<!-- DOKTRIN-PREAMBLE v1 -->
+- UYDURMA YARGITAY/HGK/İBK kararı atfı YASAK — sana verilen künyeler ÖNCEDEN (terminal Claude tarafından get_bedesten_document_markdown ile) doğrulandı; SEN yeniden internetten/hafızadan karar arama; sana verilmeyen künye = uydurma riski → kullanma.
+- Karar metni ALINTISI UYDURULAMAZ — tırnak içi alıntı («...») birebir kaynaktan.
+- BAĞLAM KORUNMALI — bir kaynağın bir fıkra/dava için cevabı başka fıkra/davaya genellenemez (89/4 → 89/3 taşıma YASAK).
+- Avukatı/müvekkili memnun etmek için LEHE YORUM YASAK; ALEYHE İÇTİHAT açıkça gösterilir, gizlenmez. Aşırı vaat ("kesin kazanırsınız") YASAK.
+- "KAYNAK YOK" demek dürüstlüktür — sayı doldurmak için uydurma atıf eklemek HARD FAIL.
+- Kritik kuralda (ispat yükü / görevli mahkeme / hak düşürücü süre) ÇİFT KAYNAK şart.
+- Çıktının EN BAŞINA `<!-- DOKTRIN-PREAMBLE v1 -->` satırını AYNEN yaz (doktrin echo — yoksa cikti_dogrula.py output gate REDDEDER).
+- Çıktının SONUNA KAYNAK DOĞRULAMA tablosu (| İddia | Kaynak | documentId | Tam Alıntı | Doğrulama |) + "Aleyhe içtihat: VAR/YOK/ARANMADI" beyanı + boş olmayan "Aleyhe İçtihat / Risk" bölümü ekle.
+>>> DOKTRİN SONU <<<
+
 Görev: Usul iskeletini kur — görevli mahkeme, yetkili adliye (kesin tek yer
 taahhüdü YOK — seçenekler + doğrulanmamış noktalar), zamanaşımı (uzamış
 ceza süresi kontrolü zorunlu), arabuluculuk + KTK 97 gibi ön şartlar,
@@ -185,6 +197,18 @@ Ek referans (bağlama göre):
 
 Protokol: prompts/gemini/stratejik_analiz.md
 Ortak kurallar: prompts/gemini/_ortak-kurallar.md
+
+>>> DOKTRİN (ZORUNLU — tam metin: prompts/_doktrin-preamble.md) <<<
+<!-- DOKTRIN-PREAMBLE v1 -->
+- UYDURMA YARGITAY/HGK/İBK kararı atfı YASAK — sana verilen künyeler ÖNCEDEN (terminal Claude tarafından get_bedesten_document_markdown ile) doğrulandı; SEN yeniden internetten/hafızadan karar arama; sana verilmeyen künye = uydurma riski → kullanma.
+- Karar metni ALINTISI UYDURULAMAZ — tırnak içi alıntı («...») birebir kaynaktan.
+- BAĞLAM KORUNMALI — bir kaynağın bir fıkra/dava için cevabı başka fıkra/davaya genellenemez (89/4 → 89/3 taşıma YASAK).
+- Avukatı/müvekkili memnun etmek için LEHE YORUM YASAK; ALEYHE İÇTİHAT açıkça gösterilir, gizlenmez. Aşırı vaat ("kesin kazanırsınız") YASAK.
+- "KAYNAK YOK" demek dürüstlüktür — sayı doldurmak için uydurma atıf eklemek HARD FAIL.
+- Kritik kuralda (ispat yükü / görevli mahkeme / hak düşürücü süre) ÇİFT KAYNAK şart.
+- Çıktının EN BAŞINA `<!-- DOKTRIN-PREAMBLE v1 -->` satırını AYNEN yaz (doktrin echo — yoksa cikti_dogrula.py output gate REDDEDER).
+- Çıktının SONUNA KAYNAK DOĞRULAMA tablosu (| İddia | Kaynak | documentId | Tam Alıntı | Doğrulama |) + "Aleyhe içtihat: VAR/YOK/ARANMADI" beyanı + boş olmayan "Aleyhe İçtihat / Risk" bölümü ekle.
+>>> DOKTRİN SONU <<<
 
 Görev: 5 perspektiften analiz yap:
   4A Davacı Avukat — lehimize en güçlü 5 argüman

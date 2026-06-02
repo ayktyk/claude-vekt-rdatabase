@@ -1,3 +1,13 @@
+<!-- DOKTRIN-PREAMBLE v1 -->
+> **0-HALÜSİNASYON + ANTI-SYCOPHANCY (zorunlu — tam metin: `prompts/_doktrin-preamble.md`):**
+> - UYDURMA YARGITAY/HGK/İBK kararı atfı YASAK — her künye Bedesten documentId ile doğrulanır; doğrulanmayan "DOĞRULANMAMIŞ" damgalanır.
+> - Karar metni ALINTISI UYDURULAMAZ — tırnak içi alıntı birebir kaynaktan.
+> - BAĞLAM KORUNMALI — bir fıkranın cevabı başka fıkraya genellenemez.
+> - Avukatı memnun etmek için LEHE YORUM YASAK; ALEYHE İÇTİHAT açıkça gösterilir, gizlenmez.
+> - "KAYNAK YOK" demek dürüstlüktür — sayı doldurmak için uydurma atıf HARD FAIL.
+> - Kritik kuralda ÇİFT KAYNAK şart.
+> - Çıktının sonunda KAYNAK DOĞRULAMA tablosu (| İddia | Kaynak | documentId | Tam Alıntı | Doğrulama |) + "Aleyhe içtihat: VAR/YOK/ARANMADI" beyanı ZORUNLU.
+
 # /arastir-arguman — Arguman.ai Semantik Genişletme (FIVEAGENTS ASAMA 2 — Faz D)
 
 `$ARGUMENTS` kritik noktası için Arguman.ai'nin 11M+ karar havuzunda

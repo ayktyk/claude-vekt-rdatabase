@@ -1,6 +1,6 @@
 {
   "_comment": "Proje-level Claude Code ayarlari. Kullanici-specific permission'lar settings.local.json'da. Bu dosya gitlenir, ekibin tamami kullanir.",
-  "_doctrine": "Faz C: Model regresyon hook'u. Belge yazari uretim ajanlarinin ciktisi config/model-routing.json'a uyumlu mu kontrol eder.",
+  "_doctrine": "Doktrin lint hook'u (2026-06-02): prompts/** veya CLAUDE.md/ANTIGRAVITY.md Edit/Write edilince scripts/doktrin_lint.py --hook-stdin calisir; kapsam disi dosyalarda sessizce gecer (early-exit, gurultu yok). Eski check-model-regression.sh (deprecated no-op) bu tek slotta yeniden kullanildi — 3. paralel hook EKLENMEDI.",
 
   "hooks": {
     "PostToolUse": [
@@ -9,7 +9,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash hooks/check-model-regression.sh"
+            "command": "bash -c 'python scripts/doktrin_lint.py --hook-stdin'"
           }
         ]
       }

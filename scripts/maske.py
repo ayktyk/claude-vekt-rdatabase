@@ -50,9 +50,11 @@ TC_REGEX = re.compile(r'\b([1-9]\d{10})\b')
 IBAN_REGEX = re.compile(r'\bTR[\s]?(\d{2}[\s]?\d{4}[\s]?\d{4}[\s]?\d{4}[\s]?\d{4}[\s]?\d{4}[\s]?\d{2})\b', re.IGNORECASE)
 TELEFON_REGEX = re.compile(r'(\+90[\s]?5\d{2}[\s]?\d{3}[\s]?\d{2}[\s]?\d{2}|0[\s]?5\d{2}[\s]?\d{3}[\s]?\d{2}[\s]?\d{2}|5\d{2}[\s]?\d{3}[\s]?\d{4})')
 EPOSTA_REGEX = re.compile(r'\b([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b')
-NOTER_YEVMIYE_REGEX = re.compile(r'\b(0[0-9]{4}|[1-9][0-9]{4})\b')
-
-ARABULUCULUK_DOSYA_REGEX = re.compile(r'\b(20\d{2}/\d{3,5})\b')
+# NOTER_YEVMIYE_REGEX / ARABULUCULUK_DOSYA_REGEX KALDIRILDI (2026-06-02):
+# Bunlar her 5-haneli sayıyı / her YYYY/NNNN desenini yakalıyordu → dava esas/karar
+# numaralarını ve tutarları maskeleyip atıf verisini bozma riski (0-halüsinasyon
+# açısından tehlikeli). mask_text() zaten çağırmıyordu (ölü kod). Kamuya açık
+# sayılar (esas no, harç tutarı) ASLA maskelenmez; bu yüzden tekrar eklenmemeli.
 
 
 def _tc_validate(tc: str) -> bool:
@@ -160,9 +162,16 @@ class MaskeSistem:
         return text
 
     def unmask_text(self, text: str) -> str:
-        """Maskeli metni gerçek veriye geri çevirir."""
+        """Maskeli metni gerçek veriye geri çevirir.
+
+        Token'lar uzunluğa göre AZALAN sırada işlenir: olası prefix çakışmasına
+        (ör. [MUVEKKIL_1] vs [MUVEKKIL_11]) karşı savunma. Mevcut köşeli-parantez
+        token formatı zaten çakışmaya kapalı; bu sıralama ileriye dönük güvence.
+        """
         for kategori in ['isimler', 'adres', 'tc', 'iban', 'telefon', 'eposta', 'noter']:
-            for gercek, token in self.dict_data[kategori].items():
+            items = sorted(self.dict_data[kategori].items(),
+                           key=lambda kv: len(kv[1]), reverse=True)
+            for gercek, token in items:
                 text = text.replace(token, gercek)
         return text
 

@@ -1,3 +1,13 @@
+<!-- DOKTRIN-PREAMBLE v1 -->
+> **0-HALÜSİNASYON + ANTI-SYCOPHANCY (zorunlu — tam metin: `prompts/_doktrin-preamble.md`):**
+> - UYDURMA YARGITAY/HGK/İBK kararı atfı YASAK — her künye Bedesten documentId ile doğrulanır; doğrulanmayan "DOĞRULANMAMIŞ" damgalanır.
+> - Karar metni ALINTISI UYDURULAMAZ — tırnak içi alıntı birebir kaynaktan.
+> - BAĞLAM KORUNMALI — bir fıkranın cevabı başka fıkraya genellenemez.
+> - Avukatı memnun etmek için LEHE YORUM YASAK; ALEYHE İÇTİHAT açıkça gösterilir, gizlenmez.
+> - "KAYNAK YOK" demek dürüstlüktür — sayı doldurmak için uydurma atıf HARD FAIL.
+> - Kritik kuralda ÇİFT KAYNAK şart.
+> - Çıktının sonunda KAYNAK DOĞRULAMA tablosu (| İddia | Kaynak | documentId | Tam Alıntı | Doğrulama |) + "Aleyhe içtihat: VAR/YOK/ARANMADI" beyanı ZORUNLU.
+
 # /blog yaz — THEMIS Blog Yazari (Serbest Konu Modu)
 
 `$ARGUMENTS` formati: `[konu]` veya bos (avukatdan istenir)
@@ -163,18 +173,28 @@ Avukat "Blog bitti" diyene kadar bir sonraki adima gecme.
 
 ### ADIM 6: Post-Production (Avukat onayi sonrasi)
 
-1. **Validator** (opsiyonel ama tavsiye):
-   - Eger `scripts/blog_validator.py` mevcutsa: calistir
-   - Yoksa Director Agent kalite kontrol listesini el ile uygula
-     (Bolum: ajanlar/blog-yazari/SKILL.md > Kalite Kontrol Listesi)
+1. **TRUST KAPISI — ZORUNLU, BLOCKING (`blog_validator.py`):**
+   Blog Drive'dan indirildikten sonra, Gmail draft'tan ÖNCE çalıştır:
+   ```
+   python scripts/blog_validator.py "<blog.md yolu>" --dict {dava-id}
+   ```
+   - **HARD FAIL** (doğrulanmamış/uydurma emsal, KVKK sızıntı, TBB yasak ifade,
+     SENTINEL yok) → **DUR. Gmail draft OLUŞTURMA, final Drive'a yazma.** Sorunları
+     Antigravity'ye geri bildir, düzelttir, yeniden çalıştır.
+   - **SEO-WARN** → bloklamaz; avukata raporla (yayın öncesi düzeltilebilir).
+   - PASS olmadan 2. adıma GEÇİLMEZ ("opsiyonel" DEĞİL — 2026-05-17 sahte icra blog
+     dersi). Yapısal kapı documentId gerçekliğini doğrulamaz; her künye ayrıca
+     bağımsız reviewer ile `get_bedesten_document_markdown` üzerinden teyit edilir.
 
-2. **Gmail Draft** (opsiyonel — avukata sor):
+2. **Gmail Draft** (YALNIZ `blog_validator.py` PASS sonrası — avukata sor):
    ```
    Gmail draft olusturulsun mu? (E/H)
    ```
-   EVET → Gmail MCP `create_draft` ile `blog.mail.md` icerigi draft olarak.
+   EVET → Gmail MCP `create_draft`:
+   - To: avukatın kendi gelen kutusu (varsayılan, self-review için) — **auto-send YOK**.
    - Subject: `[Blog PR] [{konu}] — paste hazir`
-   - Body: `blog.mail.md` icerigi
+   - Body: `blog.mail.md` (Markdown→Gmail için HTML'e render et; ham markdown
+     tablo/kod blokları Gmail'de bozulur).
 
 3. **MemPalace Diary Write:**
    ```
