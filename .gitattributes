@@ -1,0 +1,19 @@
+# Satir sonu normalizasyonu — Windows <-> macOS arasi CRLF/LF kaosunu onler.
+# Tum metin dosyalari repoda LF olarak saklanir; checkout'ta da LF kalir.
+* text=auto eol=lf
+
+# Kesin binary (normalizasyon uygulanmaz)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pdf binary
+*.docx binary
+*.xlsx binary
+*.udf binary
+*.zip binary
+
+# Windows'a ozgu betikler CRLF kalmali (PowerShell/batch)
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
