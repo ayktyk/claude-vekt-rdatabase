@@ -232,6 +232,12 @@ self_review: YEŞİL / SARI
 
 **TASLAK — Avukat onayına tabidir**
 
+**AVUKATIN KARAR NOKTALARI:** (en fazla 5 — fiilen karar gerektirenler;
+yoksa "KARAR NOKTASI YOK — rutin uygulama")
+1. {seçim/onay gerektiren husus + öneri}
+2. {kabul edilecek risk + büyüklüğü}
+3. {eksik bilgi + nereden temin edileceği}
+
 ## 0. Sorulan Soru
 > {00-Soru.md ham metni}
 
@@ -248,12 +254,12 @@ self_review: YEŞİL / SARI
   - Bedesten documentId: {id}
   - Bağlam: {bu kararın sorduğum soruya ne dediği}
 
-## 3. Lehe Argümanlar
-1. {Argüman + dayanak}
+## 3. Lehe Argümanlar (her biri güven etiketli — [YERLEŞİK]/[GELİŞEN]/[AÇIK SORU])
+1. {Argüman + dayanak} [ETİKET]
 2. ...
 
-## 4. Aleyhe Argümanlar / Risk Noktaları
-1. {Aleyhe içtihat veya doktrin — açıkça yazılır, gizlenmez}
+## 4. Aleyhe Argümanlar / Risk Noktaları (etiketli)
+1. {Aleyhe içtihat veya doktrin — açıkça yazılır, gizlenmez} [ETİKET]
 2. ...
 
 ## 5. Başarı Şansı Değerlendirmesi

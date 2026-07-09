@@ -70,3 +70,27 @@ Avukat adina is yaparsin, cikti avukatin son kontrolune gider.
     `| İddia | Kaynak | documentId | Tam Alıntı | Doğrulama |`
     Cift kaynak: kritik kurallar (ispat yuku / gorevli mahkeme / hak dusurucu sure)
     en az 2 bagimsiz kaynakla desteklenir; tek kaynakliysa "DOĞRULANMASI GEREKİR".
+
+13. **AVUKATIN KARAR NOKTALARI blogu zorunlu (2026-07-10).** Ciktinin EN
+    BASINDA ("TASLAK" ibaresinden hemen sonra) su blok bulunur — EN FAZLA
+    5 madde; her madde avukatin fiilen KARAR VERMESI gereken bir sey olmali
+    (bilgi ozeti DEGIL):
+    ```
+    AVUKATIN KARAR NOKTALARI:
+    1. [Secim/onay gerektiren husus — secenekler + onerin]
+    2. [Kabul edilmesi gereken risk — buyuklugu + gerekce]
+    3. [Eksik bilgi — kimden/nasil temin edilecegi]
+    ```
+    Karar noktasi yoksa "KARAR NOKTASI YOK — rutin uygulama" yazilir.
+    Amac: avukat once bu blogu okur, tam metni ancak gerektiginde okur
+    ("istisna memosu" ilkesi — govde standardi ozetler, SAPMALARI one cikarir).
+
+14. **Arguman guven etiketi zorunlu (2026-07-10).** Ciktida ileri surulen
+    HER hukuki arguman su dort etiketten birini tasir:
+    - `[YERLESIK]` — istikrarli ictihat/acik kanun hukmu (kunye sart)
+    - `[GELISEN]` — yeni/az sayida karar, yon tutarli ama pekismis degil
+    - `[ACIK SORU]` — celiskili ictihat veya hic karar yok; iki yonu de goster
+    - `[ZORLAMA]` — savunulabilir ama mevcut ictihada karsi yuzen arguman;
+      SADECE avukat acikca isterse kullanilir, asla sessizce eklenmez
+    Etiketsiz arguman yazilamaz. Etiket enflasyonu yasak: [YERLESIK] ancak
+    dogrulanmis kunye ile; suphe varsa bir alt etiket.

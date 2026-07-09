@@ -302,6 +302,21 @@ maskeleme zorunlulugu geri gelecek.
 Her ASAMA ciktisi MD formatinda uretilir. Ayrica `scripts/md_to_docx.py` ile
 otomatik DOCX'e cevrilir (avukat Word'de duzenleme icin).
 
+**KARAR NOKTALARI blogu (ZORUNLU — 2026-07-10, tum hukuki ciktilarda):**
+Her ASAMA ciktisi ve danisma cevabi, TASLAK ibaresinden hemen sonra
+"AVUKATIN KARAR NOKTALARI" blogu ile baslar — en fazla 5 madde, her
+biri avukatin fiilen KARAR verecegi bir husus (secim, risk kabulu,
+eksik bilgi temini). Bilgi ozeti karar noktasi DEGILDIR. Yoksa
+"KARAR NOKTASI YOK — rutin uygulama" yazilir. Amac: avukat redaktore
+degil karar vericiye terfi eder; govdeyi ancak gerektiginde okur.
+
+**Arguman guven etiketi (ZORUNLU — 2026-07-10):** Ileri surulen her
+hukuki arguman `[YERLESIK] / [GELISEN] / [ACIK SORU] / [ZORLAMA]`
+etiketlerinden birini tasir ([ZORLAMA] yalniz avukat acikca isterse).
+Detay: `prompts/gemini/_ortak-kurallar.md` madde 13-14 (Gemini) —
+ayni kurallar terminal Claude ciktilari (arastirma sentezi, danisma
+cevabi) icin de gecerlidir.
+
 **UDF uretimi yalnizca NIHAI DILEKCE icin** yapilir:
 - v2 NIHAI (ASAMA 7 ciktisi), istinaf, temyiz dilekceleri
 - Uretim: `python scripts/md_to_udf.py <input.md>`
@@ -1276,9 +1291,42 @@ Bu durumda Director Agent sunlardan birini secebilir:
 
 ---
 
+## Dersler Dongusu — Bilesiklenme Mekanizmasi (ZORUNLU — 2026-07-10)
+
+**Ilke:** "Model kacirir, avukat duzeltir, duzeltme bir sonraki
+calistirmanin parcasi olur." Birincil kayit: `dersler/` klasoru
+(git'te izlenen duz-metin dosyalar — MemPalace bagli olmasa da calisir).
+
+**Kural 1 — Kapanis ritueli:** Her dava akisi / tekil komut / danisma
+arastirmasi KAPANIRKEN Claude avukata TEK soru sorar:
+> "Bu iste ben neyi kacirdim / sen neyi duzelttin? (yoksa 'yok' de)"
+Cevap `dersler/{arastirma|dilekce|usul|sistem}.md`'ye 3 satirlik formatta
+eklenir (KACIRILAN / DUZELTME / KURAL ADAYI). Detay: `dersler/README.md`.
+
+**Kural 2 — Terfi:** Ayni yonde 2+ ders veya kritik tek ders → ilgili
+kalici dosyaya (SKILL / dilekce-yazim-kurallari / playbook / CLAUDE.md)
+islenir; ders dosyasinda `[TERFI → hedef]` etiketi kalir.
+
+**Kural 3 — Is baslarken oku:** Ajan calismaya baslamadan once kendi
+alaninin `dersler/` dosyasini okur (MemPalace wake-up'in dosya-temelli esi).
+
+**Kural 4 — KVKK:** Ders kayitlarina muvekkil adi YAZILMAZ; dava-id kullanilir.
+
+## Avukat Playbook'lari (Muhakeme Kodlamasi — 2026-07-10)
+
+`playbook/{dava-turu}.md` dosyalari avukatin dava turu bazli KISISEL
+kontrol listelerini ve muhakemesini kodlar (surec degil, YARGI):
+her zaman kontrol ettikleri, karsi tarafin klasik oyunlari, yapilmayacak
+argumanlar, muvekkile risk anlatim tarzi. Ilgili dava turunde calisan HER
+ajan (arastirmaci, dilekce, savunma sim, revizyon + Gemini devir bloklari)
+once ilgili playbook'u okur. Playbook'lar IS YAPILIRKEN doldurulur:
+her aktif davada Director avukata 2-3 hedefli muhakeme sorusu sorup
+cevabi playbook'a isler. Detay: `playbook/README.md`.
+
 ## MemPalace Diary Write Politikasi (Tum Ajanlar)
 
-Her ajan isini bitirdiginde MemPalace'e diary yazimi yapar.
+Her ajan isini bitirdiginde MemPalace'e diary yazimi yapar (MemPalace
+BAGLIYSA — bagli degilse `dersler/` dongusu tek basina yeterlidir).
 Bu, sistemin sessions arasi ogrenmesini saglar.
 
 ### Genel Diary Write Kurali
