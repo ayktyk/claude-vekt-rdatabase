@@ -178,7 +178,6 @@ karar noktasi).
 | 0 | Director | Claude (terminal) | - | (sabit, MCP) |
 | 1 (briefing) | Director | Claude (terminal) | - | `kritik_nokta_tespiti` |
 | 1 (arama plani) | Director | Antigravity (sag panel) | (opsiyonel batch oncesi) | `arama_plani` |
-| **2A (Suer Stajyer — YORUNGE)** | Arastirmaci | **Claude (terminal, CDP otomasyon — `scripts/superstajyer.py`)** | - (opsiyonel: avukat "2A atla" derse atlanir) | `stajyer_prompt_uret` |
 | 2B (Yargi MCP) | Arastirmaci | Claude (terminal, MCP + CLI fallback, **MAX EFFORT**) | - | `yargi_mcp` |
 | 2C (Mevzuat MCP) | Arastirmaci | Claude (terminal, MCP + CLI fallback, **MAX EFFORT**) | - | `mevzuat_mcp` |
 | 2D (NotebookLM) | Arastirmaci | Claude (terminal, MCP) | - | `notebooklm_mcp` |
@@ -350,26 +349,19 @@ AVUKAT
   |
   v
 =================================================================
-  ASAMA 2: DERIN ARASTIRMA (2A yorunge + 1 paralel kol + 1 sirali zincir)
+  ASAMA 2: DERIN ARASTIRMA (2B→2C sirali zincir + 2D async paralel kol)
 =================================================================
   |
-  |  ONCE 2A Suer Stajyer ile yorunge belirlenir (opsiyonel, tavsiye edilen).
-  |  2A bittiginde 2D paralel ve 2B → 2C sirali zincir AYNI ANDA baslar.
-  |  Hepsi tamamlaninca tek konsolidé rapor uretilir.
-  |  2A atlandiginda 2B-2D eski bagimsiz akis modunda calisir, raporda
-  |  `YORUNGE EKSIK` flag'i konur.
+  |  REVIZYON 2026-07-09: 2A Suer Stajyer ve Faz D Arguman.ai
+  |  ARSIVLENDI (arsiv/README.md). Ana omurga Yargi-MCP-Pro.
+  |  2D paralel kol ve 2B → 2C sirali zincir AYNI ANDA baslar.
+  |  Hepsi tamamlaninca tek konsolide rapor uretilir.
   |
   |  NOT (2026-05-19): 2E Akademik Doktrin kolu (DergiPark + YOK Tez)
-  |  bu surumde kaldirildi. Semantik karar arama bos­lugunu Arguman.ai
-  |  (Faz 3 entegrasyonu) ve Yargi-MCP-Pro doldurur.
+  |  kaldirilmisti; akademik kaynak gerekirse NotebookLM veya
+  |  Yargi-MCP-Pro tam metin atifi uzerinden gelir.
   |
-  +-- [2A] SUER STAJYER (YORUNGE BELIRLEYICI — TAVSIYE EDILEN)
-  |        CDP otomasyon: scripts/superstajyer.py
-  |        Fallback: manuel pano (`2A cevap al:`)
-  |        Cikti: 2A-superstajyer-cevap.md + 2A-yorunge-talimatlari.md
-  |        Kalite Kapisi 0: >=5 Yargitay karari + teyit linkleri + ARASTIRMA TAMAMLANDI
-  |
-  +-- PARALEL KOL ------------------------------------------------
+  +-- ASYNC PARALEL KOL -------------------------------------------
   |   |
   |   `-- [2D] NotebookLM -----> buro kaynaklari (ITERATIF SORGU)
   |             |
@@ -642,32 +634,28 @@ resim cikarilir ve kritik noktalar netlestirilir.
   `-- 00-Briefing.md olarak kaydet
 ```
 
-### ASAMA 2: Derin Arastirma (3 paralel kol + 1 sirali zincir)
+### ASAMA 2: Derin Arastirma (2B→2C sirali zincir + 2D async paralel kol)
 
-> **Motor:** Hibrit | **MCP cagrilari (birincil):** Claude (claude-opus-4.7, **MAX EFFORT thinking**) | **CLI cagrilari (fallback):** Claude | **Sentez & arama plani:** Gemini (gemini-3.1-pro-preview) | **Routing:** `arastirma_sentezi` | **Fallback model:** claude-opus-4.7
-> Yargi MCP, Mevzuat MCP, NotebookLM MCP cagrilari Claude'da kalir; donen kararlari rapora ceviren sentez Gemini'de yapilir.
+> **Motor:** Claude (terminal). MCP cagrilari + sentez terminal Claude'da
+> (**MAX EFFORT thinking**; model `config/model-routing.json` ->
+> `tasks.arastirma_sentezi.model`). Sentez GEMINI'DE YAPILMAZ —
+> 2026-05-13 karari, MCP ciktilari zaten Claude oturumunda.
+
+> **REVIZYON 2026-07-09:** 2A Suer Stajyer + Faz D Arguman.ai ARSIVLENDI
+> (`arsiv/README.md`). Ana omurga Yargi-MCP-Pro.
 
 **MCP-Birincil + CLI Fallback Kurali (2B + 2C — FAZ 2 2026-05-19):**
 Yargi-MCP-Pro (`mcp__yargi-mcp-pro__*`) her zaman once cagrilir. Basarisiz olursa
 (timeout, 5xx, ToolError) 5 sn bekle, 2. deneme. Hala fail → Yargi/Mevzuat CLI
 fallback. Her fallback rapora `mcp_fallback_used: true` notu ile yazilir.
-ASAMA 2 basinda Pro MCP baglantisi `claude mcp list` ile dogrulanir
-(eski `check_government_servers_health` Pro MCP'de YOK, kaldirildi).
+ASAMA 2 basinda Pro MCP baglantisi dogrulanir (baglanti yoksa avukata
+OAuth yetkilendirme geregi bildirilir).
 
 **Akis Yapisi:**
-- **Yorunge belirleyici (ilk adim, tavsiye edilen):** 2A Suer Stajyer
-  (CDP otomasyon — `scripts/superstajyer.py`, fallback manuel pano).
-  2A ciktisi diger kollar icin **zorunlu girdi** olur. 2A atlanirsa
-  bagimsiz akis modunda calisir, raporda `YORUNGE EKSIK` flag'i konur.
-- **Faz D — Arguman.ai Semantik Genisletme (YENI — FAZ 3 2026-05-19):**
-  2A sonrasi, 2B oncesi. 11M+ karar (8 koleksiyon) icinde semantik+keyword
-  hibrit arama. Bulgular Yargi-MCP-Pro documentId koprusunden gecirilip
-  DOGRULANMIS/DOGRULANMAMIS/HARD FAIL etiketlenir. Cikti:
-  `02-Arastirma/2A-arguman-bulgulari.md`. Komut: `arastir arguman: [konu]`.
-- **Paralel kol (eszamanli):** 2D NotebookLM
-  (2A yorunge talimati varsa onu uygular)
-- **Sirali zincir:** 2B Yargi-MCP-Pro → 2C Yargi-MCP-Pro Mevzuat → Mulga/Guncel Denetimi → Eleme
-  (2A varsa 2B kararlari TEYIT modunda; Faz D varsa Arguman bulgularini Pro MCP'ye dogrulatma)
+- **Async paralel kol:** 2D NotebookLM (zinciri bloklamaz; dahili kaynak
+  secilmemisse atlanir, rapora not dusulur)
+- **Sirali zincir (omurga):** 2B Yargi-MCP-Pro → 2C Yargi-MCP-Pro Mevzuat
+  → Mulga/Guncel Denetimi → Eleme
 - 2C, 2B'nin verdigi atif maddeleri olmadan calismaya BASLAYAMAZ
 
 Hepsi bittiginde tek bir konsolide arastirma raporu uretilir.
@@ -675,10 +663,7 @@ Hepsi bittiginde tek bir konsolide arastirma raporu uretilir.
 ```
 BASLATICI: Director Agent
   |
-  |  3 paralel kolu ayni anda tetikler + 2B → 2C sirali zinciri ayri yurutur:
-  |
-  |        Sorgu: kritik noktanin semantik karsiligi
-  |        Cikti: doktrin + emsal stratejisi + benzerlik skoru
+  |  2D async paralel kolu tetikler + 2B → 2C sirali zinciri yurutur:
   |
   +---> [2B] YARGI-MCP-PRO  (DERIN ITERATIF PROTOKOL - ZORUNLU - SIRALI ZINCIR BASLANGICI) - FAZ 2 2026-05-19
   |        Birincil: mcp__yargi-mcp-pro__search_bedesten_unified
@@ -695,7 +680,8 @@ BASLATICI: Director Agent
   |        Faz 2: Genis tarama (ana terim + HGK + IBK + alternatif)
   |        Faz 3: Daraltilmis arama (tarih + daire filtreleri)
   |        Faz 4: TEMPORAL EVOLUTION - Son 5 Yil Seyri (ZORUNLU)
-  |               - 2021, 2022, 2023, 2024, 2025 yil-yil ayri sorgu
+  |               - DINAMIK: icinde bulunulan yil dahil son 5 takvim
+  |                 yili, yil-yil ayri sorgu (sabit yil YAZILMAZ)
   |               - HGK yil-araligi ek sorgulari
   |               - Hakim gorus kirilimi + kirillma noktasi tespiti
   |        Faz 5: Celiski + bozma + karsit arguman taramasi (min 2)
@@ -789,11 +775,9 @@ BASLATICI: Director Agent
 
            Cikti: iteratif bulgu ozeti + perspektif yorumlari
 
-  [NOT: 2E AKADEMIK DOKTRIN kolu 2026-05-19 itibariyla kaldirildi.
-   Yerine Faz 3 entegrasyonunda Arguman.ai semantik arama (11M+ Turk
-   karari) ve Yargi-MCP-Pro tam metin atifi gelecek. Akademik doktrin
-   gorusleri gerekirse `arastir-notebook` (avukatin notebooklari) veya
-   Yargi-MCP-Pro kararlarinin tam metin atif zinciri uzerinden gelir.]
+  [NOT: 2E AKADEMIK DOKTRIN kolu 2026-05-19'da kaldirildi. Akademik
+   doktrin gorusleri gerekirse `arastir-notebook` (avukatin notebooklari)
+   veya Yargi-MCP-Pro kararlarinin tam metin atif zinciri uzerinden gelir.]
 
   |
   v
@@ -1267,8 +1251,8 @@ Sistemin adim adim yaptiklari:
      - Risk: performans savunmasi, 03 kodu
   -> 00-Briefing.md kaydedildi
 
-[ASAMA 2 - DERIN ARASTIRMA] (3 paralel kol + 1 sirali zincir)
-  Paralel kollar ayni anda:
+[ASAMA 2 - DERIN ARASTIRMA] (2B→2C sirali zincir + 2D async paralel kol)
+  Async paralel kol:
   - 2D NotebookLM: iteratif 10 sorgu (6 irdeleme + 4 perspektif)
   Sirali zincir:
   - 2B Yargi MCP (Opus 4.7 MAX EFFORT): 9. HD + HGK + IBK son 2 yil

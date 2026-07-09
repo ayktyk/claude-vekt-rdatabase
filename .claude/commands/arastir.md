@@ -8,129 +8,111 @@
 > - Kritik kuralda ÇİFT KAYNAK şart.
 > - Çıktının sonunda KAYNAK DOĞRULAMA tablosu (| İddia | Kaynak | documentId | Tam Alıntı | Doğrulama |) + "Aleyhe içtihat: VAR/YOK/ARANMADI" beyanı ZORUNLU.
 
-# /arastir — Director Agent ile Kritik Nokta Araştırması (FIVEAGENTS ASAMA 2)
+# /arastir — Director Agent ile Kritik Nokta Araştırması (ASAMA 2 Çekirdeği)
 
-`$ARGUMENTS` kritik noktasını **FIVEAGENTS.md ASAMA 2** protokolüne (3 paralel kol +
-1 sıralı zincir) tam uygulayarak araştır. Mevcut kısa prompt YASAK.
+`$ARGUMENTS` kritik noktasını **araştırma çekirdeği** ile araştır:
+**2B→2C sıralı zincir (omurga) + 2D async paralel kol**. Kısa/yüzeysel
+tek-shot araştırma YASAK.
+
+> **REVİZYON 2026-07-09 (avukat kararı):** 2A Süper Stajyer ve Faz D
+> Argüman.ai AKIŞTAN ÇIKARILDI (arşiv: `arsiv/README.md`). Ana omurga
+> Yargı-MCP-Pro'dur. KVKK maskeleme ERTELENDİ (yerel LLM'e geçişe kadar).
 
 ## Zorunlu Referans Dokümanlar
-- `FIVEAGENTS.md` → ASAMA 2 (satır ~600 civarı)
-- `ajanlar/arastirmaci/SKILL.md` → Bölümler 1, 2, 2.5, 2.7, 3
-- `CLAUDE.md` → ASAMA 2 hibrit motor haritası
+- `ajanlar/arastirmaci/SKILL.md` → Bölüm 1 (Yargı), 2 (Mevzuat), 2.5 (zincir + mülga eleme), 2.7 (NotebookLM)
+- `FIVEAGENTS.md` → ASAMA 2 kesiti
+- `CLAUDE.md` → Araç Katmanı + ASAMA 2
 - `config/model-routing.json` → motor routing
 
 ## Ön-koşullar (otomatik)
 1. `tmp/current-run-id.txt` oluştur (yoksa): `{YYYYMMDD}-{HHMMSS}-{dava-id}`
 2. `02-Arastirma/.faz2-progress.jsonl` aç (append mode)
-3. Pro MCP sağlık kontrolü: `claude mcp list` ile `yargi-mcp-pro` ve `arguman` bağlı doğrulanır (eski `check_government_servers_health` Pro MCP'de yok — FAZ 2 2026-05-19)
+3. Pro MCP sağlık kontrolü: `yargi-mcp-pro` bağlı mı doğrula (bağlı değilse
+   avukata OAuth yetkilendirmesi gerektiğini bildir)
 4. ADIM 0B kaynak sorgulamasından çıkan dahili kaynak (NotebookLM notebook adı vb.) yüklenir
 
-## Workflow (Yorunge + Paralel Kollar + Sıralı Zincir)
+## Workflow (Sıralı Zincir + Async Paralel Kol)
 
 ```
 Director Agent
   |
-  +-- 2A Suer Stajyer (YORUNGE BELIRLEYICI — TAVSIYE EDILEN ILK ADIM)
-  |    Otomatik komut: `arastir stajyer: {dava-id}`
-  |    Cikti: 02-Arastirma/2A-superstajyer-cevap.md
-  |          02-Arastirma/2A-yorunge-talimatlari.md (alt-moduller icin)
-  |    Atlanabilir: avukat "2A atla" derse veya CDP+manuel ikisi de fail ise
-  |    Atlandiginda raporda `YORUNGE EKSIK` flag'i konur
+  +-- 2D NotebookLM (ASYNC PARALEL KOL — zinciri bloklamaz)
+  |    10 iteratif sorgu (6 hukuki + 4 perspektif)
+  |    Dahili kaynak seçilmemişse bu kol atlanır (rapora not düşülür)
   |
-  | 2A bittikten sonra (veya atlandiktan sonra):
-  |
-  +-- Faz D Arguman.ai (YENI — FAZ 3 2026-05-19, semantik genisletme)
-  |    Otomatik komut: `arastir arguman: {kritik nokta}`
-  |    Cikti: 02-Arastirma/2A-arguman-bulgulari.md
-  |    11M+ karar havuzu (8 koleksiyon), server-side skill'ler
-  |    (caselaw-search/citation-network/karsi-arguman) otomatik tetiklenir
-  |    Her bulgu Yargi-MCP-Pro documentId koprusunden gecirilir
-  |    Atlanabilir: avukat "arguman atla" derse (kredi tasarrufu)
-  |
-  +-- 2D NotebookLM (async paralel kol — bloklamaz, Faz D ile eszamanli)
-  |    Zorunlu Girdi: 2A yorunge talimati (varsa) — 2A'nin yan meseleleri
-  |
-  +-- 2B Yargı-MCP-Pro --> 2C Yargi-MCP-Pro Mevzuat (sıralı zincir)
-                           --> Mulga Eleme Protokolü (kalite kapısı)
-       Zorunlu Girdi (2B): 2A kararlari (TEYIT modunda) + yan meseleler
-                           + Faz D bulgulari (Arguman -> documentId dogrulama)
-       Zorunlu Girdi (2C): 2B atif maddeleri + 2A esas mesele
+  +-- 2B Yargı-MCP-Pro ──> 2C Yargı-MCP-Pro Mevzuat (SIRALI ZİNCİR — OMURGA)
+  |         |                        |
+  |         |                        +──> Mülga Eleme Protokolü (kalite kapısı)
+  |         |
+  |         Çıktı: atif-maddeleri.json (2C'nin zorunlu girdisi)
   |
   v
-TÜM KOLLAR + ZİNCİR TAMAMLANINCA → Konsolide Sentez (Terminal Claude)
+ZİNCİR + KOL TAMAMLANINCA → Konsolide Sentez (Terminal Claude)
 ```
-
-Yorunge prensibi: 2A varsa 2B-2D onun bulgularini DOGRULAMA + DERINLESTIRME
-modunda calisir (bagimsiz arama degil). 2A atlanmissa eski bagimsiz akis modu.
-
-Not (2026-05-19): 2E Akademik Doktrin kolu (DergiPark + YOK Tez) ASAMA 2'den
-kaldirildi. Semantik karar arama bos­luğunu Arguman.ai (Faz 3 entegrasyonu) ve
-Yargı-MCP-Pro doldurur. Akademik doktrin gerekirse `arastir-notebook` veya
-Yargi-MCP-Pro tam metin atifindan dolayli olarak gelir.
 
 ## Zorunlu Çağrılar (Detayları Alt Komutlarda)
 
 ### 2B Yargı — `/arastir-yargi` protokolü
 - Min 15 sorgu / 6 faz / temporal evolution / min 5 tam metin
-- Israrcı backoff (15→30→60→120→300 sn, skip YOK)
+- **Temporal evolution DİNAMİK:** içinde bulunulan yıl dahil son 5 takvim
+  yılı, yıl-yıl ayrı sorgu (sabit yıl listesi YAZILMAZ)
+- **Backoff (TEK DOĞRU):** 429'da 5→15→30→60 sn, max 4 retry; hâlâ fail
+  → o sorgu `[RATE LIMIT]` notuyla atlanır, faz devam eder
 - Atıf maddeleri `02-Arastirma/atif-maddeleri.json`'a yazılır
 
 ### 2C Mevzuat — `/arastir-mevzuat` protokolü
-- 2B'nin atıf maddelerini bekler
-- Min 8 sorgu / 9 faz + Mulga Denetim
+- 2B'nin atıf maddelerini bekler (**2B `atif-maddeleri.json` üretmeden
+  BAŞLAYAMAZ**; 2B tamamen fail olduysa avukata bildir, zinciri durdur)
+- Min 8 sorgu / 9 faz + Mülga Denetim
 - `page_size: 20` her search'te explicit
-- Mulga eleme `02-Arastirma/mulga-eleme.json`'a yazılır
+- Mülga eleme `02-Arastirma/mulga-eleme.json`'a yazılır
 - Normlar Hiyerarşisi etiketleri zorunlu
 
 ### 2D NotebookLM — `/arastir-notebook` protokolü (async paralel kol)
-- 10 iteratif sorgu (6 hukuki + 4 perspektif)
-- 47 sorguya çıkma uyarısı (hard cap 12)
-- Async — diğer kolları bloklamaz
+- 10 iteratif sorgu (6 hukuki + 4 perspektif), hard cap 12
+- Async — zinciri bloklamaz
 - Tek sorgu 3 dk soft timeout, toplam 15 dk soft cap
 
-## Progress Görünürlüğü (Faz B'de devreye girer)
+## Progress Görünürlüğü
 Her 30-60 sn'de terminal canlı durum:
 ```
-FAZ 2 DURUM — run 20260504-182000-ahmet
+FAZ 2 DURUM — run 20260709-182000-ahmet
 2B Yargı: 7/15 sorgu, 2/5 tam metin, 0 rate-limit, son 4.1s
 2C Mevzuat: bekliyor (2B atıf maddeleri lazım)
 2D NotebookLM: 4/10 soru, Q4 polling 82s
 Geçen süre: 06:42
-Sonraki adım: Yargı temporal_2025
+Sonraki adım: Yargı temporal (dinamik yıl listesi)
 ```
 
 60 sn sessizlikte: `STILL_WORKING: <ne yapıyorum>` satırı.
 
-## Konsolide Sentez — Terminal Claude (2026-05-13 Antigravity Hibrit)
+## Konsolide Sentez — Terminal Claude
 
-**DEPRECATED:** Eski `gemini-bridge.sh arastirma_sentezi` çağrısı artık
-yapılmıyor (exit 100). Sentez **terminal Claude** tarafından yazılır;
-MCP çıktıları zaten Claude oturumunda hazır.
+Sentez **terminal Claude** tarafından yazılır; MCP çıktıları zaten Claude
+oturumunda hazır. (Eski gemini-bridge sentezi DEPRECATED — exit 100.)
 
-Tüm kollar tamamlandığında Claude konsolide raporu doğrudan yazar:
-- Frontmatter: `engine: claude`, `model: claude-opus-4-7`, `status: TASLAK`
+Zincir + kol tamamlandığında Claude konsolide raporu doğrudan yazar:
+- Frontmatter: `engine: claude`, `model: {config/model-routing.json ->
+  tasks.arastirma_sentezi.model}`, `status: TASLAK`
 - Format: FIVEAGENTS.md "Cikti Format Kurallari" + Kalite Kapı 1 gereklilikleri
 - Çıktı: `02-Arastirma/arastirma-raporu.md`
 - Yan dosyalar: `atif-maddeleri.json`, `mulga-eleme.json`
 
 ## Kalite Kapısı 1 (ASAMA 2 Bitişi)
-- [ ] 2A Suer Stajyer çalıştı mı veya `YORUNGE EKSIK` flag'i konuldu mu?
-- [ ] Faz D Arguman.ai çalıştı mı (`arastir arguman:` veya tam akış)?
-- [ ] Faz D DOĞRULANMIŞ / DOĞRULANMAMIŞ / HARD FAIL tabloları rapora girdi mi?
 - [ ] 2B 15 sorgu + 5 tam metin var mı?
+- [ ] Temporal evolution dinamik yıl listesiyle (son 5 takvim yılı) tamamlandı mı?
 - [ ] `atif-maddeleri.json` doldu mu?
 - [ ] 2C 8 sorgu + Normlar Hiyerarşisi etiketli mi?
 - [ ] `mulga-eleme.json` doldu mu? Geçerli karar ≥ 5 mi?
-- [ ] 2D 10 sorgu (veya doygunluk notu) var mı?
+- [ ] 2D 10 sorgu (veya doygunluk notu / dahili-kaynak-yok notu) var mı?
 - [ ] Sentez Claude tarafından yapıldı mı (`engine: claude` frontmatter)?
-- [ ] Atıf doğrulama [DOĞRULANMIŞ] (Pro MCP documentId ile) etiketli mi?
+- [ ] Her künye Pro MCP documentId ile [DOĞRULANMIŞ] etiketli mi?
 - [ ] Çelişkili kararlar bölümü var mı?
+- [ ] Aleyhe içtihat beyanı (VAR/YOK/ARANMADI) yazıldı mı?
 - [ ] Güven notu (yüksek/orta/düşük) atandı mı?
 - [ ] mcp_fallback_used flag'i (varsa) belirtildi mi?
-- [ ] (2E DergiPark + YÖK Tez kontrolü 2026-05-19'da KALDIRILDI)
 
 Eksik varsa: SADECE eksik mini-kolu yeniden çalıştır. Tüm Faz 2'yi başlatma.
 
 ## Çıktı
 `02-Arastirma/arastirma-raporu.md` — konsolide rapor (tüm bulgular + sentez)
-

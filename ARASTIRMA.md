@@ -1,4 +1,4 @@
-# ARASTIRMA.md — Hızlı Araştırma Modülü
+# ARASTIRMA.md — Hızlı Araştırma Modülü (Danışma Hattı)
 
 > **Amaç:** Avukat Aykut'a müvekkil adaylarının sorduğu hukuki soruları **hızlıca**
 > ve **0-halüsinasyon** garantisi ile cevaplamak. Dava açma odaklı değil,
@@ -6,13 +6,20 @@
 >
 > **Mevcut dava akışına (CLAUDE.md ASAMA 0-7, `arastir:` komutu) DOKUNMAZ.**
 > Bağımsız ikinci bir hat olarak çalışır.
+>
+> **REVİZYON 2026-07-09 (avukat kararı):** Süper Stajyer (Faz 1) ve
+> Argüman.ai (Faz 2) bu modülden ÇIKARILDI (arşiv: `arsiv/README.md`).
+> Modül artık doğrudan **Yargı-MCP-Pro + Mevzuat** üzerinde çalışır —
+> künyeler kaynağından (Bedesten) geldiği için ayrı doğrulama köprüsü
+> fazına gerek kalmadı; tam-metin teyidi korunur. KVKK maskeleme zaten
+> bu modülde yoktu (jenerik soru), değişmedi.
 
 ---
 
 ## 1. Felsefe ve Sınırlar
 
 ### Yapar (Scope İçi)
-- Hukuki bir soruya doktrin + Yargıtay içtihadı + güncel mevzuat üzerinden cevap üretir
+- Hukuki bir soruya Yargıtay içtihadı + güncel mevzuat üzerinden cevap üretir
 - Müvekkil adayı görüşmesine hazırlık raporu hazırlar
 - Stratejik yön gösterir (lehe-aleyhe argümanlar, riskler, başarı şansı)
 - Cevabı Drive `Research/{tarih}-{slug}/` altına yazar
@@ -20,7 +27,7 @@
 ### Yapmaz (Scope Dışı)
 - **Dava açmaz** — UYAP yüklemesi YOK
 - **Dilekçe/ihtarname/sözleşme üretmez** — bunlar mevcut komutlarla (`dilekce yaz`, `ihtarname yaz`, `sozlesme yaz`) dava modunda yapılır
-- **Müvekkil verisi toplamaz** — TC, IBAN, telefon, ad-soyad asla LLM'e gönderilmez; soru jenerik formüle çevrilir
+- **Müvekkil kimlik verisi istemez** — soru jenerik hukuki formüle çevrilerek çalışılır
 - **Dava klasörü açmaz** — `Aktif Davalar/`'a dokunmaz
 - **MemPalace dava drawer'ı yazmaz** — sadece `wing_arastirma` ve proje memory'sine yazar
 
@@ -37,7 +44,7 @@ arastir danisma: {hukuki soru}
 - `arastir danisma: trafik kazasında %50 kusurlu yaya öldü, sürücüye tazminat davası açılabilir mi`
 - `arastir danisma: 6 ay aralıksız çalışmış işçi haklı fesih ile kıdem tazminatı alabilir mi`
 
-Slash komut karşılığı: `.claude/commands/arastir-danisma.md`. Avukat bu komutu yazdığında Claude `ARASTIRMA.md`'yi okuyup aşağıdaki 6 faz workflow'unu uygular.
+Slash komut karşılığı: `.claude/commands/arastir-danisma.md`. Avukat bu komutu yazdığında Claude `ARASTIRMA.md`'yi okuyup aşağıdaki 5 faz workflow'unu uygular.
 
 ---
 
@@ -46,9 +53,9 @@ Slash komut karşılığı: `.claude/commands/arastir-danisma.md`. Avukat bu kom
 Tam doktrin: `@ajanlar/0-halusinasyon-doktrini.md`. Bu modül için kritik kurallar:
 
 ### 6 Mutlak Yasak
-1. **Süper Stajyer veya Argüman.ai'nin verdiği Yargıtay künyeleri Yargı Pro MCP ile doğrulanmadan rapora ATIF YAPILMAZ.** Mehmet Ali davası dersi (2026-05-20): Argüman.ai folder PDF'leri 2/2 yanlış künye sundu.
-2. **Tırnaklı alıntı (`«...»`) sadece Bedesten'den çekilmiş tam metinden** — parafrazi de uydurma sayılır eğer kaynak yoksa.
-3. **NotebookLM / Süper Stajyer cevabı bağlamına sadık kalınır** — sorulan soru hangi konuysa cevap o konuyu kapsar, genelleştirilmez.
+1. **Tam metni açılmamış karara ATIF YAPILMAZ.** Search listesinde görünmek yetmez — her künye `get_bedesten_document_markdown` ile açılıp konu uyumu teyit edilmeden cevaba giremez. (Mehmet Ali davası dersi, 2026-05-20: aracı kaynaklar 2/2 yanlış künye sunmuştu; bu kural aracı olmasa da geçerli — search snippet'i de yanıltabilir.)
+2. **Tırnaklı alıntı (`«...»`) sadece Bedesten'den çekilmiş tam metinden** — parafraz da uydurma sayılır eğer kaynak yoksa.
+3. **Karar bağlamına sadık kalınır** — sorulan soru hangi konuysa cevap o konuyu kapsar, genelleştirilmez (89/4 cevabı 89/3'e taşınamaz).
 4. **"Bilmiyorum" demek dürüstlüktür** — kaynaklar yetersizse "bu konuda Bedesten'de DOĞRULANMIŞ yeterli emsal bulunamadı" yazılır.
 5. **Müvekkil/avukat lehine yorumlama YASAK** — kaynak ne diyorsa o yazılır, aleyhe içtihat varsa açıkça gösterilir.
 6. **Kaynaksız genel ifade YASAK** — "Yargıtay yerleşmiştir", "Doktrin baskındır" gibi iddialar mutlaka künye + tam alıntı + Bedesten documentId ile destekli olmalı.
@@ -59,9 +66,9 @@ Tam doktrin: `@ajanlar/0-halusinasyon-doktrini.md`. Bu modül için kritik kural
 - **≥2 DOĞRULANMAMIŞ atıf** → cevap YAZILMAZ, avukata "yetersiz kaynak" mesajı
 
 ### Çıktı Öncesi Checklist
-- [ ] Her Yargıtay künyesi Bedesten Pro MCP documentId ile doğrulandı mı?
+- [ ] Her Yargıtay künyesi Bedesten Pro MCP documentId + tam metin ile doğrulandı mı?
 - [ ] Her tırnaklı alıntı kaynaktan birebir mi?
-- [ ] Atıf yapılan kanun maddeleri mülga eleme tablosundan geçti mi?
+- [ ] Atıf yapılan kanun maddeleri mülga denetiminden geçti mi?
 - [ ] Aleyhe içtihat/doktrin varsa açıkça yazıldı mı?
 - [ ] "Bu konuda kaynak yok" diyebileceğim yer varsa onu yazdım mı?
 - [ ] Kaynak Doğrulama Tablosu sonda var mı?
@@ -69,7 +76,7 @@ Tam doktrin: `@ajanlar/0-halusinasyon-doktrini.md`. Bu modül için kritik kural
 
 ---
 
-## 4. Workflow (6 Faz)
+## 4. Workflow (5 Faz)
 
 ### Faz 0: Soru Kabul + Klasör Kurulumu
 
@@ -77,10 +84,11 @@ Tam doktrin: `@ajanlar/0-halusinasyon-doktrini.md`. Bu modül için kritik kural
    - "ev sahibi 3 ay kira ödememe tahliye" → `ev-sahibi-3-ay-kira-tahliye`
    - "trafik kazası %50 kusurlu yaya ölüm" → `trafik-50-kusur-yaya-olum`
 2. Tarih önekiyle klasör adı: `{YYYY-MM-DD}-{slug}`
-3. Drive klasörünü oluştur:
+3. Research klasörünü oluştur — yol **platforma göre çözümlenir**:
+   ```bash
+   python3 scripts/paths.py research   # → .../Hukuk Bürosu/Research
    ```
-   G:\Drive'ım\Hukuk Bürosu\Research\{YYYY-MM-DD}-{slug}\
-   ```
+   Klasör: `{research_root}/{YYYY-MM-DD}-{slug}/`
 4. `00-Soru.md` dosyasını yaz. İçerik:
    ```markdown
    ---
@@ -92,179 +100,89 @@ Tam doktrin: `@ajanlar/0-halusinasyon-doktrini.md`. Bu modül için kritik kural
    # Soru
    {avukatın sorduğu ham soru}
 
-   ## Doktrinal Çeviri (Faz 2 için)
+   ## Doktrinal Çeviri (Faz 1 için)
    {Claude'un sorudan çıkardığı doktrinal Türkçe terimler:
     örn. "kira ödememe → tahliye davası → TBK m.315 ihtar şartı"}
    ```
 
-### Faz 1: Süper Stajyer (CDP Otomasyon)
+### Faz 1: Yargı-MCP-Pro İçtihat Taraması (hafif protokol)
 
-**Atlanabilir** — CDP kapalıysa veya avukat "stajyeri atla" derse Faz 2'ye geç.
+Dava akışının 2B'sinin mini versiyonu — **min 6 sorgu / 3 alt-adım**
+(15-sorguluk tam protokol dava akışında; danışma hattı hız önceliklidir):
 
-1. **CDP Health Check:** `curl -s --max-time 3 http://localhost:9222/json/version`
-   - FAIL → avukata "Chrome CDP modunda değil. `scripts\launch-chrome-cdp.ps1` ile başlat veya `stajyer atla` de" mesajı
-   - OK → devam
-2. **Çok-turlu batch yazımı:** `tmp/danisma-stajyer-batch.md`. KVKK mask **YOK**
-   (jenerik soru, müvekkil adı yok). Soru TEK mesaj değil, **2 GRUPLU tur**
-   olarak `===BATCH===` ayracıyla yazılır (ASLA 1 satırlık peş peşe soru).
-   Sadece SON tur "ARASTIRMA TAMAMLANDI" ile biter:
-   ```
-   Sorulan hukuki soru:
-   {00-Soru.md içeriği}
-
-   Bu soruyu sana 2 turda soracağım; her turu eksiksiz yaz, bir önceki
-   cevaba göre derinleştir.
-
-   TUR 1 — Türk hukuku çerçevesinde:
-   1. Soruya doğrudan cevap
-   2. En az 5 ilgili Yargıtay kararı (esas/karar/daire/tarih)
-   3. İlgili kanun maddeleri (kanun adı + m.no)
-   (Bu turu normal bitir, "ARASTIRMA TAMAMLANDI" YAZMA.)
-   ===BATCH===
-   TUR 2 — Tur 1 cevabını esas alarak:
-   4. Karşı argüman / risk noktaları
-   5. Sapma uyarıları (varsa)
-   6. Tur 1'de yüzeysel kalan / şüpheli karar veya maddeyi derinleştir
-   Bu son tur; en son satıra tek başına "ARASTIRMA TAMAMLANDI" yaz.
-   ```
-3. **Çalıştır (cok-turlu, insan-gibi, bekleyerek):**
-   ```bash
-   python scripts/superstajyer.py run-batch \
-     --batch-file tmp/danisma-stajyer-batch.md \
-     --output "G:\Drive'ım\Hukuk Bürosu\Research\{klasör}\01-Stajyer-cevap.md" \
-     --config config/superstajyer.json
-   ```
-   Script her turdan önce "önceki üretim bitti mi" boşta-kilidi + insan-gibi
-   gecikme uygular; turlar arası spam imkânsız.
-   Çıkış kodları (yukarıda yorum bloğunda):
-   - 0 → başarı (tüm turlar tamam), Faz 2'ye geç
-   - 10/20/30/40/50 → hata, avukata bildir + fallback teklif
-4. **Çıktı kontrolü:** Dosya yazıldı mı? Son turda `ARASTIRMA TAMAMLANDI` markörü var mı? Yargıtay kararı sayısı ≥3?
-
-### Faz 2: Argüman.ai Semantik Genişletme
-
-1. **Koleksiyon seçimi:**
-   - İş hukuku / kira / aile / tazminat → `hukuk`
-   - Suç davası → `ceza`
-   - Vergi / belediye / kamu → `idare`
-   - Temel hak ihlali → `anayasa`
-2. **İlk arama** (geniş, expand=true):
-   ```python
-   mcp__arguman__search(
-     query="<doktrinal Türkçe terim>",
-     collection="hukuk",
-     top_k=10,
-     expand=True
-   )
-   ```
-3. **Drift kontrolü:** Top sonuçlar gerçekten sorulan konu mu? Daire + snippet kontrol et. Drift varsa sorguyu yeniden formülleyip `expand=False` ile dene.
-4. **Tam metin doğrulama** (min 3 kararda):
-   ```python
-   mcp__arguman__get_full_text(
-     point_id=<hit.provenance.point_id>,
-     collection="hukuk",
-     page=1
-   )
-   ```
-   **Snippet'tan asla atıf yapma** — tam metnin gövdesi sorulan meseleyi içeriyor mu doğrula.
-5. **`02-Arguman-bulgulari.md` yaz:**
-   ```markdown
-   ---
-   engine: claude
-   mcp: arguman
-   arguman_credits_used: N
-   total_candidates_found: M
-   ---
-
-   # Argüman.ai Bulguları
-
-   ## Kullanılan Sorgular
-   - "{doktrinal terim}" expand=true, top_k=10 → {N} sonuç
-
-   ## Bulunan Kararlar (Top 5-10)
-   | # | Skor | Daire | Esas/Karar | Tarih | point_id |
-   |---|---|---|---|---|---|
-   | 1 | 0.95 | ... | ... | ... | ... |
-
-   ## Tam Metin Okunan Kararlar (≥3)
-   ### Karar 1: {künye}
-   {tam metin alıntısı + bağlam yorumu}
-   ```
-
-**Maliyet notu:** Faz 2 tipik 1-3 kredi. `top_k` arttırma ek kredi getirmez. `expand=True` aynı 1 kredi.
-
-### Faz 3: Yargı Pro Doğrulama Köprüsü (KRİTİK 0-HALÜSİNASYON KAPISI)
-
-Faz 1 (Stajyer) + Faz 2 (Argüman) bulgularındaki **her künye** Bedesten'de var mı kontrol et.
-
-1. **Künye listesi çıkar:** Faz 1 + Faz 2 çıktılarından eşsiz künye seti (esas_no + karar_no + daire).
-2. **Her künye için:**
+1. **Terim üretimi:** Doktrinal çeviriden 3-4 alternatif arama terimi +
+   ilgili daire(ler) belirle.
+2. **Tarama (min 6 sorgu):**
    ```python
    mcp__yargi-mcp-pro__search_bedesten_unified(
+     phrase="{doktrinal terim}",
      court_types=["YARGITAYKARARI"],
-     esas_no="{YIL/SIRA}",
-     karar_no="{YIL/SIRA}",
-     birimAdi="{H1-H23/C1-C23/HGK/CGK/IBK}",
-     phrase="{konuyla ilgili 1-2 kelime}"
+     birimAdi="{ilgili daire — biliniyorsa}"
    )
    ```
-3. **Sonuç değerlendirme:**
-   - `total_records > 0` ve esas+karar uyuyor → `get_bedesten_document_markdown(documentId)` çağır
-     - Tam metin **sorulan konuyla ilgili** → **DOĞRULANMIŞ**
-     - Tam metin **alakasız** (Mehmet Ali davasında olduğu gibi vekalet ücreti vb.) → **HARD FAIL** (eleme)
-   - `total_records == 0` → **DOĞRULANMAMIŞ** (Bedesten'de yok, halüsinasyon ihtimali)
-4. **`03-Yargi-Pro-dogrulama.md` yaz:**
+   - Ana terim + en az 2 alternatif terim
+   - En az 1 HGK sorgusu (`birimAdi="HGK"`)
+   - En az 1 güncellik sorgusu (son 2 yıl tarih filtresi)
+   - En az 1 karşı-argüman/bozma sorgusu
+3. **Tam metin teyidi (ZORUNLU — atıf ön şartı):** Cevaba girecek her
+   karar (min 3, hedef 5):
+   ```python
+   mcp__yargi-mcp-pro__get_bedesten_document_markdown(documentId)
+   ```
+   - Tam metin **sorulan konuyla ilgili** → **DOĞRULANMIŞ** (cevaba girer)
+   - Tam metin **alakasız** → **ELENDİ** (şeffaflık tablosuna yazılır)
+   - Search'te görünüp tam metni açılamayan → **DOĞRULANMAMIŞ** (cevaba girmez)
+4. **`01-Ictihat-taramasi.md` yaz:**
    ```markdown
    ---
    engine: claude
    mcp: yargi-mcp-pro
-   total_kunye_count: N
-   verified_count: V
-   unverified_count: U
-   hard_fail_count: H
+   total_sorgu: N
+   dogrulanmis: V
+   elenen: E
    ---
 
-   # Yargı Pro Doğrulama Sonuçları
+   # İçtihat Taraması
 
-   ## DOĞRULANMIŞ Kararlar (V adet)
-   | Künye | Bedesten documentId | Konu uyum | Tam metin özeti |
+   ## Kullanılan Sorgular
+   | # | Sorgu | Filtre | Sonuç sayısı |
    |---|---|---|---|
-   | {Daire} E. {esas} - K. {karar} | {documentId} | ✓ | ... |
 
-   ## DOĞRULANMAMIŞ Kararlar (U adet)
-   | Künye | Sebep | Aksiyon |
+   ## DOĞRULANMIŞ Kararlar (tam metin açıldı, konu uyumlu)
+   | Künye | documentId | Tam metin özeti + soruya ne dediği |
    |---|---|---|
-   | ... | Bedesten 0 sonuç | Cevaba dahil etme |
 
-   ## HARD FAIL — Eleme Edilen Kararlar (H adet)
-   | Künye | Gerçek konu | Stajyer/Argüman iddiası | Karar |
-   |---|---|---|---|
-   | ... | Sigorta tahkim vekalet ücreti | "Trafik tazminat zamanaşımı emsali" | ELENDİ |
+   ## Elenen / Doğrulanamayan Kararlar
+   | Künye | Sebep |
+   |---|---|
    ```
 
-**Kalite eşiği:** Faz 3 sonu DOĞRULANMIŞ sayısı (V) ≥ 2 olmalı. Aksi halde Faz 5'e geçilmez → avukata "yetersiz kaynak" mesajı.
+**Kalite eşiği:** DOĞRULANMIŞ sayısı ≥ 2 olmalı. Aksi halde Faz 3'e
+geçilmez → avukata "yetersiz kaynak" mesajı + bulunan ham veriler.
 
-### Faz 4: Mülga Denetimi
+### Faz 2: Mevzuat + Mülga Denetimi
 
-Faz 1+2'de atıf yapılan kanun maddeleri için yürürlük kontrolü.
+Faz 1 kararlarının atıf yaptığı + sorunun işaret ettiği kanun maddeleri için yürürlük kontrolü.
 
 1. **Madde listesi çıkar:** "TBK m.315", "KTK m.97", "HMK m.107" vb.
 2. **Her madde için:**
    ```python
    mcp__yargi-mcp-pro__search_mevzuat(
-     phrase='+"{kanun adı}" +m.{no}',
+     phrase='"{kanun adı}"',
      mevzuat_tur_list=["KANUN"]
    )
    mcp__yargi-mcp-pro__get_mevzuat_document(
-     id_type="madde",
-     identifier="{madde_id}"
+     id="{madde_id}",
+     id_type="madde"
    )
    ```
+   (Parametre adları OAuth sonrası gerçek şemayla teyit edilir; şüphede
+   tool şeması esas alınır.)
 3. **Sonuç değerlendirme:**
    - Madde **yürürlükte ve metni soruya uygun** → **GÜNCEL**
    - Madde **mülga** veya **değişmiş** → **MÜLGA/DEĞİŞMİŞ** (raporda uyarı; argüman zayıflar)
    - Madde **bulunamadı** → **DOĞRULANAMADI** (avukata manuel kontrol notu)
-4. **`04-Mulga-denetim.md` yaz:**
+4. **`02-Mulga-denetim.md` yaz:**
    ```markdown
    ---
    engine: claude
@@ -287,15 +205,22 @@ Faz 1+2'de atıf yapılan kanun maddeleri için yürürlük kontrolü.
    |---|---|
    ```
 
-### Faz 5: Sentez Cevap (Avukatın Okuyacağı Nihai Rapor)
+### Faz 2.5 (OPSİYONEL): NotebookLM
 
-Faz 1-4 çıktılarını Claude **terminal** sentezler. Antigravity/Gemini gerekmez — bu modül Claude tek-elden çalışır (hafiflik prensibi).
+Avukatın sorunun alanına uyan notebook'u varsa (iş hukuku, aile hukuku)
+2-4 hedefli sorgu atılabilir. Her sorguda "SADECE KAYNAKLARA GÖRE CEVAP
+VER, UYDURMA YAPMA" ibaresi zorunlu. Notebook yoksa faz sessizce atlanır.
+
+### Faz 3: Sentez Cevap (Avukatın Okuyacağı Nihai Rapor)
+
+Faz 1-2 çıktılarını Claude **terminal** sentezler. Antigravity/Gemini
+gerekmez — bu modül Claude tek-elden çalışır (hafiflik prensibi).
 
 **`arastirma-cevabi.md` yapısı:**
 ```markdown
 ---
 engine: claude
-model: claude-opus-4-7
+model: {config/model-routing.json -> tasks.arastirma_sentezi.model}
 task_type: arastirma_cevabi
 arastirma_id: {YYYY-MM-DD}-{slug}
 timestamp_utc: {ISO}
@@ -314,10 +239,10 @@ self_review: YEŞİL / SARI
 {Soruya en net cevap. Lehe-aleyhe karışık dağılım yok.}
 
 ## 2. Hukuki Dayanak
-### 2.1. Mevzuat (Faz 4 GÜNCEL maddeleri)
+### 2.1. Mevzuat (Faz 2 GÜNCEL maddeleri)
 - {Kanun adı m.X}: «verbatim alıntı» — kaynak: Mevzuat MCP
 
-### 2.2. Yargıtay İçtihadı (Faz 3 DOĞRULANMIŞ kararları)
+### 2.2. Yargıtay İçtihadı (Faz 1 DOĞRULANMIŞ kararları)
 - {Daire} E. {esas} - K. {karar} ({tarih}):
   «verbatim alıntı tam metinden»
   - Bedesten documentId: {id}
@@ -350,22 +275,22 @@ self_review: YEŞİL / SARI
 |---|---|---|---|---|
 | {...} | {künye} | «...» | {id} | ✓ DOĞRULANMIŞ |
 
-## Stajyer / Argüman.ai Bulguları — Elenen Künyeler
-{Faz 3 HARD FAIL listesi — şeffaflık için}
+## Elenen Künyeler (şeffaflık)
+{Faz 1 ELENDİ listesi — tam metni konu dışı çıkanlar}
 ```
 
 **DOCX üretimi:**
 ```bash
-python scripts/md_to_docx.py "G:\Drive'ım\Hukuk Bürosu\Research\{klasör}\"
+python3 scripts/md_to_docx.py "{research_root}/{klasör}/"
 ```
 
-### Faz 6: Memory Yazımı
+### Faz 4: Memory Yazımı
 
 İki katman:
 
 **A. MemPalace `wing_arastirma`** (yoksa oluştur):
 ```python
-# Wing yoksa
+# Her araştırma sonu
 mempalace_add_drawer(
   wing="wing_arastirma",
   hall="hall_danisma_sorulari",
@@ -373,16 +298,16 @@ mempalace_add_drawer(
   body="Soru: {özet}\nBulunan kararlar: N adet\nCevap: {1 cümle}\nDrive: {klasör}"
 )
 
-# Halüsinasyon çıktıysa
+# Halüsinasyon/elenen künye çıktıysa
 mempalace_add_drawer(
   wing="wing_arastirma",
   hall="hall_halusinasyon_kunyeleri",
-  title="HALÜSİNASYON: {künye}",
-  body="Kaynak: {Stajyer/Argüman}\nGerçek konu: {Bedesten tam metin özeti}\nIddia: {ne diye sunmuştu}"
+  title="ELENEN KÜNYE: {künye}",
+  body="Görünen yer: {search snippet}\nGerçek konu: {Bedesten tam metin özeti}\nSebep: {konu dışı / bulunamadı}"
 )
 ```
 
-**B. Proje memory** (`C:\Users\user\.claude\projects\C--Users-user-Desktop-Eski-Claude-ant-grav-ty\memory\`):
+**B. Proje memory** (`~/.claude/projects/{proje}/memory/`):
 - Yeni öğrenim yakalandıysa (örn. "X kanun maddesi Y davası için kritik") → yeni memory dosyası
 - Her araştırma sonu MEMORY.md'ye 1 satır eklenmez — sadece **kalıcı öğrenim** varsa.
 
@@ -392,33 +317,30 @@ mempalace_add_drawer(
 
 | Senaryo | Aksiyon |
 |---|---|
-| CDP port yanıt vermiyor | Stajyer atla, raporda `STAJYER YOK` flag'i, Faz 2'den devam |
-| Süper Stajyer login eksik | Avukata bildir + manuel pano fallback teklif |
-| Süper Stajyer cevabında <3 karar | Avukata "yetersiz cevap, tekrar sorgu?" sor |
-| Argüman.ai 0 sonuç | Faz 2 boş geçer, raporda `ARGUMAN YOK` flag'i, Yargı Pro ile devam |
-| Argüman.ai re-auth gerekiyor | Avukata `mcp__arguman` yeniden bağlanma bildirimi |
-| Yargı Pro MCP down | Faz 3 atlanır, AMA bu HARD FAIL → cevap yazılmaz, avukata "Pro MCP gerekiyor" |
-| Mevzuat MCP down | Faz 4 atlanır, `MULGA DENETIMI YAPILMADI` flag'i, cevap yazılır ama uyarılı |
-| ≥2 DOĞRULANMAMIŞ atıf | HARD FAIL — Faz 5'e geçilmez, avukata "yetersiz kaynak" + bulunan ham veriler paylaşılır |
+| Yargı Pro MCP bağlı değil / OAuth süresi dolmuş | Avukata yetkilendirme linki göster — **Faz 1 Pro MCP'siz ÇALIŞMAZ** (HARD gereksinim) |
+| Yargı Pro MCP down (bağlıyken hata) | 1 retry (5 sn), sonra `yargi` CLI fallback; o da fail → cevap yazılmaz, avukata "Pro MCP gerekiyor" |
+| Mevzuat sorguları down | Faz 2 atlanır, `MULGA DENETIMI YAPILMADI` flag'i, cevap yazılır ama uyarılı |
+| Faz 1'de DOĞRULANMIŞ < 2 | Cevap yazılmaz → avukata "yetersiz kaynak" + bulunan ham veriler paylaşılır |
+| ≥2 DOĞRULANMAMIŞ atıf cevaba sızmış | HARD FAIL — Faz 3'e geçilmez |
+| NotebookLM erişilemiyor | Faz 2.5 sessizce atlanır (opsiyonel faz) |
 | Sentez sırasında çelişkili kararlar | Çelişki açıkça raporda yazılır, hangi tarafın ağır basacağı tahmin edilmez (avukat karar verir) |
 
 ---
 
 ## 6. Output Özeti
 
-**Drive klasörü:** `G:\Drive'ım\Hukuk Bürosu\Research\{YYYY-MM-DD}-{slug}\`
+**Drive klasörü:** `{research_root}/{YYYY-MM-DD}-{slug}/`
+(`research_root` = `python3 scripts/paths.py research` çıktısı)
 
 | Dosya | İçerik | Üretici |
 |---|---|---|
 | `00-Soru.md` | Ham soru + doktrinal çeviri | Claude (Faz 0) |
-| `01-Stajyer-cevap.md` | Süper Stajyer ham cevap | superstajyer.py (Faz 1) |
-| `02-Arguman-bulgulari.md` | Argüman.ai search + tam metin | Claude + Argüman MCP (Faz 2) |
-| `03-Yargi-Pro-dogrulama.md` | DOĞRULANMIŞ/DOĞRULANMAMIŞ/HARD FAIL tablosu | Claude + Yargı Pro MCP (Faz 3) |
-| `04-Mulga-denetim.md` | Mevzuat madde yürürlük denetimi | Claude + Yargı Pro Mevzuat (Faz 4) |
-| `arastirma-cevabi.md` ★ | NİHAİ — avukatın okuyacağı sentez | Claude (Faz 5) |
-| `arastirma-cevabi.docx` | DOCX export | md_to_docx.py (Faz 5) |
+| `01-Ictihat-taramasi.md` | Sorgular + DOĞRULANMIŞ/Elenen kararlar | Claude + Yargı Pro MCP (Faz 1) |
+| `02-Mulga-denetim.md` | Mevzuat madde yürürlük denetimi | Claude + Yargı Pro Mevzuat (Faz 2) |
+| `arastirma-cevabi.md` ★ | NİHAİ — avukatın okuyacağı sentez | Claude (Faz 3) |
+| `arastirma-cevabi.docx` | DOCX export | md_to_docx.py (Faz 3) |
 
-**Avukat sadece `arastirma-cevabi.md/.docx`'i okur.** Diğer 5 dosya iz/şeffaflık için arşivde durur.
+**Avukat sadece `arastirma-cevabi.md/.docx`'i okur.** Diğer dosyalar iz/şeffaflık için arşivde durur.
 
 ---
 
@@ -428,4 +350,4 @@ mempalace_add_drawer(
 arastir danisma: {hukuki soru}
 ```
 
-Klasör adı otomatik üretilir. Müvekkil adı sorulmaz, KVKK mask dict gerekmez. Tek soru yeterli.
+Klasör adı otomatik üretilir. Müvekkil adı sorulmaz. Tek soru yeterli.

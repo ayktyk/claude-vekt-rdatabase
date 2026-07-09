@@ -33,53 +33,32 @@ Director Agent akışı:
    - `03-Sentez-ve-Dilekce/`
    - `04-Muvekkil-Belgeleri/`
    - `05-Durusma-Notlari/`
-3. KVKK kontrol: komut maskeli mi? `config/masks/{dava-id}.json` var mı?
+3. (KVKK maskeleme ERTELENDİ — 2026-07-09 avukat kararı; komut gerçek
+   veriyle gelir, maske dict kontrolü YAPILMAZ. Yerel LLM'e geçişte geri gelir.)
 4. Kaynak sorgulamasını zorunlu yap (NotebookLM, Drive, yerel dosya).
 5. Advanced briefing topla (opsiyonel ama tavsiye edilen).
 6. Hukuki kritik noktaları belirle (birincil + ikincil + riskli).
 7. `00-Briefing.md` Drive'a kaydet.
 
-## ASAMA 2 — Derin Araştırma (Terminal Claude — yörünge + paralel + sıralı zincir)
+## ASAMA 2 — Derin Araştırma (Terminal Claude — sıralı zincir + async paralel kol)
+
+> **REVİZYON 2026-07-09:** 2A Süper Stajyer + Faz D Argüman.ai ARŞİVLENDİ
+> (`arsiv/README.md`). Çekirdek = 2B→2C sıralı zincir + 2D async paralel.
 
 İç sıra:
 
-1. **2A Suer Stajyer (YÖRÜNGE BELİRLEYİCİ — tavsiye edilen ilk adım)**
-   - Otomatik komut: `arastir stajyer: {dava-id}` (CDP otomasyon, fallback manuel pano)
-   - Çıktı: `02-Arastirma/2A-superstajyer-cevap.md` + `2A-yorunge-talimatlari.md`
-   - Atlanabilir: avukat "2A atla" derse veya CDP+manuel ikisi de fail ise.
-     Atlandığında ASAMA 2 raporuna `YORUNGE EKSIK` flag'i konur.
-   - Detay: `.claude/commands/arastir-stajyer.md`
-
-2. **Faz D — Arguman.ai Semantik Genişletme (YENİ — FAZ 3 2026-05-19)**
-   - 2A sonrası, 2B öncesi çalışır
-   - Otomatik komut: `arastir arguman: {kritik nokta}`
-   - Arguman.ai 11M+ karar havuzunda hibrit semantik+keyword arama
-     (Cohere + BM25 + RRF + opsiyonel neural rerank)
-   - 8 koleksiyon: ceza / hukuk / idare / anayasa / aihm / uyusmazlik / bgh_*
-   - Server-side skill'ler otomatik tetiklenir: `caselaw-search`,
-     `citation-network` (HGK/CGK bağlayıcılık etiketi), `karsi-arguman`
-     (5 seviyeli tehdit — ASAMA 6 için ön-sorgu olarak da kullanılır)
-   - Her bulgu Yargı-MCP-Pro `documentId` köprüsünden geçirilir →
-     DOĞRULANMIŞ / DOĞRULANMAMIŞ / HARD FAIL etiketleme
-   - Çıktı: `02-Arastirma/2A-arguman-bulgulari.md`
-   - Atlanabilir: avukat "arguman atla" derse (kredi tasarrufu için)
-   - Detay: `.claude/commands/arastir-arguman.md`
-
-3. **2D NotebookLM (paralel kol)** — 2A yörünge talimatı varsa onu uygular,
-   yoksa bağımsız akış. Faz D ile eş zamanlı çalışabilir.
+1. **2D NotebookLM (async paralel kol)** — zinciri bloklamaz; ADIM 0B'de
+   dahili kaynak seçilmemişse atlanır (rapora not düşülür).
    (2E Akademik kolu 2026-05-19 itibariyla kaldırıldı.)
 
-4. **2B Yargı-MCP-Pro → 2C Mevzuat-MCP-Pro (sıralı zincir)** — 2A varsa
-   kararları teyit modunda sorgular + yan meseleler için ek arama.
-   2A yoksa eski bağımsız akış (atıf maddeleri + mülga eleme).
-   - 2B Faz D varsa Arguman bulgularını Pro MCP'ye doğrulatma da yapar
-     (esas/karar/daire → documentId köprüsü)
+2. **2B Yargı-MCP-Pro → 2C Mevzuat (sıralı zincir — OMURGA)** —
+   2B derin protokol (min 15 sorgu / 6 faz / min 5 tam metin), her kararın
+   atıf maddeleri çıkarılır → `atif-maddeleri.json`. 2C bunu bekler
+   (min 8 sorgu / 9 faz) + mülga eleme + normlar hiyerarşisi.
 
-5. **Sentez:** terminal Claude konsolide raporu yazar (Antigravity'ye gitmez).
+3. **Sentez:** terminal Claude konsolide raporu yazar (Antigravity'ye gitmez).
    - Çıktı: `02-Arastirma/arastirma-raporu.md` + `atif-maddeleri.json` +
      `mulga-eleme.json`
-   - Faz D bulguları rapora "Arguman.ai DOĞRULANMIŞ/DOĞRULANMAMIŞ Kararlar"
-     bölümü olarak girer
 
 ## ASAMA 2 SONUNDA — Antigravity 3 Batch Devir (2026-05-14 iyileştirme)
 

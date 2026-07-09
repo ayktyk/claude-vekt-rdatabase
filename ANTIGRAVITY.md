@@ -193,7 +193,6 @@ Aşağıdaki dosyaları oku (3 dosya — dosya paketi):
 Ek referans (bağlama göre):
   - 02-Arastirma\yargi-bulgulari.md
   - 02-Arastirma\mevzuat-bulgulari.md
-  - 02-Arastirma\sstajyer-ozet.md (varsa)
 
 Protokol: prompts/gemini/stratejik_analiz.md
 Ortak kurallar: prompts/gemini/_ortak-kurallar.md

@@ -52,7 +52,8 @@ Mevcut kısa prompt YASAK — bu komut tam protokolü zorunlu uygular.
 - Spesifik kavram (exact phrase)
 
 ### Faz 4 — Temporal Evolution (Query 9-14, ZORUNLU)
-- 2021, 2022, 2023, 2024, 2025 yıl-yıl ayrı sorgu (`kararTarihiStart/End` ile)
+- **DİNAMİK yıl listesi:** içinde bulunulan yıl dahil son 5 takvim yılı,
+  yıl-yıl ayrı sorgu (`kararTarihiStart/End` ile — sabit yıl YAZILMAZ)
 - HGK yıl-aralığı sorguları
 - `sort_direction="asc"` ile en eski → en yeni evrim takibi
 - Hakim görüş kırılımı + kırılma noktası tespiti
@@ -97,7 +98,7 @@ Frontmatter: `engine: claude`, `mcp: yargi-mcp-pro`, `status: TASLAK`.
 ## Kalite Kapısı (çıktı tamamlanmadan önce)
 - [ ] 15 sorgu listesi var mı?
 - [ ] 5 tam metin künyesi var mı (her biri Pro MCP `documentId` ile fetch edildi)?
-- [ ] Temporal evolution (2021-2025) tablosu var mı?
+- [ ] Temporal evolution (son 5 takvim yılı, dinamik) tablosu var mı?
 - [ ] HGK/İBK kararı var mı (yoksa ek arama)?
 - [ ] `atif-maddeleri.json` doldu mu?
 - [ ] Çelişkili kararlar bölümü var mı?

@@ -56,7 +56,7 @@ Yargitay 12. HD T.27.09.2016 E.2016/17416 K.2016/19934
 kapılarla** zorlanır. Kanonik kaynak: `prompts/_doktrin-preamble.md` +
 `scripts/doktrin_contract.py` (SENTINEL `<!-- DOKTRIN-PREAMBLE v1 -->`, 8 clause token,
 Kaynak Doğrulama Tablosu grameri, TBB ifadeleri, KVKK allowlist). Tüm dış-prompt
-yüzeyleri (16 Gemini prompt + Süper Stajyer + 5 perspektif ajanı + arastir/blog
+yüzeyleri (16 Gemini prompt + 5 perspektif ajanı + arastir/blog
 komutları + devir blokları) bu doktrini inline taşır.
 
 **Air-gap gerçeği:** Gemini devir bloğunu avukat ELLE yapıştırır ve çıktıyı doğrudan
@@ -109,7 +109,7 @@ ASAMA 2  Derin Arastirma            |
                                     |   ASAMA 7  Dilekce v2 NIHAI
                                     |    ↓ "Hepsi bitti" + UDF + Pilot raporu
 ------------------------------------|------------------------------------------
-+ KVKK mask/unmask                  | (maskeli token'larla calisir, ham veri gormez)
++ (KVKK maskeleme ERTELENDI)        | (gercek veriyle calisir — bkz. KVKK bolumu)
 + md_to_docx.py / md_to_udf.py      | + Her ASAMA sonu self-review
 + MemPalace diary write             | + Batch 3'te Antigravity ic doga dongusu:
 + qmd update                        |   yaz → elestir → revize (3 cikti tek sohbet)
@@ -199,7 +199,6 @@ dongusu oldugu icin tek sohbette birlestirildi. ASAMA 3 ve 4 ayri kaldi
    Gorev: {batch-spesifik talimat}
    Cikti(lar): {hedef yol(lar)}
 
-   KVKK: tum token'lar maskeli kalir ([MUVEKKIL_1], [TC_1] vs.)
    Cikti(lar) sonunda self-review yap (prompts/gemini/self_review.md).
    ---
    ```
@@ -268,63 +267,35 @@ self-review zorunlulugu) korunur, sadece teknik kanal degisti.
 - [ ] Avukati lehine cekme durtusu reddedildi mi?
 - [ ] "Bu konuda kaynak yok" diyebilecegim yer varsa yazdim mi?
 
-## 2A Stajyer (Super Stajyer) Entegrasyonu (2026-05-16 — Canli Pilot)
+## ARSIVLENEN MODULLER (2026-07-09 — Avukatin karari)
 
-**Durum:** Aktif. ASAMA 2'nin ilk adimi 2A oldu (yorunge belirleyici).
-2B-2D artik 2A bulgularini teyit/derinlestirme modunda calisir.
+Arastirma cekirdegi sadelestirildi. Asagidaki moduller AKTIF DEGIL,
+dosyalari `arsiv/` altinda (detay + geri alma: `arsiv/README.md`):
 
-**Kullanim kilavuzu (avukat icin adim adim):** `@SSTAJYER.md` — PC acmaktan
-UYAP'a yuklemeye kadar ornek dava ile tam akis.
+- **2A Super Stajyer** (CDP otomasyon, sstajyer.com) — kullanilmiyor;
+  yorunge-belirleyici rolu kaldirildi. ASAMA 2 artik dogrudan
+  2B→2C sirali zincir + 2D paralel kol ile baslar.
+- **Faz D Arguman.ai** (semantik genisletme) — kullanilmiyor;
+  `arastir arguman:` komutu devre disi.
+- **2E Akademik** (DergiPark + YOK Tez) — 2026-05-19'da zaten kaldirilmisti.
 
-**Teknik detay:**
-- **Komut:** `arastir stajyer: {dava-id}` (CDP otomasyonu, default)
-- **Fallback:** `2A cevap al: {dava-id}` (manuel pano, CDP fail durumunda)
-- **Komut detayi:** `@.claude/commands/arastir-stajyer.md`
-- **Stajyer protokolu:** `@ajanlar/arastirmaci/SKILL.md` Bolum 0
+Bu modullere ait komutlar (`arastir stajyer:`, `2A cevap al:`,
+`arastir arguman:`) gelirse avukata modulun arsivlendigi soylenir,
+akis calistirilmaz.
 
-**Kurulu altyapi (yeni oturumda kontrol etme):**
-- Chrome ozel CDP profile'inda calisir (port 9222). Avukatin masaustunde
-  `Super Stajyer (CDP)` kisayolu var — `scripts/launch-chrome-cdp.ps1`
-  ile baslatir. User-data-dir: `$env:LOCALAPPDATA\Google\Chrome\CDP-Profile`
-  (Chrome 136+ guvenlik kurali — default profile ile CDP calismaz).
-- Health check: `python scripts/superstajyer.py health` → "[OK] CDP baglandi"
-- Site: `https://app.sstajyer.com/`
-- Selector'lar dolu: `config/superstajyer.json` (prompt=ProseMirror
-  contenteditable + type method, submit=Enter tusu, response=`main` container,
-  completion marker="ARASTIRMA TAMAMLANDI")
-- Playwright kurulu (1.58.0)
+## KVKK Maskeleme (ERTELENDI — yerel LLM'e gecise kadar)
 
-**Yeni oturumda Claude sorumluluklari:**
-1. `arastir stajyer:` komutu geldiginde once CDP health check yap
-2. Chrome kapali ise avukati masaustu kisayoluna yonlendir, "Chrome'u ac,
-   devam et" de — kendin chrome.exe baslatma
-3. Suer Stajyer login expired ise avukata "site sekmesine git, login ol" de
-4. Cikti dosyasi (`2A-superstajyer-cevap.md`) genelde 100KB+ olur —
-   Read tool offset/limit ile parca parca oku, sohbete TAM METIN dukme
-5. Yorunge talimatlarini (`2A-yorunge-talimatlari.md`) urettikten sonra
-   2B-2D her birinin basinda "Zorunlu Girdi: 2A ciktisi" notunu hatirla
+**Avukatin karari (2026-07-09):** Bulut LLM'lerle (Claude / Gemini)
+calisirken maskeleme UYGULANMAZ. Dava komutlari ve ASAMA ciktilari
+gercek veriyle calisir. Avukat YEREL LLM kullanmaya basladiginda
+maskeleme zorunlulugu geri gelecek.
 
-## KVKK Seviye 2 Maskeleme Protokolu (ZORUNLU)
-
-Muvekkil verisi LLM'e (Anthropic / Google) gitmeden once `scripts/maske.py` ile
-maskelenir. Avukat yeni dava acarken komutu MASKELI sekilde verir:
-
-```
-Yeni dava: [MUVEKKIL_1] (kiraya veren) + [MUVEKKIL_2] (tapu maliki)
-Karsi taraf: [KARSI_TARAF_1]
-Tasinmaz: [ADRES_2]
-Dava-ID: selin-uyar-2026-003
-```
-
-Tum ASAMA ciktilari maskeli verilerle uretilir. Dilekce v2 NIHAI sonrasi
-avukat `python maske.py --dict DAVA-ID unmask dilekce-v2.md dilekce-v2.final.md`
-komutuyla gercek veriye cevirir ve UYAP'a yukler.
-
-Detay: `MASKELEME-KILAVUZU.md`
-TC, IBAN, Telefon, E-posta **otomatik** maskelenir (regex tabanli).
-Isim ve adres **manuel** dict'e eklenir (avukat dava acmadan once).
-
-Dict dosyalari: `config/masks/{dava-id}.json` (yerel disk, git disi, KVKK gereği).
+- `scripts/maske.py` repoda korunur (calisir durumda; `cikti_dogrula.py`
+  TC-checksum icin import eder). Kilavuz: `MASKELEME-KILAVUZU.md`.
+- KVKK sizinti kontrolu (`cikti_dogrula.py` icindeki TC/IBAN taramasi)
+  BLOG ve kamuya acik ciktilar icin GECERLI kalir — blog metnine gercek
+  muvekkil verisi yazilamaz.
+- Drive paylasim kisiti ve `config/.env` kurallari aynen yururlukte.
 
 ## Cikti Formati
 
@@ -349,8 +320,9 @@ Taslak ASAMA'lar (v1 dilekce, usul raporu, arastirma, stratejik analiz,
 savunma simulasyonu, briefing, hesaplama vb.) yalnizca MD + DOCX
 uretir. UDF URETMEZ — UYAP'a gitmez, revizyona tabi.
 
-UYAP yuklemesi oncesi avukat `python scripts/maske.py unmask` ile
-maskeli dilekceyi gercek veriye cevirir.
+(KVKK maskeleme ERTELENDI oldugu icin unmask adimi su an gerekmez;
+dilekce zaten gercek veriyle uretilir. Yerel LLM'e gecince bu adim
+geri gelir: `python3 scripts/maske.py --dict {dava-id} unmask ...`)
 
 ## Kalici Kayit Politikasi
 
@@ -484,7 +456,6 @@ Sistemin iki bilgi katmani vardir. Her arac yalnizca kendi katmanina aittir.
 |---|---|
 | Yargi-MCP-Pro (`mcp__yargi-mcp-pro__*`) | **BIRINCIL** — FAZ 2 2026-05-19. Yargitay/Danistay/Yerel/Istinaf/KYB arama + tam metin: `search_bedesten_unified` (court_types[] enum, birimAdi enum), `get_bedesten_document_markdown` (documentId). Eski 9+ ayri tool (anayasa/emsal/kvkk/uyusmazlik/rekabet/...) Pro MCP'de search_bedesten_unified'a konsolide oldu (court_types[] ile filtre). `check_government_servers_health` Pro MCP'de yok. Engine: `config/model-routing.json` -> `tasks.yargi_mcp` (MAX EFFORT thinking). |
 | Yargi-MCP-Pro Mevzuat (`mcp__yargi-mcp-pro__*`) | **BIRINCIL** — FAZ 2 2026-05-19. 12 mevzuat tipi (KANUN/KHK/TUZUK/YONETMELIK/CB_KARARNAME/CB_YONETMELIK/CB_KARAR/CB_GENELGE/KKY/UY/TEBLIGLER/MULGA) arama + icerik + madde agaci + gerekce: `search_mevzuat` (phrase Mevzuat Solr — +/-/exact/wildcard/fuzzy, AND/OR/NOT BREAK eder; mevzuat_tur_list[]; mevzuat_no), `search_within_mevzuat` (tek kanun ici boolean — AND/OR/NOT UPPERCASE), `get_mevzuat_document` (id_type=mevzuat/madde/gerekce/outline polimorfik). Eski 9 tip-bazli + 3 fetch tool bu uc tool'a konsolide. Mulga denetimi prompt seviyesinde. Engine: `config/model-routing.json` -> `tasks.mevzuat_mcp` (MAX EFFORT thinking). |
-| Arguman.ai (`mcp__arguman__*`) | **YENI — FAZ 3 (entegrasyon hazirligi)**. 11M+ Turk+uluslararasi mahkeme karari (Cohere multilingual + BM25 + RRF + opsiyonel neural rerank). 8 koleksiyon: ceza/hukuk/idare/anayasa/aihm/uyusmazlik/bgh_straf/bgh_zivil. Tool'lar: `search` (kavram/doktrin), `case_lookup` (bilinen kunye nokta-atisi), `find_similar` (vektor benzerligi), `get_full_text` (25K token sayfalanmis), `infaz_hesaplama` (5275/7242/7550 sk + LLM, 1 kredi). Detay: `docs/mcp-envanteri/arguman-ai.md`. |
 | `yargi` CLI | **FALLBACK** - Yargi MCP basarisiz olursa devreye girer (`yargi bedesten search/doc`) |
 | `mevzuat` CLI | **FALLBACK** - Mevzuat MCP basarisiz olursa devreye girer (`mevzuat search/doc/article/tree`) |
 
@@ -511,8 +482,10 @@ yapar → mulga maddeye dayanan kararlar **elenir** (raporda kullanilmaz). Detay
 `@ajanlar/arastirmaci/SKILL.md` -> "Bolum 2.5 - 2B → 2C Sirali Zincir" bolumu.
 
 Minimum sorgu kurali:
-- **Yargi MCP:** min 15 sorgu. Icerisinde 5 yil-bazli temporal evolution
-  (2021-2026 yil-yil), min 2 HGK sorgusu, min 2 celiski/bozma taramasi,
+- **Yargi MCP:** min 15 sorgu. Icerisinde yil-bazli temporal evolution
+  (**DINAMIK: icinde bulunulan yil dahil son 5 takvim yili, yil-yil** —
+  sabit yil listesi YAZILMAZ, calisma gunune gore hesaplanir),
+  min 2 HGK sorgusu, min 2 celiski/bozma taramasi,
   min 5 karar tam metin okuma zorunlu.
 - **Mevzuat MCP:** min 8 sorgu. Icerisinde gerekce cekimi, madde degisiklik
   tarihcesi, min 2 yonetmelik/teblig, atif yapilan diger maddeler zorunlu.
@@ -626,7 +599,7 @@ Beklenen cikti: {uretilcek dosya}
 |---|---|---|---|
 | 0 | MemPalace Wake-up | Destek | (context enjeksiyon) |
 | 1 | Hazirlik + Briefing | Director | `00-Briefing.md` |
-| 2 | Hibrit Arastirma (2A yorunge + 1 paralel kol + 1 sirali zincir) | Arastirmaci (2A Stajyer yorunge belirleyici → 2D paralel; 2B → 2C sirali) | `02-Arastirma/arastirma-raporu.md` (+ `2A-superstajyer-cevap.md`, `2A-yorunge-talimatlari.md`) |
+| 2 | Derin Arastirma (2B→2C sirali zincir + 2D async paralel kol) | Arastirmaci (2B Yargi MCP → 2C Mevzuat MCP sirali; 2D NotebookLM paralel) | `02-Arastirma/arastirma-raporu.md` (+ `atif-maddeleri.json`, `mulga-eleme.json`) |
 | 3 | Usul Raporu | Usul Uzmani | `01-Usul/usul-raporu.md` |
 | 4 | 5 Ajan Stratejik Analiz | 4A+4B+4C+4D+4E | `02-Arastirma/stratejik-analiz.md` |
 | 5 | Dilekce v1 | Belge Yazari | `03-Sentez-ve-Dilekce/dilekce-v1.md` |
@@ -644,10 +617,10 @@ Tekil komutlar (`dilekce yaz`, `arastir: ...`, `usul: ...`,
 `stratejik analiz: ...`, `revize et: ...`) tek-asama tek-cikti
 komutlaridir, durmadan calisir.
 
-### ASAMA 2 - Arastirma Ajanlari (2 paralel kol + 1 sirali zincir)
+### ASAMA 2 - Arastirma Cekirdegi (1 sirali zincir + 1 async paralel kol)
 Alt isciler:
-- **Paralel kol:** 2D (NotebookLM/Drive)
-- **Sirali zincir:** 2B (Yargi MCP) → 2C (Mevzuat MCP, atif maddeleri + mulga eleme)
+- **Sirali zincir (omurga):** 2B (Yargi MCP) → 2C (Mevzuat MCP, atif maddeleri + mulga eleme)
+- **Async paralel kol:** 2D (NotebookLM/Drive — zinciri BLOKLAMAZ)
 
 Detay: `@ajanlar/arastirmaci/SKILL.md` Bolum 1-3.
 
@@ -794,7 +767,7 @@ Director Agent karar semasi:
   bildirimi + "devam" onayi zorunlu. Detay: yukaridaki "7 ASAMA Workflow"
   tablosu.
 - `usul: ...` -> ASAMA 0 + yalnizca Usul Uzmani
-- `arastir: ...` -> ASAMA 0 + tum arastirma alt-iscileri (2A + 2D paralel + 2B→2C sirali zincir)
+- `arastir: ...` -> ASAMA 0 + arastirma cekirdegi (2B→2C sirali zincir + 2D paralel)
 - `stratejik analiz: ...` -> ASAMA 0 + 5 Ajan (4A-4E) paralel+sentez
 - `dilekce v1: ...` / `dilekce yaz` -> ASAMA 0 + Belge Yazari (ciktilar
   var mi kontrol)
@@ -912,7 +885,7 @@ Bu gorevler her zaman terminal Claude'da kalir, Antigravity'ye gitmez:
 - Yargi MCP / Mevzuat MCP / NotebookLM MCP
 - Yargi CLI ve Mevzuat CLI cagrilari (fallback)
 - ASAMA 2 sentezi (MCP ciktilari ayni oturumda raporlanir)
-- PII mask/unmask islemi (`scripts/maske.py`)
+- PII mask/unmask islemi (`scripts/maske.py` — su an ERTELENDI, yerel LLM'e gecince)
 - Iscilik alacaklari hesaplama modulu (deterministik)
 - MemPalace diary write
 - `qmd update`, `md_to_docx.py`, `md_to_udf.py` cagrilari
@@ -1363,8 +1336,10 @@ Google Calendar MCP ile ekle:
 
 ## Guvenlik ve KVKK
 
-- TC Kimlik numaralarini ve tam muvekkil adlarini harici API'ye gonderme.
-  Maskele: `[Muvekkil]`, `[TC_NO]`, `[IBAN]`
+- Dava akisi maskeleme ZORUNLULUGU ERTELENDI (2026-07-09 avukat karari,
+  bkz. "KVKK Maskeleme (ERTELENDI)" bolumu). Yerel LLM'e geciste geri gelir.
+- KAMUYA ACIK ciktilarda (blog, mail) muvekkil verisi YASAK kalir —
+  `cikti_dogrula.py` TC/IBAN taramasi blog icin gecerli.
 - Drive paylasim ayari: yalnizca buro hesabi.
 - API anahtarlari yalnizca `config/.env` dosyasinda saklanir, hicbir ciktiya eklenmez.
 - Her cikti taslaktir. Avukat son kontrolu yapar.
@@ -1434,9 +1409,7 @@ Context window %70'e ulastiginda otomatik state dump:
 | Harc tarifesi guncel degil | "Bu hesaplama [yil] tarifesine goredir, UYAP'tan dogrulayin." notu ekle. |
 | Dilekce yapay zeka gibi gorunuyor | `sablonlar/` klasorune onaylanmis dilekceler ekle, uslubu buna gore duzelt. |
 | MCP baglanti hatasi | `~/.claude/settings.json` ve Claude Desktop user-level MCP ayarlarini kontrol et. |
-| **2A Suer Stajyer CDP baglanti yok** | `curl http://localhost:9222/json/version` bos donuyorsa Chrome CDP modunda acik degil. Cozum: `scripts\launch-chrome-cdp.ps1` ile Chrome'u baslat (`--remote-debugging-port=9222`, mevcut user-data-dir). Fallback: manuel pano akisi (`2A cevap al: {dava-id}`). |
-| **2A Suer Stajyer login eksik** | Avukata Chrome'da site sekmesine gidip login olmasi gerektigini bildir. Login sonra ayni komut tekrar denenir. |
-| **2A config selector PLACEHOLDER** | `config/superstajyer.json` ilk kurulumda doldurulmadi. Chrome DevTools (F12 → Inspect) ile prompt input + submit button + response container CSS seciciler alinir, config'e yazilir. |
+| **Arsivlenmis modul komutu geldi** (`arastir stajyer:`, `2A cevap al:`, `arastir arguman:`) | Avukata modulun 2026-07-09'da arsivlendigini bildir (`arsiv/README.md`), akisi calistirma. Arastirma icin `arastir:` cekirdek komutunu oner. |
 
 ---
 
@@ -1447,14 +1420,11 @@ Context window %70'e ulastiginda otomatik state dump:
 | `yeni dava: [isim], [tur] / ozet: [...] / kritik nokta: [...]` | Director + 7 ASAMA kullanici-kontrollu tam akis |
 | `devam` / `atla` / `motor degistir` / `dur` / `devam et` | 7 ASAMA kontrol komutlari |
 | `usul: [dava turu]` | Sadece Usul Uzmani |
-| `arastir: [kritik nokta]` | Director + 2A (opsiyonel yorunge) + 2D paralel + 2B→2C sirali zincir |
-| `arastir stajyer: [dava-id]` | Director + 2A Suer Stajyer (CDP otomasyon, port 9222) |
-| `2A cevap al: [dava-id]` | 2A manuel pano fallback (CDP fail durumunda) |
-| `arastir yargi: [kritik nokta]` | Arastirma - 2B Yargi MCP (CLI fallback, 2A varsa teyit modunda) |
+| `arastir: [kritik nokta]` | Director + arastirma cekirdegi (2B→2C sirali zincir + 2D paralel) |
+| `arastir yargi: [kritik nokta]` | Arastirma - 2B Yargi MCP (CLI fallback) |
 | `arastir mevzuat: [kritik nokta]` | Arastirma - 2C Mevzuat MCP (CLI fallback) |
 | `arastir notebook: [kritik nokta]` | Arastirma - 2D NotebookLM / Drive |
-| `arastir arguman: [kritik nokta]` | Arastirma - Faz D Arguman.ai semantik genisletme (11M+ karar, 8 koleksiyon) + Yargi-MCP-Pro dogrulama koprusu - FAZ 3 2026-05-19 |
-| `arastir danisma: [hukuki soru]` | **Hızlı Araştırma Modülü** (`@ARASTIRMA.md`) — müvekkil adayı sorusu için bağımsız hat. Süper Stajyer + Argüman.ai + Yargı Pro doğrulama + Mülga denetimi. Çıktı: `G:\Drive'ım\Hukuk Bürosu\Research\{tarih}-{slug}\arastirma-cevabi.md`. Dava akışına dokunmaz. |
+| `arastir danisma: [hukuki soru]` | **Hızlı Araştırma Modülü** (`@ARASTIRMA.md`) — müvekkil adayı sorusu için bağımsız hafif hat. Yargı-MCP-Pro + Mevzuat + Mülga denetimi + Künye doğrulama. Çıktı: `Hukuk Bürosu\Research\{tarih}-{slug}\arastirma-cevabi.md` (yol `scripts/paths.py` ile çözümlenir). Dava akışına dokunmaz. |
 | `stratejik analiz: [dava-id]` | 5 Ajan (4A Davaci + 4B Davali + 4C Bilirkisi + 4D Hakim + 4E Sentez) |
 | `dilekce v1: [dava-id]` | Belge Yazari (ilk taslak — ASAMA 5 esdegeri) |
 | `dilekce yaz` | Belge Yazari (v1 taslak — `dilekce v1:` ile ayni) |

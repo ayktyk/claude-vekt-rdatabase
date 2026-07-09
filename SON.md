@@ -1,5 +1,14 @@
 # Hukuk Başasistanı — Bir Davada Baştan Sona Tam Akış (ONBOARDING)
 
+> ⚠️ **REVİZYON UYARISI (2026-07-09 — avukat kararı):** Bu dokümanın
+> 2A Süper Stajyer, Faz D Argüman.ai ve KVKK maskeleme bölümleri
+> **GÜNCEL DEĞİL**. 2A + Faz D ARŞİVLENDİ (`arsiv/README.md`), KVKK
+> maskeleme ERTELENDİ (yerel LLM'e geçişe kadar). ASAMA 2 çekirdeği
+> artık: **2B→2C sıralı zincir + 2D async paralel kol**, ana omurga
+> Yargı-MCP-Pro. Güncel doğruluk kaynağı: `CLAUDE.md` +
+> `ajanlar/arastirmaci/SKILL.md` v3.0 + `.claude/commands/arastir.md`.
+> Bu doküman tarihi bağlam için korunur; çelişki durumunda CLAUDE.md geçerlidir.
+
 > **Bu doküman tam onboarding dökümanıdır.** Yeni bir Claude veya Gemini
 > oturumu açıldığında bu dosya yapıştırılınca **3 katman** (Terminal Claude
 > + sağ panel Antigravity + koordinasyonu yapan Avukat) bir davayı baştan

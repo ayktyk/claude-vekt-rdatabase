@@ -5,9 +5,10 @@
   "_history": {
     "2026-05-04": "Hibrit motor (Claude+Gemini bridge) onaylandi",
     "2026-05-13": "Antigravity hibrit mimarisine gecildi. Bridge DEPRECATED.",
-    "2026-05-19": "FAZ 2: Yargi-MCP-Pro entegrasyonu (Senaryo B - ayri toollar). Eski mcp__claude_ai_Yarg_MCP__* + mcp__claude_ai_Mevuzat_MCP__* yerine mcp__yargi-mcp-pro__* aktif. yargi_mcp + mevzuat_mcp task'lari AYRI kalir (siraili zincir 2B->2C korunur). 9 spesifik mevzuat toolu (search_kanun/search_khk/...) tek search_mevzuat + mevzuat_tur_list[] altinda birlesti. Rate-limit 3sn protokolu gevsetildi (zorunluluk degil, fallback). 2E Akademik decommissioned (Faz 1, 2026-05-19)."
+    "2026-05-19": "FAZ 2: Yargi-MCP-Pro entegrasyonu (Senaryo B - ayri toollar). Eski mcp__claude_ai_Yarg_MCP__* + mcp__claude_ai_Mevuzat_MCP__* yerine mcp__yargi-mcp-pro__* aktif. yargi_mcp + mevzuat_mcp task'lari AYRI kalir (siraili zincir 2B->2C korunur). 9 spesifik mevzuat toolu (search_kanun/search_khk/...) tek search_mevzuat + mevzuat_tur_list[] altinda birlesti. Rate-limit 3sn protokolu gevsetildi (zorunluluk degil, fallback). 2E Akademik decommissioned (Faz 1, 2026-05-19).",
+    "2026-07-09": "ARASTIRMA REVIZYONU (avukat karari): 2A Super Stajyer (stajyer_prompt_uret) + Faz D Arguman.ai (arguman_ai) task'lari KALDIRILDI, dosyalar arsiv/ altinda. KVKK maskeleme ERTELENDI (yerel LLM'e gecise kadar). ASAMA 2 cekirdegi = 2B->2C sirali zincir + 2D async paralel. Ana omurga Yargi-MCP-Pro (UYAP entegrasyonu dahil - envanter cikarilinca tools[] guncellenecek)."
   },
-  "_last_updated": "2026-05-19",
+  "_last_updated": "2026-07-09",
 
   "mode": "auto",
   "_mode_values": "auto = config'tek default, sormaz | ask = her ASAMA basinda avukata sor | fixed = sadece default kullan, fallback yok",
@@ -43,15 +44,6 @@
       "tools": ["search_mevzuat", "search_within_mevzuat", "get_mevzuat_document"],
       "aciklama": "Yargi-MCP-Pro Mevzuat sorgulari (12 tip: KANUN/KHK/TUZUK/YONETMELIK/CB_KARARNAME/CB_YONETMELIK/CB_KARAR/CB_GENELGE/KKY/UY/TEBLIGLER/MULGA). ASAMA 2C esas tool: search_mevzuat (phrase Mevzuat Solr - +/-/exact/wildcard*/fuzzy~/proximity, AND/OR/NOT BREAK eder; mevzuat_tur_list[] ile tip filtresi; mevzuat_no ile direkt kanun no). Tek kanun ici boolean: search_within_mevzuat. Polimorfik fetch: get_mevzuat_document(id, id_type=mevzuat/madde/gerekce/outline). FAZ 2 2026-05-19."
     },
-    "arguman_ai": {
-      "engine": "claude",
-      "model": "claude-opus-4-7",
-      "mcp_server": "arguman",
-      "tool_prefix": "mcp__arguman__",
-      "tools": ["search", "case_lookup", "find_similar", "get_full_text", "infaz_hesaplama"],
-      "collections": ["ceza", "hukuk", "idare", "anayasa", "aihm", "uyusmazlik", "bgh_straf", "bgh_zivil"],
-      "aciklama": "Arguman.ai - 11M+ Turk+uluslararasi mahkeme karari (semantik+keyword hibrit, Cohere multilingual + BM25 + RRF + opsiyonel neural rerank). 2A Stajyer sonrasi semantik genisletme: search(query, collection, top_k, expand, daire, yil_min/max). Provenance objesi (point_id, court, daire, esas, karar, tarih, ECLI). Nokta atisi: case_lookup. Tam metin: get_full_text. Infaz hesaplama: infaz_hesaplama (1 kredi, LLM). FAZ 3 entegrasyonu - 2026-05-19."
-    },
     "notebooklm_mcp": {
       "engine": "claude",
       "model": "claude-opus-4-7",
@@ -61,11 +53,6 @@
       "engine": "claude",
       "model": "claude-opus-4-7",
       "aciklama": "Muvekkil belgelerini okuyup hukuki uyusmazlik tespiti (MCP araclari ile dosya okuma)"
-    },
-    "stajyer_prompt_uret": {
-      "engine": "claude",
-      "model": "claude-opus-4-7",
-      "aciklama": "2A Stajyer modulu Faz A: 00-Briefing okur, MemPalace match'leri ekler, prompts/stajyer/sorgu_protokolu.md sablonunu KVKK maskeli sekilde doldurur, tmp/2A-stajyer-prompt.md'ye yazar. CDP otomasyonu (scripts/superstajyer.py) deterministik script oldugu icin ayri motor task'i gerektirmez."
     },
     "arastirma_sentezi": {
       "engine": "claude",

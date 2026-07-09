@@ -62,27 +62,24 @@ Bu ajan icin pratik etki:
    - 02-Arastirma/arastirma-raporu.md (ASAMA 2)
    - 01-Usul/usul-raporu.md (ASAMA 3)
    - 02-Arastirma/stratejik-analiz.md (ASAMA 4 — ozellikle 4B Davali ciktisi)
-   - **YENI — FAZ 4 2026-05-19:** 02-Arastirma/karsi-arguman-onsorgu.md (asagida ADIM 1.5)
+   - 02-Arastirma/karsi-arguman-onsorgu.md (asagida ADIM 1.5)
 
-1.5. **YENI — Arguman.ai `karsi-arguman` On-Sorgu (FAZ 4 — 2026-05-19):**
+1.5. **Karsi-Arguman On-Sorgu (REVIZE 2026-07-09 — Yargi-MCP-Pro ile):**
 
-Antigravity devir blogundan ONCE terminal Claude su sorguyu yapar.
-Arguman.ai sunucu tarafinda `karsi-arguman` skill'i otomatik tetiklenir
-(5 seviyeli tehdit siniflandirmasi).
+(Eski Arguman.ai `karsi-arguman` skill'i ARSIVLENDI — `arsiv/README.md`.)
+Antigravity devir blogundan ONCE terminal Claude, ASAMA 2 Faz 5
+(celiski/bozma taramasi) bulgularini temel alir; gerekirse Pro MCP ile
+ek karsi-ictihat sorgusu yapar:
 
 ```python
-# Briefing'den muvekkilin ana hukuki tezini cek (maskeli)
-# Dava turune gore koleksiyon sec (ceza/hukuk/idare/anayasa/aihm/uyusmazlik)
-
-mcp__arguman__search(
-  query="<muvekkilin ana hukuki tezi — doktrinal Turkce>",
-  collection="<dava turu>",
-  top_k=20,
-  expand=True
+mcp__yargi-mcp-pro__search_bedesten_unified(
+  phrase="<muvekkilin ana tezinin KARSITI — doktrinal Turkce>",
+  court_types=["YARGITAYKARARI"]
 )
+# + "{tez} bozma" / "{tez} reddi" varyantlari
 ```
 
-**Server-side skill ciktisi (otomatik):**
+**Tehdit siniflandirmasini terminal Claude yapar (5 seviye):**
 - KRITIK: pozisyonu yikici karsi-ictihat (HGK/CGK bagliyorsa cok yuksek tehdit)
 - YUKSEK: ciddi risk — Antigravity'nin onceliklendirmesi gerek
 - ORTA: dikkate alinmasi gereken sapma
@@ -90,18 +87,16 @@ mcp__arguman__search(
 - YOK / ILGISIZ: ana akistan sapma
 
 **Cikti dosyasi:** `02-Arastirma/karsi-arguman-onsorgu.md`
-- Frontmatter: `engine: claude`, `mcp: arguman`, `tool: search (karsi-arguman skill)`, `status: TASLAK`
+- Frontmatter: `engine: claude`, `mcp: yargi-mcp-pro`, `status: TASLAK`
 - Tehdit listesi (5 seviye)
-- Her tehdide ait kararin kunyesi + Yargi-MCP-Pro documentId dogrulamasi
-- KRITIK ve YUKSEK seviyedekilerin tam metni (get_full_text — ucretsiz)
+- Her tehdide ait kararin kunyesi + documentId
+- KRITIK ve YUKSEK seviyedekilerin tam metni (`get_bedesten_document_markdown`)
 
-**KVKK kurali:** Sorgu MUVEKKIL ADI/TC ICERMEZ. Briefing'den maskeli
-token'larla hukuki tez kurulur.
+**Not:** Sorguya TC/IBAN gibi kimlik verisi yazilmaz (gereksiz — hukuki
+tez jenerik doktrinal terimlerle kurulur; arama kalitesi de artar).
 
 **Antigravity devir blogu icin:** Bu cikti 5. dosya olarak eklenir
 (asagidaki devir blogu sablonunda gosterildi).
-
-**Maliyet:** 1 search + ucretsiz get_full_text'ler = ~1 kredi.
 
 2. **Antigravity devir blogu bas (avukata sun):**
 

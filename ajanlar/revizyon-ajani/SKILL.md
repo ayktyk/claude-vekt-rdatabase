@@ -37,9 +37,8 @@ Versiyon: 1.1 (FAZ 4 — Pro MCP documentId dogrulama + HARD FAIL kurali netlest
      - Sasırtıcı görünen alıntılar `mcp__yargi-mcp-pro__get_bedesten_document_markdown(documentId)`
        ile çekilip metinle karsilastirilir.
      - Uyumsuzluk varsa **alinti SILINIR**, sadece kunye + sayfa referansı bırakılır.
-   - **Arguman.ai kaynakli atif varsa:** `mcp__arguman__search` veya `case_lookup`
-     ile point_id alinir, `get_full_text` ile karar metni dogrulanir, sonra
-     Pro MCP'ye documentId koprusu kurulur (cift dogrulama).
+   - (Arguman.ai 2026-07-09'da ARSIVLENDI — eski Arguman kaynakli atif
+     goruldugunde dogrudan Pro MCP documentId dogrulamasi yapilir.)
 
 2. **NotebookLM cited_text dogrulama:**
    - Dilekçede NotebookLM kaynaklı atif varsa, NotebookLM cevabindaki cited_text ile karsilastirilir.
