@@ -53,7 +53,7 @@ Slash komut karşılığı: `.claude/commands/arastir-danisma.md`. Avukat bu kom
 Tam doktrin: `@ajanlar/0-halusinasyon-doktrini.md`. Bu modül için kritik kurallar:
 
 ### 6 Mutlak Yasak
-1. **Tam metni açılmamış karara ATIF YAPILMAZ.** Search listesinde görünmek yetmez — her künye `get_bedesten_document_markdown` ile açılıp konu uyumu teyit edilmeden cevaba giremez. (Mehmet Ali davası dersi, 2026-05-20: aracı kaynaklar 2/2 yanlış künye sunmuştu; bu kural aracı olmasa da geçerli — search snippet'i de yanıltabilir.)
+1. **Tam metni açılmamış karara ATIF YAPILMAZ.** Search listesinde görünmek yetmez — her künye `ictihat_getir` ile açılıp konu uyumu teyit edilmeden cevaba giremez. (Mehmet Ali davası dersi, 2026-05-20: aracı kaynaklar 2/2 yanlış künye sunmuştu; bu kural aracı olmasa da geçerli — search snippet'i de yanıltabilir.)
 2. **Tırnaklı alıntı (`«...»`) sadece Bedesten'den çekilmiş tam metinden** — parafraz da uydurma sayılır eğer kaynak yoksa.
 3. **Karar bağlamına sadık kalınır** — sorulan soru hangi konuysa cevap o konuyu kapsar, genelleştirilmez (89/4 cevabı 89/3'e taşınamaz).
 4. **"Bilmiyorum" demek dürüstlüktür** — kaynaklar yetersizse "bu konuda Bedesten'de DOĞRULANMIŞ yeterli emsal bulunamadı" yazılır.
@@ -114,7 +114,7 @@ Dava akışının 2B'sinin mini versiyonu — **min 6 sorgu / 3 alt-adım**
    ilgili daire(ler) belirle.
 2. **Tarama (min 6 sorgu):**
    ```python
-   mcp__yargi-mcp-pro__search_bedesten_unified(
+   mcp__yargi-mcp-pro__ictihat_ara(
      phrase="{doktrinal terim}",
      court_types=["YARGITAYKARARI"],
      birimAdi="{ilgili daire — biliniyorsa}"
@@ -127,7 +127,7 @@ Dava akışının 2B'sinin mini versiyonu — **min 6 sorgu / 3 alt-adım**
 3. **Tam metin teyidi (ZORUNLU — atıf ön şartı):** Cevaba girecek her
    karar (min 3, hedef 5):
    ```python
-   mcp__yargi-mcp-pro__get_bedesten_document_markdown(documentId)
+   mcp__yargi-mcp-pro__ictihat_getir(documentId)
    ```
    - Tam metin **sorulan konuyla ilgili** → **DOĞRULANMIŞ** (cevaba girer)
    - Tam metin **alakasız** → **ELENDİ** (şeffaflık tablosuna yazılır)
@@ -167,11 +167,11 @@ Faz 1 kararlarının atıf yaptığı + sorunun işaret ettiği kanun maddeleri 
 1. **Madde listesi çıkar:** "TBK m.315", "KTK m.97", "HMK m.107" vb.
 2. **Her madde için:**
    ```python
-   mcp__yargi-mcp-pro__search_mevzuat(
+   mcp__yargi-mcp-pro__mevzuat_ara(
      phrase='"{kanun adı}"',
      mevzuat_tur_list=["KANUN"]
    )
-   mcp__yargi-mcp-pro__get_mevzuat_document(
+   mcp__yargi-mcp-pro__mevzuat_getir(
      id="{madde_id}",
      id_type="madde"
    )

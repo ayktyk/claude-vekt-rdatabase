@@ -17,14 +17,15 @@ Mevcut kısa prompt YASAK — bu komut tam protokolü zorunlu uygular.
 `mcp__claude_ai_Yarg_MCP__*` tool'ları emekli.
 
 ## Zorunlu Referans Dokümanlar
-- `FIVEAGENTS.md` → ASAMA 2B (satır ~628 civarı)
+- `.claude/skills/yargi-legal-research-guide/SKILL.md` — **sorgu lehçeleri + tuzaklar (BİRİNCİL referans, sürüm 2026-07-08b)**
+- `FIVEAGENTS.md` → ASAMA 2B
 - `ajanlar/arastirmaci/SKILL.md` → Bölüm 1 (Yargı-MCP-Pro Derin Protokolü, 6 Faz) + Bölüm 2.5 (2B → 2C Sıralı Zincir)
-- `docs/mcp-envanteri/yargi-mcp-pro.md` — tool envanteri ve parametre kataloğu
 
-## Aktif Tool'lar (Yargı-MCP-Pro)
-- `mcp__yargi-mcp-pro__search_bedesten_unified` — mahkeme kararı arama (Yargıtay/Danıştay/Yerel/İstinaf/KYB)
-- `mcp__yargi-mcp-pro__get_bedesten_document_markdown` — documentId → tam metin
-- `mcp__yargi-mcp-pro__legal_research_guide` — meta rehber (cached, free, opsiyonel — sadece protokol netleştirmek için)
+## Aktif Tool'lar (Yargı-MCP-Pro — FAZ 6 2026-07-09 yeni Türkçe set)
+- `mcp__yargi-mcp-pro__ictihat_ara` — mahkeme kararı arama (Yargıtay/Danıştay/Yerel/İstinaf/KYB)
+- `mcp__yargi-mcp-pro__ictihat_getir` — documentId → tam metin (40K üzeri `page_number`)
+- `mcp__yargi-mcp-pro__semantik_ictihat_ara` — kavramsal keşif (Faz 1 terim üretiminde; korpus ~1 yıl eski, güncel atıf YAPILMAZ)
+- `mcp__yargi-mcp-pro__aym_ictihat_ara` — AYM kararları (Faz 6.5 koşullu kol; DÜZ kelime, operatör YOK)
 
 ## Ön-koşullar (otomatik)
 1. `tmp/current-run-id.txt` oluştur (yoksa): `{YYYYMMDD}-{HHMMSS}-{dava-id}`
@@ -39,10 +40,16 @@ Mevcut kısa prompt YASAK — bu komut tam protokolü zorunlu uygular.
 - Terim listesini progress ledger'a yaz: `phase: 2B, step: term_generation`
 
 ### Faz 2 — Geniş Tarama (Query 1-4)
-- `search_bedesten_unified(phrase="<ana terim>")` — varsayılan
-  - **Bedesten Solr dialect:** `+`, `-`, `"exact phrase"`, `AND`/`OR`/`NOT` (UPPERCASE), `()` grouping. **Wildcard/fuzzy yok.**
-- `search_bedesten_unified(phrase="<ana>", birimAdi="HGK")` — Hukuk Genel Kurulu
-- `search_bedesten_unified(phrase="<ana>", birimAdi="IBK")` — İçtihatları Birleştirme
+- `ictihat_ara(phrase="<ana terim>")` — varsayılan
+  - **Bedesten Solr dialect — ⚠️ EN KRİTİK TUZAK: çıplak terimler arası
+    BOŞLUK = OR (AND değil!).** İki kavramı birlikte zorunlu kılmak için
+    HER birini `+` ile işaretle: `+kamulaştırma +"bedel tespiti"`.
+    Diğer operatörler: `-dışla`, `"exact phrase"`, büyük harf `AND`/`OR`/`NOT`,
+    `()` grouping. **Wildcard/fuzzy/yakınlık YOK.**
+  - En az bir kriter zorunlu (phrase / esas_no / birimAdi / tarih) — yalnız court_types yetmez
+  - Triyajda `include_snippets: true` (kotasız, 5 cache-siz üst isabet)
+- `ictihat_ara(phrase="<ana>", birimAdi="HGK")` — Hukuk Genel Kurulu
+- `ictihat_ara(phrase="<ana>", birimAdi="IBK")` — İçtihatları Birleştirme
 - Alternatif terim
 - **Min delay:** Pro MCP'de gözlemli rate limit yok — sorgular arası bekleme **ZORUNLU değil**, 429 alınırsa exponential backoff
 
@@ -63,7 +70,7 @@ Mevcut kısa prompt YASAK — bu komut tam protokolü zorunlu uygular.
 - Bozma kararı + İBK arama
 
 ### Faz 6 — Tam Metin Okuma (min 5 karar)
-- `get_bedesten_document_markdown(documentId="<id>")` ile en alakalı 5 kararı tam çek
+- `ictihat_getir(documentId="<id>")` ile en alakalı 5 kararı tam çek
 - Her karardan **atıf yaptığı mevzuat maddelerini çıkar** (2C girdisi)
 - Mevzuat atıfları → `02-Arastirma/atif-maddeleri.json`
 
@@ -80,7 +87,7 @@ Mevcut kısa prompt YASAK — bu komut tam protokolü zorunlu uygular.
 ## Progress Ledger Yazımı
 Her sorgu sonu `.faz2-progress.jsonl`'e satır:
 ```json
-{"ts":"...","run_id":"...","phase":"2B","step":"yargi_search","query_no":N,"query_label":"<faz>_<terim>","tool":"mcp__yargi-mcp-pro__search_bedesten_unified","status":"ok","duration_ms":X,"result_count":Y,"selected_count":Z,"rate_limit_wait_ms":0}
+{"ts":"...","run_id":"...","phase":"2B","step":"yargi_search","query_no":N,"query_label":"<faz>_<terim>","tool":"mcp__yargi-mcp-pro__ictihat_ara","status":"ok","duration_ms":X,"result_count":Y,"selected_count":Z,"rate_limit_wait_ms":0}
 ```
 60 sn sessizlikte: `STILL_WORKING: <ne yapıyorum>` satırı.
 

@@ -59,7 +59,7 @@
 ## VARYANT A — GEMİNİ BATCH (Antigravity sağ panel)
 
 - Sana verilen Yargıtay/Bedesten künyeleri terminal tarafından **ÖNCEDEN
-  doğrulandı** (`get_bedesten_document_markdown` ile çekildi + konu teyit edildi).
+  doğrulandı** (`ictihat_getir` ile çekildi + konu teyit edildi).
   **Sen yeniden internetten/hafızadan karar arama.** Sana **verilmeyen** künye =
   uydurma riski → kullanma.
 - Çıktının başına SENTINEL satırını yaz; sonuna KAYNAK DOĞRULAMA tablosu +

@@ -33,7 +33,7 @@ Faz 1    Yargı-MCP-Pro içtihat taraması (hafif protokol: min 6 sorgu,
          min 3 tam metin teyidi) → 01-Ictihat-taramasi.md
          (DOĞRULANMIŞ / ELENDİ / DOĞRULANMAMIŞ etiketleme — atıf ön şartı
           tam metin açılması)
-Faz 2    Mülga denetimi — mcp__yargi-mcp-pro__search_mevzuat + get_mevzuat_document
+Faz 2    Mülga denetimi — mcp__yargi-mcp-pro__mevzuat_ara + mevzuat_getir
          → 02-Mulga-denetim.md
 Faz 2.5  (Opsiyonel) NotebookLM 2-4 hedefli sorgu (uygun notebook varsa)
 Faz 3    Sentez cevap (Claude tek-elden) → arastirma-cevabi.md + DOCX

@@ -54,7 +54,7 @@ GUVEN NOTU:
   - Karar baglamına uygun mu (NotebookLM 89/4 cevabini 89/3'e tasimak gibi
     genelleme hatasi var mi)?
 - Mevzuat atiflari:
-  - Madde no + tam metin Pro MCP `get_mevzuat_document` ile dogrulanmis mi?
+  - Madde no + tam metin Pro MCP `mevzuat_getir` ile dogrulanmis mi?
   - Mulga eleme yapildi mi? Olay tarihi versiyonu kontrol edildi mi?
 - **HARD FAIL kurali (>=2 DOGRULANMAMIS atif):** Cikti Drive'a yazilamaz,
   YENIDEN YAZ kararni Director'a gonder.

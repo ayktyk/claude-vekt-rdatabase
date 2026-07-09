@@ -104,15 +104,15 @@ Antigravity sag panelinde Gemini 3.1 Pro uretir ve Drive'a yazar.
 
    **1.5. DOCUMENT FETCH VERIFICATION (ZORUNLU — 2026-05-17 sistemik fix):**
 
-   `search_bedesten_unified` arama sonucunda gelen her Bedesten documentId
-   icin DEVIR BLOGUNU BASMADAN ONCE `get_bedesten_document_markdown`
+   `ictihat_ara` arama sonucunda gelen her Bedesten documentId
+   icin DEVIR BLOGUNU BASMADAN ONCE `ictihat_getir`
    ile **karar tam metni cekilir + konuyla ilgili oldugu kontrol edilir**.
 
    - **Search listesinde gorunmek = atif YAPMAK icin yetmez.** Search
      bazen alakasiz veya cok genis kapsamli sonuc dondurur (orn:
      "bilisim dolandiriciligi" sorgusu 30K+ sonuc icinde sahte SMS
      konusuyla alakasiz kararlar da var).
-   - Her aday karar icin: documentId -> get_bedesten_document_markdown
+   - Her aday karar icin: documentId -> ictihat_getir
      -> metni oku -> blog konusu ile **gercekten ilgili mi?** sor.
      Eger metin sahte SMS / bilisim dolandiriciligi / phishing /
      ilgili spesifik konuya degmiyor ise o karari **kullanma**.

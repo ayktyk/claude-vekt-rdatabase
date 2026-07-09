@@ -48,7 +48,7 @@ Yargitay 12. HD T.27.09.2016 E.2016/17416 K.2016/19934
 **Hata gecmisi (sistemik risk):**
 - 2026-05-05 Tugba 2026-89 davasi: NotebookLM 89/4 cevabini 89/3'e yanlis genellestirme + uydurma HGK alintisi. Avukat tarafindan yakalandi. Doktrin yazildi.
 - 2026-05-06 Seydi Ahmet Baskaya 2025/139 davasi: Hibrit motor (Claude+Gemini) ASAMA basi bildirim ve sonu self-review yapilmadan tum cikti tek elden Claude tarafindan uretildi. Avukat farketti, Gemini self-review devreye alindi: 35+ format/uslup ihlali ve 1 HARD FAIL bulundu. **Hibrit Motor Zorunluluk Doktrini yazildi.**
-- **2026-05-17 Sahte Icra Mesaji blog (THEMIS v1):** Hizir `search_bedesten_unified`'in dondurdugu 30,939 sonuc icinden ilk 6 Bedesten ID'yi alip karar metinlerini ACMADAN Gemini'ye devir bloguna gomdu. Tum karar tarihleri 2026-04 oldugu icin avukat suphelendi, "uydurma karar atfi" uyarisini verdi. Bedesten document API 502 oldugu icin doğrulama yapılamadi, atıflar "yerleski uygulama" formuluyle degistirildi. **Sistemik fix:** `ajanlar/blog-yazari/SKILL.md` §1.5 + `prompts/gemini/blog_yazimi.md`'ye **Document Fetch Verification Zorunlulugu** eklendi: search listesinde gorunmek = atif YAPMAK icin yetmez; her Bedesten ID `get_bedesten_document_markdown` ile acilip konuyla ilgili oldugu teyit edilmeden Gemini'ye gonderilmez. `verified: true` flag'i olmayan karar Gemini protokolünde reddedilir. API down -> kunye verilmez, "yerlesik uygulama" formulu zorunlu.
+- **2026-05-17 Sahte Icra Mesaji blog (THEMIS v1):** Hizir `ictihat_ara`'in dondurdugu 30,939 sonuc icinden ilk 6 Bedesten ID'yi alip karar metinlerini ACMADAN Gemini'ye devir bloguna gomdu. Tum karar tarihleri 2026-04 oldugu icin avukat suphelendi, "uydurma karar atfi" uyarisini verdi. Bedesten document API 502 oldugu icin doğrulama yapılamadi, atıflar "yerleski uygulama" formuluyle degistirildi. **Sistemik fix:** `ajanlar/blog-yazari/SKILL.md` §1.5 + `prompts/gemini/blog_yazimi.md`'ye **Document Fetch Verification Zorunlulugu** eklendi: search listesinde gorunmek = atif YAPMAK icin yetmez; her Bedesten ID `ictihat_getir` ile acilip konuyla ilgili oldugu teyit edilmeden Gemini'ye gonderilmez. `verified: true` flag'i olmayan karar Gemini protokolünde reddedilir. API down -> kunye verilmez, "yerlesik uygulama" formulu zorunlu.
 
 ## Doktrin Zorunluluk Kapıları (Çalıştırılabilir — 2026-06-02)
 
@@ -452,10 +452,25 @@ Sistemin iki bilgi katmani vardir. Her arac yalnizca kendi katmanina aittir.
 
 ### Harici Katman - Guncel hukuki veri
 
+> **ANA OMURGA = YARGI-MCP-PRO (FAZ 6 — 2026-07-09, avukat karari).**
+> Sunucu buyuk guncelleme aldi: tool seti TURKCE isimlerle yenilendi, eski
+> `ictihat_ara` / `ictihat_getir` /
+> `mevzuat_ara` / `mevzuat_getir` isimleri ARTIK YOK. Sorgu
+> lehceleri ve tuzaklar icin ZORUNLU referans:
+> `.claude/skills/yargi-legal-research-guide/SKILL.md` (surum 2026-07-08b).
+> Cok-kollu derin arastirma orkestrasyonu:
+> `.claude/skills/yargi-agentic-deep-research/SKILL.md`.
+
 | Arac | Gorev |
 |---|---|
-| Yargi-MCP-Pro (`mcp__yargi-mcp-pro__*`) | **BIRINCIL** — FAZ 2 2026-05-19. Yargitay/Danistay/Yerel/Istinaf/KYB arama + tam metin: `search_bedesten_unified` (court_types[] enum, birimAdi enum), `get_bedesten_document_markdown` (documentId). Eski 9+ ayri tool (anayasa/emsal/kvkk/uyusmazlik/rekabet/...) Pro MCP'de search_bedesten_unified'a konsolide oldu (court_types[] ile filtre). `check_government_servers_health` Pro MCP'de yok. Engine: `config/model-routing.json` -> `tasks.yargi_mcp` (MAX EFFORT thinking). |
-| Yargi-MCP-Pro Mevzuat (`mcp__yargi-mcp-pro__*`) | **BIRINCIL** — FAZ 2 2026-05-19. 12 mevzuat tipi (KANUN/KHK/TUZUK/YONETMELIK/CB_KARARNAME/CB_YONETMELIK/CB_KARAR/CB_GENELGE/KKY/UY/TEBLIGLER/MULGA) arama + icerik + madde agaci + gerekce: `search_mevzuat` (phrase Mevzuat Solr — +/-/exact/wildcard/fuzzy, AND/OR/NOT BREAK eder; mevzuat_tur_list[]; mevzuat_no), `search_within_mevzuat` (tek kanun ici boolean — AND/OR/NOT UPPERCASE), `get_mevzuat_document` (id_type=mevzuat/madde/gerekce/outline polimorfik). Eski 9 tip-bazli + 3 fetch tool bu uc tool'a konsolide. Mulga denetimi prompt seviyesinde. Engine: `config/model-routing.json` -> `tasks.mevzuat_mcp` (MAX EFFORT thinking). |
+| `ictihat_ara` + `ictihat_getir` | **BIRINCIL (2B).** Yargitay/Danistay/Yerel/Istinaf/KYB arama + tam metin. DIKKAT: phrase'de BOSLUK=OR — kavramlari `+` ile zorunlu isaretle. `esas_no`/`karar_no` docket lookup, `birimAdi` enum, `include_snippets: true` kotasiz triyaj, `sort_by: date` kronoloji. En az bir kriter sart. Tam metin: `ictihat_getir(documentId)` — 40K uzeri `page_number` ile. |
+| `semantik_ictihat_ara` | **YENI — kavramsal arama (Arguman.ai'nin yerini aldi).** Dogal-dil Turkce hukuki kavram → anlamca benzer kararlar + `related_quotes`. ⚠️ Korpus ~1 yil eski: KESIF araci — bulunan terimlerle `ictihat_ara` yeniden calistirilir, guncel atif ORADAN yapilir. Ilk sorgu ~20 sn (isinma). |
+| `aym_ictihat_ara` | **YENI — Anayasa Mahkemesi.** norm_denetimi / bireysel_basvuru / siyasi_parti / yuce_divan. Sorgu DUZ Turkce kelime (operator YOK). Temel hak boyutlu davalarda (mulkiyet, uzun yargilama, ifade) zorunlu kol. Karar okuma: `ictihat_getir("anayasa:<guid>")`. |
+| `mevzuat_ara` + `mevzuat_getir` + `mevzuat_icinde_ara` | **BIRINCIL (2C).** 12 tip mevzuat. `mevzuat_ara`: bosluk=AND, AND/OR/NOT literal BOZAR, `mevzuat_no` en kesin, page_size max 20. `mevzuat_icinde_ara`: tek kanun ici YEREL boolean (BUYUK harf operatorler, kelime koku). `mevzuat_getir`: id_type=mevzuat/madde/gerekce/outline; **madde_no kisayolu** (outline'siz tek cagri); 50KB chunk. id_type = kimligin geldigi ALAN ADI (hane sayisi degil). |
+| `kurum_karari_ara` + `kurum_karari_getir` | **YENI — 12 kurum karari.** gib (ozelge) / btk / rekabet / uyusmazlik / kik / sayistay / bddk / kvkk / sigorta / reklam / kdk / spk. Filtreler kuruma ozel. ⚠️ bddk/kvkk/sigorta/reklam DIS arama (Tavily) — sorguya muvekkil adi/kisi-tanimlayici YAZMA. Iki kademeli: `spk_icinde_ara`, `sigorta_dergi_icinde_ara`, `reklam_bulten_icinde_ara`. |
+| `dava-cli` (UYAP entegrasyonu) | **YENI — UYAP Avukat dosya cekme (beta).** `npx dava-cli@latest clone` → avukat Chrome'da UYAP'a girip davayi secer, TUM evrak (.udf/.pdf/.tiff) + INDEX.md yerel klasore iner (`~/Documents/YargiPRO/...`). `sync` = delta guncelleme (tarayicisiz). Detay + platform tuzaklari: `.claude/skills/yargi-uyap-workspace/SKILL.md`. Evrak formati okuma: `udf_tiff_pdf_guide` tool. |
+| `legal_research_guide` / `agentic_legal_deep_research` / `udf_tiff_pdf_guide` / `prepare_workspace_guide` | Sunucu rehber tool'lari — YEREL SKILL olarak kaydedildi, ayni surumken TEKRAR CAGIRMA (skill short-circuit). Sunucu daha yeni surum ilan ederse bir kez cagir + skill'i guncelle. |
+| `kullanici_profili_getir` | Her yeni sohbette hukuki is oncesi 1 kez cagrilir (sunucu zorunlulugu) — avukat kimlik + dilekce tercihleri doner. |
 | `yargi` CLI | **FALLBACK** - Yargi MCP basarisiz olursa devreye girer (`yargi bedesten search/doc`) |
 | `mevzuat` CLI | **FALLBACK** - Mevzuat MCP basarisiz olursa devreye girer (`mevzuat search/doc/article/tree`) |
 
@@ -1128,6 +1143,8 @@ avukata su soruyu sor. Tahmin etme, varsayim yapma, direkt sor:
 "[Dava turu] icin elindeki kaynaklara bakalim.
 Asagidakilerden hangisi hazir ve bu dava icin kullanalim?
 
+[ ] UYAP dava dosyasi - dava UYAP'ta acik mi? (dava-cli clone ile
+    TUM evrak otomatik indirilir - YENI 2026-07-09)
 [ ] NotebookLM - notebook adi: ___________
 [ ] Google Drive - klasor yolu: ___________
 [ ] Masaustu / yerel dosya - dosya adi veya yolu: ___________
@@ -1141,6 +1158,18 @@ Birden fazla secebilirsin."
 Avukatin cevabini bekle. Cevap gelmeden arastirma ajanlarini baslatma.
 
 ### Kaynak Cevabina Gore Davranis
+
+**UYAP secildi (YENI — FAZ 6 2026-07-09):**
+Protokol: `.claude/skills/yargi-uyap-workspace/SKILL.md`.
+Ozet akis: `npx dava-cli@latest clone` → avukat Chrome'da UYAP'a girip
+davayi secer → tum evrak (.udf/.pdf/.tiff) + INDEX.md yerel klasore
+iner (`~/Documents/YargiPRO/...`) → Claude INDEX.md'yi okur, kritik
+evraki (dava dilekcesi, cevap, bilirkisi raporu, durusma tutanaklari)
+tasnif eder → evrak-listesi.md yazilir → briefing bu evraka dayanir.
+Evrak formati okuma: `udf_tiff_pdf_guide` MCP tool'u (udf-cli/TIFF/PDF).
+Dava suresince yeni evrak: `npx dava-cli@latest sync` (delta,
+tarayicisiz). macOS ilk calistirmada Automation izni ister (skill'de
+detay); ilk kullanim oncesi tek seferlik `npx dava-cli@latest login`.
 
 **NotebookLM secildi:**
 Ajan 2, arastirma sirasinda belirtilen notebook'u sorgular.
@@ -1420,6 +1449,8 @@ Context window %70'e ulastiginda otomatik state dump:
 | `yeni dava: [isim], [tur] / ozet: [...] / kritik nokta: [...]` | Director + 7 ASAMA kullanici-kontrollu tam akis |
 | `devam` / `atla` / `motor degistir` / `dur` / `devam et` | 7 ASAMA kontrol komutlari |
 | `usul: [dava turu]` | Sadece Usul Uzmani |
+| `davayi cek` / `yargi pro baslat` | UYAP Avukat dava dosyasi indirme — `dava-cli clone` akisi (`.claude/skills/yargi-uyap-workspace/SKILL.md`) |
+| `dava guncelle` | Clone'lanmis davaya yeni evrak indir — `dava-cli sync` (delta, tarayicisiz) |
 | `arastir: [kritik nokta]` | Director + arastirma cekirdegi (2B→2C sirali zincir + 2D paralel) |
 | `arastir yargi: [kritik nokta]` | Arastirma - 2B Yargi MCP (CLI fallback) |
 | `arastir mevzuat: [kritik nokta]` | Arastirma - 2C Mevzuat MCP (CLI fallback) |

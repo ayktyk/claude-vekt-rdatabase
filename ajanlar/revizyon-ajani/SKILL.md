@@ -31,10 +31,10 @@ Versiyon: 1.1 (FAZ 4 — Pro MCP documentId dogrulama + HARD FAIL kurali netlest
 1. **Her Yargitay kunyesi audit edilir (FAZ 4 2026-05-19 — Pro MCP entegre):**
    - Kunye dogru mu (Daire/Tarih/Esas/Karar tutarlı mı)?
    - **Yargi-MCP-Pro documentId mevcut mu?** Revizyon Ajani Pro MCP'ye sorgu yapar:
-     `mcp__yargi-mcp-pro__search_bedesten_unified(esas_no=..., karar_no=..., birimAdi=...)`
+     `mcp__yargi-mcp-pro__ictihat_ara(esas_no=..., karar_no=..., birimAdi=...)`
      → documentId dönmezse rapora `[DOGRULANMAMIS]` damgasi.
    - Tam metin alintisi (`«...»`) gercek karar metninde gerçekten geçiyor mu?
-     - Sasırtıcı görünen alıntılar `mcp__yargi-mcp-pro__get_bedesten_document_markdown(documentId)`
+     - Sasırtıcı görünen alıntılar `mcp__yargi-mcp-pro__ictihat_getir(documentId)`
        ile çekilip metinle karsilastirilir.
      - Uyumsuzluk varsa **alinti SILINIR**, sadece kunye + sayfa referansı bırakılır.
    - (Arguman.ai 2026-07-09'da ARSIVLENDI — eski Arguman kaynakli atif

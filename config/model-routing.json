@@ -33,16 +33,25 @@
       "model": "claude-opus-4-7",
       "mcp_server": "yargi-mcp-pro",
       "tool_prefix": "mcp__yargi-mcp-pro__",
-      "tools": ["search_bedesten_unified", "get_bedesten_document_markdown", "legal_research_guide", "udf_format_guide"],
-      "aciklama": "Yargi-MCP-Pro (Bedesten/HGK/IBK) sorgu yonetimi. ASAMA 2B esas tool: search_bedesten_unified (phrase Solr - AND/OR/NOT/+/-/exact, NO wildcards), birimAdi enum (H1-H23/C1-C23/HGK/D1-D17/IBK), court_types[]. Tam metin: get_bedesten_document_markdown(documentId). FAZ 2 2026-05-19."
+      "tools": ["ictihat_ara", "ictihat_getir", "semantik_ictihat_ara", "aym_ictihat_ara", "kurum_karari_ara", "kurum_karari_getir"],
+      "skill": ".claude/skills/yargi-legal-research-guide/SKILL.md",
+      "aciklama": "Yargi-MCP-Pro ictihat sorgu yonetimi (FAZ 6 2026-07-09 — yeni Turkce tool seti). ASAMA 2B esas: ictihat_ara (phrase Bedesten Solr — BOSLUK=OR!, +zorunlu; birimAdi enum; court_types[]; esas_no/karar_no docket; include_snippets kotasiz triyaj), tam metin ictihat_getir (40K sayfalama, AYM id'leri de kabul). YENI: semantik_ictihat_ara (kavramsal arama, ~1 yil eski korpus — kesif icin, guncel atif icin ictihat_ara ile capraz-kontrol ZORUNLU), aym_ictihat_ara (norm_denetimi + bireysel_basvuru, DUZ kelime — operator yok), kurum_karari_ara (12 kurum: gib/btk/rekabet/uyusmazlik/kik/sayistay/bddk/kvkk/sigorta/reklam/kdk/spk). Detay: yargi-legal-research-guide skill."
     },
     "mevzuat_mcp": {
       "engine": "claude",
       "model": "claude-opus-4-7",
       "mcp_server": "yargi-mcp-pro",
       "tool_prefix": "mcp__yargi-mcp-pro__",
-      "tools": ["search_mevzuat", "search_within_mevzuat", "get_mevzuat_document"],
-      "aciklama": "Yargi-MCP-Pro Mevzuat sorgulari (12 tip: KANUN/KHK/TUZUK/YONETMELIK/CB_KARARNAME/CB_YONETMELIK/CB_KARAR/CB_GENELGE/KKY/UY/TEBLIGLER/MULGA). ASAMA 2C esas tool: search_mevzuat (phrase Mevzuat Solr - +/-/exact/wildcard*/fuzzy~/proximity, AND/OR/NOT BREAK eder; mevzuat_tur_list[] ile tip filtresi; mevzuat_no ile direkt kanun no). Tek kanun ici boolean: search_within_mevzuat. Polimorfik fetch: get_mevzuat_document(id, id_type=mevzuat/madde/gerekce/outline). FAZ 2 2026-05-19."
+      "tools": ["mevzuat_ara", "mevzuat_getir", "mevzuat_icinde_ara"],
+      "skill": ".claude/skills/yargi-legal-research-guide/SKILL.md",
+      "aciklama": "Yargi-MCP-Pro Mevzuat sorgulari (FAZ 6 2026-07-09 — yeni Turkce tool seti; 12 tip: KANUN/KHK/TUZUK/YONETMELIK/CB_*/KKY/UY/TEBLIGLER/MULGA). ASAMA 2C esas: mevzuat_ara (phrase Mevzuat Solr — bosluk=AND, AND/OR/NOT literal BOZAR, wildcard*/fuzzy~ calisir; mevzuat_no en kesin; page_size max 20), mevzuat_icinde_ara (tek mevzuat ici YEREL boolean — BUYUK harf AND/OR/NOT, kelime koku), mevzuat_getir (id_type=mevzuat/madde/gerekce/outline; madde_no kisayolu ile tek cagri; 50KB chunk). id_type = kimligin geldigi ALAN ADI. Detay: yargi-legal-research-guide skill."
+    },
+    "uyap_workspace": {
+      "engine": "claude",
+      "model": "claude-opus-4-7",
+      "cli": "npx dava-cli@latest",
+      "skill": ".claude/skills/yargi-uyap-workspace/SKILL.md",
+      "aciklama": "UYAP Avukat dava dosyasi cekme (FAZ 6 2026-07-09 — beta). ASAMA 1 hazirlikta opsiyonel: dava UYAP'ta varsa 'dava-cli clone' ile evraklar (.udf/.pdf/.tiff) + INDEX.md yerel klasore iner (~/Documents/YargiPRO/...), sonra arastirma girdisi olur. Delta guncelleme: 'dava-cli sync'. macOS ilk calistirmada Automation izni; Windows'ta Session-0 tuzagi (Scheduled Task yolu). Detay: yargi-uyap-workspace skill."
     },
     "notebooklm_mcp": {
       "engine": "claude",

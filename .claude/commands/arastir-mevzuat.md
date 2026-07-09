@@ -15,19 +15,19 @@ protokolüne uyarak çıkar. Mevcut kısa prompt YASAK — bu komut tam protokol
 zorunlu uygular.
 
 **FAZ 2 (2026-05-19):** Eski 9 spesifik mevzuat tool'u (`search_kanun`,
-`search_khk`, `search_tuzuk`, ...) **tek `search_mevzuat` + `mevzuat_tur_list[]`**
+`search_khk`, `search_tuzuk`, ...) **tek `mevzuat_ara` + `mevzuat_tur_list[]`**
 altında birleşti. 3 ayrı fetch tool (`get_mevzuat_content` / `_madde_tree` /
-`_gerekce`) **tek `get_mevzuat_document` + `id_type` enum**'a indirgendi.
+`_gerekce`) **tek `mevzuat_getir` + `id_type` enum**'a indirgendi.
 
 ## Zorunlu Referans Dokümanlar
-- `FIVEAGENTS.md` → ASAMA 2C (satır ~656 civarı) + Normlar Hiyerarşisi (satır ~780)
-- `ajanlar/arastirmaci/SKILL.md` → Bölüm 2 (Mevzuat MCP Derin Protokolü, 4 Faz + Mülga) + Bölüm 2.5 (Mülga Eleme)
-- `docs/mcp-envanteri/yargi-mcp-pro.md` — tool envanteri
+- `.claude/skills/yargi-legal-research-guide/SKILL.md` — **sorgu lehçeleri + tuzaklar (BİRİNCİL referans, sürüm 2026-07-08b)**
+- `FIVEAGENTS.md` → ASAMA 2C + Normlar Hiyerarşisi
+- `ajanlar/arastirmaci/SKILL.md` → Bölüm 2 (Mevzuat MCP Derin Protokolü, 9 Faz + Mülga) + Bölüm 2.5 (Mülga Eleme)
 
 ## Aktif Tool'lar (Yargı-MCP-Pro)
-- `mcp__yargi-mcp-pro__search_mevzuat` — 12 mevzuat tipi global arama
-- `mcp__yargi-mcp-pro__search_within_mevzuat` — tek kanun içi local boolean (AND/OR/NOT UPPERCASE)
-- `mcp__yargi-mcp-pro__get_mevzuat_document` — polimorfik fetch (`id_type=mevzuat/madde/gerekce/outline`)
+- `mcp__yargi-mcp-pro__mevzuat_ara` — 12 mevzuat tipi global arama
+- `mcp__yargi-mcp-pro__mevzuat_icinde_ara` — tek kanun içi local boolean (AND/OR/NOT UPPERCASE)
+- `mcp__yargi-mcp-pro__mevzuat_getir` — polimorfik fetch (`id_type=mevzuat/madde/gerekce/outline`)
 
 ## Mevzuat Tip Enum (`mevzuat_tur_list[]`)
 - `KANUN` — Kanunlar
@@ -49,23 +49,23 @@ altında birleşti. 3 ayrı fetch tool (`get_mevzuat_content` / `_madde_tree` /
 ## Zorunlu Adımlar (Min 8 Sorgu / 9 Faz + Mülga Denetim)
 
 ### Faz 1 — Ana Kanun Maddesi (Query 1-3)
-- `search_mevzuat(phrase="<kanun adı veya konu>", page_size=20)` — **page_size her zaman ≤ 20 (upstream cap)**
+- `mevzuat_ara(phrase="<kanun adı veya konu>", page_size=20)` — **page_size her zaman ≤ 20 (upstream cap)**
   - **Mevzuat Solr dialect:** `+`, `-`, `"exact"`, `wildcard*`, `fuzzy~`, `"a b"~5` (proximity), `^N` (boost). **AND/OR/NOT LİTERAL parser'ı BOZAR** — sadece bitişik kelimeler default AND.
-- Kanun no biliniyorsa direkt: `search_mevzuat(mevzuat_no="6098", mevzuat_tur_list=["KANUN"])` — TBK örneği
-- `get_mevzuat_document(id="<mevzuat_id>", id_type="outline")` — kanun başına 1 kez (cache'lenir)
-- `get_mevzuat_document(id="<madde_id>", id_type="madde")` — outline'dan gelen madde_id
+- Kanun no biliniyorsa direkt: `mevzuat_ara(mevzuat_no="6098", mevzuat_tur_list=["KANUN"])` — TBK örneği
+- `mevzuat_getir(id="<mevzuat_id>", id_type="outline")` — kanun başına 1 kez (cache'lenir)
+- `mevzuat_getir(id="<madde_id>", id_type="madde")` — outline'dan gelen madde_id
 
 ### Faz 2 — Madde Değişiklik Geçmişi (Query 4-5)
-- `get_mevzuat_document(id="<gerekce_id>", id_type="gerekce")` — yasama gerekçesi (her mevzuat'ta yok)
+- `mevzuat_getir(id="<gerekce_id>", id_type="gerekce")` — yasama gerekçesi (her mevzuat'ta yok)
 - Olay tarihine göre doğru versiyon tespiti (`resmi_gazete_tarihi_start/end` filtreleri)
 
 ### Faz 3 — İlgili Madde Zinciri (Query 6-9)
 - Önceki/sonraki madde + atıf maddeleri
-- Tek kanun içi derinleşme: `search_within_mevzuat(mevzuat_id=..., query="<boolean>", sort_by="document_order")`
+- Tek kanun içi derinleşme: `mevzuat_icinde_ara(mevzuat_id=..., query="<boolean>", sort_by="document_order")`
   - **Boolean dialect:** AND/OR/NOT UPPERCASE çalışır (Solr DEĞİL — local evaluator)
 
 ### Faz 4 — Alt Mevzuat (Query 10-12)
-- `search_mevzuat(phrase=..., mevzuat_tur_list=["YONETMELIK", "TEBLIGLER"], page_size=20)`
+- `mevzuat_ara(phrase=..., mevzuat_tur_list=["YONETMELIK", "TEBLIGLER"], page_size=20)`
 - CB Kararnamesi varsa: `mevzuat_tur_list=["CB_KARARNAME"]`
 
 ### Faz 5 — Hiyerarşik Etiketleme (Normlar Hiyerarşisi, ZORUNLU)
@@ -101,8 +101,8 @@ altında birleşti. 3 ayrı fetch tool (`get_mevzuat_content` / `_madde_tree` /
 şemada yok — protokol prompt seviyesinde uygulanır.
 
 2B'den gelen her karar için atıf maddesi denetimi:
-1. **Yürürlük:** madde bugün yürürlükte mi? (`get_mevzuat_document` + Resmî Gazete tarihi kontrolü)
-2. **Mülga tarihi:** yürürlükten kaldırıldı mı? (`search_mevzuat(phrase=..., mevzuat_tur_list=["MULGA"])` ile karşı kontrol)
+1. **Yürürlük:** madde bugün yürürlükte mi? (`mevzuat_getir` + Resmî Gazete tarihi kontrolü)
+2. **Mülga tarihi:** yürürlükten kaldırıldı mı? (`mevzuat_ara(phrase=..., mevzuat_tur_list=["MULGA"])` ile karşı kontrol)
 3. **Olay tarihi versiyonu:** o tarihte hangi versiyon?
 4. **Zımni ilga:** yeni kanun eskiyi ilga etmiş mi? (`resmi_gazete_tarihi_start/end` filtreli arama)
 

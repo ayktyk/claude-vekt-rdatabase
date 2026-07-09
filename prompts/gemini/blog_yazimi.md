@@ -35,7 +35,7 @@ urettigi paketten yararlanir. Asagidaki yasaklara MUTLAK uy:
    **EK KURAL (2026-05-17):** Context'te `verified: true` flag'i
    olmayan kararlari KULLANMA. `verified: false` veya flag yok ise
    "yerlesik uygulama" formulu zorunlu. Terminal Claude (Hizir)
-   her devir bloguna gomdugu karari `get_bedesten_document_markdown`
+   her devir bloguna gomdugu karari `ictihat_getir`
    ile dogrulayip metnin konuyla ilgili oldugunu teyit etmis olmali.
 
 2. **Tirnak ici alinti UYDURULAMAZ.** Context'te `cited_text` olarak
@@ -87,7 +87,7 @@ emsal_kararlar:
     karar: "2024/5678"
     tarih: "2024-06-15"
     verified: true              # ZORUNLU — terminal Claude
-                                # get_bedesten_document_markdown ile
+                                # ictihat_getir ile
                                 # metni acti, konuyla ilgili oldugunu
                                 # dogruladi. verified:false ise
                                 # kunye verilemez.

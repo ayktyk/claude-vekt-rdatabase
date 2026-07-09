@@ -72,7 +72,7 @@ Antigravity devir blogundan ONCE terminal Claude, ASAMA 2 Faz 5
 ek karsi-ictihat sorgusu yapar:
 
 ```python
-mcp__yargi-mcp-pro__search_bedesten_unified(
+mcp__yargi-mcp-pro__ictihat_ara(
   phrase="<muvekkilin ana tezinin KARSITI — doktrinal Turkce>",
   court_types=["YARGITAYKARARI"]
 )
@@ -90,7 +90,7 @@ mcp__yargi-mcp-pro__search_bedesten_unified(
 - Frontmatter: `engine: claude`, `mcp: yargi-mcp-pro`, `status: TASLAK`
 - Tehdit listesi (5 seviye)
 - Her tehdide ait kararin kunyesi + documentId
-- KRITIK ve YUKSEK seviyedekilerin tam metni (`get_bedesten_document_markdown`)
+- KRITIK ve YUKSEK seviyedekilerin tam metni (`ictihat_getir`)
 
 **Not:** Sorguya TC/IBAN gibi kimlik verisi yazilmaz (gereksiz — hukuki
 tez jenerik doktrinal terimlerle kurulur; arama kalitesi de artar).

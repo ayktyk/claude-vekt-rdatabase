@@ -106,9 +106,9 @@ THEMIS yeni arastirma yapmaz AMA serbest konu modunda avukatin hazir
 emsal karari yoksa Director Agent Antigravity'ye gonderecek minimum
 context'i toplar:
 
-- `mcp__yargi-mcp-pro__search_bedesten_unified` ile primary keyword
+- `mcp__yargi-mcp-pro__ictihat_ara` ile primary keyword
   icin 3-5 emsal karar (documentId'li) — FAZ 2 2026-05-19
-- `mcp__yargi-mcp-pro__search_mevzuat(mevzuat_no="<no>", mevzuat_tur_list=["KANUN"])`
+- `mcp__yargi-mcp-pro__mevzuat_ara(mevzuat_no="<no>", mevzuat_tur_list=["KANUN"])`
   ile ilgili kanun maddesi (en az 2)
 
 Sonuclar Antigravity devir bloguna gomulur.
@@ -184,7 +184,7 @@ Avukat "Blog bitti" diyene kadar bir sonraki adima gecme.
    - **SEO-WARN** → bloklamaz; avukata raporla (yayın öncesi düzeltilebilir).
    - PASS olmadan 2. adıma GEÇİLMEZ ("opsiyonel" DEĞİL — 2026-05-17 sahte icra blog
      dersi). Yapısal kapı documentId gerçekliğini doğrulamaz; her künye ayrıca
-     bağımsız reviewer ile `get_bedesten_document_markdown` üzerinden teyit edilir.
+     bağımsız reviewer ile `ictihat_getir` üzerinden teyit edilir.
 
 2. **Gmail Draft** (YALNIZ `blog_validator.py` PASS sonrası — avukata sor):
    ```

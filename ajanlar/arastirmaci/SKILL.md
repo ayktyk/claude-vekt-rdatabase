@@ -232,16 +232,26 @@ Oneri: Manuel arama veya yeniden calistirma
 **5xx/timeout davranisi:** 1 retry (5 sn sonra), sonra Yargi CLI
 fallback otomatik (frontmatter'a `mcp_fallback_used: true` notu).
 
-Pro MCP arac listesi (3 esas tool — FAZ 2 2026-05-19):
-- `mcp__yargi-mcp-pro__search_bedesten_unified` — Yargitay/Danistay/Yerel/Istinaf/KYB arama (court_types[] enum); birimAdi enum H1-H23/C1-C23/HGK/CGK/D1-D17/IBK/...; phrase Bedesten Solr dialect (AND/OR/NOT UPPERCASE, +/-/"exact"/grouping — NO wildcards/fuzzy)
-- `mcp__yargi-mcp-pro__get_bedesten_document_markdown` — documentId → tam metin Markdown (cached)
-- `mcp__yargi-mcp-pro__legal_research_guide` — meta rehber (cached, free, opsiyonel)
-
-NOT: Eski 9+ ayrı tool (`search_anayasa_unified`, `search_emsal_*`, `search_uyusmazlik_*`,
-`search_kvkk_*`, `search_rekabet_*`, `search_kik_v2_*`, `search_sayistay_*`, `search_bddk_*`,
-`search_sigorta_tahkim_*`, `search_gib_ozelge`) Pro MCP'de **search_bedesten_unified**'a
-konsolide oldu — `court_types[]` parametresi ile filtrelenir. `check_government_servers_health`
-Pro MCP'de **yok** (kaldirildi — `claude mcp list` ile baglanti dogrulanir).
+Pro MCP arac listesi (FAZ 6 2026-07-09 — YENI TURKCE TOOL SETI; tam
+lehce/tuzak referansi: `.claude/skills/yargi-legal-research-guide/SKILL.md`):
+- `mcp__yargi-mcp-pro__ictihat_ara` — Yargitay/Danistay/Yerel/Istinaf/KYB arama
+  (court_types[] enum; birimAdi enum H1-H23/C1-C23/HGK/CGK/D1-D17/IBK/...).
+  ⚠️ phrase'de BOSLUK = OR (AND DEGIL!) — kavramlari `+` ile isaretle:
+  `+"etkin pismanlik" +"nitelikli dolandiricilik"`. Joker/fuzzy YOK.
+  esas_no/karar_no docket lookup (`YIL/SIRA`); include_snippets: true =
+  kotasiz triyaj; sort_by: "date" kronoloji; en az bir kriter sart.
+- `mcp__yargi-mcp-pro__ictihat_getir` — documentId → tam metin Markdown
+  (cached; 40K uzeri page_number ile; AYM `anayasa:<guid>` id'leri de kabul)
+- `mcp__yargi-mcp-pro__semantik_ictihat_ara` — YENI: kavramsal arama.
+  Faz 1'de terim kesfi icin kullanilir (asagida). ⚠️ Korpus ~1 yil eski —
+  guncel atif ASLA buradan yapilmaz, bulunan terimlerle ictihat_ara calisir.
+- `mcp__yargi-mcp-pro__aym_ictihat_ara` — YENI: AYM kararlari (norm_denetimi/
+  bireysel_basvuru). Sorgu DUZ kelime, OPERATOR YOK. Temel hak boyutu olan
+  davalarda ek kol olarak calistirilir.
+- `mcp__yargi-mcp-pro__kurum_karari_ara` / `kurum_karari_getir` — 12 kurum
+  (gib ozelge/rekabet/kvkk/sayistay/kdk/spk/...). Konu kurum karari
+  gerektiriyorsa ek sorgu. ⚠️ bddk/kvkk/sigorta/reklam DIS arama —
+  kisi-tanimlayici YAZMA.
 
 **Atif Madde Cikarimi (2C girdisi - YENI):** Tam metni okunan her karar icin,
 kararin atif yaptigi mevzuat maddeleri cikarilir (TBK m.X, Is K. m.Y, ...) ve
@@ -249,10 +259,10 @@ kararin atif yaptigi mevzuat maddeleri cikarilir (TBK m.X, Is K. m.Y, ...) ve
 Mevzuat" bolumune temel olur ve mulga eleme protokolune girer.
 
 **ARAC ESLEME (CLI komutu → MCP karsiligi):**
-- `yargi bedesten search "X"` → `search_bedesten_unified(query="X")`
-- `yargi bedesten search "X" -b HGK` → `search_bedesten_unified(query="X", birim="HGK")`
-- `yargi bedesten search "X" --date-start 2024-01-01` → `search_bedesten_unified(query="X", date_start="2024-01-01")`
-- `yargi bedesten doc <id>` → `get_bedesten_document_markdown(document_id="<id>")`
+- `yargi bedesten search "X"` → `ictihat_ara(phrase="X")` (⚠️ coklu kavramda `+` isaretle)
+- `yargi bedesten search "X" -b HGK` → `ictihat_ara(phrase="X", birimAdi="HGK")`
+- `yargi bedesten search "X" --date-start 2024-01-01` → `ictihat_ara(phrase="X", kararTarihiStart="2024-01-01")`
+- `yargi bedesten doc <id>` → `ictihat_getir(documentId="<id>")`
 
 Asagidaki bash kod bloklari **referans** amaclidir - gercek cagri MCP araclariyla
 yapilir, CLI komutlari sadece MCP fail durumunda devreye girer. Faz protokolu
@@ -260,13 +270,19 @@ ve minimum sorgu sayilari aynidir.
 
 
 
-#### Faz 1 - Terim Uretimi (on-dusunme)
+#### Faz 1 - Terim Uretimi (on-dusunme + semantik kesif)
 
 Aramaya baslamadan ONCE ajan durup **5-7 alternatif arama terimi** uretir:
 
 - Ana hukuki kavram (ornek: "fazla mesai ispat yuku")
 - Es anlamli / yakin kavramlar (ornek: "fazla calisma ispati", "mesai ispati")
 - Gunluk kullanim karsiligi (ornek: "imzali bordro karinesi")
+- **YENI — Semantik terim kesfi (1-2 sorgu):** Yargitay'in kullandigi tam
+  ifade bilinmiyorsa `semantik_ictihat_ara(query="<dogal-dil Turkce hukuki
+  kavram cumlesi>")` calistirilir; donen `related_quotes` icindeki
+  terminoloji (Yargitay'in kendi soyleyisleri) terim listesine eklenir.
+  ⚠️ Semantik sonuclar SADECE terim kesfi icindir — korpus ~1 yil eski,
+  guncel atif Faz 2-6'daki `ictihat_ara` sonuclarindan yapilir.
 - Ilgili daire(ler)i tespit et:
   - Isci - 9. HD, 22. HD, HGK (Hukuk Genel Kurulu)
   - Kira - 3. HD, 6. HD
@@ -360,6 +376,25 @@ Her karar icin ajan not alir:
 - Bizim dilekcede hangi cumle icin atif olarak kullanilabilir?
 - Karsi taraf tarafindan nasil cevrilebilir?
 
+#### Faz 6.5 - AYM Kolu (KOSULLU — temel hak boyutu varsa ZORUNLU)
+
+Dava temel hak boyutu tasiyorsa (mulkiyet, uzun yargilama, adil yargilanma,
+ifade, ozel hayat, esitlik) AYM ictihadi taranir:
+
+```python
+mcp__yargi-mcp-pro__aym_ictihat_ara(
+  decision_type="bireysel_basvuru",   # veya norm_denetimi (kanun iptali)
+  query="<duz Turkce kelimeler — OPERATOR YOK, her kelime daraltir>",
+  decision_date_start="<son 3-5 yil>"
+)
+# okuma: ictihat_getir("anayasa:<guid>") — uzun kararlarda page_number ile
+```
+
+- Norm denetimi: dayandigimiz kanun maddesi iptal edilmis/edilmek uzere mi?
+- Bireysel basvuru: benzer olay orgusunde ihlal karari var mi (norm-seviyesi etki)?
+- Temel hak boyutu YOKSA bu faz atlanir, rapora "AYM: ARANMADI (temel hak
+  boyutu yok)" notu dusulur.
+
 #### Faz 7 - Gap Check (zorunlu son kontrol)
 
 Rapor yazmadan ONCE ajan kendine sorar ve **yazili** olarak kontrol eder:
@@ -423,43 +458,43 @@ denetimi yapilir. `atif-maddeleri.json` olusmadan 2C BASLAYAMAZ.
 **Min sorgu sayilari (8 sorgu, 9 faz) DEGISMEZ — sadece arac Pro MCP olur.**
 
 **!! page_size ≤20 KURALI (ZORUNLU — Pro MCP'de de korunur)**
-Pro MCP `search_mevzuat` upstream hard cap'i `page_size <= 20`. Daha fazla `Kayit
+Pro MCP `mevzuat_ara` upstream hard cap'i `page_size <= 20`. Daha fazla `Kayit
 sayisi 20'den fazla olamaz` hatasi doner. Tool schema'da `maximum: 20` enforced.
 - **`page_size` parametresi HER zaman 20 veya altinda** olmali
 - **Default 25 KULLANMA** — explicit `page_size: 20` ver
 - Pagination kullan: `page_size: 20, page: 1`, sonra `page: 2` ...
-- `search_bedesten_unified` icin Bedesten cap 100 (Pro MCP schema'da `maximum: 100`)
+- `ictihat_ara` icin Bedesten cap 100 (Pro MCP schema'da `maximum: 100`)
 - Rate limit Pro MCP'de gozlenmedi (yukaridaki Bolum 1 v3 gevsetilmis protokolu)
 
 Pro MCP arac listesi (3 esas tool — FAZ 2 2026-05-19):
-- `mcp__yargi-mcp-pro__search_mevzuat` — 12 mevzuat tipi global arama. Tipleri:
+- `mcp__yargi-mcp-pro__mevzuat_ara` — 12 mevzuat tipi global arama. Tipleri:
   KANUN, KHK, TUZUK, YONETMELIK, CB_KARARNAME, CB_YONETMELIK, CB_KARAR (PDF/OCR),
   CB_GENELGE (PDF/OCR), KKY (kurum yonetmelik), UY (universite yonetmelik), TEBLIGLER, MULGA.
   Parametreler: `mevzuat_adi` (title plain), `phrase` (Mevzuat Solr — +/-/"exact"/wildcard*/fuzzy~/"a b"~5/boost^N;
   **AND/OR/NOT literal BREAK eder**), `mevzuat_no` (direkt kanun no), `mevzuat_tur_list[]`,
   `resmi_gazete_tarihi_start/end`, `page`, `page_size` (max 20).
-- `mcp__yargi-mcp-pro__search_within_mevzuat` — tek mevzuat ici local boolean
+- `mcp__yargi-mcp-pro__mevzuat_icinde_ara` — tek mevzuat ici local boolean
   (Solr DEGIL — `AND`/`OR`/`NOT` UPPERCASE calisir + adjacent words implicit AND).
-  `mevzuat_id` (search_mevzuat'tan), `query`, `sort_by` (relevance/document_order),
+  `mevzuat_id` (mevzuat_ara'tan), `query`, `sort_by` (relevance/document_order),
   `page_size` (1-50, default 25).
-- `mcp__yargi-mcp-pro__get_mevzuat_document` — polimorfik fetch:
+- `mcp__yargi-mcp-pro__mevzuat_getir` — polimorfik fetch:
   `id_type="mevzuat"` → tam metin (auto-chunk >50KB), `id_type="madde"` → tek madde,
   `id_type="gerekce"` → yasama gerekcesi, `id_type="outline"` → bolum/madde tree (`madde_id` listesi).
   PDF tipleri (`CB_KARAR`, `CB_GENELGE`) Mistral OCR'lı.
 
 NOT: Eski 9 tip-bazli search tool (`search_kanun`, `search_khk`, `search_tuzuk`,
 `search_kurum_yonetmelik`, `search_teblig`, `search_cbk`, `search_cbyonetmelik`,
-`search_cbgenelge`, `search_cbbaskankarar`) Pro MCP'de tek `search_mevzuat` +
+`search_cbgenelge`, `search_cbbaskankarar`) Pro MCP'de tek `mevzuat_ara` +
 `mevzuat_tur_list[]` altında birlesti. Eski 3 fetch tool (`get_mevzuat_content`,
-`get_mevzuat_madde_tree`, `get_mevzuat_gerekce`) tek `get_mevzuat_document` +
+`get_mevzuat_madde_tree`, `get_mevzuat_gerekce`) tek `mevzuat_getir` +
 `id_type` enum'a indirgendi.
 
 **ARAC ESLEME (eski → Pro MCP karsiligi):**
-- `mevzuat search "X" -t KANUN` → `search_mevzuat(phrase="X", mevzuat_tur_list=["KANUN"])` veya `search_mevzuat(mevzuat_adi="X", mevzuat_tur_list=["KANUN"])`
-- `search_kanun(kanun_no=N)` → `search_mevzuat(mevzuat_no="N", mevzuat_tur_list=["KANUN"])`
-- `mevzuat tree <id>` veya `get_mevzuat_madde_tree(mevzuat_id="<id>")` → `get_mevzuat_document(id="<id>", id_type="outline")`
-- `mevzuat article <id>` veya `get_mevzuat_content(madde_id="<id>")` → `get_mevzuat_document(id="<id>", id_type="madde")`
-- `mevzuat gerekce <id>` veya `get_mevzuat_gerekce(mevzuat_id="<id>")` → `get_mevzuat_document(id="<id>", id_type="gerekce")`
+- `mevzuat search "X" -t KANUN` → `mevzuat_ara(phrase="X", mevzuat_tur_list=["KANUN"])` veya `mevzuat_ara(mevzuat_adi="X", mevzuat_tur_list=["KANUN"])`
+- `search_kanun(kanun_no=N)` → `mevzuat_ara(mevzuat_no="N", mevzuat_tur_list=["KANUN"])`
+- `mevzuat tree <id>` veya `get_mevzuat_madde_tree(mevzuat_id="<id>")` → `mevzuat_getir(id="<id>", id_type="outline")`
+- `mevzuat article <id>` veya `get_mevzuat_content(madde_id="<id>")` → `mevzuat_getir(id="<id>", id_type="madde")`
+- `mevzuat gerekce <id>` veya `get_mevzuat_gerekce(mevzuat_id="<id>")` → `mevzuat_getir(id="<id>", id_type="gerekce")`
 
 Mevzuat MCP de derin mod. Kanun maddesini cekip birakmak YASAK.
 Gerekce + degisiklik tarihcesi + ilgili yonetmelik hep toplanir.
@@ -684,10 +719,10 @@ icin, kararin atif yaptigi mevzuat maddeleri **cikarilir** ve liste olarak
 #### Adim 2 — 2C Mevzuat MCP Atif Maddelerini Cek
 
 2B'nin verdigi atif madde listesi uzerinden iterasyon (Pro MCP — FAZ 2):
-- `search_mevzuat(phrase="<kanun adi>", page_size=20)` veya `search_mevzuat(mevzuat_no="<no>", mevzuat_tur_list=["KANUN"])` → mevzuat_id
-- `get_mevzuat_document(id="<mevzuat_id>", id_type="outline")` → madde agaci + madde_id listesi
-- `get_mevzuat_document(id="<madde_id>", id_type="madde")` → bugunkü guncel metin
-- `get_mevzuat_document(id="<gerekce_id veya mevzuat_id>", id_type="gerekce")` → gerekce (varsa)
+- `mevzuat_ara(phrase="<kanun adi>", page_size=20)` veya `mevzuat_ara(mevzuat_no="<no>", mevzuat_tur_list=["KANUN"])` → mevzuat_id
+- `mevzuat_getir(id="<mevzuat_id>", id_type="outline")` → madde agaci + madde_id listesi
+- `mevzuat_getir(id="<madde_id>", id_type="madde")` → bugunkü guncel metin
+- `mevzuat_getir(id="<gerekce_id veya mevzuat_id>", id_type="gerekce")` → gerekce (varsa)
 
 #### Adim 3 — Mulga / Guncel Denetimi (her madde icin ZORUNLU)
 
@@ -696,7 +731,7 @@ icin, kararin atif yaptigi mevzuat maddeleri **cikarilir** ve liste olarak
 | Yururluk | Madde bugun yururlukte mi? | madde_tree status | Mulga ise FLAG |
 | Mulga tarihi | Ne zaman yururlukten kaldirildi? | madde_tree history | Olay tarihi sonrasi ise atif gecersiz |
 | Olay tarihi versiyonu | Olay tarihinde hangi versiyon yururlukteydi? | madde history | Versiyon farkliysa "olay tarihi versiyonu Y, bugun Z" notu |
-| Zimni ilga | Yeni kanun eskiyi ilga etmis mi? | search_mevzuat (yeni kanun) | Ediyorsa atif guncellenir veya gecersiz |
+| Zimni ilga | Yeni kanun eskiyi ilga etmis mi? | mevzuat_ara (yeni kanun) | Ediyorsa atif guncellenir veya gecersiz |
 
 #### Adim 4 — Eleme (kalite kapisi)
 

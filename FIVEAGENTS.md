@@ -375,12 +375,12 @@ AVUKAT
   +-- SIRALI ZINCIR (2B → 2C, paralelden CIKARILDI) --------------
       |
       |-- [2B] YARGI-MCP-PRO (Opus 4.7 MAX EFFORT) — FAZ 2 2026-05-19
-      |       Birincil: mcp__yargi-mcp-pro__search_bedesten_unified, get_bedesten_document_markdown
+      |       Birincil: mcp__yargi-mcp-pro__ictihat_ara, ictihat_getir
       |       Fallback: yargi CLI (MCP fail durumunda)
       |       Cikti: kararlar + her kararin atif yaptigi mevzuat maddeleri
       |       v
       |-- [2C] YARGI-MCP-PRO MEVZUAT (Opus 4.7 MAX EFFORT) — FAZ 2 2026-05-19
-      |       Birincil: mcp__yargi-mcp-pro__search_mevzuat, search_within_mevzuat, get_mevzuat_document
+      |       Birincil: mcp__yargi-mcp-pro__mevzuat_ara, mevzuat_icinde_ara, mevzuat_getir
       |       Fallback: mevzuat CLI (MCP fail durumunda)
       |       Girdi: 2B'nin atif maddeleri listesi
       |       v
@@ -666,12 +666,12 @@ BASLATICI: Director Agent
   |  2D async paralel kolu tetikler + 2B → 2C sirali zinciri yurutur:
   |
   +---> [2B] YARGI-MCP-PRO  (DERIN ITERATIF PROTOKOL - ZORUNLU - SIRALI ZINCIR BASLANGICI) - FAZ 2 2026-05-19
-  |        Birincil: mcp__yargi-mcp-pro__search_bedesten_unified
+  |        Birincil: mcp__yargi-mcp-pro__ictihat_ara
   |                  (court_types[]: YARGITAYKARARI/DANISTAYKARAR/YERELHUKUK/ISTINAFHUKUK/KYB;
   |                   birimAdi enum: H1-H23/C1-C23/HGK/CGK/D1-D17/IBK/...)
-  |                  + mcp__yargi-mcp-pro__get_bedesten_document_markdown (tam metin)
+  |                  + mcp__yargi-mcp-pro__ictihat_getir (tam metin)
   |        NOT: Eski 9+ ayri tool (anayasa/emsal/kvkk/uyusmazlik/rekabet/...) Pro MCP'de
-  |              search_bedesten_unified'a konsolide oldu (court_types[] ile filtre)
+  |              ictihat_ara'a konsolide oldu (court_types[] ile filtre)
   |        Fallback: yargi CLI (yargi bedesten search/doc) - sadece MCP fail
   |        Mod: Her zaman derin, tek-shot yasak, **Opus 4.7 MAX EFFORT thinking**
   |        Minimum: 15 sorgu / 6 faz
@@ -697,23 +697,23 @@ BASLATICI: Director Agent
   v   (sirali zincir devami - 2C 2B'nin ciktisini bekler)
   |
   +---> [2C] YARGI-MCP-PRO MEVZUAT  (DERIN ITERATIF PROTOKOL - ZORUNLU - 2B'YE BAGIMLI) - FAZ 2 2026-05-19
-  |        Birincil: mcp__yargi-mcp-pro__search_mevzuat
+  |        Birincil: mcp__yargi-mcp-pro__mevzuat_ara
   |                  (mevzuat_tur_list[]: 12 tip — KANUN/KHK/TUZUK/YONETMELIK/CB_KARARNAME/
   |                   CB_YONETMELIK/CB_KARAR/CB_GENELGE/KKY/UY/TEBLIGLER/MULGA;
   |                   mevzuat_no ile direkt kanun no lookup;
   |                   phrase Mevzuat Solr dialect — +/-/"exact"/wildcard*/fuzzy~,
   |                   AND/OR/NOT literal BREAK eder)
-  |                  + mcp__yargi-mcp-pro__search_within_mevzuat (tek kanun ici boolean — AND/OR/NOT UPPERCASE)
-  |                  + mcp__yargi-mcp-pro__get_mevzuat_document (id_type=mevzuat/madde/gerekce/outline polimorfik)
-  |        NOT: Eski 9 tip-bazli search tool tek search_mevzuat'a konsolide; 3 fetch tool
-  |              tek get_mevzuat_document'e indirgendi.
+  |                  + mcp__yargi-mcp-pro__mevzuat_icinde_ara (tek kanun ici boolean — AND/OR/NOT UPPERCASE)
+  |                  + mcp__yargi-mcp-pro__mevzuat_getir (id_type=mevzuat/madde/gerekce/outline polimorfik)
+  |        NOT: Eski 9 tip-bazli search tool tek mevzuat_ara'a konsolide; 3 fetch tool
+  |              tek mevzuat_getir'e indirgendi.
   |        Fallback: mevzuat CLI (mevzuat search/doc/article/tree) - sadece MCP fail
   |        Mod: Her zaman derin, tek-shot yasak, **Opus 4.7 MAX EFFORT thinking**
   |        Girdi: 2B'nin atif maddesi listesi (TBK m.X, Is K. m.Y, ...)
   |        Minimum: 8 sorgu / 4 faz + mulga denetim
   |
-  |        Faz 1: Ana kanun - search_mevzuat + get_mevzuat_document(id_type=outline) + (id_type=madde)
-  |        Faz 2: Degisiklik gecmisi - get_mevzuat_document(id_type=gerekce) + history
+  |        Faz 1: Ana kanun - mevzuat_ara + mevzuat_getir(id_type=outline) + (id_type=madde)
+  |        Faz 2: Degisiklik gecmisi - mevzuat_getir(id_type=gerekce) + history
   |               (olay tarihine gore dogru versiyon tespiti)
   |        Faz 3: Ilgili madde zinciri - onceki/sonraki madde +
   |               atif yapilan maddeler
@@ -735,7 +735,7 @@ BASLATICI: Director Agent
   |        Kontrol 1: Yururluk - madde bugun yururlukte mi? (madde_tree status)
   |        Kontrol 2: Mulga tarihi - yurulukten kaldirildi mi? (madde_tree history)
   |        Kontrol 3: Olay tarihi versiyonu - o tarihte hangi versiyon? (history)
-  |        Kontrol 4: Zimni ilga - yeni kanun eskiyi ilga etmis mi? (search_mevzuat)
+  |        Kontrol 4: Zimni ilga - yeni kanun eskiyi ilga etmis mi? (mevzuat_ara)
   |
   |        ELEME KARARI:
   |          GECERLI       → rapora alinir (atif maddeleri yururlukte ve uyumlu)
