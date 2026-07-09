@@ -12,8 +12,8 @@ Selin Uyar dava klasöründeki tüm .md dosyalarını .docx'e çevirir.
 Kullanım:
     python md_to_docx.py <kaynak_klasor> [hedef_klasor]
 
-Örnek:
-    python md_to_docx.py "G:/Drive'ım/Hukuk Bürosu/Aktif Davalar/Selin Uyar Kira Tespit Davası"
+Örnek (platform-bagimsiz — yol scripts/paths.py ile cozumlenir):
+    python md_to_docx.py "$(python scripts/paths.py dava selin-uyar-2026-003)"
 """
 
 import sys

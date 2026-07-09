@@ -356,7 +356,34 @@ maskeli dilekceyi gercek veriye cevirir.
 
 Kalici dava ve arastirma ciktisi yerel diske degil, yalnizca Google Drive'a kaydedilir.
 
-Temel klasor:
+### Platform ve Yol Cozumleme (ZORUNLU — Windows + macOS)
+
+Bu proje iki makinede calisir (Windows + MacBook). "Hukuk Burosu" veri koku
+her makinede FARKLI mutlak yolda durur. Bu dokumanda gecen HER
+`G:\Drive'im\Hukuk Burosu\...` ifadesi bir **PLATFORM TOKEN**'idir; sabit
+Windows yolu DEGILDIR. Gercek yol calisilan platforma gore cozumlenir:
+
+| Platform | `Hukuk Burosu` koku |
+|---|---|
+| Windows | `G:\Drive'im\Hukuk Burosu` |
+| macOS | `/Users/busrayesilkaya/Library/CloudStorage/GoogleDrive-aykutyesilkaya75@gmail.com/Drive'ım/Hukuk Bürosu` |
+
+**Tek dogruluk kaynagi:** `config/paths.json` + `scripts/paths.py`
+(cozumleme onceligi: `HUKUK_BUROSU_ROOT` env > `config/paths.json`'daki platform anahtari).
+
+Dosya yazma/okuma yolu uretmeden ONCE kok yolu cozumle:
+```bash
+python scripts/paths.py data-root          # cozumlenen kok
+python scripts/paths.py dava {dava-id}     # Aktif Davalar/{dava-id}
+python scripts/paths.py check              # tum yollar + VAR/YOK dogrulama
+```
+Python scriptleri icinden: `from paths import dava_dir, aktif_davalar, blog_root`.
+
+Yeni makine eklerken `config/paths.json` -> `data_root`'a anahtar ekle veya
+`HUKUK_BUROSU_ROOT` ortam degiskenini ayarla. Repo Google Drive'in ICINDE
+tutulmaz (kod GitHub ile senkronize; yalnizca `Hukuk Burosu` VERISI Drive'da).
+
+Temel klasor (token — yukaridaki tabloya gore cozumlenir):
 - `G:\Drive'im\Hukuk Burosu`
 
 Kayit kurali:

@@ -1,0 +1,18 @@
+{
+  "_comment": "Platform-bagimsiz yol cozumleme. 'Hukuk Burosu' veri kokunun her makinedeki gercek yolu. Cozumleme onceligi (scripts/paths.py): 1) env HUKUK_BUROSU_ROOT  2) bu dosyada mevcut platform anahtari. Yeni makine eklerken buraya anahtar ekle veya env degiskeni ayarla.",
+  "_kullanim": "python scripts/paths.py data-root   (mevcut platformun cozumlenen kokunu yazar)",
+  "_son_guncelleme": "2026-07-09",
+
+  "data_root": {
+    "darwin": "/Users/busrayesilkaya/Library/CloudStorage/GoogleDrive-aykutyesilkaya75@gmail.com/Drive'ım/Hukuk Bürosu",
+    "windows": "G:\\Drive'ım\\Hukuk Bürosu"
+  },
+
+  "subdirs": {
+    "aktif_davalar": "Aktif Davalar",
+    "bekleyen_davalar": "Bekleyen Davalar",
+    "biten_davalar": "Biten Davalar",
+    "blog": "Blog",
+    "research": "Research"
+  }
+}

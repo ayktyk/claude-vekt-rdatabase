@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
-"""PDF inspection helper - ASAMA 1 müvekkil PDF okuma."""
+"""PDF inspection helper - ASAMA 1 müvekkil PDF okuma.
+
+PDF yolu platform-bagimsiz olarak PDF_PATH ortam degiskeninden alinir
+(sabit Windows yolu YOK). Ornek:
+    PDF_PATH="/.../müvekkil evrak.pdf" python scripts/pdf_inspect.py inspect 1 3
+    PDF_PATH="$(python scripts/paths.py dava 2026-003)/SON/evrak.pdf" python scripts/pdf_inspect.py dump out.txt
+"""
+import os
 import sys
 import io
 from pathlib import Path
@@ -8,10 +15,22 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 import PyPDF2
 
-PDF_PATH = Path(r"G:\Drive'ım\Hukuk Bürosu\Aktif Davalar\2026-003 Mehmet Ali - Trafik Kazası Tazminat\SON\müvekkil son evraklar.pdf")
+_pdf_env = os.environ.get("PDF_PATH")
+PDF_PATH = Path(_pdf_env).expanduser() if _pdf_env else None
+
+
+def _require_pdf():
+    if PDF_PATH is None:
+        raise SystemExit(
+            "[HATA] PDF yolu verilmedi. PDF_PATH ortam degiskenini ayarla, orn:\n"
+            '  PDF_PATH="/yol/evrak.pdf" python scripts/pdf_inspect.py inspect 1 3'
+        )
+    if not PDF_PATH.exists():
+        raise SystemExit(f"[HATA] PDF bulunamadi: {PDF_PATH}")
 
 def inspect(start: int = 1, end: int = 3, full: bool = False):
     """Read pages [start, end] inclusive, 1-indexed."""
+    _require_pdf()
     with open(PDF_PATH, "rb") as f:
         reader = PyPDF2.PdfReader(f)
         total = len(reader.pages)
@@ -31,6 +50,7 @@ def inspect(start: int = 1, end: int = 3, full: bool = False):
 
 def dump_all(out_path: Path):
     """Dump all pages to a UTF-8 text file."""
+    _require_pdf()
     with open(PDF_PATH, "rb") as f:
         reader = PyPDF2.PdfReader(f)
         total = len(reader.pages)
