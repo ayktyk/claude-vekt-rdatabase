@@ -1,11 +1,34 @@
 # Playbook — Trafik Kazasi Kaynakli Tazminat (Deger Kaybi + Mahrumiyet + Hasar)
 
 Son guncelleme: 2026-07-10
-Durum: TOHUM (2026-07-09 dogrulanmis arastirmadan) + [AVUKAT DOLDURACAK] bosluklar
+Durum: AKTIF — avukat muhakemesi islendi (2026-07-10 mulakat)
 Kaynak arastirma: `Hukuk Burosu/Research/2026-07-09-arac-mahrumiyet-bedeli-icra/`
+
+## 0. AYKUT'UN STRATEJI FELSEFESI (bu dava turunun anahtari)
+
+> **"Riski dusuk tutarim; onemli olan usuli bir hatayla kaybetmemek ve
+> kazanci maksimuma yaklastirmak."**
+
+Tum ajanlarin uygulayacagi uc sonuc:
+1. **Tutar IHTIYATLI kurulur** — karsi vekalet ucreti yememek onceliklidir.
+   Yuksek gun sayisi + yuksek gunluk bedel KOMBINASYONU asla onerilmez;
+   delillendirilebilir alt bant secilir.
+2. **Usul guvenligi > tutar buyuklugu** — gorev/yetki/sure hatasi tek
+   basina davayi kaybettirir; once usul dogrulanir, sonra esasa gecilir.
+3. **Asil savas alani ITIRAZIN IPTALI davasidir** — takip zaten itirazla
+   duracaktir (asagida §3); takip tutari, o davada TAM KABUL alinabilecek
+   sekilde kurulur.
 
 ## 1. Ilk Bakis Kontrol Listesi (dosya gelince ilk 10 dk)
 
+- [ ] **KAZA FOTOGRAFLARI var mi?** (AYKUT — ilk soru): onden + yandan +
+      arkadan, PLAKA GORUNECEK sekilde. Yoksa muvekkilden hemen iste;
+      delil dosyasinin temeli.
+- [ ] **Yaralama/olum var mi, yoksa salt maddi hasar mi?** (AYKUT):
+      Bedensel zarar varsa dosya BASKA REJIME gecer (ceza boyutu, uzamis
+      ceza zamanasimi, ZMSS bedensel teminat, SGK rucu ihtimali) — bu
+      playbook SALT MADDI HASAR dosyasi icindir; bedensel zarar varsa
+      Director avukata bildirir, bu playbook'la devam ETMEZ.
 - [ ] Kusur durumu: tutanak/kaza tespit + Tramer kaydi (tek kaza mi?)
 - [ ] Aracin kullanim amaci: hususi mi ticari mi (K1/K2 belgesi var mi?)
       → hesap yontemini belirler (kira bedeli vs gercek kazanc kaybi)
@@ -14,7 +37,6 @@ Kaynak arastirma: `Hukuk Burosu/Research/2026-07-09-arac-mahrumiyet-bedeli-icra/
 - [ ] Onarim: fatura/servis kaydi + eksper raporu (makul sure dayanagi)
 - [ ] Arac pert mi? → pert ise deger kaybi YOK; mahrumiyet "yeni arac
       alimina kadar makul sure" uzerinden (Ankara BAM 35.HD 2023/1178-2024/1678)
-- [ ] [AVUKAT DOLDURACAK: Aykut'un ilk bakista baktigi diger seyler]
 
 ## 2. Hesap / Deger Yaklasimi (DOGRULANMIS — 2026-07-09 arastirmasi)
 
@@ -47,8 +69,17 @@ Sigorta Tahkim hakem uygulamasi ayni yonde (Karar Dergisi 36/50 — snippet).
   olasilikla REDDEDILIR — abartili tutar koyma (kotu niyet tazminati riski).
 - Takip talebine hesap dokumunu (gun × bedel − tenzil) + delilleri ekle:
   itiraz halinde itirazin iptali dosyasi hazir olur.
-- [AVUKAT DOLDURACAK: Aykut'un tenzil orani pratigi — %10-20 bandinda mi,
-  kalem kalem mi?]
+
+**AYKUT'UN TUTAR KURALI (baglayici):**
+- **Yuksek tutar ve yuksek gun BELIRLENMEZ.** Gun sayisinda emsal bandin
+  alt-orta bolgesi (ornek: bilirkisi pratigi 7-15 gunse 7-10 taraf),
+  gunluk bedelde delillendirilmis piyasa teklifinin ortalamasi veya alti.
+- Gerekce: takip tutari, itirazin iptali davasinda TAM KABUL alinacak
+  sekilde kurulmali — kismi ret, karsi vekalet ucreti dogurur ve net
+  kazanci erozyona ugratir. "Kazanci maksimuma yaklastirmak" = brut
+  talebi degil, NET tahsilati buyutmek.
+- Tenzil (yakit/amortisman) hesapta acikca gosterilir; ihtiyatli oran
+  secilir ki bilirkisi raporu talebin ALTINDA kalmasin.
 
 ## 3. Karsi Tarafin Klasik Oyunlari
 
@@ -61,24 +92,36 @@ Sigorta Tahkim hakem uygulamasi ayni yonde (Karar Dergisi 36/50 — snippet).
   karsila; bilirkisi ek raporu tuzagina hazirlan (BAM 35.HD 2025/1542'de
   1.400→718 TL dusus ornegi: verinin DONEMI kritik).
 - "Ikame arac zaten saglandi" → kasko kayitlarini onceden kontrol et.
-- [AVUKAT DOLDURACAK: Aykut'un sahada gordugu diger savunmalar]
+- **REFLEKS ITIRAZ (AYKUT — sahada en sik gorulen):** Karsi taraf takibe
+  cogu zaman BILINCSIZCE, salt durdurmak icin itiraz eder. Bu VERI olarak
+  kullanilir: (a) takip hazirlanirken itiraz GELECEK varsayilir, itirazin
+  iptali dosyasi bastan kurulur (deliller takip ekinde), (b) tutar tam-kabul
+  hedefiyle ihtiyatli tutulur, (c) itirazin iptali kazanildiginda %20 icra
+  inkar tazminati talep edilir ama likidite nedeniyle reddine hazirlanilir —
+  asil kazanc tam kabul + yargilama gideri + vekalet ucretidir.
 
-## 4. Yapilmayacaklar
+## 4. Yapilmayacaklar (AYKUT — kesin kurallar)
 
-- Mahrumiyeti ZMSS sigortacisina/Tahkime ana talep olarak goturme
-  (teminat disi — vekalet ucreti riski; Karar Dergisi 36'daki gibi ret).
-  [AVUKAT ONAYLAYACAK: AYM 2020 iptali sonrasi tartisma nedeniyle Tahkim
-  basvurusuna ihtiyati kayit olarak eklensin mi, hic mi eklenmesin?]
+- **Mahrumiyet Tahkim'e HIC goturulmez** (avukat karari 2026-07-10 —
+  ihtiyati kayitla bile eklenmez). AYM 2020 iptali tartismasina ragmen:
+  teminat disi ret + vekalet ucreti riski, olasi kazanima degmez.
+  Tahkim = yalniz hasar + deger kaybi. Mahrumiyet = yalniz icra/dava,
+  kusurlu surucu + isletene karsi.
+- **Yuksek tutar + yuksek gun kombinasyonu KULLANILMAZ** (§2 tutar kurali).
 - Fiili servis gununu takibe koyma (kismi ret + karsi vekalet ucreti uretir).
-- [AVUKAT DOLDURACAK: Aykut'un bilincli kullanmadigi argumanlar]
+- [ZORLAMA] etiketli arguman bu dava turunde onerilmez — strateji felsefesi
+  (§0) geregi dusuk-risk hat secilir.
 
-## 5. Muvekkil Iletisimi
+## 5. Muvekkil Iletisimi (AYKUT)
 
-- [AVUKAT DOLDURACAK: tahsilat gercekciligi nasil anlatilir — icra
-  borclusunun odeme gucu riski; sure beklentisi; masraf/vekalet ucreti
-  bilgilendirmesi]
-- Vaat edilmez: kesin tutar, kesin sure ("yerlesik formul su; rakami
-  bilirkisi/piyasa belirler" cercevesi).
+- **YUKSEK TUTAR VAAT EDILMEZ.** Cerceve: "yerlesik formul su (gun ×
+  emsal kira − indirim); rakami bilirkisi/piyasa belirler; biz
+  delillendirilebilir ihtiyatli tutari talep ediyoruz ki dava guvenle
+  kazanilsin." Buyuk rakam telaffuz eden muvekkil beklentisi BASTAN
+  asagi cekilir.
+- Kesin sure vaat edilmez (itiraz + itirazin iptali yolu anlatilir:
+  takip → muhtemel itiraz → dava → tahsilat).
+- Muvekkil iletisim ajani/bilgilendirme ciktilari bu tonu korur.
 
 ## 6. Tuzaklar
 
@@ -89,7 +132,17 @@ Sigorta Tahkim hakem uygulamasi ayni yonde (Karar Dergisi 36/50 — snippet).
 - Zamanasimi: KTK m.109 — 2 yil (zarar gorenin ogrenmesinden) / her halde
   10 yil; ceza zamanasimi uzatmasi ihtimalini kontrol et. [DOGRULANMASI
   GEREKIR — bu playbook'a islenmeden once madde metni cekilmeli]
-- [AVUKAT DOLDURACAK: pahaliya mal olmus ince nokta var mi?]
+- **GOREV/YETKI VE USUL HATALARI (AYKUT — 1 numarali hassasiyet):**
+  Bu dava turunde kaybettiren sey esas degil USULdur. Her dosyada takip/
+  dava acilmadan once ZORUNLU kontrol:
+  - Gorevli mahkeme: taraf sifatina gore (tacir-tacir → Asliye Ticaret;
+    aksi halde Asliye Hukuk) — sigortaci davali DEGILSE ticaret karinesi
+    otomatik kurulmaz, somut dosyada dogrulanir
+  - Yetkili yer + COK-ADLIYELI sehirde dogru adliye (Usul Uzmani
+    "Adliye Esleme Protokolu" ZORUNLU — Selin Uyar 2026-003 dersi)
+  - Icra dairesi yetkisi (genel yetki + haksiz fiil yeri secenegi)
+  - Sure/zamanasimi hesabi cift kontrol
+  Usul Uzmani ciktisi bu maddeleri KARAR NOKTALARI blogunda ayrica gosterir.
 
 ## 7. Kaynak Cekirdegi (dogrulanmis kunyeler — tekrar kullanilabilir)
 
