@@ -30,7 +30,8 @@ Bu komut **bağımsız hızlı araştırma modülünü** çalıştırır. Mevcut
 Faz 0    Soru kabul + slug üret + Research/{tarih}-{slug}/ klasörü + 00-Soru.md
          (klasör kökü: python3 scripts/paths.py research)
 Faz 1    Yargı-MCP-Pro içtihat taraması (hafif protokol: min 6 sorgu,
-         min 3 tam metin teyidi) → 01-Ictihat-taramasi.md
+         min 3 tam metin teyidi; Sol→Terra→Luna→Claude QA)
+         → 01-Ictihat-taramasi.md
          (DOĞRULANMIŞ / ELENDİ / DOĞRULANMAMIŞ etiketleme — atıf ön şartı
           tam metin açılması)
 Faz 2    Mülga denetimi — mcp__yargi-mcp-pro__mevzuat_ara + mevzuat_getir
@@ -46,13 +47,16 @@ Faz 4    Memory yazımı — MemPalace wing_arastirma + proje memory
 1. **ARASTIRMA.md'yi tam oku.** Protokolünü uygula, ezberden çalışma.
 2. `$ARGUMENTS`'ten slug üret. Tarih önekiyle klasör adı: `{YYYY-MM-DD}-{slug}`.
 3. Research klasörünü oluştur: `{python3 scripts/paths.py research}/{klasör}/`.
-4. Faz 0-4'ü sırayla çalıştır. Her faz çıktısını Drive'a yaz.
-5. Faz 3 öncesi **Çıktı Öncesi Checklist** (ARASTIRMA.md §3) uygula:
+4. Faz 1'i `python3 scripts/yargi_model_pipeline.py --mod hafif --cikti
+   "{research_klasoru}" "$ARGUMENTS"` ile çalıştır. Çıkış kodu `0` değilse
+   Faz 2'ye geçme; Claude nihai sentez yapmaz, yalnız kısa QA kapısıdır.
+5. Kalan fazları sırayla çalıştır. Her faz çıktısını Drive'a yaz.
+6. Faz 3 öncesi **Çıktı Öncesi Checklist** (ARASTIRMA.md §3) uygula:
    - DOĞRULANMIŞ atıf ≥ 2 mi?
    - ≥2 DOĞRULANMAMIŞ atıf HARD FAIL → cevap yazma
    - Aleyhe içtihat varsa açıkça yaz
    - Lehe yorum dürtüsü reddedildi mi
-6. Avukata `arastirma-cevabi.md/.docx` Drive yolunu ver + 1-2 cümle özet.
+7. Avukata `arastirma-cevabi.md/.docx` Drive yolunu ver + 1-2 cümle özet.
 
 ## Kişisel Veri Notu
 

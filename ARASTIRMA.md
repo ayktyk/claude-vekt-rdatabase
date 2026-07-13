@@ -110,6 +110,17 @@ Tam doktrin: `@ajanlar/0-halusinasyon-doktrini.md`. Bu modül için kritik kural
 Dava akışının 2B'sinin mini versiyonu — **min 6 sorgu / 3 alt-adım**
 (15-sorguluk tam protokol dava akışında; danışma hattı hız önceliklidir):
 
+Kanonik çalıştırma:
+
+```bash
+python3 scripts/yargi_model_pipeline.py --mod hafif --cikti "{research_klasoru}" "{hukuki_soru}"
+```
+
+Model sırası `config/model-routing.json` içinden okunur: Sol ana tarama, Terra
+bağımsız denetim, Luna `01-Ictihat-taramasi.md` + `atif-maddeleri.json`, Claude
+ise yalnız kısa kalite kapısı üretir. Claude nihai sentez yapmaz. Komut `0`
+dönmeden Faz 2'ye geçilmez.
+
 1. **Terim üretimi:** Doktrinal çeviriden 3-4 alternatif arama terimi +
    ilgili daire(ler) belirle.
 2. **Tarama (min 6 sorgu):**
@@ -135,7 +146,8 @@ Dava akışının 2B'sinin mini versiyonu — **min 6 sorgu / 3 alt-adım**
 4. **`01-Ictihat-taramasi.md` yaz:**
    ```markdown
    ---
-   engine: claude
+   engine: codex
+   pipeline_stage: 3
    mcp: yargi-mcp-pro
    total_sorgu: N
    dogrulanmis: V
@@ -341,7 +353,7 @@ mempalace_add_drawer(
 | Dosya | İçerik | Üretici |
 |---|---|---|
 | `00-Soru.md` | Ham soru + doktrinal çeviri | Claude (Faz 0) |
-| `01-Ictihat-taramasi.md` | Sorgular + DOĞRULANMIŞ/Elenen kararlar | Claude + Yargı Pro MCP (Faz 1) |
+| `01-Ictihat-taramasi.md` | Sorgular + DOĞRULANMIŞ/Elenen kararlar | Luna + Yargı Pro MCP (Faz 1); Claude kısa QA kapısı |
 | `02-Mulga-denetim.md` | Mevzuat madde yürürlük denetimi | Claude + Yargı Pro Mevzuat (Faz 2) |
 | `arastirma-cevabi.md` ★ | NİHAİ — avukatın okuyacağı sentez | Claude (Faz 3) |
 | `arastirma-cevabi.docx` | DOCX export | md_to_docx.py (Faz 3) |

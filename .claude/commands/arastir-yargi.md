@@ -21,6 +21,19 @@ Mevcut kısa prompt YASAK — bu komut tam protokolü zorunlu uygular.
 - `FIVEAGENTS.md` → ASAMA 2B
 - `ajanlar/arastirmaci/SKILL.md` → Bölüm 1 (Yargı-MCP-Pro Derin Protokolü, 6 Faz) + Bölüm 2.5 (2B → 2C Sıralı Zincir)
 
+## Kanonik Çalıştırıcı
+
+2B araştırmasını doğrudan tek model oturumunda yürütme. Model sırası ve
+limitler `config/model-routing.json` içinden okunarak şu komutla çalıştırılır:
+
+```bash
+python3 scripts/yargi_model_pipeline.py --mod derin --cikti "02-Arastirma" "$ARGUMENTS"
+```
+
+Sıra: Sol ana araştırma → Terra bağımsız denetim → Luna nihai 2B raporu →
+Claude kısa kalite kapısı. Claude nihai sentez yapmaz. Komut çıkış kodu `0`
+olmadan 2C başlatılmaz.
+
 ## Aktif Tool'lar (Yargı-MCP-Pro — FAZ 6 2026-07-09 yeni Türkçe set)
 - `mcp__yargi-mcp-pro__ictihat_ara` — mahkeme kararı arama (Yargıtay/Danıştay/Yerel/İstinaf/KYB)
 - `mcp__yargi-mcp-pro__ictihat_getir` — documentId → tam metin (40K üzeri `page_number`)
@@ -95,12 +108,17 @@ Her sorgu sonu `.faz2-progress.jsonl`'e satır:
 - `02-Arastirma/yargi-bulgulari.md` — kararların tam listesi + temporal seyir
 - `02-Arastirma/atif-maddeleri.json` — 2C girdisi (her karar için citations array)
 
-## Sentez Aşaması — Terminal Claude
-2B Yargı bulgularının raporu **terminal Claude** tarafından yazılır;
-MCP çıktıları zaten Claude oturumunda.
+## Nihai 2B Raporu ve Kalite Kapısı
 
-Çıktı: `02-Arastirma/yargi-bulgulari.md` + `02-Arastirma/atif-maddeleri.json`.
-Frontmatter: `engine: claude`, `mcp: yargi-mcp-pro`, `status: TASLAK`.
+- Luna (3. aşama) `02-Arastirma/yargi-bulgulari.md` ile
+  `02-Arastirma/atif-maddeleri.json` dosyalarını üretir.
+- Claude (4. aşama) raporu yeniden yazmaz; en fazla 2 hedefli YargıMCP çağrısı
+  ve 600 kelimeyle `yargi-04-claude-kalite.md` kalite kararını verir.
+- `yargi-model-pipeline.json` sıralı aşamaları ve `claude_gate` sonucunu tutar.
+- 2C yalnız manifest `completed` ve kalite kararı `GECTI` ise başlar.
+
+Kanonik rapor frontmatter'ı: `engine: codex`, model = routing'deki 3. aşama,
+`mcp: yargi-mcp-pro`, `pipeline_stage: 3`, `status: TASLAK`.
 
 ## Kalite Kapısı (çıktı tamamlanmadan önce)
 - [ ] 15 sorgu listesi var mı?
@@ -109,7 +127,8 @@ Frontmatter: `engine: claude`, `mcp: yargi-mcp-pro`, `status: TASLAK`.
 - [ ] HGK/İBK kararı var mı (yoksa ek arama)?
 - [ ] `atif-maddeleri.json` doldu mu?
 - [ ] Çelişkili kararlar bölümü var mı?
-- [ ] Engine frontmatter `engine: claude`, `mcp: yargi-mcp-pro` mi?
+- [ ] Engine frontmatter `engine: codex`, `pipeline_stage: 3`, `mcp: yargi-mcp-pro` mi?
+- [ ] Claude kalite kapısı `GECTI` mi (nihai sentez yapmadan)?
 - [ ] mcp_fallback_used flag'i (varsa) belirtildi mi?
 
 Eksik varsa: ASAMA 2B yarım, sadece eksik mini-kolu tekrar çalıştır (tüm Faz 2'yi başlatma).

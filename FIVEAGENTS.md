@@ -178,7 +178,7 @@ karar noktasi).
 | 0 | Director | Claude (terminal) | - | (sabit, MCP) |
 | 1 (briefing) | Director | Claude (terminal) | - | `kritik_nokta_tespiti` |
 | 1 (arama plani) | Director | Antigravity (sag panel) | (opsiyonel batch oncesi) | `arama_plani` |
-| 2B (Yargi MCP) | Arastirmaci | Claude (terminal, MCP + CLI fallback, **MAX EFFORT**) | - | `yargi_mcp` |
+| 2B (Yargi MCP) | Arastirmaci | Config sirasi: Sol → Terra → Luna → Claude kisa QA | - | `yargi_mcp` |
 | 2C (Mevzuat MCP) | Arastirmaci | Claude (terminal, MCP + CLI fallback, **MAX EFFORT**) | - | `mevzuat_mcp` |
 | 2D (NotebookLM) | Arastirmaci | Claude (terminal, MCP) | - | `notebooklm_mcp` |
 | 2 sentez | Arastirmaci | Claude (terminal) | - | `arastirma_sentezi` |
@@ -374,7 +374,7 @@ AVUKAT
   |
   +-- SIRALI ZINCIR (2B → 2C, paralelden CIKARILDI) --------------
       |
-      |-- [2B] YARGI-MCP-PRO (Opus 4.7 MAX EFFORT) — FAZ 2 2026-05-19
+      |-- [2B] YARGI-MCP-PRO (Sol → Terra → Luna → Claude kisa QA)
       |       Birincil: mcp__yargi-mcp-pro__ictihat_ara, ictihat_getir
       |       Fallback: yargi CLI (MCP fail durumunda)
       |       Cikti: kararlar + her kararin atif yaptigi mevzuat maddeleri
@@ -636,10 +636,10 @@ resim cikarilir ve kritik noktalar netlestirilir.
 
 ### ASAMA 2: Derin Arastirma (2B→2C sirali zincir + 2D async paralel kol)
 
-> **Motor:** Claude (terminal). MCP cagrilari + sentez terminal Claude'da
-> (**MAX EFFORT thinking**; model `config/model-routing.json` ->
-> `tasks.arastirma_sentezi.model`). Sentez GEMINI'DE YAPILMAZ —
-> 2026-05-13 karari, MCP ciktilari zaten Claude oturumunda.
+> **Motor:** 2B, `config/model-routing.json -> tasks.yargi_mcp.pipeline`
+> sirasiyla Sol → Terra → Luna → Claude kisa QA olarak calisir. Luna nihai 2B
+> raporunu yazar; Claude 2B sentezi yapmaz. 2C/2D ve genel ASAMA 2 sentezi kendi
+> routing task'larinda kalir.
 
 > **REVIZYON 2026-07-09:** 2A Suer Stajyer + Faz D Arguman.ai ARSIVLENDI
 > (`arsiv/README.md`). Ana omurga Yargi-MCP-Pro.
@@ -656,7 +656,8 @@ OAuth yetkilendirme geregi bildirilir).
   secilmemisse atlanir, rapora not dusulur)
 - **Sirali zincir (omurga):** 2B Yargi-MCP-Pro → 2C Yargi-MCP-Pro Mevzuat
   → Mulga/Guncel Denetimi → Eleme
-- 2C, 2B'nin verdigi atif maddeleri olmadan calismaya BASLAYAMAZ
+- 2C, 2B'nin verdigi atif maddeleri ve Claude `GECTI` kapisi olmadan
+  calismaya BASLAYAMAZ
 
 Hepsi bittiginde tek bir konsolide arastirma raporu uretilir.
 
@@ -665,7 +666,7 @@ BASLATICI: Director Agent
   |
   |  2D async paralel kolu tetikler + 2B → 2C sirali zinciri yurutur:
   |
-  +---> [2B] YARGI-MCP-PRO  (DERIN ITERATIF PROTOKOL - ZORUNLU - SIRALI ZINCIR BASLANGICI) - FAZ 2 2026-05-19
+  +---> [2B] YARGI-MCP-PRO  (Sol ana tarama -> Terra denetim -> Luna nihai 2B -> Claude kisa QA)
   |        Birincil: mcp__yargi-mcp-pro__ictihat_ara
   |                  (court_types[]: YARGITAYKARARI/DANISTAYKARAR/YERELHUKUK/ISTINAFHUKUK/KYB;
   |                   birimAdi enum: H1-H23/C1-C23/HGK/CGK/D1-D17/IBK/...)
@@ -673,7 +674,7 @@ BASLATICI: Director Agent
   |        NOT: Eski 9+ ayri tool (anayasa/emsal/kvkk/uyusmazlik/rekabet/...) Pro MCP'de
   |              ictihat_ara'a konsolide oldu (court_types[] ile filtre)
   |        Fallback: yargi CLI (yargi bedesten search/doc) - sadece MCP fail
-  |        Mod: Her zaman derin, tek-shot yasak, **Opus 4.7 MAX EFFORT thinking**
+  |        Mod: Her zaman derin, tek-shot yasak; model sirasi config pipeline'dan
   |        Minimum: 15 sorgu / 6 faz
   |
   |        Faz 1: Terim uretimi (5-7 alternatif + daire tespiti)
@@ -1255,7 +1256,7 @@ Sistemin adim adim yaptiklari:
   Async paralel kol:
   - 2D NotebookLM: iteratif 10 sorgu (6 irdeleme + 4 perspektif)
   Sirali zincir:
-  - 2B Yargi MCP (Opus 4.7 MAX EFFORT): 9. HD + HGK + IBK son 2 yil
+  - 2B Yargi MCP (Sol→Terra→Luna→Claude QA): 9. HD + HGK + IBK son 2 yil
     -> 12 aday karar bulundu, atif maddeleri: Is K. m.2/5/17/22/24/32
   - 2C Mevzuat MCP (Opus 4.7 MAX EFFORT): atif maddeleri cekildi
     -> Mulga denetim: 11 GECERLI / 1 elenen (eski Is K. m.X 2020 tadili)

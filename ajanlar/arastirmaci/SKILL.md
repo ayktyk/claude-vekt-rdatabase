@@ -1,7 +1,7 @@
 # Arastirmaci -- Skill Dosyasi
 
-Son guncelleme: 2026-07-09
-Versiyon: 3.0 (REVIZYON: 2A Super Stajyer + Faz D Arguman.ai ARSIVLENDI;
+Son guncelleme: 2026-07-13
+Versiyon: 3.1 (2B Yargi sirali Sol/Terra/Luna + kisa Claude kalite kapisi;
 cekirdek = 2B→2C sirali zincir + 2D async paralel kol; ana omurga Yargi-MCP-Pro)
 
 > **ARSIVLENEN KOLLAR (2026-07-09 avukat karari):** 2A Super Stajyer
@@ -19,9 +19,11 @@ okunur. Bu dosyada hardcoded model adi YOKTUR.
 - **arastirma_sentezi** task'i icin: `engine: claude` (2026-05-13 itibariyla
   terminal Claude'da kalir; MCP ciktilari ayni oturumda raporlanir, Antigravity'ye
   copy-paste yorgunlugu olmasin diye)
-- **MCP/CLI cagrilari** (MemPalace, Drive, NotebookLM,
-  Yargi MCP, Mevzuat MCP, ve CLI fallback'lari) icin: `engine: claude`
-  (her zaman terminal Claude — MAX EFFORT thinking)
+- **yargi_mcp (2B)** task'i icin: routing'deki dort asamali sirali pipeline.
+  Sol ana arastirma, Terra bagimsiz denetim, Luna nihai 2B raporu, Claude
+  yalniz kisa kalite kapisidir; Claude 2B sentezi yapmaz.
+- **Diger MCP/CLI cagrilari** (MemPalace, Drive, NotebookLM, Mevzuat MCP ve
+  CLI fallback'lari) icin: ilgili task'in config'teki motoru kullanilir.
 - **arama_plani** task'i (sorgu terimi listesi uretmek): `engine: antigravity_manual`
   (opsiyonel — Antigravity'ye copy-paste blok ile gonderilir; pas gecilebilir)
 - **self_review** task'i: `engine: antigravity_manual` (Antigravity ASAMA
@@ -197,6 +199,14 @@ KALDIRILDI.
 **Fallback:** Yargi CLI (`yargi bedesten search/doc`) - sadece MCP fail durumunda
 **Thinking budget:** Engine + model `config/model-routing.json` -> ilgili task'tan okunur, MAX EFFORT thinking aktif
 **Min sorgu sayilari (15, 6 faz, vb.) DEGISMEZ — sadece arac Pro MCP olur.**
+
+**Kanonik calistirici:**
+`python3 scripts/yargi_model_pipeline.py --mod derin --cikti "02-Arastirma" "<kritik nokta>"`
+
+Calistirici `tasks.yargi_mcp.pipeline` sirasini uygular. Luna
+`yargi-bulgulari.md` ve `atif-maddeleri.json` dosyalarini uretir. Claude raporu
+yeniden yazmaz; en fazla 2 hedefli MCP cagrisi ve 600 kelimeyle kalite kapisi
+karari verir. Cikis kodu `0` ve `claude_gate: GECTI` olmadan 2C baslatilmaz.
 
 **!! RATE LIMIT KURALI (TEK DOGRU — v3, 2026-07-09 netlestirildi)**
 
@@ -705,7 +715,8 @@ Fallback kullanildiginda raporda "Kullanilan Kaynaklar" bolumune
 ### Bolum 2.5 - 2B → 2C Sirali Zincir + Mulga Eleme Protokolu (YENI)
 
 2B Yargi MCP ve 2C Mevzuat MCP **sirali** calisir (paralelden CIKARILDI).
-2C, 2B'nin atif madde ciktisi olmadan baslamaz. Akis:
+2C, 2B'nin atif madde ciktisi ve Claude kalite kapisi `GECTI` olmadan
+baslamaz. Akis:
 
 #### Adim 1 — 2B Yargi MCP Detayli Arama
 
@@ -926,7 +937,11 @@ Bu, tek-shot aramada olmayan bir muhakeme katmanidir ve kalitenin temelidir.
 
 ---
 
-## Sentez Asamasi — Claude'da Kalir (2026-05-13)
+## ASAMA 2 Konsolide Sentezi — Claude'da Kalir (2026-05-13)
+
+Bu bolum 2B'nin kendi nihai raporunu degil, 2B+2C+2D bittikten sonraki genel
+ASAMA 2 konsolidasyonunu anlatir. 2B'nin nihai raporunu Luna yazar; 2B
+sonundaki Claude yalniz kisa kalite kapisidir.
 
 Tum kollar (2B+2C+2D) tamamlandiktan sonra konsolide arastirma raporunu
 **terminal Claude** yazar. MCP ciktilari zaten Claude oturumunda ham olarak
@@ -947,8 +962,8 @@ ASAMA 2 sentezi Claude'da birakildi. Cunku:
 
 ### Akis (Yeni)
 
-1. **Ham bulgulari topla (Claude path — paralel + sirali zincir):**
-   - 2B Yargi MCP -> bulunan kararlar + atif maddeleri + son 5 yil seyri
+1. **Ham bulgulari topla (paralel + sirali zincir):**
+   - 2B Sol/Terra/Luna + Claude QA -> bulunan kararlar + atif maddeleri + son 5 yil seyri
    - 2C Mevzuat MCP -> kanunlar + mulga eleme tablosu + normlar hiyerarsisi
    - 2D NotebookLM -> 10 iteratif sorgu cevaplari (6 irdeleme + 4 perspektif)
 

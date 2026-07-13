@@ -1,14 +1,15 @@
 {
-  "_comment": "Hibrit motor haritasi. Claude = MCP + arastirma + koordinasyon. Antigravity (Gemini 3.1 Pro) = hukuki uretim (usul, 5 ajan, dilekce, simulasyon, revizyon). Antigravity manuel devir: terminal Claude copy-paste blogu basar, avukat sag panele yapistirir, Antigravity Drive'a yazar.",
+  "_comment": "Hibrit motor haritasi. Yargi 2B = sirali Sol/Terra/Luna + kisa Claude kalite kapisi. Diger MCP + koordinasyon = Claude. Antigravity (Gemini 3.1 Pro) = hukuki uretim (usul, 5 ajan, dilekce, simulasyon, revizyon).",
   "_avukat_karari_2026_05_13": "Avukat Aykut Antigravity hibrit mimarisini onayladi: bridge devre disi, MCP/arastirma terminal Claude'da, hukuki uretim Antigravity sag panelinde.",
-  "_doctrine_source": "Bu dosya TEK dogruluk kaynagidir (Single Source of Truth). Diger SKILL.md ve CLAUDE.md dosyalarinda hardcoded motor adi yer ALMAZ; hepsi bu config'e referans verir.",
+  "_doctrine_source": "Bu dosya TEK dogruluk kaynagidir (Single Source of Truth). Calistiricilar model, sira ve limitleri buradan okur; dokumanlar yalniz rolleri ve onayli akis sirasini aciklar.",
   "_history": {
     "2026-05-04": "Hibrit motor (Claude+Gemini bridge) onaylandi",
     "2026-05-13": "Antigravity hibrit mimarisine gecildi. Bridge DEPRECATED.",
     "2026-05-19": "FAZ 2: Yargi-MCP-Pro entegrasyonu (Senaryo B - ayri toollar). Eski mcp__claude_ai_Yarg_MCP__* + mcp__claude_ai_Mevuzat_MCP__* yerine mcp__yargi-mcp-pro__* aktif. yargi_mcp + mevzuat_mcp task'lari AYRI kalir (siraili zincir 2B->2C korunur). 9 spesifik mevzuat toolu (search_kanun/search_khk/...) tek search_mevzuat + mevzuat_tur_list[] altinda birlesti. Rate-limit 3sn protokolu gevsetildi (zorunluluk degil, fallback). 2E Akademik decommissioned (Faz 1, 2026-05-19).",
-    "2026-07-09": "ARASTIRMA REVIZYONU (avukat karari): 2A Super Stajyer (stajyer_prompt_uret) + Faz D Arguman.ai (arguman_ai) task'lari KALDIRILDI, dosyalar arsiv/ altinda. KVKK maskeleme ERTELENDI (yerel LLM'e gecise kadar). ASAMA 2 cekirdegi = 2B->2C sirali zincir + 2D async paralel. Ana omurga Yargi-MCP-Pro (UYAP entegrasyonu dahil - envanter cikarilinca tools[] guncellenecek)."
+    "2026-07-09": "ARASTIRMA REVIZYONU (avukat karari): 2A Super Stajyer (stajyer_prompt_uret) + Faz D Arguman.ai (arguman_ai) task'lari KALDIRILDI, dosyalar arsiv/ altinda. KVKK maskeleme ERTELENDI (yerel LLM'e gecise kadar). ASAMA 2 cekirdegi = 2B->2C sirali zincir + 2D async paralel. Ana omurga Yargi-MCP-Pro (UYAP entegrasyonu dahil - envanter cikarilinca tools[] guncellenecek).",
+    "2026-07-13": "YARGI COK MODELLI ROUTING (avukat karari): 2B YargiMCP sirasi GPT-5.6 Sol -> Terra -> Luna -> Claude Opus. Sol ana arastirma, Terra bagimsiz denetim, Luna nihai 2B raporu + atif-maddeleri, Claude en fazla 2 hedefli sorguluk kisa kalite kapisi. Claude nihai sentez YAPMAZ."
   },
-  "_last_updated": "2026-07-09",
+  "_last_updated": "2026-07-13",
 
   "mode": "auto",
   "_mode_values": "auto = config'tek default, sormaz | ask = her ASAMA basinda avukata sor | fixed = sadece default kullan, fallback yok",
@@ -29,13 +30,31 @@
       "aciklama": "MemPalace, Google Drive, Calendar, Gmail MCP cagrilari"
     },
     "yargi_mcp": {
-      "engine": "claude",
-      "model": "claude-opus-4-7",
+      "engine": "ordered_multi_model",
+      "model": "gpt-5.6-sol",
       "mcp_server": "yargi-mcp-pro",
       "tool_prefix": "mcp__yargi-mcp-pro__",
       "tools": ["ictihat_ara", "ictihat_getir", "semantik_ictihat_ara", "aym_ictihat_ara", "kurum_karari_ara", "kurum_karari_getir"],
       "skill": ".claude/skills/yargi-legal-research-guide/SKILL.md",
-      "aciklama": "Yargi-MCP-Pro ictihat sorgu yonetimi (FAZ 6 2026-07-09 — yeni Turkce tool seti). ASAMA 2B esas: ictihat_ara (phrase Bedesten Solr — BOSLUK=OR!, +zorunlu; birimAdi enum; court_types[]; esas_no/karar_no docket; include_snippets kotasiz triyaj), tam metin ictihat_getir (40K sayfalama, AYM id'leri de kabul). YENI: semantik_ictihat_ara (kavramsal arama, ~1 yil eski korpus — kesif icin, guncel atif icin ictihat_ara ile capraz-kontrol ZORUNLU), aym_ictihat_ara (norm_denetimi + bireysel_basvuru, DUZ kelime — operator yok), kurum_karari_ara (12 kurum: gib/btk/rekabet/uyusmazlik/kik/sayistay/bddk/kvkk/sigorta/reklam/kdk/spk). Detay: yargi-legal-research-guide skill."
+      "pipeline": {
+        "execution": "sequential",
+        "orchestrator": "scripts/yargi_model_pipeline.py",
+        "stages": [
+          {"order": 1, "engine": "codex", "model": "gpt-5.6-sol", "reasoning": "xhigh", "role": "ana_arastirma"},
+          {"order": 2, "engine": "codex", "model": "gpt-5.6-terra", "reasoning": "xhigh", "role": "bagimsiz_denetim"},
+          {"order": 3, "engine": "codex", "model": "gpt-5.6-luna", "reasoning": "xhigh", "role": "nihai_2b_sentezi"},
+          {"order": 4, "engine": "claude", "model": "opus", "reasoning": "high", "role": "kisa_kalite_kapisi"}
+        ],
+        "modes": {
+          "derin": {"min_queries": 15, "min_full_text": 5},
+          "hafif": {"min_queries": 6, "min_full_text": 3}
+        },
+        "final_report_stage": 3,
+        "quality_gate_stage": 4,
+        "claude_max_mcp_calls": 2,
+        "claude_max_words": 600
+      },
+      "aciklama": "Yargi-MCP-Pro 2B sirali cok-model hatti. Sol ana tarama; Terra bagimsiz karsi arama; Luna kanonik yargi-bulgulari.md + atif-maddeleri.json; Claude yalniz kisa kalite kapisi. 2C sadece Claude GECTI kararindan sonra baslar. Sorgu lehceleri ve tool seti icin yargi-legal-research-guide skill."
     },
     "mevzuat_mcp": {
       "engine": "claude",

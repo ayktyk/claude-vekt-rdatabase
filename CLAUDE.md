@@ -496,13 +496,12 @@ fallback olayi rapora `mcp_fallback_used: true` notu ile yazilir.
 Bu katman yalnizca avukatin isaret ettigi kritik nokta icin calistirilir.
 Genis, konusuz arastirma yapma.
 
-**ONEMLI - Her Zaman Derin Mod (v2.0):** Yargi MCP ve Mevzuat MCP her
-sorguda **iteratif derin protokol** ile calisir. Engine + thinking budget
-`config/model-routing.json` -> `tasks.yargi_mcp` ve `tasks.mevzuat_mcp`'den
-okunur (MAX EFFORT thinking aktif). Hibrit mod yoktur, tek-shot sorgu
-yasaktir. Protokol hem `arastir:` hem `yeni dava` komutlarinda her zaman
-aktiftir. Yargi CLI / Mevzuat CLI yalniz MCP fail durumunda fallback
-olarak devreye girer.
+**ONEMLI - Her Zaman Derin Mod:** Yargi MCP ve Mevzuat MCP her sorguda
+**iteratif derin protokol** ile calisir. 2B, `config/model-routing.json` ->
+`tasks.yargi_mcp.pipeline` sirasindaki Sol → Terra → Luna → Claude kisa QA
+hattidir. Luna nihai 2B raporunu yazar; Claude 2B sentezi yapmaz. Mevzuat
+motoru `tasks.mevzuat_mcp`'den okunur. Tek-shot sorgu yasaktir. Yargi CLI /
+Mevzuat CLI yalniz MCP fail durumunda fallback olarak devreye girer.
 
 **2B → 2C Sirali Akis (paralelden CIKARILDI):** 2B Yargi MCP detayli karar
 arastirmasi yapar → bulunan kararlarin atif yaptigi mevzuat maddelerini cikarir
@@ -896,6 +895,7 @@ tek seferlik override yapilabilir.
 | Task Tipi | Ajan | Default Motor | Fallback |
 |---|---|---|---|
 | Kritik nokta tespiti | Director on-adim (ASAMA 1) | Claude (terminal) | - |
+| 2B YargiMCP | Arastirmaci (ASAMA 2B) | Sol → Terra → Luna → Claude kisa QA | Config pipeline |
 | Arastirma sentezi | Arastirmaci (ASAMA 2) | Claude (terminal) | - |
 | Arama plani | Arastirmaci (ASAMA 2 hazirlik) | Antigravity (sag panel) | Claude |
 | Usul raporu | Usul Uzmani (ASAMA 3) | **Antigravity (sag panel)** | Claude |
@@ -912,7 +912,9 @@ Bu gorevler her zaman terminal Claude'da kalir, Antigravity'ye gitmez:
 
 - Director Agent orkestrasyonu (komut siniflandirma, ASAMA gecisleri)
 - MCP cagrilari (MemPalace, Drive, NotebookLM, Calendar, Gmail)
-- Yargi MCP / Mevzuat MCP / NotebookLM MCP
+- Yargi 2B orkestrasyonu (`scripts/yargi_model_pipeline.py`); Claude burada
+  yalniz 4. asama kisa kalite kapisidir
+- Mevzuat MCP / NotebookLM MCP
 - Yargi CLI ve Mevzuat CLI cagrilari (fallback)
 - ASAMA 2 sentezi (MCP ciktilari ayni oturumda raporlanir)
 - PII mask/unmask islemi (`scripts/maske.py` — su an ERTELENDI, yerel LLM'e gecince)
@@ -1500,7 +1502,7 @@ Context window %70'e ulastiginda otomatik state dump:
 | `davayi cek` / `yargi pro baslat` | UYAP Avukat dava dosyasi indirme — `dava-cli clone` akisi (`.claude/skills/yargi-uyap-workspace/SKILL.md`) |
 | `dava guncelle` | Clone'lanmis davaya yeni evrak indir — `dava-cli sync` (delta, tarayicisiz) |
 | `arastir: [kritik nokta]` | Director + arastirma cekirdegi (2B→2C sirali zincir + 2D paralel) |
-| `arastir yargi: [kritik nokta]` | Arastirma - 2B Yargi MCP (CLI fallback) |
+| `arastir yargi: [kritik nokta]` | Arastirma - 2B Sol→Terra→Luna→Claude kisa QA pipeline'i |
 | `arastir mevzuat: [kritik nokta]` | Arastirma - 2C Mevzuat MCP (CLI fallback) |
 | `arastir notebook: [kritik nokta]` | Arastirma - 2D NotebookLM / Drive |
 | `arastir danisma: [hukuki soru]` | **Hızlı Araştırma Modülü** (`@ARASTIRMA.md`) — müvekkil adayı sorusu için bağımsız hafif hat. Yargı-MCP-Pro + Mevzuat + Mülga denetimi + Künye doğrulama. Çıktı: `Hukuk Bürosu\Research\{tarih}-{slug}\arastirma-cevabi.md` (yol `scripts/paths.py` ile çözümlenir). Dava akışına dokunmaz. |
