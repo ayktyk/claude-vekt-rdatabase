@@ -1,5 +1,17 @@
 # Hibrit Motor Pilot Testi
 
+> **⚠ TARIHSEL — 2026-05-13'TE GUNCELLENDI ⚠**
+>
+> Bu pilot plan Gemini bridge mimarisi icindi. 2026-05-13'te
+> sistem Antigravity hibrit mimarisine gecti. Bridge cagrilari
+> DEPRECATED. Yeni pilot test ihtiyaci olusursa:
+> - Terminal Claude ASAMA 0-1-2 (MCP + arastirma)
+> - Antigravity sag panel ASAMA 3-7 (hukuki uretim)
+> Karsilastirma: avukat manuel olarak v1 fallback Claude vs v1
+> Antigravity ciktilarini "/motor-degistir" ile uretip karsilastirir.
+>
+> Tarihsel referans olarak korunuyor.
+
 Amac: Ayni davayi (A) full-Claude ve (B) hibrit (Gemini+Claude) modda
 kosturup ciktilarini yan yana karsilastirmak. Benchmark'in gercek iste
 de gecerli olup olmadigini dogrulamak.

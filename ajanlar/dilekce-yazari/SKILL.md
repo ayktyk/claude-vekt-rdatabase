@@ -9,11 +9,12 @@ Versiyon: 1.1
 
 **TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/model-routing.json`'dan okunur.
 
-- **dilekce_yazimi** task'i: `config/model-routing.json` -> `tasks.dilekce_yazimi.engine` ve `model`
-- **Claude'da kalir:** hesaplama sonuclarinin dilekceye enjeksiyonu, MCP cagrilari, UYAP/UDF formatina donusturme — bunlar arac kullanimidir, hukuki uretim degildir
-- **Self-review:** `tasks.self_review.engine` (kritik) + Revizyon Ajani (7 boyut)
-- **Prompt sablonu:** `prompts/gemini/dilekce_yazimi.md`
-- **Override:** `--model claude` veya `--model gemini` ile tek seferlik manuel
+- **dilekce_yazimi** task'i: `config/model-routing.json` -> `tasks.dilekce_yazimi.engine` (= `antigravity_manual`) ve `model`
+- **Antigravity (sag panel)** uretir; terminal Claude SADECE devir blogu basar
+- **Claude'da kalir:** hesaplama sonuclarinin dilekceye enjeksiyonu (devir blogunda), MCP cagrilari, UYAP/UDF formatina donusturme (`md_to_docx.py`, `md_to_udf.py`)
+- **Self-review:** Antigravity ayni sohbette `prompts/gemini/self_review.md`'yi uygular; ek olarak ASAMA 7 Revizyon Ajani 7 boyutta tekrar denetler
+- **Prompt sablonu:** `prompts/gemini/dilekce_yazimi.md` (Antigravity'ye yapistirilir)
+- **Fallback:** Antigravity erisilemezse "fallback claude" → Claude uretir, `fallback_used: true`
 
 ---
 
@@ -55,50 +56,104 @@ Versiyon: 1.1
 
 ---
 
-## ZORUNLU ILK ADIM — Gemini Bridge Cagrisi
+## ZORUNLU ILK ADIM — Antigravity Devri (2026-05-13 → 3 Batch 2026-05-14)
 
-Ben hukuki metin ureten bir ajanim. Dogrudan ben yazmiyorum, once Gemini'ye gidiyorum.
+Bu ASAMA hukuki uretimdir, Antigravity sag panelinde Gemini 3.1 Pro yapar.
+Terminal Claude burada SADECE devir blogu basar; dilekce v1'i dogrudan
+terminal Claude YAZMAZ.
+
+**ÖNEMLI — BATCH 3 ICINDE (2026-05-14 pilot sonrasi iyilestirme):**
+Mehmet Ali 2026-003 davasinda 5 ayri devir blogu yorucuydu. ASAMA 5
+(dilekce v1) artik tek basina degil, **BATCH 3** icinde uretilir:
+
+> **BATCH 3 = ASAMA 5 + ASAMA 6 + ASAMA 7** tek Antigravity sohbetinde.
+> Antigravity once dilekce v1 yazar (bu ajan), sonra savunma simulasyonu
+> yapar (`savunma_simulasyonu` task), sonra v2 NIHAI revizyon (`revizyon`
+> task) yapar. Drive'a 3 ayri dosya yazilir; avukat tek devir bloguyla
+> 3 ciktinin hepsini alir.
+
+Bu ajan icin pratik etki:
+- **Devir blogu icerigi degisti:** Artik sadece "Dilekce v1 yaz, sonra
+  6 ve 7'ye devam et" diyen tek master blok kullanilir
+  (`ANTIGRAVITY.md` > BATCH 3 sablonuna bak)
+- **Self-review hala her ADIM sonu yapilir** (ADIM A icin v1 self-review)
+- **DOCX/UDF uretimi tum batch bittiginde** yapilir (terminal Claude
+  "Hepsi bitti" sinyaliyle baslar)
 
 ### Akis
 
-1. **Context dosyasi hazirla:** `tmp/.gemini-input-{dava-id}-asama5.md`
-   Icerik: usul raporu (01-Usul/) + arastirma raporu (02-Arastirma/) + briefing
-   (00-Briefing.md varsa) + stratejik analiz rehberi (4E sentez ciktisi) +
-   somut talepler listesi
+1. **On-hazirlik (Claude'da kalir):** Onceki ASAMA ciktilari Drive'da
+   hazir olmali:
+   - 00-Briefing.md (ASAMA 1)
+   - 02-Arastirma/arastirma-raporu.md (ASAMA 2)
+   - 01-Usul/usul-raporu.md (ASAMA 3)
+   - 02-Arastirma/stratejik-analiz.md (ASAMA 4 — yazim rehberi)
 
-2. **Bridge cagir:**
-   ```bash
-   ASAMA=5 DAVA_ID="<dava-id>" \
-     bash scripts/gemini-bridge.sh dilekce_yazimi \
-       tmp/.gemini-input-{dava-id}-asama5.md \
-       tmp/.gemini-output-{dava-id}-asama5.md
+2. **Antigravity devir blogu bas (avukata sun):**
+
+   ```
+   ========== ANTIGRAVITY DEVIR BLOGU ==========
+   ASAMA: ASAMA 5 (Dilekce v1)
+   Dava-ID: {dava-id}
+
+   Sag panele yapistirilacak:
+   --------------------------------------------
+   Asagidaki dosyalari oku (sirayla):
+     - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\00-Briefing.md
+     - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\02-Arastirma\arastirma-raporu.md
+     - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\01-Usul\usul-raporu.md
+     - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\02-Arastirma\stratejik-analiz.md
+        ^ YAZIM REHBERI — ASAMA 4 sentez ciktisinin "Dilekce Yazim Rehberi"
+          bolumunu birebir takip et (arguman sirasi, ton, atif kararlari)
+
+   Protokol: prompts/gemini/dilekce_yazimi.md
+   Ortak kurallar: prompts/gemini/_ortak-kurallar.md
+   Dilekce yazim sablonu: dilekce-yazim-kurallari.md (proje kokunde)
+
+   Cikti: G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\03-Sentez-ve-Dilekce\dilekce-v1.md
+
+   KVKK kritik: dilekcede tum muvekkil verisi MASKELI token kalir
+   ([MUVEKKIL_1], [TC_1], [ADRES_2] vs.). Unmask sonra avukat yapar.
+   Hesaplama tutarlari usul raporundan birebir alinir (kendi hesabini yapma).
+   En az 2 Yargitay karari atif olmali (kunye + Bedesten documentId).
+   "DOGRULANMAMIS" damgali kararlar dilekceye TASINAMAZ.
+
+   Cikti sonunda self-review yap (prompts/gemini/self_review.md):
+     - HARD FAIL: Dogrulanmamis atif >= 2
+     - HARD FAIL: NotebookLM cevabini farkli davaya genelletirme
+     - HARD FAIL: Uydurma Yargitay alintisi
+   --------------------------------------------
+
+   Antigravity tamamlayinca buraya don ve "ASAMA 5 bitti" yaz.
+   =============================================
    ```
 
-3. **Exit code kontrol:**
+3. **Avukat onayini bekle:** Avukat "ASAMA 5 bitti" diyene kadar bir
+   sonraki ASAMA'ya gecme.
 
-   | Exit | Anlam | Davranis |
-   |------|-------|----------|
-   | 0 | Gemini basarili | Cikti oku, frontmatter koru, TASLAK olarak sun |
-   | 99 | engine=claude path (config soyle dedi) | Claude ile yazmaya devam et |
-   | 1 | Hata: prompt/context eksik veya 2x deneme fail | Fallback log + Claude ile yaz, frontmatter `fallback_used: true` |
-   | 3 | gemini CLI bulunamadi | Avukata "npm install -g @google/gemini-cli" oner, Claude ile devam |
-   | 4 | OAuth auth hatasi | Avukata "gemini /auth" oner, Claude ile devam |
-
-4. **Cikti dogrulama (bridge basarili olduysa):**
-   - Frontmatter `engine: gemini` veya `engine: claude` olmali
-   - `status: TASLAK` mutlaka olmali
-   - Atif yapilan kararlarin kunyeleri: Daire/Tarih/Esas-Karar No
-   - Eksikse: bridge'i yeniden cagirma, Claude ile zenginlestirme yap
-
-5. **Kalite kapisi:** Bridge ciktisi eksik veya format bozuksa, dogrudan
-   `dilekce-v1.md` olarak Drive'a yazma. Once eksiklikleri tamamla.
+4. **Avukat onayi sonrasi (Director yapar):**
+   - `qmd update` calistir (yeni dilekce-v1.md indexlenir)
+   - `mempalace_diary_write "dilekce_yazari"` ile dilekceden ogrenilen
+     uslup/strateji notlarini yaz
+   - `python scripts/md_to_docx.py {dava-klasoru}` calistir (DOCX zorunlu;
+     UDF v1 icin URETILMEZ — sadece NIHAI v2'de uretilir)
+   - ASAMA 6 (Savunma Simulasyonu) devir blogunu hazirla
 
 ### Asla
 
-- Bridge cagrisini atla ve dogrudan dilekce yaz (config Gemini diyorsa)
-- Bridge fail dustu diye sessizce Claude ile yaz; mutlaka frontmatter'da
-  `fallback_used: true` notu ile yaz
-- `tmp/.gemini-input-*` dosyasini gercek dava klasorune yaz; yalniz tmp'de tut
+- Devir blogunu basmadan terminal Claude'da dilekce yazma
+- `gemini-bridge.sh` cagirma — DEPRECATED (exit 100)
+- Hesaplamayi Antigravity'ye yaptirma (usul raporundan birebir kopya)
+- Antigravity ciktisini "kontrol etmek icin" terminal Claude'da yeniden
+  uretme — kalite kapisi Antigravity self-review'da
+- Maskeli token'lari unmask edip dilekceye yazdirma (KVKK ihlali)
+
+### Fallback
+
+Antigravity erisilemezse avukat "fallback claude" → terminal Claude
+`prompts/gemini/dilekce_yazimi.md` protokolune gore dilekce v1 uretir,
+frontmatter `engine: claude`, `fallback_used: true`,
+`reason: antigravity_unavailable`.
 
 ---
 

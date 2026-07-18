@@ -3,8 +3,19 @@
 // her yıl başı manuel güncellenir. Sistem ÖTELEMEYİ ZORLA UYGULAMAZ — avukat
 // onayıyla `adjustedForHoliday=true` kaydedilir.
 
-import { addDays, addYears } from 'date-fns'
 import type { LegalDeadlineTemplate } from './legalDeadlines.js'
+
+function addDays(d: Date, n: number): Date {
+  const c = new Date(d.getFullYear(), d.getMonth(), d.getDate())
+  c.setDate(c.getDate() + n)
+  return c
+}
+
+function addYears(d: Date, n: number): Date {
+  const c = new Date(d.getFullYear(), d.getMonth(), d.getDate())
+  c.setFullYear(c.getFullYear() + n)
+  return c
+}
 
 // ISO YYYY-MM-DD biçiminde Türkiye resmi + dini bayram tarihleri.
 // 2026 ve 2027 için doldurulmuştur. Diyanet 2027 takvimi yayınladığında PR ile genişletilir.

@@ -41,16 +41,19 @@ Her komutta. Hicbir ajan Director Agent'in siniflandirmasi olmadan baslamaz.
 |---|---|
 | `yeni dava: [isim], [tur]` | ADIM -1 + ADIM 0 + ADIM 0B + ADIM 0C + Ajan 2 (arastirma) + Ajan 1 (usul) |
 | `usul: [dava turu]` | ADIM -1 + yalnizca Ajan 1 |
-| `arastir: [kritik nokta]` | ADIM -1 + 2D+2E paralel + 2B→2C sirali zincir (mulga eleme dahil) |
-| `arastir yargi: [...]` | ADIM -1 + Ajan 2B (Yargi MCP, CLI fallback) |
+| `arastir: [kritik nokta]` | ADIM -1 + 2A (yorunge — opsiyonel) + 2D paralel + 2B→2C sirali zincir (mulga eleme dahil) |
+| `arastir stajyer: [dava-id]` | ADIM -1 + 2A Suer Stajyer (CDP otomasyon, scripts/superstajyer.py) |
+| `2A cevap al: [dava-id]` | 2A manuel fallback (Get-Clipboard, CDP fail durumunda) |
+| `arastir yargi: [...]` | ADIM -1 + Ajan 2B (Yargi MCP, CLI fallback; 2A varsa teyit modunda) |
 | `arastir mevzuat: [...]` | ADIM -1 + Ajan 2C (Mevzuat MCP, CLI fallback) |
 | `arastir notebook: [...]` | ADIM -1 + Ajan 2D (NotebookLM/Drive) |
-| `arastir akademik: [...]` | ADIM -1 + Ajan 2E (Akademik Doktrin: DergiPark + YOK Tez) |
 | `dilekce yaz` / `ihtarname yaz` / `sozlesme yaz` | ADIM -1 + gerekli usul/esas ciktilari var mi kontrol + Ajan 3 |
 | `hesapla: [parametreler]` | ADIM -1 + Hesaplama modulu |
 | `savunma simule et: [dava-id]` | ADIM -1 + Savunma Simulatoru |
 | `revize et: [dava-id]` | ADIM -1 + Revizyon Ajani |
-| `blog yap: [konu]` | ADIM -1 + Ajan 4 (Pazarlama) |
+| `blog yaz: [konu]` | ADIM -1 + Blog Yazari (THEMIS — serbest konu modu, Antigravity manuel devir) |
+| `blog yaz dava: [dava-id]` | ADIM -1 + Blog Yazari (THEMIS — dava modu, arastirma raporundan, KVKK extra sert) |
+| `blog yap: [konu]` | DEPRECATED: Eski pazarlama komutu. Yerine `blog yaz: [konu]` kullan. Geriye uyumluluk icin `blog yaz: [konu]` ile ayni davrani. |
 | `ictihat tara` | Otonom dongu (haftalik tarama) |
 | `briefing: [dava-id]` | ADIM -1 + Advanced Briefing formu |
 | `arastir bilirkisi: [dava-id] [rapor-dosyasi]` | ADIM -1 + Arastirmaci (Bilirkisi Denetleme alt-modu) |
@@ -177,6 +180,20 @@ Arastirma-talebi akisi:
 ```text
 ADIM -1 (MemPalace) -> ADIM 0 (Bekleyen Dava klasoru) -> ADIM 0B (Kaynak)
 -> Ajan 2 (Arastirma) -> Kalite Gate 1
+```
+
+Blog yazimi akisi (THEMIS):
+```text
+ADIM -1 (MemPalace + kanibalizasyon kontrolu)
+-> Parametre toplama (primary keyword, kategori, intent — serbest mod)
+   VEYA Dava arastirma raporundan girdi paketi cikar (dava mod)
+-> Cikti klasoru olustur (Blog\{tarih}-{slug}\ veya {dava-id}\06-Blog\)
+-> author.json sameAs okuma + (serbest modda) hizli Yargi/Mevzuat MCP tarama
+-> Antigravity devir blogu bas -> avukat sag panele yapistir
+-> Antigravity uretir + Imagen kapak gorseli -> 4 dosya Drive'a yazilir
+-> Self-review (KIRMIZI = yeniden uret)
+-> Avukat "Blog bitti" der -> Director: validator + Gmail draft
+   + MemPalace diary + hall_blog_konulari drawer (kanibalizasyon kayit)
 ```
 
 ## Cikti Formati
@@ -459,17 +476,60 @@ asama_sure_sn: {hesaplama}
 Bu satirlar opsiyoneldir; deterministik timing zaten hooks tarafindan
 yakalanir. LLM emit unutursa sistem bozulmaz.
 
-### 3. Gemini-bridge cagrilarinda env var
+### 3. Antigravity Devir Blogu — 3 Batch (2026-05-14 pilot sonrasi)
 
-Director Bash ile `gemini-bridge.sh` cagirirken ASAMA + DAVA_ID env var
-set eder:
+**DEPRECATED:** Eski `gemini-bridge.sh` cagrisi 2026-05-13 itibariyla
+devre disi (exit 100). Antigravity hibrit mimarisine gecildi.
 
-```bash
-ASAMA="ASAMA 2" DAVA_ID="test-selin-uyar-2026-001" \
-  bash scripts/gemini-bridge.sh arama_plani context.md output.md
+**2026-05-14 iyilestirme:** Mehmet Ali 2026-003 pilot sonrasi 5 ayri
+devir blogu → **3 batch'e** indirildi. Manuel is yuku %40 azaldi,
+kalite zinciri korundu.
+
+**3 Batch akisi:**
+- **BATCH 1:** ASAMA 3 (Usul Raporu) tek
+- **BATCH 2:** ASAMA 4 (5-Ajan Stratejik Analiz) tek — KIRMIZI cikarsa
+  BATCH 3 BLOKLENIR, avukat onayi gerekli (hipotez secimi)
+- **BATCH 3:** ASAMA 5 (dilekce v1) + ASAMA 6 (savunma sim) + ASAMA 7
+  (v2 NIHAI) **TEK Antigravity sohbetinde**. Antigravity dogal "yaz →
+  elestir → revize" dongusunu kurar; context kaybolmaz; v2 kalitesi
+  yukselir.
+
+Detayli devir blogu sablonlari: `ANTIGRAVITY.md` > "3 BATCH DEVIR BLOGU
+SABLONLARI" bolumu.
+
+Director Antigravity'ye is devrederken Bash cagrisi yapmaz, yerine
+avukata copy-paste devir blogu basar:
+
+```text
+========== ANTIGRAVITY DEVIR BLOGU ==========
+ASAMA: ASAMA N ({asama adi})
+Dava-ID: {dava-id}
+
+Sag panele yapistirilacak:
+--------------------------------------------
+Asagidaki dosyalari oku:
+  - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\{girdi-1}.md
+  - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\{girdi-2}.md
+
+Protokol: prompts/gemini/{task_type}.md  (bu dosyayi da oku, kurallari uygula)
+
+Cikti: G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\{cikti}.md
+
+KVKK: tum token'lar maskeli kalir ([MUVEKKIL_1], [TC_1], vs.)
+Cikti sonunda self-review yap (prompts/gemini/self_review.md).
+--------------------------------------------
+
+Antigravity tamamlayinca buraya don ve "ASAMA N bitti" yaz.
+=============================================
 ```
 
-Bridge bu env var'lari `logs/model-events.jsonl`'a yazar.
+Avukat blogu yapistirir → Antigravity uretir + self-review yapar →
+Drive'a yazar → avukat terminale doner → Director `qmd update` +
+MemPalace diary yapar → bir sonraki ASAMA'nin devir blogunu basar.
+
+Loglama: Devir blogu basildiginda `logs/model-events.jsonl`'a
+`{"engine":"antigravity_manual", "asama":"N", "dava_id":"..."}` yazilir.
+"Tamamlandi" geri donusunde ayni log'a `{"status":"completed"}` eklenir.
 
 ### Profiling kapatma (rollback)
 
@@ -519,7 +579,6 @@ bash scripts/progress_helper.sh log 2B yargi_search \
 - 2B Yargi MCP cagrilari → phase=`2B`
 - 2C Mevzuat MCP cagrilari → phase=`2C`
 - 2D NotebookLM cagrilari → phase=`2D`
-- 2E Akademik (DergiPark/YOKTez) → phase=`2E`
 - 5 ajan stratejik analiz → phase=`4A` / `4B` / `4C` / `4D` / `4E`
 - Bridge cagrilari → phase=`{asama}_bridge`
 
@@ -576,7 +635,6 @@ FAZ 2 DURUM — run 20260504T182000-1234-ahmet
 2B Yargı:    7/15 sorgu, 2/5 tam metin, 0 rate-limit, son 4.1s
 2C Mevzuat:  bekliyor (2B atif maddeleri lazim)
 2D NotebookLM: 4/10 soru, Q4 polling 82s (SLOW flag)
-2E Akademik:  3/8 arama, 1 makale tam metin
 Geçen sure: 06:42
 Sonraki adim: Yargi temporal_2025
 ```

@@ -1,0 +1,53 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'python scripts/doktrin_lint.py --hook-stdin'"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash 'C:/Users/user/Desktop/projelerim/aktif projeler/Vektör Database li Otomasyon Claude Code/hooks/mcp-timing-post.sh'"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'if echo \"$CLAUDE_TOOL_INPUT\" | grep -qiE \"\\.env|credentials|api.key|secret\"; then echo \"KVKK ENGEL: Hassas dosyaya erisim yasak!\" && exit 2; fi'"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE \"rm -rf|sudo rm|dd if=\"; then echo \"TEHLIKE: Yikim komutu engellendi!\" && exit 2; fi'"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash 'C:/Users/user/Desktop/projelerim/aktif projeler/Vektör Database li Otomasyon Claude Code/hooks/mcp-timing-pre.sh'"
+          }
+        ]
+      }
+    ]
+  }
+}

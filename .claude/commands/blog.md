@@ -24,6 +24,7 @@ Eger argument bossa: avukata "hangi konuyu blog yapacagiz?" diye sor.
 
 - `ajanlar/blog-yazari/SKILL.md` — tam protokol
 - `prompts/gemini/blog_yazimi.md` — Antigravity'ye yapistirilan prompt
+- `prompts/themis-blog-pr-v3-format.md` — **Gmail PR çıktısının ZORUNLU formatı (THEMIS v3)**. Blog maili/CMS çıktısı AYNEN bu yapıda üretilir (avukat onaylı, 2026-06-03).
 - `prompts/gemini/_ortak-kurallar.md` — Gemini ortak kurallari
 - `TEHMIS.md` — proje kokunde tam THEMIS referansi
 - `config/author.json` — Aykut sameAs URL'leri

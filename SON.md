@@ -271,7 +271,7 @@ her devir bloğu bu kuralları implicit olarak uygular.
    değilsen "DOĞRULANMASI GEREKİR" notu düş.
 
 9. **Context sınırı.** Sana verilen context dışındaki bilgiyi varsayım yapma.
-   Context'te yoksa eksik olduğunu bildir.
+   Context'te yoksa eksik olduğunu bildir.Context'i doğru oku varsayımsız cevap ver.
 
 10. **Avukat Aykut'un tonu:** Ölçülü profesyonel. Slogan tarzı ifade yasak.
     Abartılı vurgu (çift ünlem, tırnakla vurgu) yasak.
@@ -374,6 +374,8 @@ Director Agent avukata şu soruyu sorar:
 Aşağıdakilerden hangisi hazır?
 
 [ ] NotebookLM — notebook adı: ___________
+[ ] superstajyer sitesi — : ___________
+[ ] argumanai mcp : ___________
 [ ] Google Drive — klasör yolu: ___________
 [ ] Masaüstü / yerel dosya
 [ ] Claude Projects

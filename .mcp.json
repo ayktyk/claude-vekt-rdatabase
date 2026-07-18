@@ -6,7 +6,10 @@
     },
     "buro-hafizasi": {
       "command": "python",
-      "args": ["-m", "mempalace.mcp_server"],
+      "args": [
+        "-m",
+        "mempalace.mcp_server"
+      ],
       "env": {
         "MEMPALACE_PALACE_PATH": "${MEMPALACE_PALACE_PATH:-C:/Users/user/mempalace_palace}",
         "PYTHONIOENCODING": "utf-8"
@@ -14,11 +17,21 @@
     },
     "qmd-hafiza": {
       "command": "qmd",
-      "args": ["mcp"],
+      "args": [
+        "mcp"
+      ],
       "env": {
         "GGML_CUDA": "0",
         "NODE_OPTIONS": "--max-old-space-size=4096"
       }
+    },
+    "yargi-mcp-pro": {
+      "type": "http",
+      "url": "https://yargi-mcp-pro-production.up.railway.app/mcp"
+    },
+    "arguman": {
+      "type": "http",
+      "url": "https://mcp.arguman.ai/mcp"
     }
   }
 }

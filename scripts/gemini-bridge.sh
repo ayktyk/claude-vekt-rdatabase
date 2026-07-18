@@ -1,5 +1,33 @@
 #!/usr/bin/env bash
-# gemini-bridge.sh
+# ============================================================
+# DEPRECATED - 2026-05-13
+# ============================================================
+# Bu script Antigravity hibrit mimarisine gecisle DEVRE DISI BIRAKILDI.
+# Hukuki uretim artik sag paneldeki Antigravity (Gemini 3.1 Pro)
+# panelinde yapiliyor. Terminal Claude copy-paste devir blogu basar.
+#
+# Rehber: ANTIGRAVITY.md (proje kokunde)
+# Geri donus icin: bu blogu kaldir, scripti eski haline al
+# (git log scripts/gemini-bridge.sh ile gecmis goruntulenir).
+#
+# Bu scripti cagirmak HATA verir (exit 100).
+# ============================================================
+echo "==========================================================" >&2
+echo "DEPRECATED: gemini-bridge.sh devre disi (2026-05-13)." >&2
+echo "" >&2
+echo "Hukuki uretim Antigravity sag panelde yapilir." >&2
+echo "Rehber: ANTIGRAVITY.md" >&2
+echo "" >&2
+echo "Terminal Claude ile fallback uretim icin: 'fallback claude'" >&2
+echo "==========================================================" >&2
+exit 100
+
+# ============================================================
+# ASAGIDAKI ESKI KOD KORUNDU (ROLLBACK ICIN).
+# Bridge cagrilirsa yukaridaki exit 100 calisir, asagi gelmez.
+# ============================================================
+
+# gemini-bridge.sh (ESKI)
 # Gemini Director Agent bunu cagirir. Context + prompt template birlestirip
 # Gemini CLI'ye yollar, temiz markdown cevabi doner.
 #

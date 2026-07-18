@@ -191,5 +191,12 @@
         ]
       }
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "notebooklm",
+    "buro-hafizasi",
+    "qmd-hafiza",
+    "yargi-mcp-pro",
+    "arguman"
+  ]
 }

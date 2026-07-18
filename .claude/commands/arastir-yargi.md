@@ -40,6 +40,20 @@ olmadan 2C başlatılmaz.
 - `mcp__yargi-mcp-pro__semantik_ictihat_ara` — kavramsal keşif (Faz 1 terim üretiminde; korpus ~1 yıl eski, güncel atıf YAPILMAZ)
 - `mcp__yargi-mcp-pro__aym_ictihat_ara` — AYM kararları (Faz 6.5 koşullu kol; DÜZ kelime, operatör YOK)
 
+## Künye-Bazlı Doğrulama (avukat künye verdiğinde — ZORUNLU)
+
+Avukat **spesifik bir karar künyesi** verdiyse, o kararı KONU KELİMESİYLE DEĞİL,
+**doğrudan künye ile** doğrula (konu kelimesi drift yapar, bulunamaz):
+1. `search_bedesten_unified` → `phrase` = **kesin esas no** (örn `"2015/12092"`, tırnaklı/exact).
+2. `court_types` karara göre: **Yargıtay → YARGITAYKARARI** (+ `birimAdi`, örn `H17`),
+   **BAM/istinaf → ISTINAFHUKUK**, **ATM/asliye/yerel → YERELHUKUK**.
+3. Esas+karar+daire birebir eşleşeni → `get_bedesten_document_markdown(documentId)` ile
+   tam metni çek; konuyla ilgisini + birebir alıntıyı teyit et (Document-Fetch-Verification).
+4. 429 (rate limit) → 12-20 sn bekle, **sıralı** tekrar (paralel batch YASAK).
+   Ortak esas no (çok kararda var) → karar no + mahkeme adı ile daralt.
+5. Doğrulanan künye `verified:true` + documentId + URL ile kullanılır; doğrulanamayan
+   çıktıya KONULMAZ (0-halüsinasyon). Detay: hafıza `feedback-kunye-dogrulama`.
+
 ## Ön-koşullar (otomatik)
 1. `tmp/current-run-id.txt` oluştur (yoksa): `{YYYYMMDD}-{HHMMSS}-{dava-id}`
 2. `02-Arastirma/.faz2-progress.jsonl` aç (append mode)

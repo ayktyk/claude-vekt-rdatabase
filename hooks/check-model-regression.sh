@@ -1,5 +1,28 @@
 #!/usr/bin/env bash
-# check-model-regression.sh
+# ============================================================
+# DEPRECATED - 2026-05-13
+# ============================================================
+# Bu hook Antigravity hibrit mimarisine gecisle ANLAMSIZ HALE GELDI.
+# Eski mantik: Edit/Write sonrasi dosya frontmatter'indaki engine
+# alanini config'teki beklentiyle karsilastiriyordu (gemini fallback
+# orani izleme amacli).
+#
+# Yeni mimaride engine='antigravity_manual' tasklarinda dosyalar
+# Antigravity sag panelden Drive'a yaziliyor; terminal Claude o
+# dosyalari sadece OKUYOR (Write/Edit yapmiyor). Dolayisiyla hook
+# zaten tetiklenmiyor. Aktif kalmasi gerekirse log gurultusu yapar.
+#
+# Hook artik no-op: hemen exit 0 doner.
+# Rehber: ANTIGRAVITY.md
+# Geri donus icin git log ile eski sirum geri yuklenebilir.
+# ============================================================
+exit 0
+
+# ============================================================
+# ASAGIDAKI ESKI KOD KORUNDU (ROLLBACK ICIN).
+# ============================================================
+
+# check-model-regression.sh (ESKI)
 # PostToolUse hook: Edit/Write sonrasi yazilan dosya frontmatter'inda
 # beklenen engine ile gercek engine eslesiyor mu kontrol eder.
 #
