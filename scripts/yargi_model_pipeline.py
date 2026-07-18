@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Run the ordered multi-model YargiMCP research pipeline."""
+"""Run the ordered multi-model YargiMCP research pipeline (Claude'suz revizyon 2026-07-18).
+
+Zincir: Sol (ana arastirma) -> Terra (bagimsiz denetim) -> Sol (nihai 2B sentezi)
+-> Terra (kisa kalite kapisi). Tum asamalar codex engine ile calisir.
+Spec: docs/superpowers/specs/2026-07-18-claudesiz-motor-revizyonu-design.md
+"""
 
 from __future__ import annotations
 
@@ -19,8 +24,9 @@ from typing import Dict, List, Sequence
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "config" / "model-routing.json"
-LUNA_SCHEMA_PATH = ROOT / "config" / "yargi-luna-output.schema.json"
+SENTEZ_SCHEMA_PATH = ROOT / "config" / "yargi-sentez-output.schema.json"
 MCP_NAME = "yargi-mcp-pro"
+DEFAULT_SANDBOX = "danger-full-access"  # CLI fallback ag erisimi icin; MCP'ye donunce read-only
 
 
 def now_iso() -> str:
@@ -73,6 +79,11 @@ def load_routing() -> Dict[str, object]:
     orders = [stage.get("order") for stage in stages]
     if orders != [1, 2, 3, 4]:
         raise RuntimeError("Yargi pipeline sirasi 1,2,3,4 olmali.")
+    engines = {stage.get("engine") for stage in stages}
+    if engines != {"codex"}:
+        raise RuntimeError(
+            "Claude'suz revizyonda tum pipeline asamalari codex engine olmali."
+        )
     return pipeline
 
 
@@ -90,16 +101,39 @@ def check_command(command: Sequence[str], label: str, timeout: int = 75) -> None
         raise RuntimeError("{} basarisiz:\n{}".format(label, result.stdout[-1600:]))
 
 
-def preflight() -> None:
-    missing = [name for name in ("codex", "claude") if not shutil.which(name)]
-    if missing:
-        raise RuntimeError("Eksik komutlar: {}".format(", ".join(missing)))
+def mcp_available() -> bool:
+    try:
+        check_command(["codex", "mcp", "get", MCP_NAME], "Codex YargiMCP kontrolu")
+        return True
+    except (RuntimeError, subprocess.TimeoutExpired):
+        return False
+
+
+def preflight() -> bool:
+    """Codex oturumunu dogrular; MCP yoksa yargi CLI fallback'ini kontrol eder.
+
+    Donus: True = MCP kullanilabilir, False = CLI fallback modu.
+    """
+    if not shutil.which("codex"):
+        raise RuntimeError("Eksik komut: codex")
     check_command(["codex", "login", "status"], "Codex oturum kontrolu")
-    check_command(["claude", "auth", "status"], "Claude oturum kontrolu")
-    check_command(["codex", "mcp", "get", MCP_NAME], "Codex YargiMCP kontrolu")
-    check_command(["claude", "mcp", "get", MCP_NAME], "Claude YargiMCP kontrolu")
-    if not LUNA_SCHEMA_PATH.is_file():
-        raise RuntimeError("Luna cikti semasi bulunamadi: {}".format(LUNA_SCHEMA_PATH))
+    if not SENTEZ_SCHEMA_PATH.is_file():
+        raise RuntimeError(
+            "Sentez cikti semasi bulunamadi: {}".format(SENTEZ_SCHEMA_PATH)
+        )
+    if mcp_available():
+        return True
+    if not (shutil.which("yargi") and shutil.which("mevzuat")):
+        raise RuntimeError(
+            "Ne {} MCP'si ne de yargi/mevzuat CLI fallback'i mevcut.".format(MCP_NAME)
+        )
+    print(
+        "[uyari] {} MCP erisilemiyor; yargi/mevzuat CLI (Bedesten) fallback modu.".format(
+            MCP_NAME
+        ),
+        flush=True,
+    )
+    return False
 
 
 def doctrine() -> str:
@@ -115,7 +149,25 @@ def thresholds(pipeline: Dict[str, object], mode: str) -> Dict[str, int]:
     }
 
 
-def common_prompt(question: str, mode: str, limits: Dict[str, int]) -> str:
+def tool_block(use_mcp: bool) -> str:
+    if use_mcp:
+        return (
+            "- Yalniz `yargi-mcp-pro` ictihat araclarini kullan. Search sonucu atif icin\n"
+            "  yeterli degildir; atif yapilan her karar `ictihat_getir` ile tam metin acilir."
+        )
+    return (
+        "- Arac olarak `yargi` ve `mevzuat` CLI'larini kullan (ayni Bedesten verisi):\n"
+        "  `yargi bedesten search \"...\" -c DANISTAYKARAR|YARGITAYKARARI [-b DAIRE]`,\n"
+        "  `yargi bedesten doc <documentId>`, `mevzuat search/tree/article`.\n"
+        "  Sorgular arasi en az 3 sn bekle; 429'da 60 sn bekleyip bir kez tekrar dene.\n"
+        "  Search sonucu atif icin yeterli degildir; atif yapilan her karar\n"
+        "  `yargi bedesten doc` ile tam metin acilir."
+    )
+
+
+def common_prompt(
+    question: str, mode: str, limits: Dict[str, int], use_mcp: bool
+) -> str:
     return """{doctrine}
 
 HUKUKI SORU / KRITIK NOKTA:
@@ -125,8 +177,7 @@ CALISMA MODU: {mode}
 MINIMUM: {queries} benzersiz arama sorgusu, {full_text} tam metin karari.
 
 ZORUNLU:
-- Yalniz `yargi-mcp-pro` ictihat araclarini kullan. Search sonucu atif icin
-  yeterli degildir; atif yapilan her karar `ictihat_getir` ile tam metin acilir.
+{tools}
 - Her kunye documentId, mahkeme/daire, tarih, E./K. ve baglamla yazilir.
 - Tam metin gorulmeyen karar nihai sonuca alinmaz; DOGRULANMAMIS olarak ayrilir.
 - Aleyhe kararlar ve gorus degisimleri gizlenmez. Model uzlasisi kaynak
@@ -139,16 +190,19 @@ ZORUNLU:
         mode=mode,
         queries=limits["min_queries"],
         full_text=limits["min_full_text"],
+        tools=tool_block(use_mcp),
     )
 
 
-def sol_prompt(question: str, mode: str, limits: Dict[str, int]) -> str:
+def sol_prompt(
+    question: str, mode: str, limits: Dict[str, int], use_mcp: bool
+) -> str:
     protocol = (
         ".claude/commands/arastir-yargi.md"
         if mode == "derin"
         else "ARASTIRMA.md icindeki Faz 1 hafif protokolu"
     )
-    return common_prompt(question, mode, limits) + """
+    return common_prompt(question, mode, limits, use_mcp) + """
 
 ROL 1/4: ANA ARASTIRMACI. Model routing'deki birinci model olarak {protocol}
 kurallarini oku ve uygula. Terim uretimi, genis/dar arama, guncellik, karsi
@@ -163,9 +217,10 @@ def terra_prompt(
     mode: str,
     limits: Dict[str, int],
     sol_path: Path,
+    use_mcp: bool,
 ) -> str:
     fresh_queries = 6 if mode == "derin" else 3
-    return common_prompt(question, mode, limits) + """
+    return common_prompt(question, mode, limits, use_mcp) + """
 
 ROL 2/4: BAGIMSIZ DENETCI. Once su Sol raporunu oku:
 {sol_path}
@@ -173,61 +228,63 @@ ROL 2/4: BAGIMSIZ DENETCI. Once su Sol raporunu oku:
 Sol'un aramalarini mekanik tekrarlama. En az {fresh_queries} bagimsiz karsi
 arama yap; kritik documentId'leri yeniden tam metin ac. Sol'daki dogru
 bulgulari, kunye/baglam hatalarini, atlanan aleyhe kararlari, eski kararlari ve
-yeni emsalleri ayri yaz. Luna icin duzeltilmis karar ve mevzuat atfi listesi
-uret.
+yeni emsalleri ayri yaz. Nihai sentez asamasi icin duzeltilmis karar ve mevzuat
+atfi listesi uret.
 """.format(sol_path=sol_path, fresh_queries=fresh_queries)
 
 
-def luna_prompt(
+def sentez_prompt(
     question: str,
     mode: str,
     limits: Dict[str, int],
     sol_path: Path,
     terra_path: Path,
-    luna_model: str,
+    sentez_model: str,
+    use_mcp: bool,
 ) -> str:
-    return common_prompt(question, mode, limits) + """
+    return common_prompt(question, mode, limits, use_mcp) + """
 
-ROL 3/4: NIHAYI YARGI BULGULARI SENTEZI.
+ROL 3/4: NIHAI YARGI BULGULARI SENTEZI.
 Oku:
-- Sol: {sol_path}
-- Terra: {terra_path}
+- Sol (ana arastirma): {sol_path}
+- Terra (bagimsiz denetim): {terra_path}
 
-Celiskili veya yuksek riskli noktalarda hedefli YargiMCP kontrolleri yap.
+Celiskili veya yuksek riskli noktalarda hedefli dogrulama kontrolleri yap.
 Yalniz tam metinle desteklenen sonuclari koru. Verilen JSON semasina birebir
 uyan tek bir JSON nesnesi dondur:
 - `report_markdown`: kanonik Yargi raporu. Frontmatter'da engine=codex,
-  model={luna_model}, mcp=yargi-mcp-pro, pipeline_stage=3, status=TASLAK olsun.
+  model={sentez_model}, pipeline_stage=3, status=TASLAK olsun.
 - `atif_maddeleri`: her karar icin documentId, kunye, tam-metin dogrulamasi ve
   o kararin atif yaptigi mevzuat maddeleri.
-- `query_count`: raporda listelenen benzersiz gercek MCP arama sayisi.
-- `full_text_count`: ictihat_getir ile acilmis benzersiz karar sayisi.
+- `query_count`: raporda listelenen benzersiz gercek arama sayisi.
+- `full_text_count`: tam metni acilmis benzersiz karar sayisi.
 
-Bu asama nihai 2B raporunu yazar. Claude raporu yeniden yazmayacak.
+Bu asama nihai 2B raporunu yazar; sonraki asama yalniz kalite kapisidir.
 """.format(
         sol_path=sol_path,
         terra_path=terra_path,
-        luna_model=luna_model,
+        sentez_model=sentez_model,
     )
 
 
-def claude_prompt(
+def gate_prompt(
     question: str,
     report_path: Path,
     citations_path: Path,
     max_calls: int,
     max_words: int,
+    use_mcp: bool,
 ) -> str:
     return """{doctrine}
 
-ROL 4/4: CLAUDE KISA KALITE KAPISI.
+ROL 4/4: TERRA KISA KALITE KAPISI (ureten Sol'dan bagimsiz denetci model).
 Soru: {question}
-Luna raporu: {report_path}
+Nihai sentez raporu: {report_path}
 Atif verisi: {citations_path}
 
 - Nihai sentez yapma ve raporu yeniden yazma.
-- Genis arastirma yapma. En fazla {max_calls} hedefli YargiMCP cagrisi kullan;
-  yalniz sonucu degistirecek kunye veya baglam supheliyse arac cagir.
+- Genis arastirma yapma. En fazla {max_calls} hedefli dogrulama cagrisi kullan
+  ({tool_hint}); yalniz sonucu degistirecek kunye veya baglam supheliyse arac cagir.
 - En fazla {max_words} kelime yaz.
 - Ilk satir tam olarak `KARAR: GECTI` veya `KARAR: REVIZE GEREKIR` olsun.
 - Sonra yalniz kritik kunye/baglam hatalari, eksik aleyhe ictihat, eksik tam
@@ -239,10 +296,17 @@ Atif verisi: {citations_path}
         citations_path=citations_path,
         max_calls=max_calls,
         max_words=max_words,
+        tool_hint="yargi-mcp-pro araclari" if use_mcp else "`yargi bedesten doc`",
     )
 
 
-def codex_command(model: str, effort: str, output_path: Path, schema: bool = False) -> List[str]:
+def codex_command(
+    model: str,
+    effort: str,
+    output_path: Path,
+    sandbox: str,
+    schema: bool = False,
+) -> List[str]:
     command = [
         "codex",
         "exec",
@@ -252,38 +316,14 @@ def codex_command(model: str, effort: str, output_path: Path, schema: bool = Fal
         "--config",
         'model_reasoning_effort="{}"'.format(effort),
         "--sandbox",
-        "read-only",
+        sandbox,
         "--cd",
         str(ROOT),
     ]
     if schema:
-        command.extend(["--output-schema", str(LUNA_SCHEMA_PATH)])
+        command.extend(["--output-schema", str(SENTEZ_SCHEMA_PATH)])
     command.extend(["--output-last-message", str(output_path), "-"])
     return command
-
-
-def claude_command(model: str, effort: str) -> List[str]:
-    return [
-        "claude",
-        "--print",
-        "--model",
-        model,
-        "--effort",
-        effort,
-        "--permission-mode",
-        "dontAsk",
-        "--allowedTools",
-        "Read",
-        "mcp__yargi-mcp-pro__ictihat_ara",
-        "mcp__yargi-mcp-pro__ictihat_getir",
-        "mcp__yargi-mcp-pro__semantik_ictihat_ara",
-        "mcp__yargi-mcp-pro__aym_ictihat_ara",
-        "mcp__yargi-mcp-pro__kurum_karari_ara",
-        "mcp__yargi-mcp-pro__kurum_karari_getir",
-        "--output-format",
-        "text",
-        "--no-session-persistence",
-    ]
 
 
 def run_stage(
@@ -293,7 +333,6 @@ def run_stage(
     prompt: str,
     output_path: Path,
     timeout: int,
-    capture_stdout: bool = False,
 ) -> Dict[str, object]:
     print("[{}] {} basliyor...".format(name, model), flush=True)
     started = time.monotonic()
@@ -301,30 +340,16 @@ def run_stage(
     if temp_path.exists():
         temp_path.unlink()
     adjusted = list(command)
-    if not capture_stdout:
-        adjusted[adjusted.index(str(output_path))] = str(temp_path)
+    adjusted[adjusted.index(str(output_path))] = str(temp_path)
     try:
-        if capture_stdout:
-            with temp_path.open("w", encoding="utf-8") as handle:
-                result = subprocess.run(
-                    adjusted,
-                    cwd=str(ROOT),
-                    input=prompt,
-                    stdout=handle,
-                    stderr=None,
-                    text=True,
-                    timeout=timeout,
-                    check=False,
-                )
-        else:
-            result = subprocess.run(
-                adjusted,
-                cwd=str(ROOT),
-                input=prompt,
-                text=True,
-                timeout=timeout,
-                check=False,
-            )
+        result = subprocess.run(
+            adjusted,
+            cwd=str(ROOT),
+            input=prompt,
+            text=True,
+            timeout=timeout,
+            check=False,
+        )
     except subprocess.TimeoutExpired as exc:
         raise RuntimeError(
             "{} zaman asimina ugradi ({} sn).".format(name, timeout)
@@ -350,7 +375,7 @@ def run_stage(
     }
 
 
-def parse_luna(path: Path, limits: Dict[str, int]) -> Dict[str, object]:
+def parse_sentez(path: Path, limits: Dict[str, int]) -> Dict[str, object]:
     text = path.read_text(encoding="utf-8").strip()
     if text.startswith("```"):
         text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text, flags=re.DOTALL)
@@ -361,16 +386,18 @@ def parse_luna(path: Path, limits: Dict[str, int]) -> Dict[str, object]:
     report = payload.get("report_markdown")
     if query_count < limits["min_queries"]:
         raise RuntimeError(
-            "Luna sorgu esigi altinda: {}/{}".format(query_count, limits["min_queries"])
+            "Sentez sorgu esigi altinda: {}/{}".format(
+                query_count, limits["min_queries"]
+            )
         )
     if full_text_count < limits["min_full_text"]:
         raise RuntimeError(
-            "Luna tam metin esigi altinda: {}/{}".format(
+            "Sentez tam metin esigi altinda: {}/{}".format(
                 full_text_count, limits["min_full_text"]
             )
         )
     if not isinstance(citations, list) or not citations:
-        raise RuntimeError("Luna atif_maddeleri listesi bos.")
+        raise RuntimeError("Sentez atif_maddeleri listesi bos.")
     unverified = [
         item
         for item in citations
@@ -378,14 +405,14 @@ def parse_luna(path: Path, limits: Dict[str, int]) -> Dict[str, object]:
     ]
     if unverified:
         raise RuntimeError(
-            "Luna atif_maddeleri yalniz tam metni dogrulanmis kararlar icermeli."
+            "Sentez atif_maddeleri yalniz tam metni dogrulanmis kararlar icermeli."
         )
     if not isinstance(report, str) or len(report.strip()) < 500:
-        raise RuntimeError("Luna report_markdown alani yetersiz.")
+        raise RuntimeError("Sentez report_markdown alani yetersiz.")
     return payload
 
 
-def parse_claude_gate(text: str, max_words: int) -> str:
+def parse_gate(text: str, max_words: int) -> str:
     if len(re.findall(r"\S+", text)) > max_words:
         return "LIMIT_ASILDI"
     lines = text.lstrip().splitlines()
@@ -397,7 +424,10 @@ def parse_claude_gate(text: str, max_words: int) -> str:
 
 def parser() -> argparse.ArgumentParser:
     result = argparse.ArgumentParser(
-        description="YargiMCP'yi Sol, Terra, Luna ve kisa Claude kapisiyla calistirir."
+        description=(
+            "YargiMCP arastirmasini Sol -> Terra -> Sol (sentez) -> Terra (kalite "
+            "kapisi) zinciriyle calistirir."
+        )
     )
     result.add_argument("soru", nargs="?", help="Hukuki soru veya kritik nokta")
     result.add_argument("--soru-dosyasi", type=Path, help="UTF-8 soru/vaka dosyasi")
@@ -427,6 +457,7 @@ def main() -> int:
         or ROOT / "tmp" / "yargi-model-runs" / (timestamp + "-" + ascii_slug(question))
     ).resolve()
     stages = pipeline["stages"]
+    sandbox = str(pipeline.get("sandbox", DEFAULT_SANDBOX))
     if args.kuru_calistir:
         print("Mod: {} | Esik: {} sorgu / {} tam metin".format(
             args.mod, limits["min_queries"], limits["min_full_text"]
@@ -438,29 +469,33 @@ def main() -> int:
             ))
         return 0
 
+    use_mcp = False
     try:
         if not args.on_kontrol_yok:
-            print("Oturum ve YargiMCP baglantilari kontrol ediliyor...", flush=True)
-            preflight()
+            print("Codex oturumu ve arac erisimi kontrol ediliyor...", flush=True)
+            use_mcp = preflight()
+        else:
+            use_mcp = mcp_available()
         output_dir.mkdir(parents=True, exist_ok=True)
     except (OSError, RuntimeError, subprocess.TimeoutExpired) as exc:
         print("On kontrol hatasi: {}".format(exc), file=sys.stderr)
         return 2
 
-    sol, terra, luna, claude = stages
+    sol, terra, sentez, gate = stages
     sol_path = output_dir / "yargi-01-sol.md"
     terra_path = output_dir / "yargi-02-terra.md"
-    luna_json_path = output_dir / ".yargi-03-luna.json"
+    sentez_json_path = output_dir / ".yargi-03-sentez.json"
     report_name = "yargi-bulgulari.md" if args.mod == "derin" else "01-Ictihat-taramasi.md"
     report_path = output_dir / report_name
     citations_path = output_dir / "atif-maddeleri.json"
-    claude_path = output_dir / "yargi-04-claude-kalite.md"
+    gate_path = output_dir / "yargi-04-terra-kalite.md"
     manifest_path = output_dir / "yargi-model-pipeline.json"
     manifest: Dict[str, object] = {
         "created_at": now_iso(),
         "question": question,
         "mode": args.mod,
         "thresholds": limits,
+        "mcp_used": use_mcp,
         "status": "running",
         "pipeline": stages,
         "stages": [],
@@ -472,72 +507,76 @@ def main() -> int:
             (
                 "01-sol",
                 sol,
-                codex_command(sol["model"], sol.get("reasoning", "xhigh"), sol_path),
-                sol_prompt(question, args.mod, limits),
+                codex_command(
+                    sol["model"], sol.get("reasoning", "xhigh"), sol_path, sandbox
+                ),
+                sol_prompt(question, args.mod, limits, use_mcp),
                 sol_path,
-                False,
             ),
             (
                 "02-terra",
                 terra,
                 codex_command(
-                    terra["model"], terra.get("reasoning", "xhigh"), terra_path
+                    terra["model"], terra.get("reasoning", "xhigh"), terra_path, sandbox
                 ),
-                terra_prompt(question, args.mod, limits, sol_path),
+                terra_prompt(question, args.mod, limits, sol_path, use_mcp),
                 terra_path,
-                False,
             ),
             (
-                "03-luna",
-                luna,
+                "03-sentez",
+                sentez,
                 codex_command(
-                    luna["model"], luna.get("reasoning", "xhigh"), luna_json_path, True
+                    sentez["model"],
+                    sentez.get("reasoning", "xhigh"),
+                    sentez_json_path,
+                    sandbox,
+                    True,
                 ),
-                luna_prompt(
-                    question, args.mod, limits, sol_path, terra_path, luna["model"]
+                sentez_prompt(
+                    question,
+                    args.mod,
+                    limits,
+                    sol_path,
+                    terra_path,
+                    sentez["model"],
+                    use_mcp,
                 ),
-                luna_json_path,
-                False,
+                sentez_json_path,
             ),
         ]
-        for name, stage, command, prompt, path, capture in stage_specs:
+        for name, stage, command, prompt, path in stage_specs:
             result = run_stage(
-                name,
-                stage["model"],
-                command,
-                prompt,
-                path,
-                args.zaman_asimi,
-                capture_stdout=capture,
+                name, stage["model"], command, prompt, path, args.zaman_asimi
             )
             manifest["stages"].append(result)  # type: ignore[union-attr]
             atomic_json(manifest_path, manifest)
 
-        luna_payload = parse_luna(luna_json_path, limits)
-        atomic_text(report_path, luna_payload["report_markdown"].rstrip() + "\n")
+        sentez_payload = parse_sentez(sentez_json_path, limits)
+        atomic_text(report_path, sentez_payload["report_markdown"].rstrip() + "\n")
         atomic_json(
             citations_path,
             {
                 "schema_version": 1,
                 "generated_at": now_iso(),
-                "generated_by": luna["model"],
+                "generated_by": sentez["model"],
                 "mode": args.mod,
-                "kararlar": luna_payload["atif_maddeleri"],
+                "kararlar": sentez_payload["atif_maddeleri"],
             },
         )
 
-        max_calls = int(pipeline.get("claude_max_mcp_calls", 2))
-        max_words = int(pipeline.get("claude_max_words", 600))
+        max_calls = int(pipeline.get("gate_max_mcp_calls", 2))
+        max_words = int(pipeline.get("gate_max_words", 600))
         result = run_stage(
-            "04-claude-kalite",
-            claude["model"],
-            claude_command(claude["model"], claude.get("reasoning", "high")),
-            claude_prompt(
-                question, report_path, citations_path, max_calls, max_words
+            "04-terra-kalite",
+            gate["model"],
+            codex_command(
+                gate["model"], gate.get("reasoning", "high"), gate_path, sandbox
             ),
-            claude_path,
+            gate_prompt(
+                question, report_path, citations_path, max_calls, max_words, use_mcp
+            ),
+            gate_path,
             args.zaman_asimi,
-            capture_stdout=True,
         )
         manifest["stages"].append(result)  # type: ignore[union-attr]
     except (OSError, RuntimeError, ValueError, json.JSONDecodeError) as exc:
@@ -548,20 +587,20 @@ def main() -> int:
         print("Pipeline durdu: {}".format(exc), file=sys.stderr)
         return 1
 
-    gate_text = claude_path.read_text(encoding="utf-8")
-    gate = parse_claude_gate(gate_text, max_words)
-    manifest["claude_gate"] = gate
+    gate_text = gate_path.read_text(encoding="utf-8")
+    gate_result = parse_gate(gate_text, max_words)
+    manifest["quality_gate"] = gate_result
     manifest["final_report"] = report_path.name
     manifest["citations"] = citations_path.name
-    manifest["status"] = "completed" if gate == "GECTI" else "review_required"
+    manifest["status"] = "completed" if gate_result == "GECTI" else "review_required"
     manifest["finished_at"] = now_iso()
     atomic_json(manifest_path, manifest)
 
-    print("Nihai Luna raporu: {}".format(report_path))
+    print("Nihai sentez raporu (Sol): {}".format(report_path))
     print("Atif girdisi: {}".format(citations_path))
-    print("Claude kalite kapisi: {} ({})".format(claude_path, gate))
-    if gate != "GECTI":
-        print("2C BASLAMAMALI: Claude kalite kapisi gecilmedi.", file=sys.stderr)
+    print("Terra kalite kapisi: {} ({})".format(gate_path, gate_result))
+    if gate_result != "GECTI":
+        print("2C BASLAMAMALI: kalite kapisi gecilmedi.", file=sys.stderr)
         return 3
     return 0
 

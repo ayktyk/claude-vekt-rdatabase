@@ -9,85 +9,131 @@
     "2026-07-09": "ARASTIRMA REVIZYONU (avukat karari): 2A Super Stajyer (stajyer_prompt_uret) + Faz D Arguman.ai (arguman_ai) task'lari KALDIRILDI, dosyalar arsiv/ altinda. KVKK maskeleme ERTELENDI (yerel LLM'e gecise kadar). ASAMA 2 cekirdegi = 2B->2C sirali zincir + 2D async paralel. Ana omurga Yargi-MCP-Pro (UYAP entegrasyonu dahil - envanter cikarilinca tools[] guncellenecek).",
     "2026-07-13": "YARGI COK MODELLI ROUTING (avukat karari): 2B YargiMCP sirasi GPT-5.6 Sol -> Terra -> Luna -> Claude Opus. Sol ana arastirma, Terra bagimsiz denetim, Luna nihai 2B raporu + atif-maddeleri, Claude en fazla 2 hedefli sorguluk kisa kalite kapisi. Claude nihai sentez YAPMAZ."
   },
-  "_last_updated": "2026-07-13",
-
+  "_last_updated": "2026-07-18",
   "mode": "auto",
   "_mode_values": "auto = config'tek default, sormaz | ask = her ASAMA basinda avukata sor | fixed = sadece default kullan, fallback yok",
-
   "handoff_protocol": "antigravity_copy_paste",
   "handoff_template_dir": "prompts/gemini/",
   "_handoff_aciklama": "engine='antigravity_manual' olan tasklarda terminal Claude devir blogu basar; avukat Antigravity sag paneline yapistirir; Antigravity uretip Drive'a yazar; avukat terminale doner 'ASAMA X bitti' der; Claude qmd update + MemPalace diary yapar ve bir sonraki ASAMA'ya gecer.",
-
   "tasks": {
     "director": {
-      "engine": "claude",
-      "model": "claude-opus-4-7",
-      "aciklama": "Director Agent: workflow orkestrasyonu, ASAMA gecisleri, kalite kapilari, kullanici-kontrol komutlari (devam/atla/dur/motor-degistir), Antigravity devir bloklari uretimi"
+      "engine": "codex",
+      "model": "gpt-5.6-sol",
+      "aciklama": "Director Agent: workflow orkestrasyonu, ASAMA gecisleri, kalite kapilari, kullanici-kontrol komutlari (devam/atla/dur/motor-degistir), Antigravity devir bloklari uretimi",
+      "_eski": "claude-opus-4-7 (2026-07-18 oncesi)"
     },
     "mcp_arac_yonetimi": {
-      "engine": "claude",
-      "model": "claude-opus-4-7",
-      "aciklama": "MemPalace, Google Drive, Calendar, Gmail MCP cagrilari"
+      "engine": "codex",
+      "model": "gpt-5.6-sol",
+      "aciklama": "MemPalace, Google Drive, Calendar, Gmail MCP cagrilari",
+      "_eski": "claude-opus-4-7 (2026-07-18 oncesi)"
     },
     "yargi_mcp": {
       "engine": "ordered_multi_model",
       "model": "gpt-5.6-sol",
       "mcp_server": "yargi-mcp-pro",
       "tool_prefix": "mcp__yargi-mcp-pro__",
-      "tools": ["ictihat_ara", "ictihat_getir", "semantik_ictihat_ara", "aym_ictihat_ara", "kurum_karari_ara", "kurum_karari_getir"],
+      "tools": [
+        "ictihat_ara",
+        "ictihat_getir",
+        "semantik_ictihat_ara",
+        "aym_ictihat_ara",
+        "kurum_karari_ara",
+        "kurum_karari_getir"
+      ],
       "skill": ".claude/skills/yargi-legal-research-guide/SKILL.md",
       "pipeline": {
         "execution": "sequential",
         "orchestrator": "scripts/yargi_model_pipeline.py",
         "stages": [
-          {"order": 1, "engine": "codex", "model": "gpt-5.6-sol", "reasoning": "xhigh", "role": "ana_arastirma"},
-          {"order": 2, "engine": "codex", "model": "gpt-5.6-terra", "reasoning": "xhigh", "role": "bagimsiz_denetim"},
-          {"order": 3, "engine": "codex", "model": "gpt-5.6-luna", "reasoning": "xhigh", "role": "nihai_2b_sentezi"},
-          {"order": 4, "engine": "claude", "model": "opus", "reasoning": "high", "role": "kisa_kalite_kapisi"}
+          {
+            "order": 1,
+            "engine": "codex",
+            "model": "gpt-5.6-sol",
+            "reasoning": "xhigh",
+            "role": "ana_arastirma"
+          },
+          {
+            "order": 2,
+            "engine": "codex",
+            "model": "gpt-5.6-terra",
+            "reasoning": "xhigh",
+            "role": "bagimsiz_denetim"
+          },
+          {
+            "order": 3,
+            "engine": "codex",
+            "model": "gpt-5.6-sol",
+            "reasoning": "xhigh",
+            "role": "nihai_2b_sentezi"
+          },
+          {
+            "order": 4,
+            "engine": "codex",
+            "model": "gpt-5.6-terra",
+            "reasoning": "high",
+            "role": "kalite_kapisi"
+          }
         ],
         "modes": {
-          "derin": {"min_queries": 15, "min_full_text": 5},
-          "hafif": {"min_queries": 6, "min_full_text": 3}
+          "derin": {
+            "min_queries": 15,
+            "min_full_text": 5
+          },
+          "hafif": {
+            "min_queries": 6,
+            "min_full_text": 3
+          }
         },
         "final_report_stage": 3,
         "quality_gate_stage": 4,
-        "claude_max_mcp_calls": 2,
-        "claude_max_words": 600
+        "sandbox": "danger-full-access",
+        "_sandbox_not": "CLI fallback ag erisimi icin; yargi-mcp-pro MCP calisir hale gelince read-only yapilabilir",
+        "gate_max_mcp_calls": 2,
+        "gate_max_words": 600
       },
       "aciklama": "Yargi-MCP-Pro 2B sirali cok-model hatti. Sol ana tarama; Terra bagimsiz karsi arama; Luna kanonik yargi-bulgulari.md + atif-maddeleri.json; Claude yalniz kisa kalite kapisi. 2C sadece Claude GECTI kararindan sonra baslar. Sorgu lehceleri ve tool seti icin yargi-legal-research-guide skill."
     },
     "mevzuat_mcp": {
-      "engine": "claude",
-      "model": "claude-opus-4-7",
+      "engine": "codex",
+      "model": "gpt-5.6-sol",
       "mcp_server": "yargi-mcp-pro",
       "tool_prefix": "mcp__yargi-mcp-pro__",
-      "tools": ["mevzuat_ara", "mevzuat_getir", "mevzuat_icinde_ara"],
+      "tools": [
+        "mevzuat_ara",
+        "mevzuat_getir",
+        "mevzuat_icinde_ara"
+      ],
       "skill": ".claude/skills/yargi-legal-research-guide/SKILL.md",
-      "aciklama": "Yargi-MCP-Pro Mevzuat sorgulari (FAZ 6 2026-07-09 — yeni Turkce tool seti; 12 tip: KANUN/KHK/TUZUK/YONETMELIK/CB_*/KKY/UY/TEBLIGLER/MULGA). ASAMA 2C esas: mevzuat_ara (phrase Mevzuat Solr — bosluk=AND, AND/OR/NOT literal BOZAR, wildcard*/fuzzy~ calisir; mevzuat_no en kesin; page_size max 20), mevzuat_icinde_ara (tek mevzuat ici YEREL boolean — BUYUK harf AND/OR/NOT, kelime koku), mevzuat_getir (id_type=mevzuat/madde/gerekce/outline; madde_no kisayolu ile tek cagri; 50KB chunk). id_type = kimligin geldigi ALAN ADI. Detay: yargi-legal-research-guide skill."
+      "aciklama": "Yargi-MCP-Pro Mevzuat sorgulari (FAZ 6 2026-07-09 — yeni Turkce tool seti; 12 tip: KANUN/KHK/TUZUK/YONETMELIK/CB_*/KKY/UY/TEBLIGLER/MULGA). ASAMA 2C esas: mevzuat_ara (phrase Mevzuat Solr — bosluk=AND, AND/OR/NOT literal BOZAR, wildcard*/fuzzy~ calisir; mevzuat_no en kesin; page_size max 20), mevzuat_icinde_ara (tek mevzuat ici YEREL boolean — BUYUK harf AND/OR/NOT, kelime koku), mevzuat_getir (id_type=mevzuat/madde/gerekce/outline; madde_no kisayolu ile tek cagri; 50KB chunk). id_type = kimligin geldigi ALAN ADI. Detay: yargi-legal-research-guide skill.",
+      "_eski": "claude-opus-4-7 (2026-07-18 oncesi)"
     },
     "uyap_workspace": {
-      "engine": "claude",
-      "model": "claude-opus-4-7",
+      "engine": "codex",
+      "model": "gpt-5.6-sol",
       "cli": "npx dava-cli@latest",
       "skill": ".claude/skills/yargi-uyap-workspace/SKILL.md",
-      "aciklama": "UYAP Avukat dava dosyasi cekme (FAZ 6 2026-07-09 — beta). ASAMA 1 hazirlikta opsiyonel: dava UYAP'ta varsa 'dava-cli clone' ile evraklar (.udf/.pdf/.tiff) + INDEX.md yerel klasore iner (~/Documents/YargiPRO/...), sonra arastirma girdisi olur. Delta guncelleme: 'dava-cli sync'. macOS ilk calistirmada Automation izni; Windows'ta Session-0 tuzagi (Scheduled Task yolu). Detay: yargi-uyap-workspace skill."
+      "aciklama": "UYAP Avukat dava dosyasi cekme (FAZ 6 2026-07-09 — beta). ASAMA 1 hazirlikta opsiyonel: dava UYAP'ta varsa 'dava-cli clone' ile evraklar (.udf/.pdf/.tiff) + INDEX.md yerel klasore iner (~/Documents/YargiPRO/...), sonra arastirma girdisi olur. Delta guncelleme: 'dava-cli sync'. macOS ilk calistirmada Automation izni; Windows'ta Session-0 tuzagi (Scheduled Task yolu). Detay: yargi-uyap-workspace skill.",
+      "_eski": "claude-opus-4-7 (2026-07-18 oncesi)"
     },
     "notebooklm_mcp": {
-      "engine": "claude",
-      "model": "claude-opus-4-7",
-      "aciklama": "NotebookLM async paralel kol — 10 iteratif sorgu, polling"
+      "engine": "codex",
+      "model": "gpt-5.6-sol",
+      "aciklama": "NotebookLM async paralel kol — 10 iteratif sorgu, polling",
+      "_eski": "claude-opus-4-7 (2026-07-18 oncesi)"
     },
     "kritik_nokta_tespiti": {
-      "engine": "claude",
-      "model": "claude-opus-4-7",
-      "aciklama": "Muvekkil belgelerini okuyup hukuki uyusmazlik tespiti (MCP araclari ile dosya okuma)"
+      "engine": "codex",
+      "model": "gpt-5.6-sol",
+      "aciklama": "Muvekkil belgelerini okuyup hukuki uyusmazlik tespiti (MCP araclari ile dosya okuma)",
+      "_eski": "claude-opus-4-7 (2026-07-18 oncesi)"
     },
     "arastirma_sentezi": {
-      "engine": "claude",
-      "model": "claude-opus-4-7",
-      "aciklama": "MCP/CLI ciktilarini ASAMA 2 esas raporuna cevirme. Claude'da kalir cunku ham MCP ciktilari ayni oturumda uretiliyor; copy-paste yorgunlugu olusmasin diye Antigravity'ye gitmez. 2026-05-13 karari."
+      "engine": "codex",
+      "model": "gpt-5.6-sol",
+      "aciklama": "MCP/CLI ciktilarini ASAMA 2 esas raporuna cevirme. Claude'da kalir cunku ham MCP ciktilari ayni oturumda uretiliyor; copy-paste yorgunlugu olusmasin diye Antigravity'ye gitmez. 2026-05-13 karari.",
+      "_eski": "claude-opus-4-7 (2026-07-18 oncesi)"
     },
-
     "arama_plani": {
       "engine": "antigravity_manual",
       "model": "gemini-3.1-pro-preview",
@@ -139,11 +185,13 @@
       "aciklama": "Kalite gate: Antigravity kendi ciktisini elestirir (her uretim sonrasi, ayni sohbette)."
     }
   },
-
   "fallback": {
-    "_aciklama_2026_05_13": "Antigravity hibrit mimarisine gecildi. Asagidaki gemini_chain alanlari DEPRECATED — sadece rollback icin korunuyor. Yeni fallback: Antigravity erisilemezse terminal Claude hukuki uretimi yapar (final_fallback).",
+    "_aciklama_2026_05_13": "Antigravity hibrit mimarisine gecildi. Asagidaki gemini_chain alanlari DEPRECATED — sadece rollback icin korunuyor. Yeni fallback: Antigravity erisilemezse terminal Claude hukuki uretimi yapar (final_fallback). [DEVRE DISI 2026-07-18 — fallback: codex/gpt-5.6-sol]",
     "_deprecated_2026_05_13": true,
-    "gemini_chain_deprecated": ["gemini-3.1-pro-preview", "gemini-3-flash-preview"],
+    "gemini_chain_deprecated": [
+      "gemini-3.1-pro-preview",
+      "gemini-3-flash-preview"
+    ],
     "gemini_max_retry_deprecated": 2,
     "gemini_retry_delay_sec_deprecated": 5,
     "final_fallback": {
@@ -152,6 +200,11 @@
       "aciklama": "Antigravity erisilemez/cevap vermezse veya avukat 'fallback claude' derse terminal Claude bu ASAMA'yi uretir. Cikti frontmatter: engine: claude, fallback_used: true."
     },
     "log_fallback_to_mempalace": true,
-    "log_fallback_to_event_log": "logs/model-events.jsonl"
-  }
+    "log_fallback_to_event_log": "logs/model-events.jsonl",
+    "engine": "codex",
+    "model": "gpt-5.6-sol"
+  },
+  "_claude_removed": "2026-07-18 avukat karari: Claude (Fable) simdilik tamamen cikarildi — orkestrasyon Codex/Sol (AGENTS.md), 2B nihai sentez Sol, kalite kapisi Terra. Spec: docs/superpowers/specs/2026-07-18-claudesiz-motor-revizyonu-design.md. Geri donus: CLAUDE.md ve .claude/ dokunulmadan korundu.",
+  "orchestrator_engine": "codex",
+  "orchestrator_model": "gpt-5.6-sol"
 }

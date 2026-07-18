@@ -1,5 +1,14 @@
 # Hukuk Basasistani - CLAUDE.md
 
+> **GUNCEL DURUM (2026-07-18, avukat karari):** Sistemin orkestratoru SIMDILIK
+> Codex CLI'dir (GPT-5.6 Sol) — anayasa: `AGENTS.md`. Claude (Fable) muhakeme
+> ve orkestrasyon rollerinden gecici olarak cikarildi; 2B pipeline
+> Sol→Terra→Sol(sentez)→Terra(kalite) oldu (Luna cikti). Bu dosya geri donus
+> guvencesi olarak korunur — Claude oturumu acilirsa once
+> `docs/superpowers/specs/2026-07-18-claudesiz-motor-revizyonu-design.md`
+> spec'ini oku ve avukata mevcut durumu hatirlat; asagidaki kurallar ancak
+> avukat Claude'a donus kararini verirse yeniden birincil olur.
+
 Yeni oturum basladiginda bu dosyayi oku. Tum davranislarin bu kurallara gore sekillenir.
 
 ---
