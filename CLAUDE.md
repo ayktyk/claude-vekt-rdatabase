@@ -1,13 +1,13 @@
 # Hukuk Basasistani - CLAUDE.md
 
-> **GUNCEL DURUM (2026-07-18, avukat karari):** Sistemin orkestratoru SIMDILIK
-> Codex CLI'dir (GPT-5.6 Sol) — anayasa: `AGENTS.md`. Claude (Fable) muhakeme
-> ve orkestrasyon rollerinden gecici olarak cikarildi; 2B pipeline
-> Sol→Terra→Sol(sentez)→Terra(kalite) oldu (Luna cikti). Bu dosya geri donus
-> guvencesi olarak korunur — Claude oturumu acilirsa once
-> `docs/superpowers/specs/2026-07-18-claudesiz-motor-revizyonu-design.md`
-> spec'ini oku ve avukata mevcut durumu hatirlat; asagidaki kurallar ancak
-> avukat Claude'a donus kararini verirse yeniden birincil olur.
+> **GUNCEL DURUM (2026-07-19, avukat karari):** Codex denemesi sona erdi;
+> Codex TUM PROJEDEN kaldirildi (arsiv: `arsiv/codex-motor/`). Orkestra sefi
+> ve TUM tool kullanimi CLAUDE FABLE 5'tir (`claude-fable-5`); Fable limiti
+> dolarsa CLAUDE OPUS 4.8 (`claude-opus-4-8`) devralir — gecis avukatin
+> `/model` komutuyla yapilir, ASAMA bildirimi + cikti frontmatter'i hangi
+> modelin calistigini damgalar. Hukuki muhakeme Antigravity/Gemini 3.1 Pro'da.
+> BU DOSYA sistemin TEK anayasasidir.
+> Spec: `docs/superpowers/specs/2026-07-19-claude-gemini-donus-design.md`
 
 Yeni oturum basladiginda bu dosyayi oku. Tum davranislarin bu kurallara gore sekillenir.
 
@@ -37,6 +37,7 @@ Tam doktrin: `@ajanlar/0-halusinasyon-doktrini.md` (ZORUNLU OKUMA — her hukuki
 4. **Muvekkili memnun etmek icin lehe yorum YASAK** — kaynak ne diyorsa o yazilir, aleyhe yon de acikca gosterilir.
 5. **"Bu konuda kaynak yok" demek dogruluk** — bilinmeyen seyi uydurma yapmak yerine eksiklik bildirilir.
 6. **Kaynaksiz genel ifade YASAK** — "Yargitay yerlesmistir / Doktrin baskindir" gibi iddialar mutlaka kunye + alinti + URL ile destekli olmali.
+7. **ARACSIZ KUNYE YASAGI (benchmark dersi 2026-07-18 — KALICI):** Bedesten erisimli arac (Yargi-MCP-Pro veya `yargi`/`mevzuat` CLI) olmadan hicbir motor kunye yazamaz. Aracsiz uretim zorunluysa ciktinin basina `ARACSIZ — kunye icermez` damgasi konur. (Benchmark: +YargiPro her modele +2…+7 puan katti; aracsiz hukuki uretim standart altidir.)
 
 **Pozitif kurallar:**
 - Her hukuki ciktida sonunda "Kaynak Dogrulama" tablosu zorunludur (iddia + kaynak + tam alinti + dogrulama).
@@ -506,11 +507,11 @@ Bu katman yalnizca avukatin isaret ettigi kritik nokta icin calistirilir.
 Genis, konusuz arastirma yapma.
 
 **ONEMLI - Her Zaman Derin Mod:** Yargi MCP ve Mevzuat MCP her sorguda
-**iteratif derin protokol** ile calisir. 2B, `config/model-routing.json` ->
-`tasks.yargi_mcp.pipeline` sirasindaki Sol → Terra → Luna → Claude kisa QA
-hattidir. Luna nihai 2B raporunu yazar; Claude 2B sentezi yapmaz. Mevzuat
-motoru `tasks.mevzuat_mcp`'den okunur. Tek-shot sorgu yasaktir. Yargi CLI /
-Mevzuat CLI yalniz MCP fail durumunda fallback olarak devreye girer.
+**iteratif derin protokol** ile calisir. 2B ve 2C TEK ELDEN Claude Fable 5
+tarafindan yurutulur (`config/model-routing.json` -> `tasks.yargi_mcp` /
+`tasks.mevzuat_mcp`, engine: claude; protokol: 6 Faz + Gap Check, min sorgu
+kurallari `modes` altinda). Tek-shot sorgu yasaktir. Yargi CLI / Mevzuat CLI
+yalniz MCP fail durumunda fallback olarak devreye girer.
 
 **2B → 2C Sirali Akis (paralelden CIKARILDI):** 2B Yargi MCP detayli karar
 arastirmasi yapar → bulunan kararlarin atif yaptigi mevzuat maddelerini cikarir
@@ -904,7 +905,7 @@ tek seferlik override yapilabilir.
 | Task Tipi | Ajan | Default Motor | Fallback |
 |---|---|---|---|
 | Kritik nokta tespiti | Director on-adim (ASAMA 1) | Claude (terminal) | - |
-| 2B YargiMCP | Arastirmaci (ASAMA 2B) | Sol → Terra → Luna → Claude kisa QA | Config pipeline |
+| 2B YargiMCP | Arastirmaci (ASAMA 2B) | Claude Fable 5 (iteratif derin protokol) | Claude Opus 4.8 |
 | Arastirma sentezi | Arastirmaci (ASAMA 2) | Claude (terminal) | - |
 | Arama plani | Arastirmaci (ASAMA 2 hazirlik) | Antigravity (sag panel) | Claude |
 | Usul raporu | Usul Uzmani (ASAMA 3) | **Antigravity (sag panel)** | Claude |
@@ -921,8 +922,8 @@ Bu gorevler her zaman terminal Claude'da kalir, Antigravity'ye gitmez:
 
 - Director Agent orkestrasyonu (komut siniflandirma, ASAMA gecisleri)
 - MCP cagrilari (MemPalace, Drive, NotebookLM, Calendar, Gmail)
-- Yargi 2B orkestrasyonu (`scripts/yargi_model_pipeline.py`); Claude burada
-  yalniz 4. asama kisa kalite kapisidir
+- Yargi 2B derin arastirmasi (Yargi-MCP-Pro, tek elden — iteratif derin
+  protokol: derin mod min 15 sorgu / 5 tam metin, hafif mod 6 / 3)
 - Mevzuat MCP / NotebookLM MCP
 - Yargi CLI ve Mevzuat CLI cagrilari (fallback)
 - ASAMA 2 sentezi (MCP ciktilari ayni oturumda raporlanir)
@@ -965,7 +966,7 @@ Gemini veya Claude fark etmez, her ajan ciktisinin basina YAML frontmatter eklen
 
 ```yaml
 ---
-model: gemini-3.1-pro-preview | claude-opus-4.7
+model: gemini-3.1-pro-preview | claude-fable-5 | claude-opus-4-8
 engine: gemini | claude
 task_type: usul_raporu | arastirma_sentezi | dilekce_yazimi | ...
 run_id: {ISO_timestamp}-{pid}
@@ -1511,7 +1512,7 @@ Context window %70'e ulastiginda otomatik state dump:
 | `davayi cek` / `yargi pro baslat` | UYAP Avukat dava dosyasi indirme — `dava-cli clone` akisi (`.claude/skills/yargi-uyap-workspace/SKILL.md`) |
 | `dava guncelle` | Clone'lanmis davaya yeni evrak indir — `dava-cli sync` (delta, tarayicisiz) |
 | `arastir: [kritik nokta]` | Director + arastirma cekirdegi (2B→2C sirali zincir + 2D paralel) |
-| `arastir yargi: [kritik nokta]` | Arastirma - 2B Sol→Terra→Luna→Claude kisa QA pipeline'i |
+| `arastir yargi: [kritik nokta]` | Arastirma - 2B Yargi-MCP-Pro (Claude Fable 5, iteratif derin protokol) |
 | `arastir mevzuat: [kritik nokta]` | Arastirma - 2C Mevzuat MCP (CLI fallback) |
 | `arastir notebook: [kritik nokta]` | Arastirma - 2D NotebookLM / Drive |
 | `arastir danisma: [hukuki soru]` | **Hızlı Araştırma Modülü** (`@ARASTIRMA.md`) — müvekkil adayı sorusu için bağımsız hafif hat. Yargı-MCP-Pro + Mevzuat + Mülga denetimi + Künye doğrulama. Çıktı: `Hukuk Bürosu\Research\{tarih}-{slug}\arastirma-cevabi.md` (yol `scripts/paths.py` ile çözümlenir). Dava akışına dokunmaz. |
