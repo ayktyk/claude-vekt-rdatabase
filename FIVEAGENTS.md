@@ -178,7 +178,7 @@ karar noktasi).
 | 0 | Director | Claude (terminal) | - | (sabit, MCP) |
 | 1 (briefing) | Director | Claude (terminal) | - | `kritik_nokta_tespiti` |
 | 1 (arama plani) | Director | Antigravity (sag panel) | (opsiyonel batch oncesi) | `arama_plani` |
-| 2B (Yargi MCP) | Arastirmaci | Config sirasi: Sol → Terra → Luna → Claude kisa QA | - | `yargi_mcp` |
+| 2B (Yargi MCP) | Arastirmaci | Claude Fable 5 tek elden (iteratif derin protokol) | - | `yargi_mcp` |
 | 2C (Mevzuat MCP) | Arastirmaci | Claude (terminal, MCP + CLI fallback, **MAX EFFORT**) | - | `mevzuat_mcp` |
 | 2D (NotebookLM) | Arastirmaci | Claude (terminal, MCP) | - | `notebooklm_mcp` |
 | 2 sentez | Arastirmaci | Claude (terminal) | - | `arastirma_sentezi` |
@@ -374,12 +374,12 @@ AVUKAT
   |
   +-- SIRALI ZINCIR (2B → 2C, paralelden CIKARILDI) --------------
       |
-      |-- [2B] YARGI-MCP-PRO (Sol → Terra → Luna → Claude kisa QA)
+      |-- [2B] YARGI-MCP-PRO (Claude Fable 5 — iteratif derin protokol)
       |       Birincil: mcp__yargi-mcp-pro__ictihat_ara, ictihat_getir
       |       Fallback: yargi CLI (MCP fail durumunda)
       |       Cikti: kararlar + her kararin atif yaptigi mevzuat maddeleri
       |       v
-      |-- [2C] YARGI-MCP-PRO MEVZUAT (Opus 4.7 MAX EFFORT) — FAZ 2 2026-05-19
+      |-- [2C] YARGI-MCP-PRO MEVZUAT (Claude Fable 5 MAX EFFORT) — FAZ 2 2026-05-19
       |       Birincil: mcp__yargi-mcp-pro__mevzuat_ara, mevzuat_icinde_ara, mevzuat_getir
       |       Fallback: mevzuat CLI (MCP fail durumunda)
       |       Girdi: 2B'nin atif maddeleri listesi
@@ -571,7 +571,7 @@ AVUKAT
 
 ### ASAMA 1: Hazirlik
 
-> **Motor:** Gemini | **Model:** gemini-3.1-pro-preview | **Routing:** `kritik_nokta_tespiti` + `arama_plani` | **Fallback:** claude-opus-4.7
+> **Motor:** Gemini | **Model:** gemini-3.1-pro-preview | **Routing:** `kritik_nokta_tespiti` + `arama_plani` | **Fallback:** claude-fable-5 (terminal; limit dolarsa claude-opus-4-8)
 > Not: Drive klasor olusturma ve kaynak sorgulama MCP cagrilari Claude'da kalir.
 
 Bu asamada hic hukuki arastirma yapilmaz. Sadece olgusal
@@ -636,10 +636,10 @@ resim cikarilir ve kritik noktalar netlestirilir.
 
 ### ASAMA 2: Derin Arastirma (2B→2C sirali zincir + 2D async paralel kol)
 
-> **Motor:** 2B, `config/model-routing.json -> tasks.yargi_mcp.pipeline`
-> sirasiyla Sol → Terra → Luna → Claude kisa QA olarak calisir. Luna nihai 2B
-> raporunu yazar; Claude 2B sentezi yapmaz. 2C/2D ve genel ASAMA 2 sentezi kendi
-> routing task'larinda kalir.
+> **Motor:** 2B, `config/model-routing.json -> tasks.yargi_mcp` uyarinca
+> Claude Fable 5 tarafindan TEK ELDEN calisir; nihai 2B raporunu da Claude
+> yazar (iteratif derin protokol, 6 Faz + Gap Check). 2C/2D ve genel ASAMA 2
+> sentezi kendi routing task'larinda kalir.
 
 > **REVIZYON 2026-07-09:** 2A Suer Stajyer + Faz D Arguman.ai ARSIVLENDI
 > (`arsiv/README.md`). Ana omurga Yargi-MCP-Pro.
@@ -666,7 +666,7 @@ BASLATICI: Director Agent
   |
   |  2D async paralel kolu tetikler + 2B → 2C sirali zinciri yurutur:
   |
-  +---> [2B] YARGI-MCP-PRO  (Sol ana tarama -> Terra denetim -> Luna nihai 2B -> Claude kisa QA)
+  +---> [2B] YARGI-MCP-PRO  (Claude Fable 5: tarama -> tam metin -> sentez -> kalite kontrol)
   |        Birincil: mcp__yargi-mcp-pro__ictihat_ara
   |                  (court_types[]: YARGITAYKARARI/DANISTAYKARAR/YERELHUKUK/ISTINAFHUKUK/KYB;
   |                   birimAdi enum: H1-H23/C1-C23/HGK/CGK/D1-D17/IBK/...)
@@ -709,7 +709,7 @@ BASLATICI: Director Agent
   |        NOT: Eski 9 tip-bazli search tool tek mevzuat_ara'a konsolide; 3 fetch tool
   |              tek mevzuat_getir'e indirgendi.
   |        Fallback: mevzuat CLI (mevzuat search/doc/article/tree) - sadece MCP fail
-  |        Mod: Her zaman derin, tek-shot yasak, **Opus 4.7 MAX EFFORT thinking**
+  |        Mod: Her zaman derin, tek-shot yasak, **Claude Fable 5 MAX EFFORT thinking**
   |        Girdi: 2B'nin atif maddesi listesi (TBK m.X, Is K. m.Y, ...)
   |        Minimum: 8 sorgu / 4 faz + mulga denetim
   |
@@ -909,7 +909,7 @@ GECEMEZSE: Arastirma tekrar calistirilir veya eksik kisim tamamlanir.
 
 ### ASAMA 3: Usul Raporu
 
-> **Motor:** Gemini | **Model:** gemini-3.1-pro-preview | **Routing:** `usul_raporu` | **Fallback:** claude-opus-4.7
+> **Motor:** Gemini | **Model:** gemini-3.1-pro-preview | **Routing:** `usul_raporu` | **Fallback:** claude-fable-5 (terminal; limit dolarsa claude-opus-4-8)
 > Hesaplama modulu (deterministik formul) Claude'da kalir.
 
 ```
@@ -939,7 +939,7 @@ Usul cercevesini cikar:
 
 ### ASAMA 4: 5 Ajanli Stratejik Analiz (Tum Dosya Uzerinden)
 
-> **Motor:** Gemini (5 ajan paralel) | **Model:** gemini-3.1-pro-preview | **Routing:** 4A-4D default routing, 4E `savunma_simulasyonu` | **Fallback:** claude-opus-4.7
+> **Motor:** Gemini (5 ajan paralel) | **Model:** gemini-3.1-pro-preview | **Routing:** 4A-4D default routing, 4E `savunma_simulasyonu` | **Fallback:** claude-fable-5 (terminal; limit dolarsa claude-opus-4-8)
 > Promise.allSettled ile hata toleransi: 4/4 tam, 3/4 uyarili, 2/4 sinirli, <2/4 DURDUR.
 
 Bu asamada henuz dilekce YAZILMAMISTIR. 5 ajanli sistem;
@@ -1085,7 +1085,7 @@ belge yazari ajanin rehberi olarak kullanilir.
 
 ### ASAMA 5: Dilekce v1 (Stratejik Analiz Rehberligi)
 
-> **Motor:** Gemini | **Model:** gemini-3.1-pro-preview | **Routing:** `dilekce_yazimi` | **Fallback:** claude-opus-4.7
+> **Motor:** Gemini | **Model:** gemini-3.1-pro-preview | **Routing:** `dilekce_yazimi` | **Fallback:** claude-fable-5 (terminal; limit dolarsa claude-opus-4-8)
 
 ```
 BELGE YAZARI
@@ -1125,7 +1125,7 @@ Kalite kontrol:
 
 ### ASAMA 6: Savunma Simulasyonu
 
-> **Motor:** Gemini | **Model:** gemini-3.1-pro-preview | **Routing:** `savunma_simulasyonu` | **Fallback:** claude-opus-4.7
+> **Motor:** Gemini | **Model:** gemini-3.1-pro-preview | **Routing:** `savunma_simulasyonu` | **Fallback:** claude-fable-5 (terminal; limit dolarsa claude-opus-4-8)
 
 ```
 SAVUNMA SIMULATORU
@@ -1155,7 +1155,7 @@ Karsi tarafin gozuyle incele:
 
 ### ASAMA 7: Nihai Dilekce v2
 
-> **Motor:** Gemini | **Model:** gemini-3.1-pro-preview | **Routing:** `revizyon` | **Fallback:** claude-opus-4.7
+> **Motor:** Gemini | **Model:** gemini-3.1-pro-preview | **Routing:** `revizyon` | **Fallback:** claude-fable-5 (terminal; limit dolarsa claude-opus-4-8)
 > UDF uretimi (`scripts/md_to_udf.py`) deterministik, Claude/Gemini kullanmaz.
 
 ```
@@ -1256,9 +1256,9 @@ Sistemin adim adim yaptiklari:
   Async paralel kol:
   - 2D NotebookLM: iteratif 10 sorgu (6 irdeleme + 4 perspektif)
   Sirali zincir:
-  - 2B Yargi MCP (Sol→Terra→Luna→Claude QA): 9. HD + HGK + IBK son 2 yil
+  - 2B Yargi MCP (Claude Fable 5): 9. HD + HGK + IBK son 2 yil
     -> 12 aday karar bulundu, atif maddeleri: Is K. m.2/5/17/22/24/32
-  - 2C Mevzuat MCP (Opus 4.7 MAX EFFORT): atif maddeleri cekildi
+  - 2C Mevzuat MCP (Claude Fable 5 MAX EFFORT): atif maddeleri cekildi
     -> Mulga denetim: 11 GECERLI / 1 elenen (eski Is K. m.X 2020 tadili)
   -> arastirma-raporu.md kaydedildi (Gecerli + Elenen tablolari)
 

@@ -1,7 +1,7 @@
 # Arastirmaci -- Skill Dosyasi
 
-Son guncelleme: 2026-07-13
-Versiyon: 3.1 (2B Yargi sirali Sol/Terra/Luna + kisa Claude kalite kapisi;
+Son guncelleme: 2026-07-19
+Versiyon: 3.2 (2B Yargi TEK ELDEN Claude Fable 5 — iteratif derin protokol;
 cekirdek = 2B→2C sirali zincir + 2D async paralel kol; ana omurga Yargi-MCP-Pro)
 
 > **ARSIVLENEN KOLLAR (2026-07-09 avukat karari):** 2A Super Stajyer
@@ -19,9 +19,9 @@ okunur. Bu dosyada hardcoded model adi YOKTUR.
 - **arastirma_sentezi** task'i icin: `engine: claude` (2026-05-13 itibariyla
   terminal Claude'da kalir; MCP ciktilari ayni oturumda raporlanir, Antigravity'ye
   copy-paste yorgunlugu olmasin diye)
-- **yargi_mcp (2B)** task'i icin: routing'deki dort asamali sirali pipeline.
-  Sol ana arastirma, Terra bagimsiz denetim, Luna nihai 2B raporu, Claude
-  yalniz kisa kalite kapisidir; Claude 2B sentezi yapmaz.
+- **yargi_mcp (2B)** task'i icin: Claude Fable 5 tum 2B'yi TEK ELDEN yurutur —
+  tarama, tam metin teyidi, nihai rapor ve kalite kontrolu (iteratif derin
+  protokol, 6 Faz + Gap Check; fallback: Claude Opus 4.8).
 - **Diger MCP/CLI cagrilari** (MemPalace, Drive, NotebookLM, Mevzuat MCP ve
   CLI fallback'lari) icin: ilgili task'in config'teki motoru kullanilir.
 - **arama_plani** task'i (sorgu terimi listesi uretmek): `engine: antigravity_manual`
@@ -200,13 +200,12 @@ KALDIRILDI.
 **Thinking budget:** Engine + model `config/model-routing.json` -> ilgili task'tan okunur, MAX EFFORT thinking aktif
 **Min sorgu sayilari (15, 6 faz, vb.) DEGISMEZ — sadece arac Pro MCP olur.**
 
-**Kanonik calistirici:**
-`python3 scripts/yargi_model_pipeline.py --mod derin --cikti "02-Arastirma" "<kritik nokta>"`
-
-Calistirici `tasks.yargi_mcp.pipeline` sirasini uygular. Luna
-`yargi-bulgulari.md` ve `atif-maddeleri.json` dosyalarini uretir. Claude raporu
-yeniden yazmaz; en fazla 2 hedefli MCP cagrisi ve 600 kelimeyle kalite kapisi
-karari verir. Cikis kodu `0` ve `claude_gate: GECTI` olmadan 2C baslatilmaz.
+**Kanonik calistirici:** 2B dogrudan bu oturumda Claude Fable 5 tarafindan
+yurutulur (`config/model-routing.json -> tasks.yargi_mcp`, mod: derin —
+min 15 sorgu / 5 tam metin). Ayri calistirici script YOKTUR. Claude
+`yargi-bulgulari.md` ve `atif-maddeleri.json` dosyalarini uretir; uretim
+sonrasi kalite kontrol listesi ayni oturumda uygulanir.
+`atif-maddeleri.json` uretilmeden ve kalite listesi tamamlanmadan 2C baslatilmaz.
 
 **!! RATE LIMIT KURALI (TEK DOGRU — v3, 2026-07-09 netlestirildi)**
 
@@ -940,8 +939,8 @@ Bu, tek-shot aramada olmayan bir muhakeme katmanidir ve kalitenin temelidir.
 ## ASAMA 2 Konsolide Sentezi — Claude'da Kalir (2026-05-13)
 
 Bu bolum 2B'nin kendi nihai raporunu degil, 2B+2C+2D bittikten sonraki genel
-ASAMA 2 konsolidasyonunu anlatir. 2B'nin nihai raporunu Luna yazar; 2B
-sonundaki Claude yalniz kisa kalite kapisidir.
+ASAMA 2 konsolidasyonunu anlatir. 2B'nin nihai raporunu da Claude yazar;
+uretim sonrasi kalite kontrolu ayni oturumda yapilir.
 
 Tum kollar (2B+2C+2D) tamamlandiktan sonra konsolide arastirma raporunu
 **terminal Claude** yazar. MCP ciktilari zaten Claude oturumunda ham olarak
@@ -963,7 +962,7 @@ ASAMA 2 sentezi Claude'da birakildi. Cunku:
 ### Akis (Yeni)
 
 1. **Ham bulgulari topla (paralel + sirali zincir):**
-   - 2B Sol/Terra/Luna + Claude QA -> bulunan kararlar + atif maddeleri + son 5 yil seyri
+   - 2B Claude Fable 5 -> bulunan kararlar + atif maddeleri + son 5 yil seyri
    - 2C Mevzuat MCP -> kanunlar + mulga eleme tablosu + normlar hiyerarsisi
    - 2D NotebookLM -> 10 iteratif sorgu cevaplari (6 irdeleme + 4 perspektif)
 
