@@ -26,3 +26,17 @@
   Spec: docs/superpowers/specs/2026-07-18-claudesiz-motor-revizyonu-design.md
 - KURAL ADAYI: Araç erişimi olmayan motor künye YAZAMAZ; araçsız üretimde
   "ARAÇSIZ — künye içermez" damgası zorunlu (AGENTS.md doktrin md.7).
+
+## 2026-07-19 — Codex denemesi geri alındı: Claude+Gemini dönüşü
+- KAÇIRILAN: Benchmark puanı tek başına orkestratör seçimi için yeterli
+  kriter değildi — Codex/Sol orkestrasyonu avukatın çalışma akışında
+  (kontrol kapıları, MCP entegrasyonları, MemPalace/Gmail/Takvim
+  otomasyonu) beklentiyi karşılamadı.
+- DÜZELTME: Avukat kararıyla (2026-07-19) Codex TÜM projeden kaldırıldı
+  (arsiv/codex-motor/). Orkestra şefi + tüm tool kullanımı Claude Fable 5;
+  limit dolarsa Claude Opus 4.8 (bildirimli). Hukuki muhakeme
+  Antigravity/Gemini 3.1 Pro'da kaldı. 2B tek elden Claude iteratif derin
+  protokol. Spec: docs/superpowers/specs/2026-07-19-claude-gemini-donus-design.md
+- KURAL ADAYI: Motor/orkestratör değişikliği kararında benchmark puanına ek
+  olarak entegrasyon maliyeti (MCP, hook, hafıza katmanları) ve avukatın
+  fiili kullanım deneyimi ZORUNLU kriterdir; tek metrikle motor değiştirilmez.
