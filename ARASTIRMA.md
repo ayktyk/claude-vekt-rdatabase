@@ -44,7 +44,7 @@ arastir danisma: {hukuki soru}
 - `arastir danisma: trafik kazasında %50 kusurlu yaya öldü, sürücüye tazminat davası açılabilir mi`
 - `arastir danisma: 6 ay aralıksız çalışmış işçi haklı fesih ile kıdem tazminatı alabilir mi`
 
-Slash komut karşılığı: `.claude/commands/arastir-danisma.md`. Avukat bu komutu yazdığında Director (Codex/Sol — bkz. AGENTS.md) `ARASTIRMA.md`'yi okuyup aşağıdaki 5 faz workflow'unu uygular.
+Slash komut karşılığı: `.claude/commands/arastir-danisma.md`. Avukat bu komutu yazdığında Director (Claude Fable 5 — bkz. CLAUDE.md) `ARASTIRMA.md`'yi okuyup aşağıdaki 5 faz workflow'unu uygular.
 
 ---
 
@@ -110,17 +110,12 @@ Tam doktrin: `@ajanlar/0-halusinasyon-doktrini.md`. Bu modül için kritik kural
 Dava akışının 2B'sinin mini versiyonu — **min 6 sorgu / 3 alt-adım**
 (15-sorguluk tam protokol dava akışında; danışma hattı hız önceliklidir):
 
-Kanonik çalıştırma:
-
-```bash
-python3 scripts/yargi_model_pipeline.py --mod hafif --cikti "{research_klasoru}" "{hukuki_soru}"
-```
-
-Model sırası `config/model-routing.json` içinden okunur: Sol ana tarama, Terra
-bağımsız denetim, Sol (stage 3) `01-Ictihat-taramasi.md` + `atif-maddeleri.json`
-nihai sentezini yazar, Terra yalnız kısa kalite kapısı üretir (2026-07-18
-revizyonu: Luna ve Claude pipeline'dan çıkarıldı). Komut `0`
-dönmeden Faz 2'ye geçilmez.
+Faz 1'i **Claude Fable 5 tek elden** yürütür (`config/model-routing.json ->
+tasks.yargi_mcp`, hafif mod: min 6 sorgu / 3 tam metin). Ayrı pipeline
+scripti YOKTUR — sorgular bu oturumda Yargı-MCP-Pro araçlarıyla atılır,
+MCP fail olursa `yargi` CLI fallback (rapora `mcp_fallback_used: true`).
+Faz 1 çıktıları (`01-Ictihat-taramasi.md` + `atif-maddeleri.json`)
+yazılmadan Faz 2'ye geçilmez.
 
 1. **Terim üretimi:** Doktrinal çeviriden 3-4 alternatif arama terimi +
    ilgili daire(ler) belirle.
@@ -147,8 +142,8 @@ dönmeden Faz 2'ye geçilmez.
 4. **`01-Ictihat-taramasi.md` yaz:**
    ```markdown
    ---
-   engine: codex
-   pipeline_stage: 3
+   engine: claude
+   model: claude-fable-5
    mcp: yargi-mcp-pro
    total_sorgu: N
    dogrulanmis: V
@@ -198,7 +193,7 @@ Faz 1 kararlarının atıf yaptığı + sorunun işaret ettiği kanun maddeleri 
 4. **`02-Mulga-denetim.md` yaz:**
    ```markdown
    ---
-   engine: codex
+   engine: claude
    mcp: yargi-mcp-pro (mevzuat)
    total_madde_count: N
    ---
@@ -226,14 +221,15 @@ VER, UYDURMA YAPMA" ibaresi zorunlu. Notebook yoksa faz sessizce atlanır.
 
 ### Faz 3: Sentez Cevap (Avukatın Okuyacağı Nihai Rapor)
 
-Faz 1-2 çıktılarının nihai sentezi Sol'dadır (pipeline stage 3 çıktısı temel
-alınır); Terra bağımsız künye teyidi yapar, deterministik kapı `cikti_dogrula.py`
-yapısal kontrolü tamamlar. Antigravity/Gemini gerekmez (hafiflik prensibi).
+Faz 1-2 çıktılarının nihai sentezini **Claude Fable 5** yazar; ardından AYNI
+oturumda bağımsız künye içerik-teyidi yapılır (her documentId yeniden çekilip
+alıntı kıyaslanır) ve deterministik kapı `cikti_dogrula.py` yapısal kontrolü
+tamamlar. Antigravity/Gemini gerekmez (hafiflik prensibi).
 
 **`arastirma-cevabi.md` yapısı:**
 ```markdown
 ---
-engine: codex
+engine: claude
 model: {config/model-routing.json -> tasks.arastirma_sentezi.model}
 task_type: arastirma_cevabi
 arastirma_id: {YYYY-MM-DD}-{slug}
@@ -354,10 +350,10 @@ mempalace_add_drawer(
 
 | Dosya | İçerik | Üretici |
 |---|---|---|
-| `00-Soru.md` | Ham soru + doktrinal çeviri | Director/Sol (Faz 0) |
-| `01-Ictihat-taramasi.md` | Sorgular + DOĞRULANMIŞ/Elenen kararlar | Sol sentez + Yargı araçları (Faz 1); Terra kısa QA kapısı |
-| `02-Mulga-denetim.md` | Mevzuat madde yürürlük denetimi | Sol + Mevzuat araçları (Faz 2) |
-| `arastirma-cevabi.md` ★ | NİHAİ — avukatın okuyacağı sentez | Sol (Faz 3) + Terra teyit |
+| `00-Soru.md` | Ham soru + doktrinal çeviri | Director/Claude (Faz 0) |
+| `01-Ictihat-taramasi.md` | Sorgular + DOĞRULANMIŞ/Elenen kararlar | Claude sentez + Yargı araçları (Faz 1) |
+| `02-Mulga-denetim.md` | Mevzuat madde yürürlük denetimi | Claude + Mevzuat araçları (Faz 2) |
+| `arastirma-cevabi.md` ★ | NİHAİ — avukatın okuyacağı sentez | Claude (Faz 3) + bağımsız künye teyidi |
 | `arastirma-cevabi.docx` | DOCX export | md_to_docx.py (Faz 3) |
 
 **Avukat sadece `arastirma-cevabi.md/.docx`'i okur.** Diğer dosyalar iz/şeffaflık için arşivde durur.
