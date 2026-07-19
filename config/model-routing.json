@@ -1,36 +1,39 @@
 {
-  "_comment": "Hibrit motor haritasi. Yargi 2B = sirali Sol/Terra/Luna + kisa Claude kalite kapisi. Diger MCP + koordinasyon = Claude. Antigravity (Gemini 3.1 Pro) = hukuki uretim (usul, 5 ajan, dilekce, simulasyon, revizyon).",
-  "_avukat_karari_2026_05_13": "Avukat Aykut Antigravity hibrit mimarisini onayladi: bridge devre disi, MCP/arastirma terminal Claude'da, hukuki uretim Antigravity sag panelinde.",
+  "_comment": "Hibrit motor haritasi. Orkestra sefi + TUM tool kullanimi = Claude Fable 5; Fable limiti dolarsa Claude Opus 4.8 (bildirimli operasyonel gecis). Hukuki muhakeme = Antigravity (Gemini 3.1 Pro): usul, 5 ajan, dilekce, simulasyon, revizyon, blog.",
+  "_avukat_karari_2026_07_19": "Codex denemesi sona erdi; Codex TUM projeden kaldirildi (arsiv/codex-motor/). Orkestrasyon + tool: claude-fable-5; fallback: claude-opus-4-8; hukuki muhakeme: gemini-3.1-pro (Antigravity). Spec: docs/superpowers/specs/2026-07-19-claude-gemini-donus-design.md",
   "_doctrine_source": "Bu dosya TEK dogruluk kaynagidir (Single Source of Truth). Calistiricilar model, sira ve limitleri buradan okur; dokumanlar yalniz rolleri ve onayli akis sirasini aciklar.",
   "_history": {
     "2026-05-04": "Hibrit motor (Claude+Gemini bridge) onaylandi",
     "2026-05-13": "Antigravity hibrit mimarisine gecildi. Bridge DEPRECATED.",
     "2026-05-19": "FAZ 2: Yargi-MCP-Pro entegrasyonu (Senaryo B - ayri toollar). Eski mcp__claude_ai_Yarg_MCP__* + mcp__claude_ai_Mevuzat_MCP__* yerine mcp__yargi-mcp-pro__* aktif. yargi_mcp + mevzuat_mcp task'lari AYRI kalir (siraili zincir 2B->2C korunur). 9 spesifik mevzuat toolu (search_kanun/search_khk/...) tek search_mevzuat + mevzuat_tur_list[] altinda birlesti. Rate-limit 3sn protokolu gevsetildi (zorunluluk degil, fallback). 2E Akademik decommissioned (Faz 1, 2026-05-19).",
     "2026-07-09": "ARASTIRMA REVIZYONU (avukat karari): 2A Super Stajyer (stajyer_prompt_uret) + Faz D Arguman.ai (arguman_ai) task'lari KALDIRILDI, dosyalar arsiv/ altinda. KVKK maskeleme ERTELENDI (yerel LLM'e gecise kadar). ASAMA 2 cekirdegi = 2B->2C sirali zincir + 2D async paralel. Ana omurga Yargi-MCP-Pro (UYAP entegrasyonu dahil - envanter cikarilinca tools[] guncellenecek).",
-    "2026-07-13": "YARGI COK MODELLI ROUTING (avukat karari): 2B YargiMCP sirasi GPT-5.6 Sol -> Terra -> Luna -> Claude Opus. Sol ana arastirma, Terra bagimsiz denetim, Luna nihai 2B raporu + atif-maddeleri, Claude en fazla 2 hedefli sorguluk kisa kalite kapisi. Claude nihai sentez YAPMAZ."
+    "2026-07-13": "YARGI COK MODELLI ROUTING: 2B sirasi Sol -> Terra -> Luna -> Claude kisa QA. (2026-07-19'da kaldirildi)",
+    "2026-07-18": "CLAUDESUZ REVIZYON: orkestrator Codex/Sol (AGENTS.md), 2B Sol->Terra->Sol->Terra, Claude tum rollerden cikarildi. (2026-07-19'da geri alindi)",
+    "2026-07-19": "CLAUDE+GEMINI DONUSU (avukat karari): Codex TAMAMEN kaldirildi (arsiv/codex-motor/). Orkestra sefi + tum tool kullanimi claude-fable-5; limit dolarsa claude-opus-4-8 (avukat /model ile gecer, cikti frontmatter + ASAMA bildirimi damgalar). 2B tek elden Claude iteratif derin protokol (derin 15/5, hafif 6/3). Antigravity task'lari degismedi. MemPalace/Gmail/Takvim/NotebookLM MCP'leri yeniden aktif."
   },
-  "_last_updated": "2026-07-18",
+  "_last_updated": "2026-07-19",
   "mode": "auto",
-  "_mode_values": "auto = config'tek default, sormaz | ask = her ASAMA basinda avukata sor | fixed = sadece default kullan, fallback yok",
+  "_mode_values": "auto = config'teki default, sormaz | ask = her ASAMA basinda avukata sor | fixed = sadece default kullan, fallback yok",
   "handoff_protocol": "antigravity_copy_paste",
   "handoff_template_dir": "prompts/gemini/",
   "_handoff_aciklama": "engine='antigravity_manual' olan tasklarda terminal Claude devir blogu basar; avukat Antigravity sag paneline yapistirir; Antigravity uretip Drive'a yazar; avukat terminale doner 'ASAMA X bitti' der; Claude qmd update + MemPalace diary yapar ve bir sonraki ASAMA'ya gecer.",
   "tasks": {
     "director": {
-      "engine": "codex",
-      "model": "gpt-5.6-sol",
-      "aciklama": "Director Agent: workflow orkestrasyonu, ASAMA gecisleri, kalite kapilari, kullanici-kontrol komutlari (devam/atla/dur/motor-degistir), Antigravity devir bloklari uretimi",
-      "_eski": "claude-opus-4-7 (2026-07-18 oncesi)"
+      "engine": "claude",
+      "model": "claude-fable-5",
+      "model_fallback": "claude-opus-4-8",
+      "aciklama": "Director Agent: workflow orkestrasyonu, ASAMA gecisleri, kalite kapilari, kullanici-kontrol komutlari (devam/atla/dur/motor-degistir), Antigravity devir bloklari uretimi"
     },
     "mcp_arac_yonetimi": {
-      "engine": "codex",
-      "model": "gpt-5.6-sol",
-      "aciklama": "MemPalace, Google Drive, Calendar, Gmail MCP cagrilari",
-      "_eski": "claude-opus-4-7 (2026-07-18 oncesi)"
+      "engine": "claude",
+      "model": "claude-fable-5",
+      "model_fallback": "claude-opus-4-8",
+      "aciklama": "MemPalace, Google Drive, Calendar, Gmail MCP cagrilari"
     },
     "yargi_mcp": {
-      "engine": "ordered_multi_model",
-      "model": "gpt-5.6-sol",
+      "engine": "claude",
+      "model": "claude-fable-5",
+      "model_fallback": "claude-opus-4-8",
       "mcp_server": "yargi-mcp-pro",
       "tool_prefix": "mcp__yargi-mcp-pro__",
       "tools": [
@@ -42,61 +45,23 @@
         "kurum_karari_getir"
       ],
       "skill": ".claude/skills/yargi-legal-research-guide/SKILL.md",
-      "pipeline": {
-        "execution": "sequential",
-        "orchestrator": "scripts/yargi_model_pipeline.py",
-        "stages": [
-          {
-            "order": 1,
-            "engine": "codex",
-            "model": "gpt-5.6-sol",
-            "reasoning": "xhigh",
-            "role": "ana_arastirma"
-          },
-          {
-            "order": 2,
-            "engine": "codex",
-            "model": "gpt-5.6-terra",
-            "reasoning": "xhigh",
-            "role": "bagimsiz_denetim"
-          },
-          {
-            "order": 3,
-            "engine": "codex",
-            "model": "gpt-5.6-sol",
-            "reasoning": "xhigh",
-            "role": "nihai_2b_sentezi"
-          },
-          {
-            "order": 4,
-            "engine": "codex",
-            "model": "gpt-5.6-terra",
-            "reasoning": "high",
-            "role": "kalite_kapisi"
-          }
-        ],
-        "modes": {
-          "derin": {
-            "min_queries": 15,
-            "min_full_text": 5
-          },
-          "hafif": {
-            "min_queries": 6,
-            "min_full_text": 3
-          }
+      "protokol": "claude_iteratif_derin",
+      "modes": {
+        "derin": {
+          "min_queries": 15,
+          "min_full_text": 5
         },
-        "final_report_stage": 3,
-        "quality_gate_stage": 4,
-        "sandbox": "danger-full-access",
-        "_sandbox_not": "CLI fallback ag erisimi icin; yargi-mcp-pro MCP calisir hale gelince read-only yapilabilir",
-        "gate_max_mcp_calls": 2,
-        "gate_max_words": 600
+        "hafif": {
+          "min_queries": 6,
+          "min_full_text": 3
+        }
       },
-      "aciklama": "Yargi-MCP-Pro 2B sirali cok-model hatti. Sol ana tarama; Terra bagimsiz karsi arama; Luna kanonik yargi-bulgulari.md + atif-maddeleri.json; Claude yalniz kisa kalite kapisi. 2C sadece Claude GECTI kararindan sonra baslar. Sorgu lehceleri ve tool seti icin yargi-legal-research-guide skill."
+      "aciklama": "Yargi-MCP-Pro 2B derin arastirma — TEK ELDEN Claude Fable 5 (iteratif derin protokol, 6 Faz + Gap Check). Min sorgu/tam-metin kurallari 'modes' altinda. MCP fail -> yargi CLI fallback (rapora mcp_fallback_used: true). 2C yalnizca 2B tamamlanip atif-maddeleri.json uretilince baslar. Sorgu lehceleri ve tuzaklar: yargi-legal-research-guide skill."
     },
     "mevzuat_mcp": {
-      "engine": "codex",
-      "model": "gpt-5.6-sol",
+      "engine": "claude",
+      "model": "claude-fable-5",
+      "model_fallback": "claude-opus-4-8",
       "mcp_server": "yargi-mcp-pro",
       "tool_prefix": "mcp__yargi-mcp-pro__",
       "tools": [
@@ -105,34 +70,33 @@
         "mevzuat_icinde_ara"
       ],
       "skill": ".claude/skills/yargi-legal-research-guide/SKILL.md",
-      "aciklama": "Yargi-MCP-Pro Mevzuat sorgulari (FAZ 6 2026-07-09 — yeni Turkce tool seti; 12 tip: KANUN/KHK/TUZUK/YONETMELIK/CB_*/KKY/UY/TEBLIGLER/MULGA). ASAMA 2C esas: mevzuat_ara (phrase Mevzuat Solr — bosluk=AND, AND/OR/NOT literal BOZAR, wildcard*/fuzzy~ calisir; mevzuat_no en kesin; page_size max 20), mevzuat_icinde_ara (tek mevzuat ici YEREL boolean — BUYUK harf AND/OR/NOT, kelime koku), mevzuat_getir (id_type=mevzuat/madde/gerekce/outline; madde_no kisayolu ile tek cagri; 50KB chunk). id_type = kimligin geldigi ALAN ADI. Detay: yargi-legal-research-guide skill.",
-      "_eski": "claude-opus-4-7 (2026-07-18 oncesi)"
+      "aciklama": "Yargi-MCP-Pro Mevzuat sorgulari (FAZ 6 2026-07-09 — yeni Turkce tool seti; 12 tip: KANUN/KHK/TUZUK/YONETMELIK/CB_*/KKY/UY/TEBLIGLER/MULGA). ASAMA 2C esas: mevzuat_ara (phrase Mevzuat Solr — bosluk=AND, AND/OR/NOT literal BOZAR, wildcard*/fuzzy~ calisir; mevzuat_no en kesin; page_size max 20), mevzuat_icinde_ara (tek mevzuat ici YEREL boolean — BUYUK harf AND/OR/NOT, kelime koku), mevzuat_getir (id_type=mevzuat/madde/gerekce/outline; madde_no kisayolu ile tek cagri; 50KB chunk). id_type = kimligin geldigi ALAN ADI. Detay: yargi-legal-research-guide skill."
     },
     "uyap_workspace": {
-      "engine": "codex",
-      "model": "gpt-5.6-sol",
+      "engine": "claude",
+      "model": "claude-fable-5",
+      "model_fallback": "claude-opus-4-8",
       "cli": "npx dava-cli@latest",
       "skill": ".claude/skills/yargi-uyap-workspace/SKILL.md",
-      "aciklama": "UYAP Avukat dava dosyasi cekme (FAZ 6 2026-07-09 — beta). ASAMA 1 hazirlikta opsiyonel: dava UYAP'ta varsa 'dava-cli clone' ile evraklar (.udf/.pdf/.tiff) + INDEX.md yerel klasore iner (~/Documents/YargiPRO/...), sonra arastirma girdisi olur. Delta guncelleme: 'dava-cli sync'. macOS ilk calistirmada Automation izni; Windows'ta Session-0 tuzagi (Scheduled Task yolu). Detay: yargi-uyap-workspace skill.",
-      "_eski": "claude-opus-4-7 (2026-07-18 oncesi)"
+      "aciklama": "UYAP Avukat dava dosyasi cekme (FAZ 6 2026-07-09 — beta). ASAMA 1 hazirlikta opsiyonel: dava UYAP'ta varsa 'dava-cli clone' ile evraklar (.udf/.pdf/.tiff) + INDEX.md yerel klasore iner (~/Documents/YargiPRO/...), sonra arastirma girdisi olur. Delta guncelleme: 'dava-cli sync'. macOS ilk calistirmada Automation izni; Windows'ta Session-0 tuzagi (Scheduled Task yolu). Detay: yargi-uyap-workspace skill."
     },
     "notebooklm_mcp": {
-      "engine": "codex",
-      "model": "gpt-5.6-sol",
-      "aciklama": "NotebookLM async paralel kol — 10 iteratif sorgu, polling",
-      "_eski": "claude-opus-4-7 (2026-07-18 oncesi)"
+      "engine": "claude",
+      "model": "claude-fable-5",
+      "model_fallback": "claude-opus-4-8",
+      "aciklama": "NotebookLM async paralel kol — 10 iteratif sorgu, polling"
     },
     "kritik_nokta_tespiti": {
-      "engine": "codex",
-      "model": "gpt-5.6-sol",
-      "aciklama": "Muvekkil belgelerini okuyup hukuki uyusmazlik tespiti (MCP araclari ile dosya okuma)",
-      "_eski": "claude-opus-4-7 (2026-07-18 oncesi)"
+      "engine": "claude",
+      "model": "claude-fable-5",
+      "model_fallback": "claude-opus-4-8",
+      "aciklama": "Muvekkil belgelerini okuyup hukuki uyusmazlik tespiti (MCP araclari ile dosya okuma)"
     },
     "arastirma_sentezi": {
-      "engine": "codex",
-      "model": "gpt-5.6-sol",
-      "aciklama": "MCP/CLI ciktilarini ASAMA 2 esas raporuna cevirme. Claude'da kalir cunku ham MCP ciktilari ayni oturumda uretiliyor; copy-paste yorgunlugu olusmasin diye Antigravity'ye gitmez. 2026-05-13 karari.",
-      "_eski": "claude-opus-4-7 (2026-07-18 oncesi)"
+      "engine": "claude",
+      "model": "claude-fable-5",
+      "model_fallback": "claude-opus-4-8",
+      "aciklama": "MCP/CLI ciktilarini ASAMA 2 esas raporuna cevirme. Claude'da kalir cunku ham MCP ciktilari ayni oturumda uretiliyor; copy-paste yorgunlugu olusmasin diye Antigravity'ye gitmez. 2026-05-13 karari."
     },
     "arama_plani": {
       "engine": "antigravity_manual",
@@ -186,25 +150,17 @@
     }
   },
   "fallback": {
-    "_aciklama_2026_05_13": "Antigravity hibrit mimarisine gecildi. Asagidaki gemini_chain alanlari DEPRECATED — sadece rollback icin korunuyor. Yeni fallback: Antigravity erisilemezse terminal Claude hukuki uretimi yapar (final_fallback). [DEVRE DISI 2026-07-18 — fallback: codex/gpt-5.6-sol]",
-    "_deprecated_2026_05_13": true,
-    "gemini_chain_deprecated": [
-      "gemini-3.1-pro-preview",
-      "gemini-3-flash-preview"
-    ],
-    "gemini_max_retry_deprecated": 2,
-    "gemini_retry_delay_sec_deprecated": 5,
+    "_aciklama": "Iki ayri fallback: (1) MOTOR fallback — Antigravity erisilemezse terminal Claude hukuki uretimi yapar (final_fallback; cikti frontmatter: engine: claude, fallback_used: true). (2) MODEL fallback — Claude Fable 5 limiti dolarsa avukat /model ile claude-opus-4-8'e gecer; gecis ASAMA bildirimi + cikti frontmatter'inda damgalanir.",
     "final_fallback": {
       "engine": "claude",
-      "model": "claude-opus-4-7",
-      "aciklama": "Antigravity erisilemez/cevap vermezse veya avukat 'fallback claude' derse terminal Claude bu ASAMA'yi uretir. Cikti frontmatter: engine: claude, fallback_used: true."
+      "model": "claude-fable-5",
+      "model_fallback": "claude-opus-4-8",
+      "aciklama": "Antigravity erisilemez/cevap vermezse veya avukat 'fallback claude' derse terminal Claude bu ASAMA'yi uretir."
     },
     "log_fallback_to_mempalace": true,
-    "log_fallback_to_event_log": "logs/model-events.jsonl",
-    "engine": "codex",
-    "model": "gpt-5.6-sol"
+    "log_fallback_to_event_log": "logs/model-events.jsonl"
   },
-  "_claude_removed": "2026-07-18 avukat karari: Claude (Fable) simdilik tamamen cikarildi — orkestrasyon Codex/Sol (AGENTS.md), 2B nihai sentez Sol, kalite kapisi Terra. Spec: docs/superpowers/specs/2026-07-18-claudesiz-motor-revizyonu-design.md. Geri donus: CLAUDE.md ve .claude/ dokunulmadan korundu.",
-  "orchestrator_engine": "codex",
-  "orchestrator_model": "gpt-5.6-sol"
+  "orchestrator_engine": "claude",
+  "orchestrator_model": "claude-fable-5",
+  "orchestrator_model_fallback": "claude-opus-4-8"
 }
