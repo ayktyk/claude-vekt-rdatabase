@@ -75,7 +75,7 @@ Proje geleneğine uygun: silme yerine `arsiv/codex-motor/` altına taşıma +
 | `FIVEAGENTS.md` | 2B pipeline referansları → Claude tek elden |
 | `ajanlar/arastirmaci/SKILL.md` | 2B çok-modelli hat referansları → Claude iteratif protokol |
 | `.claude/commands/arastir.md`, `arastir-yargi.md`, `arastir-danisma.md` | Pipeline/Sol/Terra/Luna referansları temizlenir |
-| `.claude/skills/yargi-agentic-deep-research/SKILL.md` | Codex referansı temizlenir |
+| `.claude/skills/yargi-agentic-deep-research/SKILL.md` | DOKUNULMAZ — satır 10/116'daki "Codex" geçişleri vendor rehberinin jenerik platform notudur (sunucu sürüm-senkron sözleşmesi bozulmasın); doğrulama grep'inde belgeli istisna |
 | Kalıcı hafıza (`memory/sistem-codex-orkestrasyonu.md` + `MEMORY.md`) | "Claude devre dışı" kaydı → dönüş kaydıyla değiştirilir |
 
 ## 5. config/model-routing.json Değişiklikleri
