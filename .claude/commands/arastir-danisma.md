@@ -30,7 +30,7 @@ Bu komut **bağımsız hızlı araştırma modülünü** çalıştırır. Mevcut
 Faz 0    Soru kabul + slug üret + Research/{tarih}-{slug}/ klasörü + 00-Soru.md
          (klasör kökü: python3 scripts/paths.py research)
 Faz 1    Yargı-MCP-Pro içtihat taraması (hafif protokol: min 6 sorgu,
-         min 3 tam metin teyidi; Sol→Terra→Luna→Claude QA)
+         min 3 tam metin teyidi; Claude Fable 5 tek elden)
          → 01-Ictihat-taramasi.md
          (DOĞRULANMIŞ / ELENDİ / DOĞRULANMAMIŞ etiketleme — atıf ön şartı
           tam metin açılması)
@@ -47,9 +47,9 @@ Faz 4    Memory yazımı — MemPalace wing_arastirma + proje memory
 1. **ARASTIRMA.md'yi tam oku.** Protokolünü uygula, ezberden çalışma.
 2. `$ARGUMENTS`'ten slug üret. Tarih önekiyle klasör adı: `{YYYY-MM-DD}-{slug}`.
 3. Research klasörünü oluştur: `{python3 scripts/paths.py research}/{klasör}/`.
-4. Faz 1'i `python3 scripts/yargi_model_pipeline.py --mod hafif --cikti
-   "{research_klasoru}" "$ARGUMENTS"` ile çalıştır. Çıkış kodu `0` değilse
-   Faz 2'ye geçme; Claude nihai sentez yapmaz, yalnız kısa QA kapısıdır.
+4. Faz 1'i **bu oturumda Claude Fable 5 tek elden** çalıştır (hafif mod:
+   min 6 sorgu / 3 tam metin — `tasks.yargi_mcp.modes.hafif`). Faz 1
+   çıktıları yazılmadan Faz 2'ye geçme.
 5. Kalan fazları sırayla çalıştır. Her faz çıktısını Drive'a yaz.
 6. Faz 3 öncesi **Çıktı Öncesi Checklist** (ARASTIRMA.md §3) uygula:
    - DOĞRULANMIŞ atıf ≥ 2 mi?

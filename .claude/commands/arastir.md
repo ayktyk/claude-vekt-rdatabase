@@ -40,7 +40,7 @@ Director Agent
   |    10 iteratif sorgu (6 hukuki + 4 perspektif)
   |    Dahili kaynak seçilmemişse bu kol atlanır (rapora not düşülür)
   |
-  +-- 2B Sol→Terra→Luna→Claude QA ──> 2C Yargı-MCP-Pro Mevzuat (SIRALI ZİNCİR)
+  +-- 2B Claude Fable 5 (Yargı-MCP-Pro) ──> 2C Yargı-MCP-Pro Mevzuat (SIRALI ZİNCİR)
   |         |                        |
   |         |                        +──> Mülga Eleme Protokolü (kalite kapısı)
   |         |
@@ -53,17 +53,16 @@ ZİNCİR + KOL TAMAMLANINCA → Konsolide Sentez (Terminal Claude)
 ## Zorunlu Çağrılar (Detayları Alt Komutlarda)
 
 ### 2B Yargı — `/arastir-yargi` protokolü
-- Kanonik çağrı: `python3 scripts/yargi_model_pipeline.py --mod derin
-  --cikti "02-Arastirma" "$ARGUMENTS"`
-- Model sırası `config/model-routing.json -> tasks.yargi_mcp.pipeline` içinden
-  okunur; Luna nihai 2B çıktısını, Claude yalnız kısa kalite kararını üretir
+- 2B **bu oturumda Claude Fable 5 tek elden** yürütülür
+  (`config/model-routing.json -> tasks.yargi_mcp`, mod: derin); ayrı
+  pipeline scripti YOKTUR
 - Min 15 sorgu / 6 faz / temporal evolution / min 5 tam metin
 - **Temporal evolution DİNAMİK:** içinde bulunulan yıl dahil son 5 takvim
   yılı, yıl-yıl ayrı sorgu (sabit yıl listesi YAZILMAZ)
 - **Backoff (TEK DOĞRU):** 429'da 5→15→30→60 sn, max 4 retry; hâlâ fail
   → o sorgu `[RATE LIMIT]` notuyla atlanır, faz devam eder
 - Atıf maddeleri `02-Arastirma/atif-maddeleri.json`'a yazılır
-- Komut `0` dönmeden ve manifestte `claude_gate: GECTI` olmadan 2C başlamaz
+- `atif-maddeleri.json` üretilmeden ve 2B kalite listesi tamamlanmadan 2C başlamaz
 
 ### 2C Mevzuat — `/arastir-mevzuat` protokolü
 - 2B'nin atıf maddelerini bekler (**2B `atif-maddeleri.json` üretmeden
@@ -82,7 +81,7 @@ ZİNCİR + KOL TAMAMLANINCA → Konsolide Sentez (Terminal Claude)
 Her 30-60 sn'de terminal canlı durum:
 ```
 FAZ 2 DURUM — run 20260709-182000-ahmet
-2B Yargı: Sol tamamlandı, Terra çalışıyor; Luna/Claude QA bekliyor
+2B Yargı: Faz 4 temporal evolution çalışıyor (sorgu 11/15)
 2C Mevzuat: bekliyor (2B atıf maddeleri lazım)
 2D NotebookLM: 4/10 soru, Q4 polling 82s
 Geçen süre: 06:42
@@ -105,7 +104,7 @@ Zincir + kol tamamlandığında Claude konsolide raporu doğrudan yazar:
 
 ## Kalite Kapısı 1 (ASAMA 2 Bitişi)
 - [ ] 2B 15 sorgu + 5 tam metin var mı?
-- [ ] 2B sırası Sol→Terra→Luna→Claude QA olarak tamamlandı ve kapı `GECTI` mi?
+- [ ] 2B 6 Faz + Gap Check tamamlandı mı (Claude Fable 5 tek elden)?
 - [ ] Temporal evolution dinamik yıl listesiyle (son 5 takvim yılı) tamamlandı mı?
 - [ ] `atif-maddeleri.json` doldu mu?
 - [ ] 2C 8 sorgu + Normlar Hiyerarşisi etiketli mi?
