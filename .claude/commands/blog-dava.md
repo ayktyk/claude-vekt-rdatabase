@@ -231,8 +231,12 @@ Avukat "Blog bitti" diyene kadar bekle.
 
 `blog.md` komutundaki ADIM 6 ile ayni:
 
-1. Validator (opsiyonel)
-2. Gmail Draft (opsiyonel — avukata sor)
+1. Validator (ZORUNLU, BLOCKING — PASS olmadan Gmail draft acilmaz)
+1B. WhatsApp paketi: `python scripts/wa_paket.py "{klasor}" --hook "..."` →
+    wa-durum.png + wa-kare.png + wa-metin.txt (KVKK: hook satirlarinda dava
+    olgusu/muvekkil verisi YASAK, yalniz genel hukuki tez)
+2. Gmail Draft (avukata sor) — TAM İÇERİK kurali: blog.cms.md'nin tamami
+   mailin icinde (`blog.md` komutu ADIM 6/2'deki kural aynen uygulanir)
 3. MemPalace diary write:
    ```
    mempalace_diary_write "blog_yazari" \

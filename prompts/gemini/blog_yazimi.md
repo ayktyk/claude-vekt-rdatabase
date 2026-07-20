@@ -239,7 +239,7 @@ nextReviewAt: "YYYY-MM-DD"  # +90 gun (cluster) / +180 gun (blog)
 
 # Kategori & Niyet (2)
 category: "is-hukuku"  # is-hukuku | tuketici | trafik | icra | aile | diger
-intent: "I"            # I | C | T
+intent: "I1"           # SITE PANELI SOZLUGU: I1=bilgi | I2=nasil-yapilir | I3=karsilastirma | I4=emsal-karar | I5=avukat-arama
 
 # Anahtar Kelime (3)
 primaryKeyword: "tek primary keyword"
@@ -467,35 +467,85 @@ Yazi tamamlandiginda **dort dosya** uret:
 
 Yukaridaki yapida tam markdown.
 
-### 2. `blog.cms.md` — CMS Panel Formati (kopya-yapistir)
+### 2. `blog.cms.md` — CMS Panel Formati (Decap — kopya-yapistir)
+
+Sitenin paneli **Decap CMS**: `https://vegahukukistanbul.com/admin/#/collections/blog/new`
+("Blog Yazilari" koleksiyonu). Asagidaki sablonda alan adlari panel semasiyla
+BIREBIR eslidir (kaynak: `/admin/cms-config.yml`, 2026-07-20). Siralama panel
+formuyla aynidir; `[BOS BIRAK]` yazan alana deger uretme.
 
 ```markdown
-# CMS PANEL (WordPress / Strapi / Sanity)
+# CMS PANEL — Decap (vegahukukistanbul.com/admin → Blog Yazilari → Yeni)
 
-## BASLIK
-[H1 ile ayni]
+## KIMLIK
+- Baslik (title): [H1 ile ayni — max 100 char; site H1'i BU alandan uretir]
+- Slug (slug): [ascii-kebab-60-char]
+- Ozet (excerpt): [150-180 char — panel siniri 180]
+- Kategori (category): [orn: Is Hukuku — serbest metin]
+- Yazar (author): Vega Hukuk  [panel varsayilani — degistirme]
+- Yazar Kimligi (authorSlug): aykut-yesilkaya  [select]
 
-## SLUG
-[ascii-kebab-60-char]
+## YAYIN
+- Yayin Tarihi (publishedAt): [YYYY-MM-DD]
+- Guncelleme Tarihi (updatedAt): [BOS BIRAK / revizyonda YYYY-MM-DD]
+- Gozden Geciren (reviewedBy): aykut-yesilkaya  [select — "Av. Aykut..." YAZILMAZ, slug secilir]
+- Gozden Gecirme Tarihi (reviewedAt): [YYYY-MM-DD]
+- Sonraki Gozden Gecirme (nextReviewAt): [+90 gun]
 
-## OZET
-[150-200 char arama sonucu gorunur]
+## SEO
+- SEO Basligi (seoTitle): [50-60 char | Vega Hukuk Istanbul]
+- SEO Aciklamasi (seoDescription): [150-160 char, CTA fiili icersin]
+- Canonical: [BOS BIRAK — site otomatik uretir]
 
-## SEO BASLIGI (Meta Title)
-[50-60 char | Marka suffix]
+## TAKSONOMI
+- Seviye (tier): [T3 varsayilan — standart blog; select T1-T6]
+- Intent: [frontmatter intent ile ayni — I1-I5]
+- Topic Anahtarlari (topics): [kebab ontology key'leri, orn: is-hukuku, kidem-tazminati]
+- Pillar P1 (pillars.p1): [/hizmetler/...]
+- Pillar P2 (pillars.p2): [varsa alt konu sayfasi / BOS BIRAK]
 
-## SEO ACIKLAMASI (Meta Description)
-[145-160 char]
+## ICERIK BILESENLERI
+- TL;DR (tldr): [frontmatter tldr ile birebir — 40-60 kelime]
+- SSS (faqJson): [min 5 — TEK SATIR JSON: [{"question":"...","answer":"..."}]
+  Site FAQPage schema'yi ve gorunen SSS bolumunu BU alandan uretir]
 
-## KAPAK GORSELI
-- Dosya: kapak.png
-- Alt text: [...]
-- Imagen prompt: [...]
+## CITATION
+- Kanun Referanslari (relatedLaws) — her biri ayri kayit:
+  Kanun No (code) | Madde (madde) | Baslik (title)
+- Yargi Kararlari (relatedCases) — her biri ayri kayit, PANEL alan adlariyla:
+  Daire (daire) | Esas (esas) | Karar (karar) | Karar Tarihi (date, YYYY-MM-DD)
+  | Ozet (summary) | Yargi MCP ID (yargiMcpId = Bedesten documentId)
 
-## ICERIK (H1'den imzaya — kopyala)
+## GORSEL
+- Kapak Gorseli (coverImage): kapak.png dosyasini YUKLE (WebP tercih, 1600x900)
+- Kapak Alt Text (coverAlt): [alt metin — keyword stuffing yasak]
+- Kapak Gradient Sinifi / OG Image / OG Image Alt: [BOS BIRAK — kapak kullanilir]
 
-[Buradan sonra blog.md icerigi — frontmatter HARIC]
+## IC LINKLEME
+- Ic Link Oncelikleri (internalLinkPriority): [oncelikli hedef yazi slug'lari]
+- Manuel Ic Linkler (internalLinkMatches): [ifade → hedef slug ciftleri / BOS BIRAK]
+
+## DURUM
+- Durum (status): draft  [DIKKAT: panel varsayilani "published" — draft'a CEK,
+  avukat okuyup kendisi published yapar]
+- noindex: false
+
+## ICERIK (body alanina yapistir)
+
+SITEYE OZGU 3 KURAL (canli yazidan dogrulandi, 2026-07-20):
+1. H1 SATIRI KOYMA — site basligi title alanindan uretir (cift H1 olur).
+2. "Sik Sorulan Sorular" bolumunu KOYMA — site SSS'yi faqJson alanindan render eder.
+3. Imza + disclaimer blogunu KOYMA — site reviewedBy/reviewedAt'ten rozet uretir
+   ("Av. Aykut Yesilkaya (Istanbul Barosu sicil no: ...)" + tarih).
+Yani yapistirilacak govde: TL;DR blockquote'undan "Sonuc" bolumunun sonuna kadar.
+Ipucu: tek satirlik [Buton Metni](/blog) linki sitede CTA butonuna donusur;
+ic link icin [[Yazi Basligi]] veya [[slug|Ozel metin]] soz dizimi gecerlidir.
+
+[Buradan sonra govde — H1'siz, SSS bolumsuz, imzasiz]
 ```
+
+NOT: `blog.md` TAM dokuman olarak kalir (H1 + SSS + imza dahil — validator ve
+arsiv icin). Kirpma yalnizca `blog.cms.md`'nin ICERIK blogunda yapilir.
 
 ### 3. `blog.mail.md` — Gmail Draft Formati
 
@@ -534,16 +584,16 @@ Yukaridaki yapida tam markdown.
 
 ---
 
-# CMS panele yapistirma talimati
+# CMS panele yapistirma talimati (Decap)
 
-1. Yeni post olustur, baslik gir
-2. Slug alanina: [...]
-3. Meta title + description doldur
-4. Kapak gorseli yukle: kapak.png
-5. Icerik bolumune blog.cms.md "ICERIK" bloguna yapistir
-6. Kategori: [...]
-7. Yayin tarihi: [...]
-8. Yayinla
+1. Paneli ac: https://vegahukukistanbul.com/admin/#/collections/blog/new
+2. blog.cms.md'deki alanlari SIRAYLA gir — alan adlari panelle birebir esli
+3. Kapak gorseli yukle: kapak.png (Kapak Gorseli alani) + Alt Text
+4. TL;DR ve SSS-JSON'u kendi alanlarina yapistir (SSS govdeye DEGIL)
+5. Yargi Kararlari / Kanun Referanslari kayitlarini listeye tek tek ekle
+6. ICERIK blogunu body alanina yapistir (H1'siz, SSS'siz, imzasiz)
+7. Durum: draft olarak kaydet → onizle → okuduktan sonra published yap
+8. Kaydet (Decap GitHub'a commit eder, site otomatik yeniden yayinlanir)
 ```
 
 ### 4. `kapak.png` — Imagen ile uretilmis kapak gorseli

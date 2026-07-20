@@ -213,7 +213,8 @@ Antigravity sag panelinde Gemini 3.1 Pro uretir ve Drive'a yazar.
    sonraki adima gecme.
 
 4. **Avukat onayi sonrasi (Director yapar):**
-   - Validator script calistir (Bolum 9 — opsiyonel ama tavsiye):
+   - Validator script calistir (Bolum 9 — ZORUNLU, BLOCKING; PASS olmadan
+     Gmail draft ACILMAZ — 2026-05-17 sahte icra blog dersi):
      `python scripts/blog_validator.py {cikti-klasoru}\blog.md`
    - Eger validator FAIL: avukati bilgilendir, duzeltme oner
    - PASS: `mempalace_diary_write "blog_yazari"` ile yazidan ogrenilen
@@ -240,9 +241,32 @@ Antigravity sag panelinde Gemini 3.1 Pro uretir ve Drive'a yazar.
 Antigravity erisilemezse avukat "fallback claude" → terminal Claude
 `prompts/gemini/blog_yazimi.md` protokolune gore uretir, frontmatter
 `engine: claude`, `fallback_used: true`, `reason: antigravity_unavailable`.
-Kapak gorseli fallback'te uretilemez; `coverImage.path: ""` birakilir,
-`coverImage.prompt` doldurulur (avukat sonradan Imagen / Midjourney /
-DALL-E ile elle uretebilir).
+Kapak gorseli fallback'te (2026-07-20 itibariyla): Claude-in-Chrome ile
+avukatin OTURUM ACIK oldugu gemini.google.com'da, asagidaki "VEGA Kapak
+Tarz Formulu" prompt'uyla uretilir; tam boyut indirilip klasore kapak.png
+yazilir, `coverImage.path: "kapak.png"` guncellenir. Gemini oturumu da
+yoksa `coverImage.path: ""` birakilir, `coverImage.prompt` doldurulur
+(avukat elle uretir).
+
+### VEGA Kapak Tarz Formulu (2026-07-20 — sitedeki yayinli kapaklardan cikarildi)
+
+Sitenin yerlesik kapak tarzi FOTOGERCEKCI'dir (soyut illustrasyon DEGIL):
+- Sabit sahne: sicak, los isikli KOYU AHSAP avukat masasi; tokmak + pirinc
+  terazi + deri ciltli kitaplar + dolma kalem/evrak. Zengin kahve + pirinc
+  altin tonlar, sinematik isik, sig alan derinligi. Oran 3:2 (min 1536x1024).
+- Konuya ozel 1-2 TEMA OBJESI eklenir (ornekler: sahte icra → kirmizi uyarili
+  telefon; trafik → maket araclar + form; bahis → kirmizi uyarili telefon +
+  futbol topu + kuponlar).
+- YASAK: insan yuzu, okunabilir metin, logo, para gorseli.
+- Prompt INGILIZCE, su sablonla:
+  "Photorealistic editorial photo for a Turkish law firm blog article about
+  {KONU}. Scene: a warm, dimly lit lawyer's desk in dark wood — a wooden
+  judge's gavel and brass scales of justice, leather-bound law books stacked
+  behind, a fountain pen resting on documents. Theme objects: {KONUYA OZEL
+  1-2 OBJE}. Cinematic warm lighting, shallow depth of field, rich browns and
+  brass gold tones. No people, no faces, no readable text, no logos, no money."
+Bu formul HER kapak uretiminde kullanilir (Antigravity/Imagen dahil —
+`prompts/gemini/blog_yazimi.md` kapak bolumu bu formule uyar).
 
 ---
 
@@ -382,7 +406,11 @@ qmd search "{primary_keyword}" --collection ajan-blog-yazari
 7. **Antigravity uretsin:** Avukat sag panele yapistirir, Gemini uretir +
    kapak gorseli uretir, Drive'a 4 dosya yazar.
 8. **Onay bekle:** Avukat "Blog bitti" deyene kadar.
-9. **Validator:** (opsiyonel) `python scripts/blog_validator.py blog.md`
+9. **Validator (ZORUNLU — BLOCKING):** `python scripts/blog_validator.py blog.md`
+   — PASS olmadan Gmail draft acilmaz (2026-05-17 sahte icra blog dersi).
+   PASS sonrasi WhatsApp paketi uret (2026-07-20 eklendi):
+   `python scripts/wa_paket.py "{klasor}" --hook "3 kisa satir | ile"` →
+   wa-durum.png (1080x1920) + wa-kare.png (1080x1080) + wa-metin.txt
 10. **Gmail draft:** Avukat isterse `blog.mail.md` icerigi Gmail draft olarak.
 11. **MemPalace diary write:** Konu, primary keyword, ogrenmeler.
 12. **Hall_blog_konulari'a drawer:** Kanibalizasyon kontrolu icin slug + URL.
@@ -462,7 +490,10 @@ G:\Drive'im\Hukuk Burosu\Blog\
     ├── blog.md
     ├── blog.cms.md
     ├── blog.mail.md
-    └── kapak.png
+    ├── kapak.png
+    ├── wa-durum.png    (WhatsApp durumu 1080x1920 — scripts/wa_paket.py)
+    ├── wa-kare.png     (grup/post 1080x1080)
+    └── wa-metin.txt    (kopyala-yapistir durum metni)
 ```
 
 ### Dava Modu
@@ -558,7 +589,7 @@ yapar (devir blogu donduginde):
 
 | Sorun | Yapilacak |
 |-------|-----------|
-| Antigravity erisilemez | "fallback claude" → terminal Claude uretir (kapak gorseli URETILEMEZ — avukat sonradan) |
+| Antigravity erisilemez | "fallback claude" → terminal Claude uretir; kapak Claude-in-Chrome + gemini.google.com (avukat oturumu) ile VEGA formulunden uretilir |
 | Imagen / Nano Banana tool erisilemez | Gemini metni tamamlar, `coverImage.path: ""`, `coverImage.prompt` doldurur (avukat elle uretir) |
 | Bedesten ID < 3 | Avukatdan ek arastirma iste; veya yazinin scope'unu daralt |
 | KVKK leak tespit edildi | HARD FAIL — yeniden uret; sistemli ise self-learner ile kural ekle |

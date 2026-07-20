@@ -187,6 +187,16 @@ Avukat "Blog bitti" diyene kadar bir sonraki adima gecme.
      dersi). Yapısal kapı documentId gerçekliğini doğrulamaz; her künye ayrıca
      bağımsız reviewer ile `ictihat_getir` üzerinden teyit edilir.
 
+1B. **WhatsApp Paketi (ZORUNLU — validator PASS sonrası):**
+   ```
+   python scripts/wa_paket.py "{cikti-klasoru}" --hook "satir1|satir2|satir3"
+   ```
+   Çıktı: `wa-durum.png` (1080x1920 WhatsApp durumu), `wa-kare.png` (1080x1080
+   grup/post), `wa-metin.txt` (WhatsApp *bold* işaretli kopyala-yapıştır metin).
+   Hook = yazıdan çıkarılan en pratik 3 kısa satır (TBB vaat dili YASAK; başlık,
+   özet ve link frontmatter'dan otomatik okunur). Tasarım: lacivert/pirinç
+   VEGA şablon dili — logo/insan yüzü yok.
+
 2. **Gmail Draft** (YALNIZ `blog_validator.py` PASS sonrası — avukata sor):
    ```
    Gmail draft olusturulsun mu? (E/H)
@@ -196,6 +206,11 @@ Avukat "Blog bitti" diyene kadar bir sonraki adima gecme.
    - Subject: `[Blog PR] [{konu}] — paste hazir`
    - Body: `blog.mail.md` (Markdown→Gmail için HTML'e render et; ham markdown
      tablo/kod blokları Gmail'de bozulur).
+   - **TAM İÇERİK KURALI (avukat talebi 2026-07-20):** Panele girilecek HER ŞEY
+     mailin İÇİNDE olmalı — dosya referansı YETMEZ. Maile blog.cms.md'nin tamamı
+     eklenir: panel alan değerleri sıralı liste halinde, TL;DR / faqJson / gövde
+     ise kopyalamada bozulmasın diye `<pre style="white-space:pre-wrap">`
+     blokları içinde. Avukat MD dosyası açmadan yalnız mailden yapıştırabilmeli.
 
 3. **MemPalace Diary Write:**
    ```
@@ -225,11 +240,14 @@ Avukat "Blog bitti" diyene kadar bir sonraki adima gecme.
    Blog hazir:
      - Klasor: {drive-yolu}
      - Dosyalar: blog.md ({N} kelime), blog.cms.md, blog.mail.md, kapak.png
+     - WhatsApp: wa-durum.png + wa-kare.png + wa-metin.txt
      - Self-review: YESIL | SARI ({varsa duzeltme notu})
      - Validator: PASS | FAIL ({detay})
      - Gmail draft: OLUSTURULDU | OLUSTURULMADI
 
-   Sonraki adim: Avukat CMS'e elle yapistirir.
+   Sonraki adim: Avukat panele elle yapistirir →
+     https://vegahukukistanbul.com/admin/#/collections/blog/new
+     (alan eslemesi blog.cms.md'de — Decap semasi, TEHMIS.md Bolum 4)
    ```
 
 ## Kurallar (Avukatin Bilmesi Gerekenler)
@@ -242,8 +260,10 @@ Avukat "Blog bitti" diyene kadar bir sonraki adima gecme.
 
 ## Fallback
 
-- Antigravity erisilemez → "fallback claude" → terminal Claude uretir
-  (kapak gorseli URETILEMEZ, sonradan avukat elle uretir)
+- Antigravity erisilemez → "fallback claude" → terminal Claude uretir.
+  Kapak: Claude-in-Chrome + gemini.google.com (avukat oturumu) uzerinden
+  "VEGA Kapak Tarz Formulu" ile uretilir (bkz. ajanlar/blog-yazari/SKILL.md);
+  Gemini oturumu da yoksa prompt hazir birakilir
 - Imagen tool erisilemez → metin tamamlanir, `coverImage.path: ""` birakilir
 - Yargi MCP timeout → avukatdan emsal karar Bedesten ID'lerini elle iste
 - Mevzuat MCP timeout → avukatdan kanun + madde no'yu elle iste

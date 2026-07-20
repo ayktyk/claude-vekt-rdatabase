@@ -156,7 +156,7 @@ nextReviewAt: "2026-08-14" # +90 gün (cluster) / +180 gün (blog)
 
 # Kategori & Niyet (2 alan)
 category: "is-hukuku" # is-hukuku | tuketici | trafik | icra | aile | diger
-intent: "I" # I=informational, C=commercial, T=transactional
+intent: "I1" # SITE PANELI SOZLUGU: I1=bilgi, I2=nasil-yapilir, I3=karsilastirma, I4=emsal-karar, I5=avukat-arama
 
 # Anahtar Kelime (3 alan)
 primaryKeyword: "kıdem tazminatı 2026"
@@ -236,37 +236,51 @@ THEMIS çıktısı **üç parçaya ayrılır**: kısa özet, CMS panel formatı 
 
 ---
 
-# CMS PANEL (WordPress / Strapi / Sanity gibi panele)
+# CMS PANEL — Decap (vegahukukistanbul.com/admin → Blog Yazıları → Yeni)
 
-## BAŞLIK
+Panel: https://vegahukukistanbul.com/admin/#/collections/blog/new
+Alan adları panel şemasıyla birebir (kaynak: /admin/cms-config.yml, 2026-07-20).
+Tam sıralı yapıştırma sayfası şablonu: prompts/gemini/blog_yazimi.md → "blog.cms.md" bölümü.
 
-[H1 ile aynı, 55-65 karakter]
+## KİMLİK
+- Başlık (title): [H1 ile aynı, ≤100 char — site H1'i bu alandan üretir]
+- Slug (slug): [ascii-kebab-60-char]
+- Özet (excerpt): [150-180 karakter — panel sınırı 180]
+- Kategori (category) · Yazar (author)=Vega Hukuk · Yazar Kimliği (authorSlug)=aykut-yesilkaya
 
-## SLUG
+## YAYIN
+- publishedAt · updatedAt · reviewedBy=aykut-yesilkaya [select, slug] · reviewedAt · nextReviewAt (+90)
 
-[ascii-tirelı-format-60-char-max]
+## SEO
+- SEO Başlığı (seoTitle): [50-60 char | Vega Hukuk İstanbul]
+- SEO Açıklaması (seoDescription): [150-160 char — problem + CTA]
+- Canonical: [BOŞ — otomatik üretilir]
 
-## ÖZET
+## TAKSONOMİ
+- Tier (tier): T3 varsayılan (select T1-T6) · Intent (intent): I1-I5
+- Topic Anahtarları (topics): [kebab key'ler] · Pillar (pillars.p1/p2)
 
-[155-200 karakter — arama sonucu görünürlüğü]
+## İÇERİK BİLEŞENLERİ
+- TL;DR (tldr): [frontmatter tldr birebir, 40-60 kelime]
+- SSS (faqJson): [min 5, [{"question","answer"}] — site SSS'yi ve FAQPage schema'yı bu alandan üretir]
+- Kanun Referansları (relatedLaws: code|madde|title)
+- Yargı Kararları (relatedCases: daire|esas|karar|date|summary|yargiMcpId=Bedesten documentId)
 
-## SEO BAŞLIĞI (Meta Title)
+## GÖRSEL
+- Kapak Görseli (coverImage): kapak.png YÜKLE (WebP tercih, 1600x900) + Alt Text (coverAlt)
+- coverClass / ogImage / ogImageAlt: [BOŞ — kapak kullanılır]
 
-[50-60 karakter | marka suffix]
+## DURUM
+- Durum (status): draft [panel varsayılanı published — düşür; avukat okuyup yayınlar] · noindex: false
 
-## SEO AÇIKLAMASI (Meta Description)
+## İÇERİK (body alanına kopyala)
 
-[145-160 karakter — problem + CTA]
+Siteye özgü kırpma (canlı yazıdan doğrulandı, 2026-07-20): body'ye H1 KONMAZ
+(title'dan üretilir), SSS bölümü KONMAZ (faqJson'dan render edilir), imza +
+disclaimer KONMAZ (reviewedBy/reviewedAt'ten rozet üretilir). Yapıştırılan
+gövde = TL;DR blockquote'undan "Sonuç" bölümünün sonuna kadar.
 
-## KAPAK GÖRSELİ ÖNERİSİ
-
-- **İngilizce stok arama:** [Unsplash/Pexels terimi]
-- **Türkçe karşılığı:** [TR terim]
-- **Sahne tarifi:** [1-2 cümle, soyut/nötr/profesyonel]
-
-## İÇERİK (kopyala — H1'den imzaya)
-
-[Buraya §2'deki 6 katman markdown gelir]
+[Buraya §2'deki 6 katman markdown gelir — H1'siz, SSS'siz, imzasız]
 
 ---
 
@@ -317,6 +331,49 @@ _Bu yazı bilgilendirme amaçlıdır, hukuki tavsiye niteliği taşımaz._
 ````
 
 ````
+
+### Panel Şeması Referansı (Decap CMS — çekim: 2026-07-20)
+
+Kaynak: `https://vegahukukistanbul.com/admin/cms-config.yml` (backend: GitHub
+`ayktyk/avukat-web-yenileme`, branch `main`; içerik `src/content/blog/*.md`;
+medya `public/uploads/blog`). Blog koleksiyonu ("Blog Yazıları") alanları:
+
+| Panel alanı (name) | Widget | Not |
+|---|---|---|
+| title | string | ≤100 char; site H1'i buradan üretir |
+| slug | string | ASCII kebab-case |
+| excerpt | text | 150-180 char |
+| category | string | serbest metin, varsayılan "Genel" |
+| author / authorSlug | string / select | "Vega Hukuk" / aykut-yesilkaya (Person schema @id) |
+| publishedAt, updatedAt, reviewedAt, nextReviewAt | datetime | YYYY-MM-DD |
+| reviewedBy | select | aykut-yesilkaya (slug — "Av. ..." değil) |
+| seoTitle / seoDescription / canonical | string / text / string | ≤60 / 150-160 / boş=otomatik |
+| type | hidden | "blog" — panelde görünmez |
+| tier / intent | select | T1-T6 (T3 varsayılan) / I1-I5 |
+| topics | list(string) | ontology key'leri (kebab) |
+| pillars | object | p1 (ana hizmet), p2 (alt konu) |
+| tldr | text | 40-60 kelime sert limit |
+| faqJson | text | [{"question","answer"}] min 5 — FAQPage schema kaynağı |
+| relatedLaws | list | code, madde, title |
+| relatedCases | list | daire, esas, karar, date, summary, yargiMcpId |
+| coverImage / coverAlt / coverClass | image / string / string | WebP tercih 1600x900 / alt / boş |
+| ogImage / ogImageAlt | image / string | boşsa kapak kullanılır |
+| internalLinkPriority | list(slug) | öncelikli iç link hedefleri |
+| internalLinkMatches | list | phrase → target slug |
+| status | select | draft / reviewing / published / quarantine (panel varsayılanı published) |
+| noindex | boolean | false |
+| body | markdown | H1'siz gövde; tek satır `[Buton](/blog)` = CTA; `[[slug\|metin]]` iç link |
+
+Frontmatter v3 ↔ panel farkları: `intent` panel sözlüğü I1-I5 (v3 güncellendi);
+`canonicalUrl` (v3) ↔ `canonical` (panel); `relatedCases.tarih/bedestenId/ozet`
+(v3) ↔ `date/yargiMcpId/summary` (panel); `relatedContent` (v3) ↔ `pillars` +
+`internalLinkPriority/Matches` (panel); `tier` ve `faqJson` yalnız panelde —
+değerleri blog.cms.md üretiminde doldurulur.
+
+Sitede ayrıca `legal_updates` ("Hukuk Gündemi") koleksiyonu var: T4 karar
+analizi yazıları için `decision` objesi (court, chamber, esasNo, kararNo,
+decisionDate, yargiMcpId, outcome, precedentValue, authorIsCounsel) taşır.
+Haftalık içtihat taraması blog'a çevrilecekse bu koleksiyon hedeflenir.
 
 ---
 
