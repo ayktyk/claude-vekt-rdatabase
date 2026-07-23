@@ -40,3 +40,22 @@
 - KURAL ADAYI: Motor/orkestratör değişikliği kararında benchmark puanına ek
   olarak entegrasyon maliyeti (MCP, hook, hafıza katmanları) ve avukatın
   fiili kullanım deneyimi ZORUNLU kriterdir; tek metrikle motor değiştirilmez.
+
+## 2026-07-24 — 15 dava türü playbook seti yazıldı (MCP doğrulamalı)
+- KAÇIRILAN: `mevzuat_getir(id_type=madde, madde_no=X)` çağrısı, kanunların
+  EK ve GEÇİCİ maddelerini BULAMIYOR (madde_no_not_found döner) — bunlar MCP
+  ağacında sayısal numarayla gelmiyor. İş K. Ek m.3 (zamanaşımı) bu yüzden
+  doğrudan çekilemedi.
+- DÜZELTME: Ek/Geçici madde metni, o maddeyi metninde birebir aktaran güncel
+  bir Yargıtay kararından (`ictihat_getir`) doğrulandı (İş K. Ek m.3 + Geçici
+  m.8 → documentId 1093760300). Alıntı karar metninden alındı, uydurulmadı.
+- KURAL ADAYI: Bir kanunun EK/GEÇİCİ maddesi gerektiğinde: (a) `id_type=outline`
+  ile ağacı çekip madde_id bul, VEYA (b) o maddeyi aktaran güncel içtihattan
+  doğrula. UYDURMA YASAK — çekilemeyen madde `[METİN DOĞRULANMADI]` damgalanır.
+- İKİNCİ DERS: Playbook doğrulama disiplini — künye yazılan her karar
+  `ictihat_getir` ile TAM METİN açıldı, alıntılar birebir; her mevzuat maddesi
+  `mevzuat_getir` ile çekildi; tutar/oran/tarife YAZILMADI (yıllık değişir,
+  "UYAP'tan teyit" formülü). Doğrulanmış künye çekirdeği playbook/README.md'de.
+- ÜÇÜNCÜ DERS: Bedesten sık sık ~Nisan 2025 yedek arşivine düşüyor; snippet'ler
+  tam metin okunmadan kullanıldıysa tabloda işaretlendi, son ~3 ay eksik notu
+  kondu.

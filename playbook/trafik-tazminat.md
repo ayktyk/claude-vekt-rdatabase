@@ -129,9 +129,20 @@ Sigorta Tahkim hakem uygulamasi ayni yonde (Karar Dergisi 36/50 — snippet).
   sorgusunu EN BASTA yap.
 - Kiralama teklifi toplarken ARAC SINIFI eslesmesi (Fiorino → hafif ticari;
   ust sinif teklif fahis itirazini besler).
-- Zamanasimi: KTK m.109 — 2 yil (zarar gorenin ogrenmesinden) / her halde
-  10 yil; ceza zamanasimi uzatmasi ihtimalini kontrol et. [DOGRULANMASI
-  GEREKIR — bu playbook'a islenmeden once madde metni cekilmeli]
+- Zamanasimi: KTK m.109 — **DOGRULANDI (mevzuat_id 102918, madde_id 2548103,
+  2026-07-23 cekildi):** *«Motorlu arac kazalarindan dogan maddi zararlarin
+  tazminine iliskin talepler, zarar gorenin, zarari ve tazminat yukumlusunu
+  ogrendigi tarihten baslayarak iki yil ve herhalde, kaza gununden baslayarak
+  on yil icinde zamanasimina ugrar.»* (m.109/1)
+  - **Ceza zamanasimi uzatmasi DOGRULANDI:** *«Dava, cezayi gerektiren bir
+    fiilden dogar ve ceza kanunu bu fiil icin daha uzun bir zaman asimi suresi
+    ongormus bulunursa, bu sure, maddi tazminat talepleri icin de gecerlidir.»*
+    (m.109/2) → yaralamali/olumlu kazada uzamis ceza zamanasimi maddi talebe de
+    uygulanir; salt maddi hasarda genelde 2 yil.
+  - **Kesilme sigortaciya da siar:** *«Zamanasimi, tazminat yukumlusune karsi
+    kesilirse, sigortaciya karsi da kesilmis olur.»* (m.109/3)
+  - **Rucu zamanasimi 2 yil:** yukumlunun kendi borcunu tam ifa ettigi ve rucu
+    edilecegi kisiyi ogrendigi gunden (m.109/4) — bkz. `trafik-rucu.md`.
 - **GOREV/YETKI VE USUL HATALARI (AYKUT — 1 numarali hassasiyet):**
   Bu dava turunde kaybettiren sey esas degil USULdur. Her dosyada takip/
   dava acilmadan once ZORUNLU kontrol:
@@ -153,3 +164,43 @@ Sigorta Tahkim hakem uygulamasi ayni yonde (Karar Dergisi 36/50 — snippet).
 | Ankara BAM 26.HD E.2024/1427 K.2026/744 (24.04.2026, KESIN) | 1208295700 ✓ | Gunluk bedel = kiralama piyasasi arastirmasi sart |
 | TBK m.50-51 | madde_id 1660147/1660150 ✓ | Ispat + hakkaniyet + kapsam |
 | KTK m.85 | madde_id 2548076 ✓ | Isleten muteselsil sorumluluk |
+| KTK m.109 | madde_id 2548103 ✓ | Zamanasimi 2/10 yil + ceza uzatmasi + rucu 2 yil |
+
+## 8. Is Akisi (standart sablon uyumu — 2026-07-23 eklendi)
+
+Bu bolum `_SABLON.md` semasindaki eksik omurgayi kapatir; §0-7 avukat
+muhakemesini korur.
+
+### Istenecek bilgi (ilk gorusme)
+Kaza tarihi/yeri · kusur durumu (tutanak/Tramer) · arac kullanim amaci
+(hususi/ticari, K1/K2) · kasko + ikame arac saglandi mi kac gun · onarim
+suresi + eksper raporu · pert mi · yaralanma/olum var mi (varsa BU PLAYBOOK
+KULLANILMAZ — bedensel zarar rejimi).
+
+### Toplanacak belge
+Kaza fotograflari (plaka gorunur) · kaza tespit tutanagi · Tramer kaydi ·
+ruhsat · onarim faturasi/servis kaydi · eksper/deger kaybi raporu · kiralama
+piyasasi yazili teklifleri (2-3, ayni sinif) · kasko police ve ikame arac
+kayitlari.
+
+### Dava/takip akisi
+1. Tramer sorgusu (EN BASTA — §6).
+2. Talep kalemi–muhatap ayrimi (§2 tablosu): hasar+deger kaybi → ZMSS
+   sigortaci (basvuru → Tahkim); mahrumiyet → kusurlu surucu + isleten
+   (icra/dava).
+3. Deger kaybi: sigortaciya basvuru → Sigorta Tahkim.
+4. Mahrumiyet: ihtiyatli tutarla icra takibi → **itiraz beklenir** (§3 refleks
+   itiraz) → itirazin iptali (IIK m.67, 1 yil; bkz. `icra-itiraz-hatti.md`).
+5. Usul cift kontrol (§6 gorev/yetki/adliye/sure).
+6. Tahsilat.
+
+### Sure haritasi
+| Sure | Ne kadar | Baslangic | Dayanak |
+|---|---|---|---|
+| Maddi tazminat zamanasimi | 2 yil / her halde 10 yil | Ogrenme / kaza gunu | KTK m.109/1 |
+| Ceza uzatmasi | Ceza z.a. suresi | — | KTK m.109/2 |
+| Rucu zamanasimi | 2 yil | Ifa + rucu edileni ogrenme | KTK m.109/4 |
+| Itirazin iptali | 1 yil | Itirazin tebligi | IIK m.67 |
+
+### Yapilmayacaklar / Muvekkil iletisimi
+§4 ve §5'te (AYKUT muhakemesi — bu playbook'un ozgun gucu).
