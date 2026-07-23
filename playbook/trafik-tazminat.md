@@ -28,7 +28,9 @@ Tum ajanlarin uygulayacagi uc sonuc:
       Bedensel zarar varsa dosya BASKA REJIME gecer (ceza boyutu, uzamis
       ceza zamanasimi, ZMSS bedensel teminat, SGK rucu ihtimali) — bu
       playbook SALT MADDI HASAR dosyasi icindir; bedensel zarar varsa
-      Director avukata bildirir, bu playbook'la devam ETMEZ.
+      **`trafik-bedensel-olum.md` playbook'una gec** (maddi-manevi tazminat,
+      ZMSS teminati, dava sarti basvuru KTK m.97, Sigorta Tahkim, Ticaret
+      Mahkemesi gorevi). Director avukata bildirir, bu playbook'la devam ETMEZ.
 - [ ] Kusur durumu: tutanak/kaza tespit + Tramer kaydi (tek kaza mi?)
 - [ ] Aracin kullanim amaci: hususi mi ticari mi (K1/K2 belgesi var mi?)
       → hesap yontemini belirler (kira bedeli vs gercek kazanc kaybi)

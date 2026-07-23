@@ -39,13 +39,15 @@ Bolum sirasi ve dogrulama kurallari: `_SABLON.md`.
 
 ---
 
-## 15 Dava Turu — Durum Cetveli (2026-07-24 — HEPSI YAZILDI)
+## 15 Dava Turu — Durum Cetveli (2026-07-24 — HEPSI YAZILDI; trafik 2 kola ayrildi → 16 dosya)
 
 Siralama, Drive'daki ~86 dosyanin tur frekansina gore yapildi
 (Aktif Davalar + Biten Davalar + 0ESKI + 02CMK klasor adlari).
-15 playbook'un tamami Yargi-MCP-Pro ile dogrulanmis kaynak (mevzuat maddesi +
+Playbook'larin tamami Yargi-MCP-Pro ile dogrulanmis kaynak (mevzuat maddesi +
 ictihat tam metni) uzerine yazildi. Her playbook sonunda Kaynak Dogrulama
-Tablosu + acik kalem listesi var.
+Tablosu + acik kalem listesi var. Trafik kazasi 2 ayri playbook'a bolundu:
+maddi hasar (deger kaybi/mahrumiyet) ve bedensel zarar/olum (maddi-manevi
+tazminat, ZMSS, Sigorta Tahkim, Ticaret Mahkemesi).
 
 ### Katman 1 — hacmin ~%75'i
 
@@ -62,7 +64,8 @@ Tablosu + acik kalem listesi var.
 
 | # | Playbook | Dosya | Durum |
 |---|---|---|---|
-| 7 | Trafik kazasi — maddi hasar | `trafik-tazminat.md` | ✅ MEVCUT + is akisi/§8 + KTK m.109 dogrulandi |
+| 7 | Trafik kazasi — maddi hasar (deger kaybi + mahrumiyet) | `trafik-tazminat.md` | ✅ MEVCUT + is akisi/§8 + KTK m.109 dogrulandi |
+| 7b | **Trafik kazasi — bedensel zarar + olum** (maddi-manevi, ZMSS, Sigorta Tahkim, Ticaret Mahkemesi) | `trafik-bedensel-olum.md` | ✅ YAZILDI (2026-07-24 genisletme) |
 | 8 | Trafik kazasi — rucuen tazminat | `trafik-rucu.md` | ✅ YAZILDI |
 | 9 | Kira — tahliye | `kira-tahliye.md` | ✅ YAZILDI |
 | 10 | Kira — kira bedeli tespiti | `kira-tespit.md` | ✅ YAZILDI |
@@ -93,6 +96,7 @@ tekrar aramadan atif yapilabilir (ama guncellik kontrolu onerilir):
 | 1108153500 | Y.4.HD E.2024/4682 K.2024/6004 + IBK 1944/37-9 | trafik rucu | Halefiyet davasi ticari dava degil |
 | 1108995200 | Y.3.HD E.2024/314 K.2024/4116 | miras | Hukmen ret suresiz + tespit davasi/def'i |
 | 1131856300 | Y.HGK E.2023/396 K.2025/88 + IBK 1974/1-2 | gayrimenkul | Muris muvazaasi ispat yuku + fiili karineler |
+| 1070978300 | Y.4.HD E.2021/23549 K.2024/5424 | trafik bedensel | Sigortaci taraftaysa gorev Asliye Ticaret (gorev iliskisi, resen) |
 
 ### Sonraki Arastirma Blogu — acik kalemler (tum playbook'lardan)
 
