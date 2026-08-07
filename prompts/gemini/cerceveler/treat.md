@@ -80,6 +80,6 @@ talebe dönüşür. Baştaki tez ile sondaki tez tutarlı olmalıdır.
 
 ## Çerçeve doğrulama listesi
 - Tez → Kural → Açıklama → Uygulama → Tez(tekrar) adımları tam mı; baştaki tez ile sondaki tez tutarlı mı?
-- Açıklama (Explanation) gerçekten kuralı içtihat/öğreti ile yorumluyor mu, yoksa kuralı tekrar mı ediyor?
+- Açıklama (Explanation) gerçekten kuralı içtihat/öğreti ile yorumluyor mu ve atıflar DOĞRULANMIŞ mı, yoksa kuralı tekrar mı ediyor?
 - Sondaki tez, SONUÇ VE TALEP'teki kesin taleple tutarlı mı?
 - Talep, açıklama ve dayanak birbirini tutuyor mu?

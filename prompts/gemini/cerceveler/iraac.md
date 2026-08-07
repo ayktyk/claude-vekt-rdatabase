@@ -11,6 +11,7 @@
 - Cevap, replik (cevaba cevap) veya düplik (ikinci cevap) yazılıyor; karşılıklı iddialar örülecek.
 - Talep, ana kuralın yanında ikinci/alternatif bir hukuki dayanağa da bağlanacak (IRRAC).
 - Karşı tarafın muhtemel savunması öngörülebiliyor ve önden kırılması taktik üstünlük sağlıyor (IRAAC).
+- Dava, cevap, replik, düplik veya ceza savunması — tür fark etmez.
 
 ## Çerçeve mantığı
 **IRAAC** = **I**ssue → **R**ule → **A**pplication → (counter-)**A**pplication → **C**onclusion

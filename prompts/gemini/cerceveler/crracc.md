@@ -92,7 +92,7 @@ kesin talebe dönüşür.
 > düzenlenmesi çocuğun üstün yararına olup talep edilmektedir.
 
 ## Çerçeve doğrulama listesi
-- Sonuç → Kural → Açıklama → Uygulama → Karşı argüman(+menfaat) → Sonuç adımları tam mı; karşı argüman ve menfaat dengesi ele alındı mı?
+- Sonuç → Kural → Kuralın Açıklaması → Uygulama → Karşı argüman(+menfaat) → Sonuç adımları tam mı; karşı argüman ve menfaat dengesi ele alındı mı?
 - Kuralın açıklaması içtihat/öğretiyle yapıldı mı (atıflar DOĞRULANMIŞ mı); sadece hüküm anılıp geçilmedi mi?
 - Baştaki Sonuç ile sondaki Sonuç tutarlı mı; iki katman birbirini pekiştiriyor mu?
 - Karşı tarafın iddiası açıkça karşılanıp çürütüldü mü (varsayımsal değil, somut)?

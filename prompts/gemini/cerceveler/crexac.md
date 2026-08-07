@@ -13,7 +13,7 @@
 - Dava, cevap, replik, düplik veya ceza savunması — tür fark etmez.
 
 ## Çerçeve mantığı
-**CREXAC** = **C**onclusion → **R**ule → **E**xplanation → **EX**ample → **A**pplication → **C**onclusion
+**CREXAC** = **C**onclusion → **R**ule → **E**xplanation → e**X**ample → **A**pplication → **C**onclusion
 (Sonuç → Kural → Açıklama → Emsal Örnek → Uygulama → Sonuç). CREAC şemasına
 **emsal örnek (Example)** katmanını ekler: kuralı soyut açıklamakla yetinmez,
 kuralın **benzer bir olayda** nasıl uygulandığını gösteren bir emsal karara veya

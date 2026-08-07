@@ -65,8 +65,8 @@ SONUÇ VE TALEP'te kesin talebe dönüşür.
 | Tez | KONU + AÇIKLAMALAR girişi | Baştan konulan tez cümlesi |
 | Kural | HUKUKİ NEDENLER + gövde atıfı | Mevzuat / içtihat / ilke |
 | Açıklama | AÇIKLAMALAR (kuralın açılımı) | Kuralın içtihat/öğretiyle yorumu |
-| Karşı argüman (TREACC) | AÇIKLAMALAR (çürütme alt başlığı) | Karşı tezin ortaya konup çürütülmesi |
 | Uygulama | AÇIKLAMALAR — II. HUKUKİ DEĞERLENDİRME | Yorumlanmış kuralın vakıaya tatbiki |
+| Karşı argüman (TREACC) | AÇIKLAMALAR (çürütme alt başlığı) | Karşı tezin ortaya konup çürütülmesi |
 | Sonuç | Bölüm sonu + SONUÇ VE TALEP | Tezi pekiştiren kapanış → kesin talep |
 
 ## Kullanım notları
@@ -106,7 +106,7 @@ SONUÇ VE TALEP'te kesin talebe dönüşür.
 
 ## Çerçeve doğrulama listesi
 - Tez → Kural → Açıklama → Uygulama → (Karşı argüman) → Sonuç adımları tam mı; tez baştan net konuldu mu?
-- Açıklama, kuralı gerçekten yorumladı mı (içtihat/öğreti ile açıldı mı), yoksa kuralın tekrarı mı?
+- Açıklama, kuralı gerçekten yorumladı mı (içtihat/öğreti ile açıldı mı ve atıflar DOĞRULANMIŞ mı), yoksa kuralın tekrarı mı?
 - TREACC kullanıldıysa karşı argüman önce dürüstçe ortaya konup sonra çürütüldü mü?
 - Sonuç ile baştaki tez tutarlı mı; SONUÇ VE TALEP'teki kesin talebe bağlanıyor mu?
 - Talep, açıklama ve dayanak birbirini tutuyor mu?
