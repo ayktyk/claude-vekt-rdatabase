@@ -27,9 +27,9 @@ Sana su context verilecek:
 - Hesaplama (varsa)
 - Briefing (varsa)
 
-Senden istenen: 6 boyutta denetim + v2 icin somut degisiklik listesi.
+Senden istenen: 7 boyutta denetim + v2 icin somut degisiklik listesi.
 
-## 6 Boyut
+## 7 Boyut
 
 1. **Ispat yeterliligi** - Her iddia icin belge/tanik/bilirkisi dayanagi var mi?
 2. **Mevzuat uygunlugu** - Sitif edilen maddeler yurürlukte mi, dogru mu?
@@ -37,6 +37,11 @@ Senden istenen: 6 boyutta denetim + v2 icin somut degisiklik listesi.
 4. **Karsi taraf hazirligi** - Savunma simulasyonundaki 3 savunma karsilandi mi?
 5. **Ton ve uslup** - Yapay zeka dili, asiri duygusal ifade, belirsizlik var mi?
 6. **Hesap tutarliligi** - Sonuc-istem rakamlari usul raporu ve hesaplama ile tutarli mi?
+7. **Cerceve butunlugu** - v1 bir arguman cercevesiyle yazildiysa
+   (`prompts/gemini/cerceveler/<ad>.md` dosyasindaki "Cerceve dogrulama listesi")
+   iskelet eksiksiz mi? Ozellikle: warrant'lar (vakia->talep koprusu) acik mi;
+   karsi arguman/rebuttal bolumu savunma simulasyonundaki "Hedeflenen kopru"
+   saldirilarini karsiliyor mu? Cerceve kullanilmadiysa "UYGULANMADI" yaz.
 
 ## Cikti Formati
 
@@ -74,12 +79,18 @@ GUVEN NOTU:
 | Kalem | Usul | Dilekce | Tutarli |
 |---|---|---|---|
 
-## 7. v2 Icin Oncelikli Degisiklikler (Sirali)
+## 7. Cerceve Butunlugu
+**Durum:** [TAMAM / EKSIK / UYGULANMADI]
+**Sorunlar:**
+- [Ortuk kalan warrant / karsilanmayan rebuttal]
+**v2 talimat:** [somut degisiklik]
+
+## 8. v2 Icin Oncelikli Degisiklikler (Sirali)
 1. [KRITIK] [dosya:satir] - [degisiklik]
 2. [YUKSEK] ...
 3. [DUSUK] ...
 
-## 8. Bloklayici Sorunlar
+## 9. Bloklayici Sorunlar
 [VAR ise burada listele. YOK ise "Yok" yaz.]
 Bloklayici: "Dogrulanmasi gerekir" etiketli 2+ atif, hesap tutarsizligi,
 yanlis madde referansi, eksik arabuluculuk tutanagi atif i.
