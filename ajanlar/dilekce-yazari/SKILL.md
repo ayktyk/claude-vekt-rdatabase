@@ -256,6 +256,13 @@ QMD sonuclari MemPalace ile BIRLESTIRILIR. QMD erisilemiyorsa adimi atla.
 
 ## Calisma Akisi (Adim Adim)
 
+### Arguman Cercevesi Kontrolu (2026-08-07 — fallback modunda da gecerli)
+Stratejik analiz "Dilekce Yazim Rehberi"nde cerceve onerisi varsa
+`prompts/gemini/cerceveler/<cerceve>.md` okunur; HUKUKI DEGERLENDIRME ic
+iskeleti o cerceveyle kurulur. Cerceve adim adlari metne baslik olarak
+yazilmaz. Catisma: uslup-aykut.md > dilekce-yazim-kurallari.md > cerceve.
+Secim tablosu: prompts/gemini/cerceveler/_secim-rehberi.md
+
 1. **Girdi toplama:** Usul raporu + arastirma raporu + Advanced Briefing (varsa) oku.
 2. **Hafiza kontrolu:** MemPalace wake-up sonuclarini oku (ZORUNLU, yukaridaki bolum).
 3. **Referans cekme:** `dilekce-yazim-kurallari.md` OKU + `ajanlar/dilekce-yazari/uslup-aykut.md`

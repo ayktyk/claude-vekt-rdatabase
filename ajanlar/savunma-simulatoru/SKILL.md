@@ -265,6 +265,11 @@ QMD sonuclari MemPalace ile BIRLESTIRILIR. QMD erisilemiyorsa adimi atla.
 5. **Hiyerarsi saldiri vektorlerini belirle:** Karsi tarafin normlar
    hiyerarsisi uzerinden saldirabilecegi noktalar
 
+### Toulmin Warrant Analizi (2026-08-07)
+Simulasyon oncesi `prompts/gemini/cerceveler/toulmin.md` okunur; v1'deki her
+ana arguman icin Claim-Grounds-Warrant cikarilir ve savunma hatlari oncelikle
+zayif warrant'lara yoneltilir (prompts/gemini/savunma_simulasyonu.md ile ayni kural).
+
 ### Hiyerarsi Saldiri Vektorleri
 
 Karsi taraf su tip saldirilari yapabilir. Her biri icin kontrol yap:

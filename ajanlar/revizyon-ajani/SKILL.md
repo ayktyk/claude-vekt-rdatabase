@@ -317,6 +317,11 @@ dogru yansitilmis mi kontrol edilir:
 - [ ] Anayasa atifi spesifik madde ile mi yapilmis? ("Anayasa'nin
       ruhu" gibi genel soylemler varsa HATA)
 
+### Cerceve Butunlugu (ek boyut — 2026-08-07)
+v1 bir cerceveyle yazildiysa `prompts/gemini/cerceveler/<ad>.md` icindeki
+"Cerceve dogrulama listesi" uygulanir; warrant aciklik ve rebuttal karsilama
+kontrolu yapilir (prompts/gemini/revizyon.md 7. boyut ile ayni kural).
+
 ## Cikti Formati
 
 Sablon:
