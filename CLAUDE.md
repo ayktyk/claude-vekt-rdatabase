@@ -167,7 +167,8 @@ dongusu oldugu icin tek sohbette birlestirildi. ASAMA 3 ve 4 ayri kaldi
 
    **BATCH 3 — ASAMA 5+6+7 (Dilekce Ailesi) — TEK SOHBETTE 3 ASAMA:**
    - Girdiler: 00-Briefing-ozet + arastirma-raporu + usul-raporu +
-     stratejik-analiz (yazim rehberi)
+     stratejik-analiz (yazim rehberi) + rehberde cerceve onerildiyse
+     `prompts/gemini/cerceveler/<cerceve>.md` (+ savunma icin `toulmin.md`)
    - Cikti SIRASI (3 dosya):
      1. 03-Sentez-ve-Dilekce/dilekce-v1.md (ASAMA 5)
      2. 02-Arastirma/savunma-simulasyonu.md (ASAMA 6 — v1 elestirisi)
@@ -1521,6 +1522,7 @@ Context window %70'e ulastiginda otomatik state dump:
 | `stratejik analiz: [dava-id]` | 5 Ajan (4A Davaci + 4B Davali + 4C Bilirkisi + 4D Hakim + 4E Sentez) |
 | `dilekce v1: [dava-id]` | Belge Yazari (ilk taslak — ASAMA 5 esdegeri) |
 | `dilekce yaz` | Belge Yazari (v1 taslak — `dilekce v1:` ile ayni) |
+| `dilekce yaz [cerceve] ile` (orn. "Toulmin ile itiraz yaz") | Belge Yazari — cerceve override; Director `prompts/gemini/cerceveler/_secim-rehberi.md` uzerinden cerceve dosyasini baglar |
 | `ihtarname yaz` | Belge Yazari |
 | `sozlesme yaz` | Belge Yazari |
 | `hesapla: giris:[tarih], cikis:[tarih], net:[TL], yemek:[TL], servis:[TL], fesih:[tur]` | Hesaplama modulu |
