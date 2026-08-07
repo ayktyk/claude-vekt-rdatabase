@@ -33,6 +33,13 @@ Sana su context verilecek:
 Senden istenen: Karsi taraf avukati gibi dusunerek 3 en guclu savunma hatti +
 her birinin karsilama stratejisi.
 
+**TOULMIN KOPRU (WARRANT) ANALIZI (ZORUNLU ADIM):**
+Once `prompts/gemini/cerceveler/toulmin.md` oku. v1 dilekcedeki HER ana arguman
+icin Claim (talep) - Grounds (vakia+delil) - Warrant (vakiayi talebe baglayan
+ortuk kopru) uclusunu cikar. Savunma hatlarini ONCELIKLE zayif, eksik veya
+ortuk birakilmis warrant'lara yonelt: karsi taraf vakiayi degil, vakiadan
+talebe atilan kopruyu hedefler.
+
 **ONCELIK KURALI (YENI — FAZ 4 2026-05-19):**
 - karsi-arguman-onsorgu.md'de **KRITIK** seviye tehdit varsa → 3 savunma
   hattindan en az 1'i bu KRITIK karari/doktrini ileri suren savunma olmali
@@ -60,6 +67,7 @@ GUVEN NOTU:
 **Hukuki dayanak:** [...]
 **Yargitay destegi:** [varsa karar kunyesi]
 **Olgusal dayanak:** [dilekcedeki hangi zayif nokta sömürülür]
+**Hedeflenen kopru (warrant):** [dilekcedeki hangi vakia->talep koprusu zayif/eksik]
 **Basari ihtimali:** [YUKSEK / ORTA / DUSUK]
 
 ### Savunma 2: ...
