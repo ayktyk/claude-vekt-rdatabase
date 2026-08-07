@@ -8,20 +8,20 @@
 
 ## 12 çerçeve — tek bakış
 
-| Çerçeve | Şema | Güçlü olduğu yer |
-|---|---|---|
-| MIRAT | Maddi Vakıa → Mesele → Kural → Uygulama → Sonuç | Vakıa-ağırlıklı, mesele-temelli klasik analiz |
-| IRAAC | Mesele → Kural → Uygulama → Karşı-Uygulama → Sonuç | Karşı argümanın gövdeye işlendiği analiz |
-| ILAC | Mesele → Mevzuat → Uygulama → Sonuç | Mevzuat hükmünün merkezde olduğu basit uyuşmazlık |
-| IPAC | Mesele → İlke/Doktrin → Uygulama → Sonuç | Mevzuat boşluğu; ilke/doktrin ağırlıklı argüman |
-| TREAC | Tez → Kural → Açıklama → Uygulama → Sonuç (+karşı argüman) | Tezi başa koyan savunma/cevap |
-| CRAC | Sonuç → Kural → Uygulama → Sonuç | Kısa, net, güçlü dosyada hâkimi baştan yönlendirme |
-| CRuPAC | Sonuç → Kural → Kuralın İspatı → Uygulama → Sonuç | Kuralın kendisinin tartışmalı olduğu dosya |
-| CREXAC | Sonuç → Kural → Açıklama → Emsal → Uygulama → Sonuç | Emsal karar karşılaştırması taşıyan argüman |
-| TREAT | Tez → Kural → Açıklama → Uygulama → Tez | Tezin tekrarla mühürlendiği kısa brief |
-| CRRACC | Sonuç → Kural → Açıklama → Uygulama → Karşı argüman → Sonuç | Karşı argüman + menfaat tartısı gereken dosya |
-| Toulmin | İddia → Dayanak → Köprü(Warrant) → Destek → Çekince → Çürütme | İtiraz; karşı tarafın zayıf köprüsünü hedefleme |
-| Klasik retorik | Exordium → Narratio → Partitio → Confirmatio → Refutatio → Peroratio | Çok bölümlü, anlatı gücü yüksek kapsamlı dilekçe |
+| Çerçeve | Dosya | Şema | Güçlü olduğu yer |
+|---|---|---|---|
+| MIRAT | `mirat.md` | Maddi Vakıa → Mesele → Kural → Uygulama → Sonuç | Vakıa-ağırlıklı, mesele-temelli klasik analiz |
+| IRAAC | `iraac.md` | Mesele → Kural → Uygulama → Karşı-Uygulama → Sonuç | Karşı argümanın gövdeye işlendiği analiz |
+| ILAC | `ilac.md` | Mesele → Mevzuat → Uygulama → Sonuç | Mevzuat hükmünün merkezde olduğu basit uyuşmazlık |
+| IPAC | `ipac.md` | Mesele → İlke/Doktrin → Uygulama → Sonuç | Mevzuat boşluğu; ilke/doktrin ağırlıklı argüman |
+| TREAC | `treac.md` | Tez → Kural → Açıklama → Uygulama → Sonuç (+karşı argüman) | Tezi başa koyan savunma/cevap |
+| CRAC | `crac.md` | Sonuç → Kural → Uygulama → Sonuç | Kısa, net, güçlü dosyada hâkimi baştan yönlendirme |
+| CRuPAC | `crupac.md` | Sonuç → Kural → Kuralın İspatı → Uygulama → Sonuç | Kuralın kendisinin tartışmalı olduğu dosya |
+| CREXAC | `crexac.md` | Sonuç → Kural → Açıklama → Emsal → Uygulama → Sonuç | Emsal karar karşılaştırması taşıyan argüman |
+| TREAT | `treat.md` | Tez → Kural → Açıklama → Uygulama → Tez | Tezin tekrarla mühürlendiği kısa brief |
+| CRRACC | `crracc.md` | Sonuç → Kural → Açıklama → Uygulama → Karşı argüman → Sonuç | Karşı argüman + menfaat tartısı gereken dosya |
+| Toulmin | `toulmin.md` | İddia → Dayanak → Köprü(Warrant) → Destek → Çekince → Çürütme | İtiraz; karşı tarafın zayıf köprüsünü hedefleme |
+| Klasik retorik | `klasik-retorik.md` | Exordium → Narratio → Partitio → Confirmatio → Refutatio → Peroratio | Çok bölümlü, anlatı gücü yüksek kapsamlı dilekçe |
 
 ## Duruma göre varsayılan öneri
 

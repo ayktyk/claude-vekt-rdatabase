@@ -68,7 +68,7 @@ birebir aynı tezi savunmalı; SONUÇ VE TALEP'te kesin talebe dönüşür.
 > **Kuralın İspatı:** Bu kural [doğrulanmış içtihat] ile de sabittir; içtihat,
 > imzasız bordronun işçiyi bağlamayacağını ve ücretin/çalışmanın ödendiğini ispat
 > yükünün işverende olduğunu istikrarlı biçimde ortaya koymaktadır ([kısa atıf:
-> Yargıtay [Daire] [E./K.]] — karar yığını değil, ilke). Öğretide de aynı ilke kabul görür.
+> Yargıtay [Daire] [E./K.] — karar yığını değil, ilke). Öğretide de aynı ilke kabul görür.
 >
 > **Uygulama:** Somut olayda dosyaya sunulan bordrolar imzasızdır ve fazla çalışmaya
 > ilişkin tahakkuk içermemektedir. İspatlanan kural gereği bu bordrolar müvekkili
