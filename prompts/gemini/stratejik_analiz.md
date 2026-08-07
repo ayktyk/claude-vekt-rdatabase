@@ -88,6 +88,10 @@ GUVEN NOTU:
 - Ikincil sebepler: [...]
 - Aleyhe ictihatlar - Sunum stratejisi: [aciktan goster + ayrim analizi]
 - Ton: Olculu profesyonel, AI izi yok
+- Cerceve onerisi: [cerceve adi + 1 cumle gerekce / YOK — standart yapi]
+  (secim tablosu: prompts/gemini/cerceveler/_secim-rehberi.md; cerceve yalnizca
+  HUKUKI DEGERLENDIRME ic iskeletini belirler, dis yapiyi degistirmez)
+- Arguman bazli cerceve (gerekirse): [arguman -> cerceve, orn. itiraz blogu -> Toulmin]
 ```
 
 ## Sinirlar
