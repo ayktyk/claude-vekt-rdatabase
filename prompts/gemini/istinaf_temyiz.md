@@ -28,6 +28,13 @@ uygulanir. Ek zorunluluk: `ajanlar/dilekce-yazari/uslup-aykut.md` dosyasi
 istinaf/temyiz layihasinda da TAM UYGULANIR (mahkemeye hitap, numaralandirma,
 yasak geçis kelimeleri, NETICE-TALEP giris kalibi vb.).
 
+## Arguman Cercevesi (2026-08-07)
+Kanun yolu dilekcelerinde varsayilan cerceve CREXAC'tir (Sonuc -> Kural ->
+Aciklama -> Emsal -> Uygulama -> Sonuc): `prompts/gemini/cerceveler/crexac.md`
+oku. Bozma/kaldirma sebebi emsal karsilastirmasina degil kural ihlaline
+dayaniyorsa IRAAC'a gec (`cerceveler/iraac.md`). Cerceve adim adlari metne
+baslik olarak yazilmaz; dis yapi istinaf/temyiz sablonuna gore sabittir.
+
 ## YAML Metadata (Ciktinin Basinda Zorunlu)
 
 ```yaml
