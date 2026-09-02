@@ -75,7 +75,7 @@ Mehmet Ali 2026-003 davasinda 5 ayri devir blogu yorucuydu. ASAMA 5
 Bu ajan icin pratik etki:
 - **Devir blogu icerigi degisti:** Artik sadece "Dilekce v1 yaz, sonra
   6 ve 7'ye devam et" diyen tek master blok kullanilir
-  (`ANTIGRAVITY.md` > BATCH 3 sablonuna bak)
+  (`AGENTS.md` > BATCH 3 sablonuna bak)
 - **Self-review hala her ADIM sonu yapilir** (ADIM A icin v1 self-review)
 - **DOCX/UDF uretimi tum batch bittiginde** yapilir (terminal Claude
   "Hepsi bitti" sinyaliyle baslar)

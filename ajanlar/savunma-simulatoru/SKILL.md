@@ -47,7 +47,7 @@ ASAMA 6 (savunma simulasyonu) artik tek basina devir blogu almaz;
 
 Bu ajan icin pratik etki:
 - **Bagimsiz devir blogu YOK:** Batch 3 master blogunun ortasinda
-  "ADIM B" olarak konumlanir (`ANTIGRAVITY.md` > BATCH 3 sablonu)
+  "ADIM B" olarak konumlanir (`AGENTS.md` > BATCH 3 sablonu)
 - **Girdi:** Az once ADIM A'da yazilan v1 (sohbette taze) + briefing +
   usul + stratejik analiz
 - **Cikti:** `02-Arastirma/savunma-simulasyonu.md` (3 ciktinin biri)

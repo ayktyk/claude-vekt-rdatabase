@@ -1,3 +1,5 @@
+> ARŞİV — güncel kaynak: `AGENTS.md` (2026-09-02). Bu dosya tarihçe olarak korunur.
+
 # ANTIGRAVITY + CLAUDE KOORDİNASYON KILAVUZU
 
 Bu belge, terminalde çalışan **Claude** ile sağ panelde çalışan

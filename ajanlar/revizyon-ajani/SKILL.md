@@ -83,7 +83,7 @@ olarak Antigravity'nin tek sohbetinde uretilir (en kritik yer):
 
 Bu ajan icin pratik etki:
 - **Bagimsiz devir blogu YOK:** Batch 3 master blogunun sonunda
-  "ADIM C" olarak konumlanir (`ANTIGRAVITY.md` > BATCH 3 sablonu)
+  "ADIM C" olarak konumlanir (`AGENTS.md` > BATCH 3 sablonu)
 - **Girdi:** Sohbette taze duran v1 + savunma sim + briefing + usul +
   stratejik analiz
 - **Cikti:** `03-Sentez-ve-Dilekce/dilekce-v2.md` (NIHAI)

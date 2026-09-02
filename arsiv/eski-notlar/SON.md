@@ -1,3 +1,5 @@
+> ARŞİV — güncel kaynak: `AGENTS.md` (2026-09-02). Bu dosya tarihçe olarak korunur.
+
 # Hukuk Başasistanı — Bir Davada Baştan Sona Tam Akış (ONBOARDING)
 
 > ⚠️ **REVİZYON UYARISI (2026-07-09 — avukat kararı):** Bu dokümanın

@@ -28,3 +28,34 @@ referansları geri ekle. Tam eski hâl için git geçmişi: `git log --follow <d
 `.agents/` klasör adları geri-alma kolaylığı için orijinal haliyle korunmuştur
 (nokta ile başlar — `ls -a` ile görünür). Dönüş spec'i:
 `docs/superpowers/specs/2026-07-19-claude-gemini-donus-design.md`.
+
+---
+
+## 2026-09-02 — Doküman toparlama (tek anayasa geçişi)
+
+Spec: `docs/superpowers/specs/2026-09-02-tek-motor-agnostik-toparlama-design.md`
+Plan: `docs/superpowers/plans/2026-09-02-tek-motor-agnostik-toparlama.md`
+
+Sistem tek motorla çalışmaya geçti; kök dizindeki tekrar eden anlatı dosyaları
+tek anayasada (`AGENTS.md`) toplandı.
+
+| Dosya | Neden arşivde |
+|---|---|
+| `SON.md` | İçeriği `AGENTS.md`'de tekilleşti |
+| `ANTIGRAVITY.md` | İki motorlu elle devir mimarisi kalktı (tek motor + DENETCI) |
+| `ASAMALAR.md` | ASAMA akışı `AGENTS.md`'de tek yerde; özgün katkısı (Kapanış, Kanun Yolu) oraya taşındı |
+| `MANUS1*.md`, `MANUS2*.md` | 2026-04/05 tarihli dış analiz raporları, geçersiz |
+| `NEXUS.md`, `BRAINSTORMING.md` | Yerel çalışma notları (zaten `.gitignore`'daydı) |
+
+**Sahibine taşınanlar (arşiv DEĞİL, aktif referans):**
+`FIVEAGENTS.md` → `ajanlar/perspektif/PROTOKOL.md` ·
+`ARASTIRMA.md` → `ajanlar/arastirmaci/danisma-hatti.md` ·
+`TEHMIS.md` → `ajanlar/blog-yazari/THEMIS.md` ·
+`doctoudf.md` → `docs/udf-format.md` ·
+`MASKELEME-KILAVUZU.md` → `docs/maskeleme-kilavuzu.md`
+
+**ANTIGRAVITY.md neden değerli kalıyor:** İçindeki *self-review protokolü*
+(adımlar + KIRMIZI/SARI/YEŞİL karar ölçütleri) `ajanlar/denetci/SKILL.md`
+yazılırken kaynak olarak kullanılacaktır.
+
+Geri alma: `git log --follow arsiv/eski-notlar/<dosya>`

@@ -85,7 +85,7 @@ BATCH 3: ASAMA 5+6+7 (Dilekçe Ailesi) — TEK ANTIGRAVITY SOHBETİ
 ASAMA 5-6-7 zaten doğal "yaz-eleştir-revize" döngüsü olduğu için tek
 sohbette birleştirildi. **5 yapıştırma → 3 yapıştırma** (%40 azalma).
 
-Detay: `ANTIGRAVITY.md` > "3 BATCH DEVIR BLOGU ŞABLONLARI" bölümü.
+Detay: `AGENTS.md` > "3 BATCH DEVIR BLOGU ŞABLONLARI" bölümü.
 
 ## Kural
 

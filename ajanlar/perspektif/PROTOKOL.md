@@ -115,7 +115,7 @@ Muvekkilin telefonundan cektigi fotograflar (kira sozlesmesi, vekaletname, tapu)
 - **Nihai hedef (Seviye 3):** Tesseract + Turkce yerel OCR ile fotograflar
   maskelenmeden once Claude'a gonderilmez.
 
-Detay: `BRAINSTORMING.md` § 1.5 + `docs/maskeleme-kilavuzu.md`.
+Detay: `arsiv/eski-notlar/BRAINSTORMING.md` § 1.5 + `docs/maskeleme-kilavuzu.md`.
 
 ### Dict Dosyasi Guvenligi
 
@@ -148,7 +148,7 @@ Detay: `BRAINSTORMING.md` § 1.5 + `docs/maskeleme-kilavuzu.md`.
 - **Seviye 3 (PC guclenince):** Yerel OCR (Tesseract Turkce) + yerel LLM (Ollama)
 - **Seviye 4 (uzun vadeli):** Turkiye ici no-retention bulut + UYAP entegrasyonu
 
-Detay planlar: `BRAINSTORMING.md`. Tam kullanim ornekleri: `docs/maskeleme-kilavuzu.md`.
+Detay planlar: `arsiv/eski-notlar/BRAINSTORMING.md`. Tam kullanim ornekleri: `docs/maskeleme-kilavuzu.md`.
 
 ---
 
@@ -260,7 +260,7 @@ motor doktrini ilk kez "calisan sistem" oldu.
 
 - `config/model-routing.json` - tum gorev tipleri (`engine: antigravity_manual` veya `engine: claude`)
 - `CLAUDE.md` -> "Antigravity Hibrit Mimarisi (2026-05-13)" bolumu
-- `ANTIGRAVITY.md` -> Devir bloklari, self-review, fallback rehberi
+- `AGENTS.md` -> Devir bloklari, self-review, fallback rehberi
 - `prompts/gemini/*.md` - Antigravity'ye yapistirilacak prompt sablonlari
 
 ---
@@ -1869,7 +1869,7 @@ UDF              -> python md_to_udf.py <input.md>  (sadece nihai)
 | `legal.local.md` | Buronun kendi kurallari ve tercihleri |
 | `dilekce-yazim-kurallari.md` | Dilekce yazim standartlari |
 | `docs/maskeleme-kilavuzu.md` | KVKK Seviye 2 maske.py kullanim ornekleri ve sorun giderme |
-| `BRAINSTORMING.md` | Uzun vadeli iyilestirme planlari (Seviye 3-4) |
+| `arsiv/eski-notlar/BRAINSTORMING.md` | Uzun vadeli iyilestirme planlari (Seviye 3-4) |
 | `.mcp.json` | MCP sunucu konfigurasyonu |
 | `config/model-routing.json` | LLM model routing (Gemini 3.1 Pro Preview birincil) |
 | `config/masks/{dava-id}.json` | KVKK dict — yerel disk, git-disi |
@@ -1880,7 +1880,7 @@ UDF              -> python md_to_udf.py <input.md>  (sadece nihai)
 | `scripts/md_to_docx.py` | MD -> DOCX donusturucu |
 | `scripts/md_to_udf.py` | MD -> UDF donusturucu (UYAP icin) |
 | `scripts/gemini-bridge.sh` | **DEPRECATED** 2026-05-13 (exit 100) — Antigravity hibrit mimarisine gecildi |
-| `ANTIGRAVITY.md` | Antigravity sag panel devir bloklari, self-review, fallback kilavuzu |
+| `AGENTS.md` | Antigravity sag panel devir bloklari, self-review, fallback kilavuzu |
 | `sablonlar/` | Rapor ve dilekce sablonlari |
 | `bilgi-tabani/` | Hesaplama dogrulama, QMD rehberi, haftalik ictihat |
 | `prompts/gemini/` | Antigravity'ye yapistirilacak prompt template'leri |

@@ -494,7 +494,7 @@ kalite zinciri korundu.
   elestir → revize" dongusunu kurar; context kaybolmaz; v2 kalitesi
   yukselir.
 
-Detayli devir blogu sablonlari: `ANTIGRAVITY.md` > "3 BATCH DEVIR BLOGU
+Detayli devir blogu sablonlari: `AGENTS.md` > "3 BATCH DEVIR BLOGU
 SABLONLARI" bolumu.
 
 Director Antigravity'ye is devrederken Bash cagrisi yapmaz, yerine

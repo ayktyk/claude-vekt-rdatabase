@@ -2,9 +2,9 @@
 """doktrin_lint.py — PROMPT-SIDE doktrin kapısı.
 
 Hedef her prompt yüzeyi SENTINEL + tüm REQUIRED_CLAUSE_TOKENS taşımalı.
-Devir-bloğu taşıyan dosyalarda (CLAUDE.md / ANTIGRAVITY.md) doktrin, FENCED kod
-bloğunun İÇİNDE aranır (doc-geneli prose'taki doktrin özetini saymaz — Gemini
-yalnız yapıştırılan bloğu görür).
+Devir/denetim bloğu taşıyan dosyalarda (AGENTS.md) doktrin, FENCED kod bloğunun
+İÇİNDE aranır (doc-geneli prose'taki doktrin özetini saymaz — bloğu alan taraf
+yalnız o bloğu görür).
 
 Kullanım:
   python scripts/doktrin_lint.py                 # tüm hedef yüzeyleri tara
@@ -46,8 +46,10 @@ TARGET_GLOBS = [
     ".claude/commands/blog-dava.md",
 ]
 
-# Devir-bloğu (fence içi) denetlenecek dosyalar
-FENCE_FILES = ["ANTIGRAVITY.md", "CLAUDE.md"]
+# Devir/denetim bloğu (fence içi) denetlenecek dosyalar.
+# 2026-09-02: tek motora geçildi. CLAUDE.md stub'a indi, ANTIGRAVITY.md arşive
+# taşındı; anayasa AGENTS.md ve içindeki DENETİM ÇAĞRI BLOĞU doktrini taşır.
+FENCE_FILES = ["AGENTS.md"]
 
 # Preamble'ın kendisi kanonik; ayrı denetlenir (yine de tokenleri içerir)
 EXEMPT_NAMES = {"_doktrin-preamble.md"}
@@ -89,11 +91,10 @@ def check_fence_file(path: Path) -> list[str]:
         text = path.read_text(encoding="utf-8")
     except OSError as e:
         return [f"OKUNAMADI: {e}"]
-    devir_markers = ("ANTIGRAVITY'YE YAPISTIRILACAK", "ANTIGRAVITY'YE YAPIŞTIRILACAK",
-                     "Dava-ID", "BATCH")
+    devir_markers = ("DENETİM TALEBİ", "Dava-ID", "BATCH")
     devir = [b for b in fenced_blocks(text) if any(m in b for m in devir_markers)]
     if not devir:
-        return ["devir bloğu (fenced) bulunamadı"]
+        return ["devir/denetim bloğu (fenced) bulunamadı"]
     # En az bir devir bloğu tam doktrin taşımalı
     ok_any = any(dc.has_sentinel(b) and not dc.missing_clauses(b) for b in devir)
     if not ok_any:
@@ -105,7 +106,7 @@ def check_fence_file(path: Path) -> list[str]:
         miss = dc.missing_clauses(best)
         if miss:
             probs.append("eksik clause: " + ", ".join(miss))
-        return [f"hiçbir devir bloğu tam doktrin taşımıyor ({len(devir)} blok); en iyi: " + "; ".join(probs)]
+        return [f"hiçbir devir/denetim bloğu tam doktrin taşımıyor ({len(devir)} blok); en iyi: " + "; ".join(probs)]
     return []
 
 
