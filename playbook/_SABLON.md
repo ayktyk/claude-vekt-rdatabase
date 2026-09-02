@@ -38,3 +38,36 @@ doldurulur: her aktif dosyada Director, doğal duraklarda (briefing sonrası,
 hipotez onayında, kapanışta) en fazla 2-3 hedefli muhakeme sorusu sorar.
 
 KVKK: müvekkil adı yazılmaz, dava-id kullanılır.
+
+---
+
+## Olay Cozum Iskeleti (bu dava turune ozgu)
+
+> Kaynak iskelet: `ajanlar/director/olay-cozum-protokolu.md`.
+> Buradaki alanlar **avukatin kendi muhakemesiyle** doldurulur; surec degil YARGI kodlanir.
+
+### Bu dava turunde gorusme oncesi mutlaka okudugum/kontrol ettiklerim
+-
+
+### Ilk gorusmede mutlaka sordugum sorular (protokol Adim 3)
+-
+
+### Bu dava turunde muvekkilin genelde ANLATMADIGI seyler (protokol Adim 5)
+-
+
+### Bu dava turunde akla gelen hukuki careler ve tercih olcutum (protokol Adim 12)
+| Care | Ne zaman tercih ederim | Ne zaman etmem |
+|---|---|---|
+|  |  |  |
+
+### Bu dava turunde en cok gozden kacan sure (protokol Adim 14-15)
+-
+
+### Bu dava turunde ispati en zor vakia ve nasil ispatlarim (protokol Adim 16)
+-
+
+### Karsi tarafin bu dava turundeki klasik oyunlari (protokol Adim 17)
+-
+
+### Bu dava turunde muvekkile riski nasil anlatirim (protokol Adim 18, 20)
+-

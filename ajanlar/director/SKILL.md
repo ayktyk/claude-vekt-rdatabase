@@ -782,3 +782,20 @@ Gecerli karar sayisi 5'in altinda ise quality_gate FAIL doner. Director:
 - Sentez Agent'i paralelken cagir (sirali zorunlu)
 - 4E ciktisini Belge Yazari'na vermeden ASAMA 5'e gec
 - KVKK ihlali: research package'da HAM veri
+
+## ASAMA 1 Zorunlu Okuma — Olay Cozum Protokolu
+
+`@ajanlar/director/olay-cozum-protokolu.md` ASAMA 1'in baglayici iskeletidir.
+24 adim sirayla uygulanir; cevabi bilinmeyen adim bos birakilmaz
+(`EKSIK — muvekkilden sorulacak` yazilir ve Karar Noktalari'na tasinir).
+Atlanan adimin gerekcesi `00-Briefing.md`'ye yazilir — sessiz atlama yoktur.
+
+**Sira baglayicidir:** avukat tercihleri (ton, risk toleransi, olmazsa olmaz
+talepler) protokolun **Adim 24**'udur; olayin hukuki iskeleti kurulmadan sorulmaz.
+
+**Neden zorunlu:** protokolun Adim 8'i (gereksiz ve cekismesiz hususlarin
+ayiklanmasi) kritik noktayi URETIR. Avukat kritik noktayi vermisse bu adim onun
+DOGRULANMASI olarak calisir. Protokol atlanirsa ASAMA 2 arastirma sorusu
+dogrulanmamis bir kritik nokta uzerine kurulur.
+
+Denetim: `python scripts/protokol_kontrol.py ajanlar/director/olay-cozum-protokolu.md`

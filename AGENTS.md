@@ -507,7 +507,7 @@ Beklenen cikti: {uretilcek dosya}
 | ASAMA | Ad | Ajanlar | Cikti |
 |---|---|---|---|
 | 0 | MemPalace Wake-up | Destek | (context enjeksiyon) |
-| 1 | Hazirlik + Briefing | Director | `00-Briefing.md` |
+| 1 | Hazirlik + **Olay Cozumu** + Briefing | Director (`ajanlar/director/olay-cozum-protokolu.md`) | `00-Briefing.md` |
 | 2 | Derin Arastirma (2B→2C sirali zincir + 2D async paralel kol) | Arastirmaci (2B Yargi MCP → 2C Mevzuat MCP sirali; 2D NotebookLM paralel) | `02-Arastirma/arastirma-raporu.md` (+ `atif-maddeleri.json`, `mulga-eleme.json`) |
 | 3 | Usul Raporu | Usul Uzmani | `01-Usul/usul-raporu.md` |
 | 4 | 5 Ajan Stratejik Analiz | 4A+4B+4C+4D+4E | `02-Arastirma/stratejik-analiz.md` |
@@ -525,6 +525,29 @@ Bu protokol SADECE `yeni dava: ...` tam akisinda uygulanir.
 Tekil komutlar (`dilekce yaz`, `arastir: ...`, `usul: ...`,
 `stratejik analiz: ...`, `revize et: ...`) tek-asama tek-cikti
 komutlaridir, durmadan calisir.
+
+### ASAMA 1 - Hazirlik + Olay Cozumu + Briefing
+
+Sira **baglayicidir**:
+
+1. **Drive dava klasoru** kurulur (`Aktif Davalar/{dava-id}/`)
+2. **Kaynak sorgulama** (zorunlu) — UYAP / NotebookLM / Drive / yerel dosya / kaynaksiz
+3. **Playbook + dersler** okunur (`playbook/{dava-turu}.md`, `dersler/`)
+4. **OLAY COZUM PROTOKOLU** — `@ajanlar/director/olay-cozum-protokolu.md`
+   adim adim uygulanir (24 adim, 4 asama). Cevabi bilinmeyen adim bos birakilmaz:
+   `EKSIK — muvekkilden sorulacak` yazilir ve **Avukatin Karar Noktalari**
+   blogua tasinir. Atlanan adimin gerekcesi briefing'e yazilir.
+5. **Advanced Briefing** (avukat tercihleri: ton, risk toleransi, olmazsa olmaz
+   talepler) — protokolun **Adim 24**'udur, en sonda kalir.
+
+**Tercih sorulmadan once olayin hukuki iskeleti kurulur; sira tersine cevrilemez.**
+
+Protokol kaynagi: Dr. Halil Polat, *Teori ve Pratikte Hukuk Nosyonu Cilt I*,
+Ikinci Kisim (s. 38-104). Okuma notlari: `bilgi-tabani/nosyon-okuma-notlari.md`.
+Her adim sayfa referansli veya `[SISTEM EKI]` etiketli; denetim:
+`python scripts/protokol_kontrol.py ajanlar/director/olay-cozum-protokolu.md`
+
+**Cikti:** `00-Briefing.md`
 
 ### ASAMA 2 - Arastirma Cekirdegi (1 sirali zincir + 1 async paralel kol)
 Alt isciler:
