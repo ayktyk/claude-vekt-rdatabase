@@ -20,7 +20,7 @@ tek-shot araştırma YASAK.
 
 ## Zorunlu Referans Dokümanlar
 - `ajanlar/arastirmaci/SKILL.md` → Bölüm 1 (Yargı), 2 (Mevzuat), 2.5 (zincir + mülga eleme), 2.7 (NotebookLM)
-- `FIVEAGENTS.md` → ASAMA 2 kesiti
+- `ajanlar/perspektif/PROTOKOL.md` → ASAMA 2 kesiti
 - `CLAUDE.md` → Araç Katmanı + ASAMA 2
 - `config/model-routing.json` → motor routing
 
@@ -98,7 +98,7 @@ oturumunda hazır. (Eski gemini-bridge sentezi DEPRECATED — exit 100.)
 Zincir + kol tamamlandığında Claude konsolide raporu doğrudan yazar:
 - Frontmatter: `engine: claude`, `model: {config/model-routing.json ->
   tasks.arastirma_sentezi.model}`, `status: TASLAK`
-- Format: FIVEAGENTS.md "Cikti Format Kurallari" + Kalite Kapı 1 gereklilikleri
+- Format: ajanlar/perspektif/PROTOKOL.md "Cikti Format Kurallari" + Kalite Kapı 1 gereklilikleri
 - Çıktı: `02-Arastirma/arastirma-raporu.md`
 - Yan dosyalar: `atif-maddeleri.json`, `mulga-eleme.json`
 

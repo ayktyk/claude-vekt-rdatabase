@@ -8,9 +8,9 @@
 > - Kritik kuralda ÇİFT KAYNAK şart.
 > - Çıktının sonunda KAYNAK DOĞRULAMA tablosu (| İddia | Kaynak | documentId | Tam Alıntı | Doğrulama |) + "Aleyhe içtihat: VAR/YOK/ARANMADI" beyanı ZORUNLU.
 
-# /arastir-yargi — Yargı-MCP-Pro Derin İteratif Protokolü (FIVEAGENTS ASAMA 2B)
+# /arastir-yargi — Yargı-MCP-Pro Derin İteratif Protokolü (5-ajan protokolü ASAMA 2B)
 
-`$ARGUMENTS` kritik noktasını **FIVEAGENTS.md ASAMA 2B** protokolüne uyarak araştır.
+`$ARGUMENTS` kritik noktasını **ajanlar/perspektif/PROTOKOL.md ASAMA 2B** protokolüne uyarak araştır.
 Mevcut kısa prompt YASAK — bu komut tam protokolü zorunlu uygular.
 
 **FAZ 2 (2026-05-19):** Yargı-MCP-Pro (`mcp__yargi-mcp-pro__*`) aktif. Eski
@@ -18,7 +18,7 @@ Mevcut kısa prompt YASAK — bu komut tam protokolü zorunlu uygular.
 
 ## Zorunlu Referans Dokümanlar
 - `.claude/skills/yargi-legal-research-guide/SKILL.md` — **sorgu lehçeleri + tuzaklar (BİRİNCİL referans, sürüm 2026-07-08b)**
-- `FIVEAGENTS.md` → ASAMA 2B
+- `ajanlar/perspektif/PROTOKOL.md` → ASAMA 2B
 - `ajanlar/arastirmaci/SKILL.md` → Bölüm 1 (Yargı-MCP-Pro Derin Protokolü, 6 Faz) + Bölüm 2.5 (2B → 2C Sıralı Zincir)
 
 ## Kanonik Çalıştırıcı
@@ -54,7 +54,7 @@ Avukat **spesifik bir karar künyesi** verdiyse, o kararı KONU KELİMESİYLE DE
 2. `02-Arastirma/.faz2-progress.jsonl` aç (append mode)
 3. Health check: Pro MCP'de `check_government_servers_health` tool'u **yok** — bu adım kaldırıldı. Bağlantı `claude mcp list` ile doğrulanır
 
-## Zorunlu Adımlar (FIVEAGENTS 6 Faz + Gap Check)
+## Zorunlu Adımlar (5-ajan protokolü 6 Faz + Gap Check)
 
 ### Faz 1 — Terim Üretimi (ön-düşünme)
 - 5-7 alternatif arama terimi üret (kritik nokta etrafında)

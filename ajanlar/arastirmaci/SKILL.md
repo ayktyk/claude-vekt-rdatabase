@@ -815,7 +815,7 @@ Iteratif olsun, mevcut yonergeye sadik."
 
 #### Sorgu Disiplini (10 Iteratif Sorgu — KORUNUR)
 
-Mevcut FIVEAGENTS.md ASAMA 2D yonergesi degismez:
+Mevcut ajanlar/perspektif/PROTOKOL.md ASAMA 2D yonergesi degismez:
 
 **Bolum A: Hukuki Irdeleme (en az 6 soru, iteratif)**
 - Q1: Temel hukuki cerceve (kritik nokta etrafinda)
@@ -968,7 +968,7 @@ ASAMA 2 sentezi Claude'da birakildi. Cunku:
 
 2. **Konsolide raporu Claude yazar:**
    - `02-Arastirma/arastirma-raporu.md` — terminal Claude doğrudan yazar
-   - Format: FIVEAGENTS.md "Cikti Format Kurallari" + Kalite Kapi 1
+   - Format: ajanlar/perspektif/PROTOKOL.md "Cikti Format Kurallari" + Kalite Kapi 1
      gereksinimlerine birebir uyar
    - Frontmatter: `engine: claude`, `model: {config/model-routing.json
      -> tasks.arastirma_sentezi.model}`, `status: TASLAK`

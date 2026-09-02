@@ -8,9 +8,9 @@
 > - Kritik kuralda ÇİFT KAYNAK şart.
 > - Çıktının sonunda KAYNAK DOĞRULAMA tablosu (| İddia | Kaynak | documentId | Tam Alıntı | Doğrulama |) + "Aleyhe içtihat: VAR/YOK/ARANMADI" beyanı ZORUNLU.
 
-# /arastir-mevzuat — Yargı-MCP-Pro Mevzuat Derin Protokolü (FIVEAGENTS ASAMA 2C)
+# /arastir-mevzuat — Yargı-MCP-Pro Mevzuat Derin Protokolü (5-ajan protokolü ASAMA 2C)
 
-`$ARGUMENTS` kritik noktasının mevzuat dayanaklarını **FIVEAGENTS.md ASAMA 2C**
+`$ARGUMENTS` kritik noktasının mevzuat dayanaklarını **ajanlar/perspektif/PROTOKOL.md ASAMA 2C**
 protokolüne uyarak çıkar. Mevcut kısa prompt YASAK — bu komut tam protokolü
 zorunlu uygular.
 
@@ -21,7 +21,7 @@ altında birleşti. 3 ayrı fetch tool (`get_mevzuat_content` / `_madde_tree` /
 
 ## Zorunlu Referans Dokümanlar
 - `.claude/skills/yargi-legal-research-guide/SKILL.md` — **sorgu lehçeleri + tuzaklar (BİRİNCİL referans, sürüm 2026-07-08b)**
-- `FIVEAGENTS.md` → ASAMA 2C + Normlar Hiyerarşisi
+- `ajanlar/perspektif/PROTOKOL.md` → ASAMA 2C + Normlar Hiyerarşisi
 - `ajanlar/arastirmaci/SKILL.md` → Bölüm 2 (Mevzuat MCP Derin Protokolü, 9 Faz + Mülga) + Bölüm 2.5 (Mülga Eleme)
 
 ## Aktif Tool'lar (Yargı-MCP-Pro)

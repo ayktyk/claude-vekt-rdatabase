@@ -19,7 +19,7 @@ Muvekkil verisi blog'a TASINMAZ — sadece hukuki tezler / icithat / mevzuat.
 
 - `ajanlar/blog-yazari/SKILL.md` — tam protokol
 - `prompts/gemini/blog_yazimi.md` — Antigravity'ye yapistirilan prompt
-- `TEHMIS.md` — proje kokunde tam THEMIS referansi
+- `ajanlar/blog-yazari/THEMIS.md` — proje kokunde tam THEMIS referansi
 - `config/author.json` — Aykut sameAs URL'leri
 - `config/model-routing.json` -> `tasks.blog_yazimi`
 

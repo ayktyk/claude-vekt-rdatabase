@@ -81,7 +81,7 @@ Opsiyonel ama etkili girdiler:
 2. Dava-ID var mi? (`xxx-yyy-2026-nnn` formati) — yoksa sor
 3. `config/masks/<dava-id>.json` var mi? — yoksa avukati maske.py add'e yonlendir
 
-Detay protokol: `MASKELEME-KILAVUZU.md`, `FIVEAGENTS.md` § KVKK Seviye 2.
+Detay protokol: `docs/maskeleme-kilavuzu.md`, `ajanlar/perspektif/PROTOKOL.md` § KVKK Seviye 2.
 
 ## Hafiza Kontrolu (ZORUNLU - Her Komutta)
 

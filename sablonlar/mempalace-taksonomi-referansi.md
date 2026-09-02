@@ -312,7 +312,7 @@ bolumune `MemPalace: ERISILEMEDI` notu duser.
 ## 10. Iliskili Dosyalar
 
 - `CLAUDE.md` -> ADIM -1 (MemPalace Wake-up) ve Director Agent karar semasi
-- `FIVEAGENTS.md` -> ASAMA 0 wake-up + ASAMA 4 diary write + ASAMA 7 promotion
+- `ajanlar/perspektif/PROTOKOL.md` -> ASAMA 0 wake-up + ASAMA 4 diary write + ASAMA 7 promotion
 - `legal.local.md` -> Statik kalici kurallar (dinamik tercihler MemPalace'ta)
 - `.mcp.json` -> `buro-hafizasi` MCP server kaydi
 - `C:/Users/user/.mempalace/identity.txt` -> palace kimligi

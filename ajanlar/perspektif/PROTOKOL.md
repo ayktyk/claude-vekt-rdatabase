@@ -115,7 +115,7 @@ Muvekkilin telefonundan cektigi fotograflar (kira sozlesmesi, vekaletname, tapu)
 - **Nihai hedef (Seviye 3):** Tesseract + Turkce yerel OCR ile fotograflar
   maskelenmeden once Claude'a gonderilmez.
 
-Detay: `BRAINSTORMING.md` § 1.5 + `MASKELEME-KILAVUZU.md`.
+Detay: `BRAINSTORMING.md` § 1.5 + `docs/maskeleme-kilavuzu.md`.
 
 ### Dict Dosyasi Guvenligi
 
@@ -148,7 +148,7 @@ Detay: `BRAINSTORMING.md` § 1.5 + `MASKELEME-KILAVUZU.md`.
 - **Seviye 3 (PC guclenince):** Yerel OCR (Tesseract Turkce) + yerel LLM (Ollama)
 - **Seviye 4 (uzun vadeli):** Turkiye ici no-retention bulut + UYAP entegrasyonu
 
-Detay planlar: `BRAINSTORMING.md`. Tam kullanim ornekleri: `MASKELEME-KILAVUZU.md`.
+Detay planlar: `BRAINSTORMING.md`. Tam kullanim ornekleri: `docs/maskeleme-kilavuzu.md`.
 
 ---
 
@@ -1865,10 +1865,10 @@ UDF              -> python md_to_udf.py <input.md>  (sadece nihai)
 | Dosya | Icerigi |
 |-------|---------|
 | `CLAUDE.md` | Tum sistem talimatlari ve kurallar |
-| `FIVEAGENTS.md` | Bu dosya — sistem akisi + komut + kalite + hafiza + KVKK + normlar hiyerarsisi |
+| `ajanlar/perspektif/PROTOKOL.md` | Bu dosya — sistem akisi + komut + kalite + hafiza + KVKK + normlar hiyerarsisi |
 | `legal.local.md` | Buronun kendi kurallari ve tercihleri |
 | `dilekce-yazim-kurallari.md` | Dilekce yazim standartlari |
-| `MASKELEME-KILAVUZU.md` | KVKK Seviye 2 maske.py kullanim ornekleri ve sorun giderme |
+| `docs/maskeleme-kilavuzu.md` | KVKK Seviye 2 maske.py kullanim ornekleri ve sorun giderme |
 | `BRAINSTORMING.md` | Uzun vadeli iyilestirme planlari (Seviye 3-4) |
 | `.mcp.json` | MCP sunucu konfigurasyonu |
 | `config/model-routing.json` | LLM model routing (Gemini 3.1 Pro Preview birincil) |
@@ -1891,7 +1891,7 @@ UDF              -> python md_to_udf.py <input.md>  (sadece nihai)
 ## Ilk Kullanimda Yapilacaklar Checklist
 
 - [x] CLAUDE.md okundu (sistem otomatik okur)
-- [x] FIVEAGENTS.md okundu (bu dosya — ana referans)
+- [x] ajanlar/perspektif/PROTOKOL.md okundu (bu dosya — ana referans)
 - [x] Google Drive bagli (`G:\Drive'im\Hukuk Burosu`)
 - [x] MemPalace aktif (`buro-hafizasi` MCP)
 - [x] QMD kurulu ve indexli (310 dosya, 1411 chunk)

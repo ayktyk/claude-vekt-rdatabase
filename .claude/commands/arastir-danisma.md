@@ -21,10 +21,10 @@ Bu komut **bağımsız hızlı araştırma modülünü** çalıştırır. Mevcut
 
 ## Zorunlu Referans Dokümanlar
 
-- **`ARASTIRMA.md`** (proje kökü) — modülün tam protokolü, faz tanımları, kalite kapısı
+- **`ajanlar/arastirmaci/danisma-hatti.md`** (proje kökü) — modülün tam protokolü, faz tanımları, kalite kapısı
 - `ajanlar/0-halusinasyon-doktrini.md` — kaynak doğrulama doktrini
 
-## Workflow (5 Faz — Detay ARASTIRMA.md'de)
+## Workflow (5 Faz — Detay ajanlar/arastirmaci/danisma-hatti.md'de)
 
 ```
 Faz 0    Soru kabul + slug üret + Research/{tarih}-{slug}/ klasörü + 00-Soru.md
@@ -44,14 +44,14 @@ Faz 4    Memory yazımı — MemPalace wing_arastirma + proje memory
 
 ## Adımlar
 
-1. **ARASTIRMA.md'yi tam oku.** Protokolünü uygula, ezberden çalışma.
+1. **ajanlar/arastirmaci/danisma-hatti.md'yi tam oku.** Protokolünü uygula, ezberden çalışma.
 2. `$ARGUMENTS`'ten slug üret. Tarih önekiyle klasör adı: `{YYYY-MM-DD}-{slug}`.
 3. Research klasörünü oluştur: `{python3 scripts/paths.py research}/{klasör}/`.
 4. Faz 1'i **bu oturumda Claude Fable 5 tek elden** çalıştır (hafif mod:
    min 6 sorgu / 3 tam metin — `tasks.yargi_mcp.modes.hafif`). Faz 1
    çıktıları yazılmadan Faz 2'ye geçme.
 5. Kalan fazları sırayla çalıştır. Her faz çıktısını Drive'a yaz.
-6. Faz 3 öncesi **Çıktı Öncesi Checklist** (ARASTIRMA.md §3) uygula:
+6. Faz 3 öncesi **Çıktı Öncesi Checklist** (ajanlar/arastirmaci/danisma-hatti.md §3) uygula:
    - DOĞRULANMIŞ atıf ≥ 2 mi?
    - ≥2 DOĞRULANMAMIŞ atıf HARD FAIL → cevap yazma
    - Aleyhe içtihat varsa açıkça yaz
@@ -74,7 +74,7 @@ kira ödememe..."). Jenerik formül hem gizlilik hem arama kalitesi için doğru
 | ≥2 DOĞRULANMAMIŞ | HARD FAIL — Faz 3 iptal, ham bulgular avukata |
 | NotebookLM yok | Faz 2.5 sessizce atlanır |
 
-Tam hata tablosu: ARASTIRMA.md §5.
+Tam hata tablosu: ajanlar/arastirmaci/danisma-hatti.md §5.
 
 ## Output
 

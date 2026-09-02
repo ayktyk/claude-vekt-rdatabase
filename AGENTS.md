@@ -169,7 +169,7 @@ gercek veriyle calisir. Avukat YEREL LLM kullanmaya basladiginda
 maskeleme zorunlulugu geri gelecek.
 
 - `scripts/maske.py` repoda korunur (calisir durumda; `cikti_dogrula.py`
-  TC-checksum icin import eder). Kilavuz: `MASKELEME-KILAVUZU.md`.
+  TC-checksum icin import eder). Kilavuz: `docs/maskeleme-kilavuzu.md`.
 - KVKK sizinti kontrolu (`cikti_dogrula.py` icindeki TC/IBAN taramasi)
   BLOG ve kamuya acik ciktilar icin GECERLI kalir — blog metnine gercek
   muvekkil verisi yazilamaz.
@@ -387,7 +387,7 @@ yalniz MCP fail durumunda fallback olarak devreye girer.
 arastirmasi yapar → bulunan kararlarin atif yaptigi mevzuat maddelerini cikarir
 → 2C Mevzuat MCP o maddeleri ceker → her madde icin **mulga/guncel denetimi**
 yapar → mulga maddeye dayanan kararlar **elenir** (raporda kullanilmaz). Detay:
-`@FIVEAGENTS.md` -> "ASAMA 2 detay diyagrami" + "Mulga Eleme Protokolu" bolumu.
+`@ajanlar/perspektif/PROTOKOL.md` -> "ASAMA 2 detay diyagrami" + "Mulga Eleme Protokolu" bolumu.
 `@ajanlar/arastirmaci/SKILL.md` -> "Bolum 2.5 - 2B → 2C Sirali Zincir" bolumu.
 
 Minimum sorgu kurali:
@@ -405,7 +405,7 @@ Minimum sorgu kurali:
   Tuzuk/Yonetmelik/Teblig). Alt norm ust normu daraltiyorsa veya ayni
   basamakta catisma varsa Lex Superior/Specialis/Posterior kurallariyla
   cozumlenir. CBK varsa munhasir kanun alani denetimi yapilir.
-  Detay: `@FIVEAGENTS.md` -> "Normlar Hiyerarsisi: Mevzuat Arastirma Motoru"
+  Detay: `@ajanlar/perspektif/PROTOKOL.md` -> "Normlar Hiyerarsisi: Mevzuat Arastirma Motoru"
   bolumu ve `@ajanlar/arastirmaci/SKILL.md` -> "Normlar Hiyerarsisi
   Protokolu" bolumu.
 
@@ -536,7 +536,7 @@ Detay: `@ajanlar/arastirmaci/SKILL.md` Bolum 1-3.
 **Normlar Hiyerarsisi (Zorunlu):** Mevzuat bulgulari Anayasa/Antlasma(m.90/5)/
 Kanun/OHAL CBK/IBK/CBK/Tuzuk/Yonetmelik/Teblig basamaklarina etiketlenir.
 Catisma Lex Superior / Specialis / Posterior ile cozulur. CBK varsa
-munhasir kanun alani denetimi yapilir. Detay: `@FIVEAGENTS.md` -> Normlar
+munhasir kanun alani denetimi yapilir. Detay: `@ajanlar/perspektif/PROTOKOL.md` -> Normlar
 Hiyerarsisi bolumu.
 
 **NotebookLM kurallari:**
@@ -571,7 +571,7 @@ calisir, 4E Sentez bunlari birlestirir ve dilekce yazim rehberi uretir.
 Karar: KIRMIZI (blokla) / YESIL (devam) / SARTLI (kosul ekle).
 Hata toleransi (Promise.allSettled): 4/4 tam, 3/4 uyarili, 2/4 sinirli
 (DUSUK GUVEN flag), 1-0/4 BASARISIZ.
-Detay: `@FIVEAGENTS.md`.
+Detay: `@ajanlar/perspektif/PROTOKOL.md`.
 
 ### ASAMA 5 - Belge Yazari (Dilekce v1)
 Usul + Arastirma + Stratejik Analiz ciktilarini birlestirip ilk taslak.
@@ -1398,7 +1398,7 @@ Context window %70'e ulastiginda otomatik state dump:
 | `arastir yargi: [kritik nokta]` | Arastirma - 2B Yargi-MCP-Pro (Claude Fable 5, iteratif derin protokol) |
 | `arastir mevzuat: [kritik nokta]` | Arastirma - 2C Mevzuat MCP (CLI fallback) |
 | `arastir notebook: [kritik nokta]` | Arastirma - 2D NotebookLM / Drive |
-| `arastir danisma: [hukuki soru]` | **Hızlı Araştırma Modülü** (`@ARASTIRMA.md`) — müvekkil adayı sorusu için bağımsız hafif hat. Yargı-MCP-Pro + Mevzuat + Mülga denetimi + Künye doğrulama. Çıktı: `Hukuk Bürosu\Research\{tarih}-{slug}\arastirma-cevabi.md` (yol `scripts/paths.py` ile çözümlenir). Dava akışına dokunmaz. |
+| `arastir danisma: [hukuki soru]` | **Hızlı Araştırma Modülü** (`@ajanlar/arastirmaci/danisma-hatti.md`) — müvekkil adayı sorusu için bağımsız hafif hat. Yargı-MCP-Pro + Mevzuat + Mülga denetimi + Künye doğrulama. Çıktı: `Hukuk Bürosu\Research\{tarih}-{slug}\arastirma-cevabi.md` (yol `scripts/paths.py` ile çözümlenir). Dava akışına dokunmaz. |
 | `stratejik analiz: [dava-id]` | 5 Ajan (4A Davaci + 4B Davali + 4C Bilirkisi + 4D Hakim + 4E Sentez) |
 | `dilekce v1: [dava-id]` | Belge Yazari (ilk taslak — ASAMA 5 esdegeri) |
 | `dilekce yaz` | Belge Yazari (v1 taslak — `dilekce v1:` ile ayni) |

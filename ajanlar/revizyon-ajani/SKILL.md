@@ -179,7 +179,7 @@ Bu ajan icin pratik etki:
      revizyon pattern'lerini yaz
    - **MemPalace promotion:** v2'de KULLANILAN argumanlari
      `wing_{dava_turu}/hall_argumanlar`'a olgun arguman olarak ekle
-     (FIVEAGENTS.md ASAMA 7 sonu bolumu).
+     (ajanlar/perspektif/PROTOKOL.md ASAMA 7 sonu bolumu).
 
 5. **UYAP yuklemesi (avukatin elinde):**
    ```powershell

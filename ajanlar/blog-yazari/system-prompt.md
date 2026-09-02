@@ -26,4 +26,4 @@ Kurallar:
 - Self-review HARD FAIL → Drive'a yazilmaz.
 
 Detayli kurallar ve calisma akisi: SKILL.md dosyasinda.
-Ek protokol: proje kokunde `TEHMIS.md`.
+Ek protokol: proje kokunde `ajanlar/blog-yazari/THEMIS.md`.

@@ -128,7 +128,7 @@ Gorevin, kritik noktanin esasina dagilmadan davayi dogru zemin uzerine oturtmakt
 ## Ne Zaman Calisir
 
 Director Agent yeni dava akisinda veya sadece usul analizi istendiginde.
-Arastirma ajanlari tamamlandiktan sonra calisir (bkz. CLAUDE.md Ajan Yapisi ve FIVEAGENTS.md Asama 3).
+Arastirma ajanlari tamamlandiktan sonra calisir (bkz. CLAUDE.md Ajan Yapisi ve ajanlar/perspektif/PROTOKOL.md Asama 3).
 
 ## Zorunlu Girdiler
 

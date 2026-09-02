@@ -616,7 +616,7 @@ yapar (devir blogu donduginde):
 - `prompts/gemini/_ortak-kurallar.md` — tum Gemini prompt'larinin ortak kurallari
 - `config/model-routing.json` — `tasks.blog_yazimi` engine config
 - `config/author.json` — Aykut sameAs URL'leri (schema.org)
-- `TEHMIS.md` — proje kokunde tam THEMIS protokolu (referans)
+- `ajanlar/blog-yazari/THEMIS.md` — proje kokunde tam THEMIS protokolu (referans)
 - `.claude/commands/blog.md` — serbest konu slash komutu
 - `.claude/commands/blog-dava.md` — dava modu slash komutu
 

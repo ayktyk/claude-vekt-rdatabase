@@ -1,4 +1,4 @@
-# ARASTIRMA.md — Hızlı Araştırma Modülü (Danışma Hattı)
+# ajanlar/arastirmaci/danisma-hatti.md — Hızlı Araştırma Modülü (Danışma Hattı)
 
 > **Amaç:** Avukat Aykut'a müvekkil adaylarının sorduğu hukuki soruları **hızlıca**
 > ve **0-halüsinasyon** garantisi ile cevaplamak. Dava açma odaklı değil,
@@ -44,7 +44,7 @@ arastir danisma: {hukuki soru}
 - `arastir danisma: trafik kazasında %50 kusurlu yaya öldü, sürücüye tazminat davası açılabilir mi`
 - `arastir danisma: 6 ay aralıksız çalışmış işçi haklı fesih ile kıdem tazminatı alabilir mi`
 
-Slash komut karşılığı: `.claude/commands/arastir-danisma.md`. Avukat bu komutu yazdığında Director (Claude Fable 5 — bkz. CLAUDE.md) `ARASTIRMA.md`'yi okuyup aşağıdaki 5 faz workflow'unu uygular.
+Slash komut karşılığı: `.claude/commands/arastir-danisma.md`. Avukat bu komutu yazdığında Director (Claude Fable 5 — bkz. CLAUDE.md) `ajanlar/arastirmaci/danisma-hatti.md`'yi okuyup aşağıdaki 5 faz workflow'unu uygular.
 
 ---
 

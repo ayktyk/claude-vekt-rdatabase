@@ -26,7 +26,7 @@ Eger argument bossa: avukata "hangi konuyu blog yapacagiz?" diye sor.
 - `prompts/gemini/blog_yazimi.md` — Antigravity'ye yapistirilan prompt
 - `prompts/themis-blog-pr-v3-format.md` — **Gmail PR çıktısının ZORUNLU formatı (THEMIS v3)**. Blog maili/CMS çıktısı AYNEN bu yapıda üretilir (avukat onaylı, 2026-06-03).
 - `prompts/gemini/_ortak-kurallar.md` — Gemini ortak kurallari
-- `TEHMIS.md` — proje kokunde tam THEMIS referansi
+- `ajanlar/blog-yazari/THEMIS.md` — proje kokunde tam THEMIS referansi
 - `config/author.json` — Aykut sameAs URL'leri
 - `config/model-routing.json` -> `tasks.blog_yazimi`
 
@@ -247,7 +247,7 @@ Avukat "Blog bitti" diyene kadar bir sonraki adima gecme.
 
    Sonraki adim: Avukat panele elle yapistirir →
      https://vegahukukistanbul.com/admin/#/collections/blog/new
-     (alan eslemesi blog.cms.md'de — Decap semasi, TEHMIS.md Bolum 4)
+     (alan eslemesi blog.cms.md'de — Decap semasi, ajanlar/blog-yazari/THEMIS.md Bolum 4)
    ```
 
 ## Kurallar (Avukatin Bilmesi Gerekenler)
