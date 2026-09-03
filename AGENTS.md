@@ -1019,6 +1019,12 @@ Avukatin cevabini bekle. Cevap gelmeden arastirma ajanlarini baslatma.
 
 ### Kaynak Cevabina Gore Davranis
 
+**Evrak kaynağı adaptörü:** Dava evrakı birden çok kaynaktan gelebilir. Bugün tek
+adaptör `dava-cli` (Yargı PRO / UYAP). İkinci slot **DavaTek** (TBB'nin masaüstü
+uygulaması) için boştur — keşif notu: `docs/davatek-kesif.md`; entegrasyon kodu
+klasör yapısı haritalanınca ayrı spec ile yazılır. Hangi kaynak kullanıldıysa
+`00-Briefing.md` içine yazılır (olay çözüm protokolü Adım 23).
+
 **UYAP secildi (YENI — FAZ 6 2026-07-09):**
 Protokol: `.claude/skills/yargi-uyap-workspace/SKILL.md`.
 Ozet akis: `npx dava-cli@latest clone` → avukat Chrome'da UYAP'a girip
