@@ -93,14 +93,69 @@ komutları + AGENTS.md denetim çağrı bloğu) bu doktrini inline taşır.
 İçerik-eşleşme (her documentId'yi Pro MCP ile teyit + alıntı kıyas) **DENETCI
 adımıdır**, script onun yerine GEÇMEZ.
 
-## Motor Mimarisi
+## Motor Mimarisi — Tek Motor + Bağımsız Denetim
 
-> **Bu bölüm Faz 5'te (DENETCI ajanı) tamamlanacaktır.** Geçiş dönemi kuralı:
-> sistem tek motorla çalışır; ASAMA 0-7 kesintisiz akar; her hukuki çıktıdan sonra
-> üretim bağlamını görmeyen bağımsız denetim yapılır.
+Sistem **tek motorla** çalışır: oturumu hangi LLM ile açtıysanız o. Sistem bunu
+tahmin etmez; avukat `motor: <ad>` komutuyla bildirir
+(`python scripts/motor.py ayarla <ad>`), çıktı frontmatter'ı bunu damgalar.
+Bildirilmemişse `engine: bildirilmedi` yazılır.
 
-Roller `config/motor-haritasi.json` dosyasındadır. Dördü de aynı motorda çalışır;
-ayrım **görev ayrımıdır**, motor ayrımı değil.
+### Roller
+
+| Rol | İş |
+|---|---|
+| `ORKESTRATOR` | Komut sınıflandırma, ASAMA geçişleri, kalite kapıları, Drive/Gmail/Takvim, DOCX/UDF üretimi, deterministik hesaplama |
+| `ARASTIRMACI` | MCP çağrıları (2B Yargı, 2C Mevzuat, 2D NotebookLM, MemPalace), araştırma sentezi |
+| `MUHAKEME` | Usul, 5-ajan analiz, dilekçe, savunma simülasyonu, revizyon, blog |
+| `DENETCI` | Sıfır bağlamlı bağımsız çıktı denetimi |
+
+Rol tanımları ve task→rol eşlemesi: `config/motor-haritasi.json`. Dördü de aynı
+motorda çalışır; ayrım **görev ayrımıdır**, motor ayrımı değil.
+
+### Akış
+
+ASAMA 0'dan 7'ye kesintisiz ilerlenir. Elle devir bloğu, kopya-yapıştırma ve
+harici panel **yoktur**. Her hukuki çıktıdan sonra:
+
+```
+ORKESTRATOR / ARASTIRMACI / MUHAKEME : ASAMA N çıktısını üretir
+        |
+        v
+DENETCI çağrılır — ÜRETİM BAĞLAMINI GÖRMEZ
+   girdi : { çıktı dosyası yolu, dava-id }
+   yapar : deterministik kapılar -> künye içerik teyidi (MCP'den yeniden çekim,
+           alıntı birebir kıyas, bağlam uyumu) -> doktrin clause sayımı
+           -> çıkarım denetimi (9. clause) -> aleyhe beyanı -> üslup
+   döner : KIRMIZI / SARI / YEŞİL
+        |
+        v
+   YEŞİL değil -> üretici rol revize eder -> DENETCI yeniden (en çok 3 tur)
+   3 turda YEŞİL yoksa -> avukata escalate; çıktı Drive'a YAZILMAZ
+```
+
+Protokol: `ajanlar/denetci/SKILL.md` · Ölçütler: `prompts/muhakeme/self_review.md`
+
+ASAMA 5-6-7 (yaz → eleştir → revize) aynı oturumda ardışık yürür; her çıktı ayrı
+dosyaya yazılır ve her biri ayrı DENETCI denetiminden geçer.
+
+### Dürüst sınır
+
+Aynı motorun kendi çıktısını denetlemesi, farklı sağlayıcının denetiminden
+zayıftır; sistematik kör noktalar paylaşılır. DENETCI bu yüzden kanaate değil
+ölçüme dayanır. Yakaladığı şey uydurma künye, bozuk alıntı, eksik clause ve
+geçersiz çıkarımdır — **hukuki isabet denetimi avukattadır.**
+
+### Motor-bağımsız çağrılış
+
+| Ortam | Yöntem |
+|---|---|
+| Alt-ajan mekanizması olan araç | Sıfır bağlamlı alt-ajan (`.claude/agents/denetci.md` adaptörü veya eşdeğeri) |
+| Alt-ajanı olmayan araç | İkinci oturum/sekme; yalnızca dosya yolu + dava-id verilir |
+| Hiçbiri yok | Avukat yeni sohbette `denetle: <dosya>` komutunu elle çalıştırır |
+
+### Kullanıcı kontrol komutları
+
+`devam` · `atla` · `dur` · `devam et` · `motor: <ad>` · `denetle: <dosya>`
 
 ### DENETİM ÇAĞRI BLOĞU (sıfır bağlam sözleşmesi)
 
