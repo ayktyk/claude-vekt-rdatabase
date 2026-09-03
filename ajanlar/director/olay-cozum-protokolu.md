@@ -483,7 +483,7 @@ sistemine yazılmış hâli — ama mekanizma bizimdir, kitapta yoktur.
 
 **Nasıl yapılır:** UYAP (`dava-cli clone`) / NotebookLM / Drive / yerel dosya /
 kaynak yok seçenekleri avukata sorulur; seçilen kaynak briefing'e yazılır.
-İkinci adaptör slotu (DavaTek) için: `docs/davatek-kesif.md`.
+UYAP evrakı Yargı PRO `dava-cli` ile çekilir (`.claude/skills/yargi-uyap-workspace/SKILL.md`).
 
 **Gerekçe:** Kitap 2025 basımlıdır ve dijital dosya çekme araçlarını konu almaz.
 

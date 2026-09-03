@@ -1,3 +1,5 @@
+> ARŞİV — avukat kararı (2026-09-03): DavaTek şimdilik kaldırıldı, evrak kaynağı Yargı PRO (`dava-cli`). Bu not ileride gerekirse geri alınır.
+
 # DavaTek Keşif Notu
 
 **Durum:** KURULUM BEKLENİYOR — avukat uygulamayı deneyecek, sonra bu form doldurulacak.
