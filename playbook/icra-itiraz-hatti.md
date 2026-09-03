@@ -1,5 +1,11 @@
 # Playbook — İCRA TAKİBİ + İTİRAZ SONRASI HAT
 
+> **Örnek dilekçe:** `sablonlar/dilekce-ornekleri/` — kira icra itiraz ailesi
+> (`kira-icra-13irnek-*` / `kira-icra-14irnek-*`: itirazın iptali / kaldırılması /
+> tahliye istemi, her biri `-dava` ve `-cevap`) + `icra-sikayet-meskeniyet-dava`.
+> Tam liste: `INDEX.md`. İskelet + SONUÇ VE TALEP referansı (FORM'dur; künye/olgu
+> kaynağı değildir).
+
 Son güncelleme: 2026-07-23
 Durum: **AKTİF — İİK mevzuatı ve içtihat MCP ile doğrulandı**
 Doğrulama: Yargı-MCP-Pro · 2004 sayılı İİK (mevzuat_id 102993) m.16, 62, 67,

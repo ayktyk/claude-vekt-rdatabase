@@ -210,6 +210,22 @@ Dilekceyi su acilardan degerlendirerek "Revizyon Raporu" olustur:
 6. NETICE-I TALEP: Hesaplamalarla tutarli mi? Eksik kalem var mi?
 7. NORMLAR HIYERARSISI UYUMU: Mevzuat atiflari hiyerarsi kurallarina uygun mu?
 
+### Boyut 6 - Netice-i Talep / Ornek Kiyasi (DETAY — 2026-09-04)
+
+v2'nin SONUC VE TALEP bolumu, ayni dava turunun ornek dilekcesiyle kiyaslanir:
+`sablonlar/dilekce-ornekleri/index.json`'dan dava turu + tarafa gore eslesen
+ornek bulunur, `{slug}.md`'nin SONUC VE TALEP yapisi referans alinir.
+
+- [ ] Ornekte bulunan standart talep kalemleri v2'de eksik mi? (yargilama
+      gideri · vekalet ucreti · faiz (turu/baslangici) · icra inkar tazminati
+      (itirazin iptalinde) · fazlaya iliskin haklarin sakliligi)
+- [ ] Talep sirasi ve numaralandirma (`1-)`, `2-)`) duzenli mi?
+- [ ] Ornekteki placeholder degerler (orn. tutar) v2'ye SIZMAMIS mi?
+
+Ornek bir FORM'dur: eksik talep kalemi UYARISI verilir, ama ornekteki tutar
+veya kunye v2'ye TASINMAZ. Eslesen ornek yoksa bu boyut "ornek yok" notuyla
+gecilir; hesaplama tutarliligi (Boyut 6 ana kural) yine uygulanir.
+
 ### Boyut 7 - Normlar Hiyerarsisi Uyumu (DETAY)
 
 Arastirma raporundaki hiyerarsi etiketleri ve flaglari dilekceye

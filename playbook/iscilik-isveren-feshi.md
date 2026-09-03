@@ -1,5 +1,8 @@
 # Playbook — İşçilik Alacakları / İşVEREN FESHİ (haksız veya geçersiz fesih)
 
+> **Örnek dilekçe:** `sablonlar/dilekce-ornekleri/is-iscilikalacaklari-dava.md`
+> — iskelet + SONUÇ VE TALEP referansı (FORM'dur; künye/olgu kaynağı değildir).
+
 Son güncelleme: 2026-07-23
 Durum: **AKTİF — mevzuat ve içtihat MCP ile doğrulandı**
 Doğrulama: Yargı-MCP-Pro · 4857 (mevzuat_id 103054), 7036 (104627), 1475 (104983)

@@ -1,5 +1,8 @@
 # Playbook — KİRA / KİRA BEDELİ TESPİTİ
 
+> **Örnek dilekçe:** `sablonlar/dilekce-ornekleri/kira-kirabedelininbelirlenmesi-kiratespit-dava.md`
+> — iskelet + KONU + SONUÇ VE TALEP referansı (FORM'dur; künye/olgu kaynağı değildir).
+
 Son güncelleme: 2026-07-23
 Durum: **AKTİF — TBK ve arabuluculuk mevzuatı MCP ile doğrulandı**
 Doğrulama: Yargı-MCP-Pro · TBK 6098 (mevzuat_id 103273) m.344, 345 ·

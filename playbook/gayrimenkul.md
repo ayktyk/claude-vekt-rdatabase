@@ -1,5 +1,11 @@
 # Playbook — GAYRİMENKUL (tapu iptal-tescil / ecrimisil / izale-i şuyu)
 
+> **Örnek dilekçe:** Taşınmaz ailesi (13 örnek) — tapu iptal-tescil (satış vaadi /
+> vekaletin kötüye kullanılması), ortaklığın giderilmesi, kamulaştırma(sız el atma),
+> zorunlu geçit, muhdesat aidiyeti, önalım. Tam liste:
+> `sablonlar/dilekce-ornekleri/` → `INDEX.md` "tasinmaz" bölümü. İskelet + SONUÇ
+> VE TALEP referansı (FORM'dur; künye/olgu kaynağı değildir).
+
 Son güncelleme: 2026-07-23
 Durum: **AKTİF — TMK mevzuatı ve içtihat MCP ile doğrulandı**
 Doğrulama: Yargı-MCP-Pro · TMK 4721 (mevzuat_id 103249) m.698, 699, 705 ·

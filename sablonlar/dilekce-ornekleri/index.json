@@ -1,0 +1,352 @@
+{
+  "uretim_tarihi": "2026-09-04",
+  "kaynak_klasor": "hakandimdik.dilekceler.v2",
+  "toplam": 47,
+  "turler": {
+    "aile": [
+      {
+        "slug": "aile-bosanma-anlasmali-dava",
+        "alt_konu": "bosanma-anlasmali",
+        "taraf": "dava",
+        "konu": "Tarafların anlaşmalı boşana protokolü uyarınca boşanmalarına karar verilmesi istemidir.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle; Davamızın KABULÜNE ve müvekkil ile davalının evlilik birliğinin temelinden sarsılması sebebiyle TMK 166/1-2 maddesi gereğince BOŞANMALARINA, EK 1'de sunulu anlaşmalı boşanma protokolünde de b"
+      },
+      {
+        "slug": "aile-bosanma-cekismeli-dava",
+        "alt_konu": "bosanma-cekismeli",
+        "taraf": "dava",
+        "konu": "Boşanma istemidir.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle; Davamızın KABULÜNE ve müvekkil ile davalının evlilik birliğinin temelinden sarsılması sebebiyle TMK 166/1-2 maddesi gereğince BOŞANMALARINA, Davalı tarafça müvekkile ödenmek üzere yasal faizi"
+      }
+    ],
+    "deliltespiti": [
+      {
+        "slug": "deliltespiti-dava",
+        "alt_konu": "",
+        "taraf": "dava",
+        "konu": "Delil tespiti istemidir.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle \"...\" adresindeki konutta karşı tarafın üstlendiği işlerdeki Malzemeden ve işçilikten kaynaklanan kusur ve hataların tespitine ve bu kusur ve hataların telafisi için gereken masrafın tespitine"
+      }
+    ],
+    "icra": [
+      {
+        "slug": "icra-sikayet-meskeniyet-dava",
+        "alt_konu": "sikayet-meskeniyet",
+        "taraf": "dava",
+        "konu": "Meskeniyet şikâyeti.",
+        "sonuc_talep_ozet": "Yukarıda açıkladığımız nedenlerle; Şikâyetin kabulüne, Meskeniyet iddiamız nedeniyle ... İli, ... İlçesi, ... Mahallesi, ... parselde kayıtlı taşınmaz üzerindeki haczin kaldırılmasına, Yargılama giderleri ve vekâlet ücretinin davalı yan üze"
+      }
+    ],
+    "is": [
+      {
+        "slug": "is-iscilikalacaklari-dava",
+        "alt_konu": "iscilikalacaklari",
+        "taraf": "dava",
+        "konu": "Müvekkil ile davalılar arasındaki iş sözleşmesinin müvekkil tarafından haklı nedenle feshedilmesi sonucu müvekkilin hak kazanmış olduğu kıdem tazminatının, yıllık izin ücreti, fazla çalışma ücreti, ul",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle ve davalı tarafın ileri süreceği iddialara karşı cevap verme hakkımızı saklı tutarak, 1. Kıdem tazminatına iş sözleşmesinin feshi tarihinden itibaren mevduata uygulanan en yüksek faiz oranı uy"
+      },
+      {
+        "slug": "is-iseiade-dava",
+        "alt_konu": "iseiade",
+        "taraf": "dava",
+        "konu": "Fazlaya ilişkin her türlü talep ve dava hakkımız saklı kalmak kaydı ile yapılan fesih işleminin geçersizliğine, müvekkilimizin işe iadesine, işe iade gerçekleşmediği takdirde 8 aylık brüt ücret tutarı",
+        "sonuc_talep_ozet": "Yukarıda arz ve izah olunan ve Sayın Mahkemenizce resen dikkate alınacak nedenlerle fazlaya ilişkin tüm talep ve dava haklarımız saklı kalmak kaydı ile faizleriyle birlikte; Davacı müvekkilin iş sözleşmesi feshinin geçersizliğinin tespitiyl"
+      }
+    ],
+    "kira": [
+      {
+        "slug": "kira-icra-13irnek-itiraziniptali-cevap",
+        "alt_konu": "icra-13irnek-itiraziniptali",
+        "taraf": "cevap",
+        "konu": "Haksız ve mesnetsiz davaya cevaplarımızdır.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle Davanın REDDİNE, Davacı aleyhine %20'den aşağı olmamak üzere kötüniyet tazminatına hükmedilmesine, Yargılama giderleri ve vekâlet ücretinin davacı üzerinde bırakılmasına Dair karar verilmesini"
+      },
+      {
+        "slug": "kira-icra-13irnek-itiraziniptali-dava",
+        "alt_konu": "icra-13irnek-itiraziniptali",
+        "taraf": "dava",
+        "konu": "13 örnek icra takibine ilişkin itirazın iptali ve tahliye istemidir.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle Davalının ... İcra Müdürlüğü'nün ... Esas sayılı dosyasına yaptığı itirazının iptaline ve takibin devamına, Davalının \"...\" adresindeki taşınmazdan tahliyesine, Davalı aleyhine %20'den aşağı o"
+      },
+      {
+        "slug": "kira-icra-13irnek-itirazinkaldirilmasi-cevap",
+        "alt_konu": "icra-13irnek-itirazinkaldirilmasi",
+        "taraf": "cevap",
+        "konu": "Haksız ve mesnetsiz davaya cevaplarımızdır.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle Davanın REDDİNE, Davacı aleyhine %20'den aşağı olmamak üzere kötüniyet tazminatına hükmedilmesine, Yargılama giderleri ve vekâlet ücretinin davacı üzerinde bırakılmasına Dair karar verilmesini"
+      },
+      {
+        "slug": "kira-icra-13irnek-itirazinkaldirilmasi-dava",
+        "alt_konu": "icra-13irnek-itirazinkaldirilmasi",
+        "taraf": "dava",
+        "konu": "13 örnek icra takibine ilişkin itirazın kesin kaldırılması, temerrüt nedeniyle akdin feshi, kiralananın tahliyesi ve icra inkâr tazminatı istemidir.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle Davalının ... İcra Müdürlüğü'nün ... Esas sayılı dosyasına yaptığı haksız ve kötüniyetli itirazının kesin kaldırılmasına, Davalının temerrüdü nedeniyle akdin feshine ve \"...\" adresindeki taşın"
+      },
+      {
+        "slug": "kira-icra-13irnek-tahliyeistemi-cevap",
+        "alt_konu": "icra-13irnek-tahliyeistemi",
+        "taraf": "cevap",
+        "konu": "Haksız ve mesnetsiz davaya cevaplarımızdır.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle Davanın REDDİNE, Yargılama giderleri ve vekâlet ücretinin davacı üzerinde bırakılmasına Dair karar verilmesini vekil eden adına dileriz. ...."
+      },
+      {
+        "slug": "kira-icra-13irnek-tahliyeistemi-dava",
+        "alt_konu": "icra-13irnek-tahliyeistemi",
+        "taraf": "dava",
+        "konu": "13 örnek icra takibine ilişkin temerrüt nedeniyle akdin feshi, kiralananın tahliyesi istemidir.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle Davalının temerrüdü nedeniyle akdin feshine ve \"...\" adresindeki taşınmazdan tahliyesine, Yargılama giderleri ve vekâlet ücretinin davalı üzerinde bırakılmasına Dair karar verilmesini vekil ed"
+      },
+      {
+        "slug": "kira-icra-14irnek-itiraziniptali-cevap",
+        "alt_konu": "icra-14irnek-itiraziniptali",
+        "taraf": "cevap",
+        "konu": "Haksız ve mesnetsiz davaya cevaplarımızdır.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle Davanın REDDİNE, Yargılama giderleri ve vekâlet ücretinin davalı üzerinde bırakılmasına Dair karar verilmesini vekil eden adına dileriz. ...."
+      },
+      {
+        "slug": "kira-icra-14irnek-itiraziniptali-dava",
+        "alt_konu": "icra-14irnek-itiraziniptali",
+        "taraf": "dava",
+        "konu": "14 örnek icra takibine ilişkin itirazın iptali ve tahliye istemidir.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle Davalının ... İcra Müdürlüğü'nün ... Esas sayılı dosyasına yaptığı itirazının iptaline ve takibin devamına, Davalının \"...\" adresindeki taşınmazdan tahliyesine, Davalı kiracının imza inkârı ha"
+      },
+      {
+        "slug": "kira-icra-14irnek-itirazinkaldirilmasi-cevap",
+        "alt_konu": "icra-14irnek-itirazinkaldirilmasi",
+        "taraf": "cevap",
+        "konu": "Haksız ve mesnetsiz davaya cevaplarımızdır.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle Davanın REDDİNE, Yargılama giderleri ve vekâlet ücretinin davalı üzerinde bırakılmasına Dair karar verilmesini vekil eden adına dileriz. ...."
+      },
+      {
+        "slug": "kira-icra-14irnek-itirazinkaldirilmasi-dava",
+        "alt_konu": "icra-14irnek-itirazinkaldirilmasi",
+        "taraf": "dava",
+        "konu": "14 örnek icra takibine ilişkin itirazın kesin kaldırılması ve tahliye istemidir.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle Davalının ... İcra Müdürlüğü'nün ... Esas sayılı dosyasına yaptığı itirazının kesin kaldırılmasına, Davalının \"...R\" adresindeki taşınmazdan tahliyesine, Yargılama giderleri ve vekâlet ücretin"
+      },
+      {
+        "slug": "kira-kirabedelininbelirlenmesi-kiratespit-dava",
+        "alt_konu": "kirabedelininbelirlenmesi-kiratespit",
+        "taraf": "dava",
+        "konu": "Kira bedelinin tespiti istemidir.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen incelenecek nedenlerle; Dava konusu \"...\" adresindeki taşınmazın kira bedeline ilişkin ... tarihinden itibaren başlayan dönem için geçerli olmak üzere NET 2.508,76 TL olan aylık bedelinin NET 25.000,00 TL olarak TBK m. 3"
+      },
+      {
+        "slug": "kira-tahliye-10yil-cevap",
+        "alt_konu": "tahliye-10yil",
+        "taraf": "cevap",
+        "konu": "Haksız ve mesnetsiz davaya cevaplarımızdır.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle; Davanın REDDİNE, Yargılama giderleri ve vekâlet ücretinin davacı üzerinde bırakılmasına dair karar verilmesini vekil eden adına dileriz. ..."
+      },
+      {
+        "slug": "kira-tahliye-10yil-dava",
+        "alt_konu": "tahliye-10yil",
+        "taraf": "dava",
+        "konu": "6098 sayılı Türk Borçlar Kanunu m. 347 uyarınca tahliye istemidir.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle; Taraflar arasındaki kira sözleşmesinin feshine ve davalının \"...\" adresinden 6098 sayılı Türk Borçlar Kanunu'nun madde 347 hükmü uyarınca tahliyesine, Yargılama giderleri ve vekâlet ücretinin"
+      },
+      {
+        "slug": "kira-tahliye-akdeaykirilik",
+        "alt_konu": "tahliye-akdeaykirilik",
+        "taraf": null,
+        "konu": "6098 sayılı Türk Borçlar Kanunu m. 316 uyarınca tahliye istemidir.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle; Davalının \"...\" adresinden 6098 sayılı Türk Borçlar Kanunu'nun madde 316 uyarınca tahliyesine, Yargılama giderleri ve vekâlet ücretinin davalıya yükletilmesine dair karar verilmesini vekil ed"
+      },
+      {
+        "slug": "kira-tahliye-ihtiyac-isyeri",
+        "alt_konu": "tahliye-ihtiyac-isyeri",
+        "taraf": null,
+        "konu": "İşyeri gereksinimi/ihtiyacı nedeniyle tahliye istemidir.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle; Davalının \"...\" adresinden davacı müvekkilin (/oğlunun/kızının) iş yeri gereksinimi/ihtiyacı nedeniyle 6098 sayılı Türk Borçlar Kanunu'nun 350/1, 1 hükmü uyarınca tahliyesine, Yargılama gider"
+      },
+      {
+        "slug": "kira-tahliye-ihtiyac-konut",
+        "alt_konu": "tahliye-ihtiyac-konut",
+        "taraf": null,
+        "konu": "İhtiyaç/gereksinim nedeniyle tahliye istemidir.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle; Davalının \"...\" adresinden davacı müvekkilin (/oğlunun/kızının) gereksinimi/ihtiyacı nedeniyle 6098 sayılı Türk Borçlar Kanunu'nun 350/1, 1 hükmü uyarınca tahliyesine, Yargılama giderleri ve "
+      },
+      {
+        "slug": "kira-tahliye-ihtiyac-yenimalik-konut",
+        "alt_konu": "tahliye-ihtiyac-yenimalik-konut",
+        "taraf": null,
+        "konu": "6098 sayılı Türk Borçlar Kanunu'nun 351. maddesi uyarınca yeni mâlikin gereksinim/ihtiyaç nedeniyle tahliye istemidir.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle; Davalının \"...\" adresinden davacı müvekkilin (müvekkilin oğlunun/kızının) gereksinimi/ihtiyacı nedeniyle 6098 sayılı Türk Borçlar Kanunu'nun 351 hükmü uyarınca tahliyesine Yargılama giderleri"
+      },
+      {
+        "slug": "kira-tahliye-ikihakliihtar",
+        "alt_konu": "tahliye-ikihakliihtar",
+        "taraf": null,
+        "konu": "6098 sayılı Türk Borçlar Kanunu m. 352/2 uyarınca iki haklı ihtar nedeniyle tahliye istemidir.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle; Taraflar arasındaki kira sözleşmesinin feshine ve davalının \"...\" adresinden 6098 sayılı Türk Borçlar Kanunu'nun madde 352/2 hükmü uyarınca tahliyesine Yargılama giderleri ve vekâlet ücretini"
+      }
+    ],
+    "kisiler": [
+      {
+        "slug": "kisiler-vesayet",
+        "alt_konu": "vesayet",
+        "taraf": null,
+        "konu": "Kısıtlı adayının kısıtlanarak müvekkilin vasi olarak atanması istemidir.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle; ... TC kimlik numaralı ...'un müvekkil olan ... TC kimlik numaralı kızı ...'in kendisine vasi olarak atanmasına, dair karar verilmesine vekil eden adına talep ederiz. ...."
+      },
+      {
+        "slug": "kisiler-yasaldanisman",
+        "alt_konu": "yasaldanisman",
+        "taraf": null,
+        "konu": "Müvekkillerden ...'na diğer müvekkil ....'nun yasal danışman (yasal müşavir) atanması istemidir.",
+        "sonuc_talep_ozet": "Açıklanan nedenlerle müvekkillerden ....'na diğer müvekkil ....'nun yasal danışman (yasal müşavir) atanmasına dair karar verilmesini vekil edenler adına dileriz."
+      }
+    ],
+    "miras": [
+      {
+        "slug": "miras-denklestirme-dava",
+        "alt_konu": "denklestirme",
+        "taraf": "dava",
+        "konu": "Fazlaya ilişkin haklarımız saklı kalmak kaydıyla; mirasbırakanın sağlığında davalılara yapmış olduğu karşılıksız kazandırmaların tespiti ile öncelikle mirasta denkleştirme, bu talebimizin kabul görmem",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen gözetilecek sair nedenlerle, fazlaya ilişkin talep ve dava haklarımız saklı kalmak kaydıyla; Mirasbırakan tarafından davalılara yapılan sağlararası karşılıksız kazandırmaların tespiti ile bu bedel ve malvarlıklarının MİR"
+      },
+      {
+        "slug": "miras-mirascilikbelgesi",
+        "alt_konu": "mirascilikbelgesi",
+        "taraf": null,
+        "konu": "Mirasçılık belgesi verilmesi istemidir.",
+        "sonuc_talep_ozet": "Yapılacak inceleme neticesinde ve Sayın Mahkemenizce kendiliğinden gözetilecek sair nedenlerle; ... TC kimlik numaralı mirasbırakan. ..’in mirasçılarını ve miras paylarını gösterir şekilde mirasçılık belgesi verilmesine dair karar verilmesi"
+      },
+      {
+        "slug": "miras-mirastaksim-tapuiptaltescil-dava",
+        "alt_konu": "mirastaksim-tapuiptaltescil",
+        "taraf": "dava",
+        "konu": "09.09.2022 tarihli Miras Taksim Sözleşmesine dayalı tapu iptali ve tescil talebimizden ibarettir.",
+        "sonuc_talep_ozet": "Açıklanan nedenler ve Mahkemenizce re'sen dikkate alınacak nedenlerle; fazlaya ilişkin haklarımız saklı kalmak üzere, Davaya konu; ... İli ... İlçesi ... Mahallesi ... Ada ... parsel, ... İli ... İlçesi ... Mahallesi ... Ada ... parsel, ..."
+      },
+      {
+        "slug": "miras-murismuvazaasi-dava",
+        "alt_konu": "murismuvazaasi",
+        "taraf": "dava",
+        "konu": "Tapuda ... ili ... ilçesi ... mahallesi, ... ada ... numaralı parsel ... numaralı parselin (ya da parseldeki ... nol.u bağımsız bölümün) muvazaa nedeniyle tapu kaydının iptali ile müvekkilin miras pay",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen incelenecek nedenlerle ve fazlaya ilişkin haklar saklı kalmak kaydıyla; Her şeyden önce açılan davanın konusuz kalmaması ve telafisi güç zararların doğmaması adına davaya konu taşınmaz üzerine üçüncü kişilere devir ve te"
+      },
+      {
+        "slug": "miras-tenkis-dava",
+        "alt_konu": "tenkis",
+        "taraf": "dava",
+        "konu": "Saklı paya tecavüz eden tasarrufa ilişkin tenkis talebimizden ibarettir.",
+        "sonuc_talep_ozet": "Yukarıda açıklanan nedenlerle; Davanın kabulü ile kazandırmanın davacının saklı payı oranında tenkisi ile fazlaya ilişkin haklar saklı kalmak kaydıyla şimdilik 5.000,00 TL'nin yasal faizi ile davalıdan tahsili ile davacıya verilmesine, Yarg"
+      },
+      {
+        "slug": "miras-terekenintespiti-dava",
+        "alt_konu": "terekenintespiti",
+        "taraf": "dava",
+        "konu": "Mirasbırakan ...'un terekesinin ihtiyati tedbir talepli olarak tespiti, aktif ve pasifiyle defterinin tutulması ve tereke mallarının korunması için gerekli tüm önlemlerin alınması istemidir.",
+        "sonuc_talep_ozet": "Yukarıda arz ve izah edilen ile Sayın Mahkemenizce re'sen gözetilecek nedenlerle; Öncelikle, terekenin kaçırılmasını ve eksilmesini önlemek amacıyla, mirasbırakan ... adına kayıtlı tüm taşınır ve taşınmaz mallar ile banka hesapları, üçüncü "
+      },
+      {
+        "slug": "miras-vasiyetiniptali-dava",
+        "alt_konu": "vasiyetiniptali",
+        "taraf": "dava",
+        "konu": "Vasiyetnamenin iptali, mahkemeniz aksi kanaatte ise fazlaya ilişkin haklar saklı kalmak kaydıyla tenkisi istemidir.",
+        "sonuc_talep_ozet": "Yukarıda arz ve izah edilen nedenler ile resen gözetilecek hususlar ışığında; Mirasbırakan ...'in ... Noterliği'nce tanzim edilen ... tarihli ... yevmiye numaralı vasiyetnamesinin İPTALİNE, Sayın Mahkemen aksi kanaatte ise, TENKİS istemimiz"
+      },
+      {
+        "slug": "miras-vasiyetintenfizi-tapuiptaltescil-dava",
+        "alt_konu": "vasiyetintenfizi-tapuiptaltescil",
+        "taraf": "dava",
+        "konu": "Vasiyetnamenin tenfizi ile tapu iptal ve tescil talebimizden ibarettir.",
+        "sonuc_talep_ozet": "Açıklanan ve Sayın Mahkemenizce re'sen dikkate alınacak nedenlerle; Davaya konu; ... İli ... İlçesi ... Mahallesi ... Ada ... parsel, ... İli ... İlçesi ... Mahallesi ... Ada ... parsel, ... İli ... İlçesi ... Mahallesi ... Ada ... parsel, "
+      }
+    ],
+    "tasinmaz": [
+      {
+        "slug": "tasinmaz-hatalikayit-1007-tazminat-dava",
+        "alt_konu": "hatalikayit-1007-tazminat",
+        "taraf": "dava",
+        "konu": "TMK 1007 maddesi mükerrer tapu kaydı nedeniyle maddi tazminat istemine ilişkin dava dilekçemizdir.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen incelenecek nedenlerle; Fazlaya ilişkin haklar saklı kalmak kaydıyla hatalı işlem nedeniyle müvekkilin uğramış olduğu 59.000,00 Türk Lirası zararının faizi ile birlikte davalıdan alınarak davacı müvekkile ödenmesine, Yar"
+      },
+      {
+        "slug": "tasinmaz-kadastro-kullanim-dava",
+        "alt_konu": "kadastro-kullanim",
+        "taraf": "dava",
+        "konu": "Kadastro Kanunu Ek m. 4 uyarınca yapılan kullanım kadastrosuna itiraz davasıdır.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle, ... ili ... ilçesi ... Mah. ... mevkii 7013 ada ... no.lu parselin ... tarihinden itibaren müvekkilin üstsoyu ve müvekkil tarafından kullanıldığının tespitine, beyanlar hânesine müvekkilin zi"
+      },
+      {
+        "slug": "tasinmaz-kamulastirmabedeltespitvetescil-cevap",
+        "alt_konu": "kamulastirmabedeltespitvetescil",
+        "taraf": "cevap",
+        "konu": "Davaya cevaplarımızdır.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle; Tarafımızca açılacak kamulaştırma işlemi ve dayanak planlarının iptali davasında yürütmeyi durdurma kararının beklenmesine, Davaya konu taşınmazın çevresinde bulunan parsellerden arsa vasıflı"
+      },
+      {
+        "slug": "tasinmaz-kamulastirmabedeltespitvetescil-dava",
+        "alt_konu": "kamulastirmabedeltespitvetescil",
+        "taraf": "dava",
+        "konu": "Kamulaştırma bedel tespit ve tescil davasıdır.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle; ... İli ... İlçesi ... Mahallesi ... Ada ... Parseldeki taşınmazın kamulaştırma bedelinin tespitine, Mezkûr parselin tapu kaydındaki tüm takyidatlardan arî olarak mülkiyetinin davacı İdare le"
+      },
+      {
+        "slug": "tasinmaz-kamulastirmasizelatma-hukukielatma-cevap",
+        "alt_konu": "kamulastirmasizelatma-hukukielatma",
+        "taraf": "cevap",
+        "konu": "Haksız ve mesnetsiz davaya cevaplarımız ile yargı yolu/görev ve husumete ilişkin itirazlarımızdır.",
+        "sonuc_talep_ozet": "Yukarıda açıklanan ve Sayın Mahkemenizce re'sen dikkate alınacak nedenlerle; Davanın görev/yargı yolu nedeniyle REDDİNE, Davanın husumet nedeniyle REDDİNE, Mahkeme aksi kanaatte ise davanın esastan REDİNE, Yargılama giderleri ve vekâlet ücr"
+      },
+      {
+        "slug": "tasinmaz-kamulastirmasizelatma-hukukielatma-dava",
+        "alt_konu": "kamulastirmasizelatma-hukukielatma",
+        "taraf": "dava",
+        "konu": "Kamulaştırmasız el atma (hukukî el atma) nedeniyle tazminat talebimizdir. FAZLAYA İLİŞKİN HAKLAR SAKLIDIR.",
+        "sonuc_talep_ozet": "Yukarıda açıklanan ve Sayın Mahkemenizce re'sen dikkate alınacak nedenlerle; Davamızın KABULÜ ile, müvekkilin maliki olduğu .. ili, ... ilçesi, ... Mahallesi ... ada, ... numaralı parselin 1/1000 ölçekli uygulama imar planında park alanında"
+      },
+      {
+        "slug": "tasinmaz-muhdesatinaidiyeti",
+        "alt_konu": "muhdesatinaidiyeti",
+        "taraf": null,
+        "konu": "Muhdesatın Aidiyetinin Tespitine ilişkin dava dilekçemizdir.",
+        "sonuc_talep_ozet": "Yukarıda açıklanan ve re'sen incelenecek nedenlerle; 1) Davacı müvekkilin hissedarı olduğu ... ili, ... İlçesi, ... Mahallesi ... mevkiindeki ... Ada ... Parsel sayılı taşınmaz üzerindeki ev, eklentilerin ve 53 tane ağaçların muhdesatının a"
+      },
+      {
+        "slug": "tasinmaz-ortakligingiderilmesi-dava",
+        "alt_konu": "ortakligingiderilmesi",
+        "taraf": "dava",
+        "konu": "Ortaklığın giderilmesi istemidir.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle; Tapuda; ... ili ... ilçesi ... mahallesi ... ada ... parseldeki ... Kat ... numaralı bağımsız bölüm, ... ili ... ilçesi ... mahallesi ... ada ... parseldeki ... Kat ... numaralı bağımsız bölü"
+      },
+      {
+        "slug": "tasinmaz-tapuiptaltescil-onalcm",
+        "alt_konu": "tapuiptaltescil-onalcm",
+        "taraf": null,
+        "konu": "Önalım (şuf'a) hakkının kullanılmasına dair davadır.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle; Her şeyden önce tapuda kayıtlı ... ili ... ilçesi ... Mahahallesi ... ada ... parseldeki davalıya ait hissenin üçüncü kişilere devrini önlemek adına hisse üzerine ihtiyatî tedbir konulmasına,"
+      },
+      {
+        "slug": "tasinmaz-tapuiptaltescil-satisvaadi-dava",
+        "alt_konu": "tapuiptaltescil-satisvaadi",
+        "taraf": "dava",
+        "konu": "Tapu iptal tescil, olmadığı taktirde tazminat istemidir.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle; Her şeyden önce ... ili ... ilçesi ... mahallesi ... ada ... numaralı parselde kain ... Projesi’nde yapılacak olan inşaatın .... kat ... numaralı bağımsız bölüm üzerine teminat aranmaksızın i"
+      },
+      {
+        "slug": "tasinmaz-tapuiptaltescil-vekaletinkotuyekullanilmasi-dava",
+        "alt_konu": "tapuiptaltescil-vekaletinkotuyekullanilmasi",
+        "taraf": "dava",
+        "konu": "Vekalet görevinin kötüye kullanılması nedenine dayalı tapu iptal ve tescil istemidir.",
+        "sonuc_talep_ozet": "Açıklanan ve Sayın Mahkemenizce re'sen dikkate alınacak nedenlerle, fazlaya ilişkin her türlü talep ve dava hakkımız saklı kalmak kaydıyla; Öncelikle davalıların dava konusu ... ili, ... ilçesi, ... mahallesi, ... ada, ... parsel numaralı t"
+      },
+      {
+        "slug": "tasinmaz-zorunlugecithakki-cevap",
+        "alt_konu": "zorunlugecithakki",
+        "taraf": "cevap",
+        "konu": "Haksız ve mesnetsiz davaya cevaplarımızdır.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle davanın REDDİNE, yargılama giderleri ve vekâlet ücretinin davacı üzerinde bırakılmasına dair karar verilmesini vekil eden adına dileriz. .... Davalı Vekili Avukat ..."
+      },
+      {
+        "slug": "tasinmaz-zorunlugecithakki-dava",
+        "alt_konu": "zorunlugecithakki",
+        "taraf": "dava",
+        "konu": "Türk Medeni Kanunu'nun 747. maddesine göre zorunlu geçit hakkı kurulması istemidir.",
+        "sonuc_talep_ozet": "Açıklanan ve re'sen dikkate alınacak nedenlerle; ... ili ... ilçesi ... Mahallesi ... ada ... parsel no.lu parsel lehine ... ili ... ilçesi ... mahallesi ... ada ... parsel no.lu parselin güney sınırı üzerinden geçit hakkı kurulmasına ve ta"
+      }
+    ]
+  }
+}

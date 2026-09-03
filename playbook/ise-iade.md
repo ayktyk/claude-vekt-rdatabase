@@ -1,5 +1,8 @@
 # Playbook — İŞE İADE (feshin geçersizliği tespiti)
 
+> **Örnek dilekçe:** `sablonlar/dilekce-ornekleri/is-iseiade-dava.md`
+> — iskelet + SONUÇ VE TALEP referansı (FORM'dur; künye/olgu kaynağı değildir).
+
 Son güncelleme: 2026-07-23
 Durum: **AKTİF — mevzuat MCP ile doğrulandı**
 Doğrulama: Yargı-MCP-Pro · 4857 (mevzuat_id 103054) m.18, m.20, m.21 ·

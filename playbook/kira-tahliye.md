@@ -1,5 +1,11 @@
 # Playbook — KİRA / TAHLİYE
 
+> **Örnek dilekçe:** `sablonlar/dilekce-ornekleri/` tahliye ailesi — ihtiyaç
+> (`kira-tahliye-ihtiyac-konut` / `-isyeri` / `-yenimalik-konut`), akde aykırılık
+> (`kira-tahliye-akdeaykirilik`), iki haklı ihtar (`kira-tahliye-ikihakliihtar`),
+> 10 yıl (`kira-tahliye-10yil-dava` / `-cevap`). Tam liste: `INDEX.md`.
+> İskelet + SONUÇ VE TALEP referansı (FORM'dur; künye/olgu kaynağı değildir).
+
 Son güncelleme: 2026-07-23
 Durum: **AKTİF — TBK ve arabuluculuk mevzuatı MCP ile doğrulandı**
 Doğrulama: Yargı-MCP-Pro · TBK 6098 (mevzuat_id 103273) m.315, 350, 352 ·

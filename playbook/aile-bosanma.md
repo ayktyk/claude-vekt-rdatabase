@@ -1,5 +1,9 @@
 # Playbook — AİLE / BOŞANMA
 
+> **Örnek dilekçe:** `sablonlar/dilekce-ornekleri/aile-bosanma-anlasmali-dava.md`
+> ve `aile-bosanma-cekismeli-dava.md` — iskelet + SONUÇ VE TALEP referansı
+> (FORM'dur; künye/olgu kaynağı değildir).
+
 Son güncelleme: 2026-07-23
 Durum: **AKTİF — TMK mevzuatı MCP ile doğrulandı**
 Doğrulama: Yargı-MCP-Pro · TMK 4721 (mevzuat_id 103249) m.166, 174, 175 tam metin

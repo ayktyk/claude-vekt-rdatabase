@@ -654,6 +654,13 @@ Usul + Arastirma + Stratejik Analiz ciktilarini birlestirip ilk taslak.
 Cikti: `dilekce-v1.md` + `.docx` (UDF URETILMEZ — v1 taslak).
 Detay: `@ajanlar/dilekce-yazari/SKILL.md`.
 
+**Ornek Dilekce Kutuphanesi (2026-09-04):** Yazimdan once dava turune uygun
+ornek `sablonlar/dilekce-ornekleri/index.json`'dan eslestirilir; bolum
+iskeleti, KONU kalibi ve SONUC VE TALEP yapisi referans alinir. Ornek bir
+**FORM**'dur — kunye/olgu kaynagi DEGILDIR; doktrin kapilari (kunye dogrulama
++ DENETCI) hafifletilmez. Ureten: `scripts/udf_ornek_ice_aktar.py`. Detay:
+`docs/superpowers/specs/2026-09-04-ornek-dilekce-kutuphanesi-design.md`.
+
 ### ASAMA 6 - Savunma Simulatoru
 Tetikleyici: `savunma simule et: [dava-id]` veya ASAMA 5 kalite gate'i.
 Detay: `@ajanlar/savunma-simulatoru/SKILL.md`.

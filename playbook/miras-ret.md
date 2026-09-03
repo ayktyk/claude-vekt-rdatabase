@@ -1,5 +1,10 @@
 # Playbook — MİRAS / REDDİ MİRAS (gerçek ret + hükmen ret)
 
+> **Örnek dilekçe:** Reddi mirasa birebir örnek yok. En yakın yapı için miras
+> ailesi: `sablonlar/dilekce-ornekleri/` → `INDEX.md` "miras" bölümü
+> (tereke tespiti, mirasçılık belgesi, tenkis, muris muvazaası vb.). Yalnız
+> iskelet + SONUÇ VE TALEP referansı (FORM'dur; künye/olgu kaynağı değildir).
+
 Son güncelleme: 2026-07-23
 Durum: **AKTİF — TMK mevzuatı ve içtihat MCP ile doğrulandı**
 Doğrulama: Yargı-MCP-Pro · TMK 4721 (mevzuat_id 103249) m.605, 606, 610, 617 ·

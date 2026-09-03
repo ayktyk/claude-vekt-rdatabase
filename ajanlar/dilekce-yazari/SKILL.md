@@ -213,11 +213,38 @@ iskeleti o cerceveyle kurulur. Cerceve adim adlari metne baslik olarak
 yazilmaz. Catisma: uslup-aykut.md > dilekce-yazim-kurallari.md > cerceve.
 Secim tablosu: prompts/muhakeme/cerceveler/_secim-rehberi.md
 
+### Ornek Dilekce Eslemesi (2026-09-04 — yazimdan ONCE, ZORUNLU)
+Dilekce yazmaya baslamadan `sablonlar/dilekce-ornekleri/index.json` acilir ve
+davaya uygun ornek(ler) esleştirilir. Ornek bir **FORM/ISKELET**'tir; kunye ve
+olgu kaynagi DEGILDIR.
+
+1. **Esleme:** `dava_turu` (+ mumkunse `alt_konu`) ile indeksten ornek bul.
+   Muvekkil davaci/basvuran ise `taraf: dava`, davali ise `taraf: cevap`
+   olan ornek tercih edilir. Birebir yoksa ayni `dava_turu` icinde en yakin
+   `alt_konu` secilir.
+2. **Okuma:** Eslesen `sablonlar/dilekce-ornekleri/{slug}.md` dosyasi okunur.
+3. **Referans alinacaklar (kopyalanmaz):** bolum sirasi/iskeleti · **KONU**
+   ifade kalibi ("...istemidir" formu) · **SONUC VE TALEP** numarali talep
+   yapisi ve kapanis kalibi · ACIKLAMALAR'in numarali-madde disiplini (bicim).
+4. **Doldurma:** Ornekteki `...` bosluklari ve ornek degerler (orn. "NET
+   25.000,00 TL") GERCEK dava verisiyle degistirilir, aynen birakilmaz.
+   Ornekteki mevzuat maddeleri (orn. TBK 344/3, 345) davaya uygunluk +
+   mulga/guncel yonunden Mevzuat MCP'den TEYIT edilir, koru korune tasinmaz.
+5. **Eslesme yoksa:** En yakin turun ornegini genel iskelet icin kullan;
+   Avukat Kontrol Notu'na `Ornek dilekce: eslesme yok, genel yapi` yaz.
+6. **Kayit:** Kullanilan ornek cikti metadatasina yazilir:
+   `ornek_dilekce: {slug} (iskelet referansi)`.
+
+**Doktrin (bağlayıcı):** Ornek eslemesi kunye dogrulama tablosunu veya DENETCI
+kapisini HAFIFLETMEZ. Ornekten alinan hicbir kunye MCP'den dogrulanmadan
+yazilamaz; 0-Halusinasyon doktrini aynen gecerlidir.
+
 1. **Girdi toplama:** Usul raporu + arastirma raporu + Advanced Briefing (varsa) oku.
 2. **Hafiza kontrolu:** MemPalace wake-up sonuclarini oku (ZORUNLU, yukaridaki bolum).
 3. **Referans cekme:** `dilekce-yazim-kurallari.md` OKU + `ajanlar/dilekce-yazari/uslup-aykut.md`
    OKU (ZORUNLU - avukatin kisisel uslup fingerprint dosyasi) + `sablonlar/` klasorundeki
-   onaylanmis dilekcelerden uslup referansi al.
+   onaylanmis dilekcelerden uslup referansi al + **eslesen ornek dilekceyi**
+   (`sablonlar/dilekce-ornekleri/`, yukaridaki "Ornek Dilekce Eslemesi") oku.
 4. **Arguman omurgasi kurma:** Arastirma raporundaki "Dilekceye Tasinacak Argumanlar" listesini temel al.
 5. **Risk karsilama:** Usul raporundaki risk noktalarini dilekcede proaktif olarak karsila.
 6. **Dilekce yazimi:** dilekce-yazim-kurallari.md + uslup-aykut.md kurallarini tam uygulayarak taslak yaz.
