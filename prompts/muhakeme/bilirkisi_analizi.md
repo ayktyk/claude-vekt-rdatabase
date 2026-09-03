@@ -31,7 +31,7 @@ uyduramazsin, context siniri, Avukat Aykut tonu).
 ```yaml
 ---
 model: {motor id}
-engine: gemini | claude
+engine: <aktif motor — python scripts/motor.py damga>
 task_type: bilirkisi_analizi
 run_id: {ISO_timestamp}-{pid}
 attempt: 1 | 2

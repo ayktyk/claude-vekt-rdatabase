@@ -172,7 +172,7 @@ Her hukuki çıktıyı yazmadan önce:
 ## VII. KÜRESEL UYUM NOKTALARı
 
 Bu doktrin şu dosyalarda referans alınır:
-- `CLAUDE.md` (proje + global) → "0 Halüsinasyon Doktrini" başlığında özet
+- `AGENTS.md` (proje) + `~/.claude/CLAUDE.md` (global) → "0 Halüsinasyon Doktrini" başlığında özet <!-- vendor-ok: global adaptör dosyası -->
 - `ajanlar/arastirmaci/SKILL.md` → kaynak doğrulama protokolü
 - `ajanlar/dilekce-yazari/SKILL.md` → atıf doğrulama protokolü
 - `ajanlar/usul-uzmani/SKILL.md` → mevzuat doğrulama

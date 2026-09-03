@@ -56,7 +56,7 @@
 
 ---
 
-## VARYANT A — GEMİNİ BATCH (Antigravity sağ panel)
+## VARYANT A — MUHAKEME rolü (üretici)
 
 - Sana verilen Yargıtay/Bedesten künyeleri terminal tarafından **ÖNCEDEN
   doğrulandı** (`ictihat_getir` ile çekildi + konu teyit edildi).

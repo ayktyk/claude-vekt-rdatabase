@@ -34,7 +34,7 @@ urettigi paketten yararlanir. Asagidaki yasaklara MUTLAK uy:
 
    **EK KURAL (2026-05-17):** Context'te `verified: true` flag'i
    olmayan kararlari KULLANMA. `verified: false` veya flag yok ise
-   "yerlesik uygulama" formulu zorunlu. Terminal Claude (Hizir)
+   "yerlesik uygulama" formulu zorunlu. ORKESTRATOR
    her devir bloguna gomdugu karari `ictihat_getir`
    ile dogrulayip metnin konuyla ilgili oldugunu teyit etmis olmali.
 
@@ -48,7 +48,7 @@ urettigi paketten yararlanir. Asagidaki yasaklara MUTLAK uy:
 
 Bu kurallar 2026-05-05 Tugba davasinda yaratilan hatadan (uydurma HGK
 alintisi) ve 2026-05-17 sahte icra blogu olayinda (Bedesten API down
-durumda search sonuclarini dogrulamadan Gemini'ye gondermek)
+durumda search sonuclarini dogrulamadan MUHAKEME'ye gondermek)
 sonra sertlestirildi.
 
 ## TBB Reklam Yasagi (TBB E.2024/990, K.2025/66) — MUTLAK YASAK
@@ -86,7 +86,7 @@ emsal_kararlar:
     esas: "2024/1234"
     karar: "2024/5678"
     tarih: "2024-06-15"
-    verified: true              # ZORUNLU — terminal Claude
+    verified: true              # ZORUNLU — ORKESTRATOR
                                 # ictihat_getir ile
                                 # metni acti, konuyla ilgili oldugunu
                                 # dogruladi. verified:false ise
@@ -147,7 +147,7 @@ yayimlanan..." / "Son icadetla birlikte..."
 - Paragraf 1: konuyu genis baglama otur (mevzuat cercevesi + guncel sorun)
 - Paragraf 2: okuyucunun gunluk hayatina indir (kim etkileniyor, ne zaman karsilasilir)
 
-**YASAK baglac/kalip (GPT signature):**
+**YASAK baglac/kalip (GPT signature):** <!-- vendor-ok: üslup terimi (yapay-zeka izi) -->
 - "Ornegin"
 - "Bu baglamda"
 - "Soz konusu mevzuat uyarinca"
@@ -391,10 +391,11 @@ SEO-WARN olarak denetler.
 | Excerpt char | 150+ | 150-500 |
 | Em-dash sayisi | 0 | ≤ 2 |
 
-## KAPAK GORSELI (Imagen / Nano Banana — Zorunlu)
+## KAPAK GORSELI (Zorunlu)
 
-Yazinin sonunda **Imagen / Nano Banana tool'unu cagirip kapak gorseli uret.**
-Antigravity bu yetenege sahiptir.
+Yazinin sonunda, bagli motorun gorsel uretim yetenegi varsa kapak gorselini uret;
+yoksa `coverImage.prompt` alanini doldur, avukat elle uretir
+(bkz. `ajanlar/blog-yazari/SKILL.md` -> VEGA Kapak Tarz Formulu).
 
 ### Gorsel Kurallari
 

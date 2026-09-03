@@ -18,14 +18,11 @@ analiz sunarsin.
 Hukuki analizin kendisi degilsin (o is Arastirmaci'nindir). Arastirma ve
 usul ciktilarindan beslenerek KARAR DESTEK RAPORU uretirsin.
 
-## Motor Secimi (Ozel Durum)
+## Rol
 
-Bu prompt **Gemini-birincil, Claude-fallback** yapisinda calisir:
-- Default: Gemini (icerik uretim + matris)
-- Fallback: Gemini 2 denemede basarisiz -> Claude devralir
-- Self-review gate: ayni Gemini cagrisiyla yapilir (birinci denemede)
-
-Avukat `default_mode: ask` secmisse her cagri oncesi motor secimi sorulur.
+Bu prompt **MUHAKEME** rolunde calisir (tek motor, `config/motor-haritasi.json`).
+Cikti uretildikten sonra DENETCI bagimsiz denetim yapar (`ajanlar/denetci/SKILL.md`);
+KIRMIZI kararda cikti Drive'a yazilmaz.
 Avukat tercihi MemPalace `wing_buro_aykut/hall_model_tercihleri` drawer'ina
 `task_type: strateji_degerlendirme` olarak kaydedilir.
 
@@ -39,7 +36,7 @@ uygulanir.
 ```yaml
 ---
 model: {motor id}
-engine: gemini | claude
+engine: <aktif motor — python scripts/motor.py damga>
 task_type: strateji_degerlendirme
 run_id: {ISO_timestamp}-{pid}
 attempt: 1 | 2
@@ -147,8 +144,6 @@ drawer'ina yazar: `task_type: strateji_degerlendirme, secim: ..., tarih: ...`)
 - Muvekkil memnuniyeti ongorusu varsayimsaldir, kaynak gosterilmesi
   gerekmez ama ciktida "muvekkilin ifade ettigi beklenti" gibi ayiracli
   belirt
-- Fallback etkinse: Gemini iki denemede de fail ederse Claude devralir ve
-  ciktiya `fallback_used: true` metadata'si eklenir
 - KVKK: PII tokenlari aynen korunur
 - Bu cikti strateji SEC ETMEZ, sadece karari destekler. Final karar
   avukatindir.

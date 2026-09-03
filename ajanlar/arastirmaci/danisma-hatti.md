@@ -4,7 +4,7 @@
 > ve **0-halüsinasyon** garantisi ile cevaplamak. Dava açma odaklı değil,
 > danışmanlık odaklıdır.
 >
-> **Mevcut dava akışına (CLAUDE.md ASAMA 0-7, `arastir:` komutu) DOKUNMAZ.**
+> **Mevcut dava akışına (AGENTS.md ASAMA 0-7, `arastir:` komutu) DOKUNMAZ.**
 > Bağımsız ikinci bir hat olarak çalışır.
 >
 > **REVİZYON 2026-07-09 (avukat kararı):** Süper Stajyer (Faz 1) ve
@@ -44,7 +44,7 @@ arastir danisma: {hukuki soru}
 - `arastir danisma: trafik kazasında %50 kusurlu yaya öldü, sürücüye tazminat davası açılabilir mi`
 - `arastir danisma: 6 ay aralıksız çalışmış işçi haklı fesih ile kıdem tazminatı alabilir mi`
 
-Slash komut karşılığı: `.claude/commands/arastir-danisma.md`. Avukat bu komutu yazdığında Director (Claude Fable 5 — bkz. CLAUDE.md) `ajanlar/arastirmaci/danisma-hatti.md`'yi okuyup aşağıdaki 5 faz workflow'unu uygular.
+Slash komut karşılığı: `.claude/commands/arastir-danisma.md`. Avukat bu komutu yazdığında Director (ARASTIRMACI rolü — bkz. AGENTS.md) `ajanlar/arastirmaci/danisma-hatti.md`'yi okuyup aşağıdaki 5 faz workflow'unu uygular.
 
 ---
 
@@ -110,7 +110,7 @@ Tam doktrin: `@ajanlar/0-halusinasyon-doktrini.md`. Bu modül için kritik kural
 Dava akışının 2B'sinin mini versiyonu — **min 6 sorgu / 3 alt-adım**
 (15-sorguluk tam protokol dava akışında; danışma hattı hız önceliklidir):
 
-Faz 1'i **Claude Fable 5 tek elden** yürütür (`config/motor-haritasi.json ->
+Faz 1'i **ARASTIRMACI rolü tek elden** yürütür (`config/motor-haritasi.json ->
 tasks.yargi_mcp`, hafif mod: min 6 sorgu / 3 tam metin). Ayrı pipeline
 scripti YOKTUR — sorgular bu oturumda Yargı-MCP-Pro araçlarıyla atılır,
 MCP fail olursa `yargi` CLI fallback (rapora `mcp_fallback_used: true`).
@@ -142,8 +142,7 @@ yazılmadan Faz 2'ye geçilmez.
 4. **`01-Ictihat-taramasi.md` yaz:**
    ```markdown
    ---
-   engine: claude
-   model: claude-fable-5
+   engine: <aktif motor — scripts/motor.py>
    mcp: yargi-mcp-pro
    total_sorgu: N
    dogrulanmis: V
@@ -193,7 +192,7 @@ Faz 1 kararlarının atıf yaptığı + sorunun işaret ettiği kanun maddeleri 
 4. **`02-Mulga-denetim.md` yaz:**
    ```markdown
    ---
-   engine: claude
+   engine: <aktif motor — scripts/motor.py>
    mcp: yargi-mcp-pro (mevzuat)
    total_madde_count: N
    ---
@@ -221,15 +220,15 @@ VER, UYDURMA YAPMA" ibaresi zorunlu. Notebook yoksa faz sessizce atlanır.
 
 ### Faz 3: Sentez Cevap (Avukatın Okuyacağı Nihai Rapor)
 
-Faz 1-2 çıktılarının nihai sentezini **Claude Fable 5** yazar; ardından AYNI
+Faz 1-2 çıktılarının nihai sentezini **ARASTIRMACI rolü** yazar; ardından AYNI
 oturumda bağımsız künye içerik-teyidi yapılır (her documentId yeniden çekilip
 alıntı kıyaslanır) ve deterministik kapı `cikti_dogrula.py` yapısal kontrolü
-tamamlar. Antigravity/Gemini gerekmez (hafiflik prensibi).
+tamamlar. ayrı bir motor gerekmez (hafiflik prensibi).
 
 **`arastirma-cevabi.md` yapısı:**
 ```markdown
 ---
-engine: claude
+engine: <aktif motor — scripts/motor.py>
 model: {config/motor-haritasi.json -> tasks.arastirma_sentezi.model}
 task_type: arastirma_cevabi
 arastirma_id: {YYYY-MM-DD}-{slug}
@@ -350,10 +349,10 @@ mempalace_add_drawer(
 
 | Dosya | İçerik | Üretici |
 |---|---|---|
-| `00-Soru.md` | Ham soru + doktrinal çeviri | Director/Claude (Faz 0) |
-| `01-Ictihat-taramasi.md` | Sorgular + DOĞRULANMIŞ/Elenen kararlar | Claude sentez + Yargı araçları (Faz 1) |
-| `02-Mulga-denetim.md` | Mevzuat madde yürürlük denetimi | Claude + Mevzuat araçları (Faz 2) |
-| `arastirma-cevabi.md` ★ | NİHAİ — avukatın okuyacağı sentez | Claude (Faz 3) + bağımsız künye teyidi |
+| `00-Soru.md` | Ham soru + doktrinal çeviri | ORKESTRATOR (Faz 0) |
+| `01-Ictihat-taramasi.md` | Sorgular + DOĞRULANMIŞ/Elenen kararlar | ARASTIRMACI sentez + Yargı araçları (Faz 1) |
+| `02-Mulga-denetim.md` | Mevzuat madde yürürlük denetimi | ARASTIRMACI + Mevzuat araçları (Faz 2) |
+| `arastirma-cevabi.md` ★ | NİHAİ — avukatın okuyacağı sentez | ARASTIRMACI (Faz 3) + DENETCI künye teyidi |
 | `arastirma-cevabi.docx` | DOCX export | md_to_docx.py (Faz 3) |
 
 **Avukat sadece `arastirma-cevabi.md/.docx`'i okur.** Diğer dosyalar iz/şeffaflık için arşivde durur.

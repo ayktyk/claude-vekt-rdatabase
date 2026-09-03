@@ -5,16 +5,19 @@ Versiyon: 1.1
 
 ---
 
-## Motor
+## Rol ve Motor
 
-**TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/motor-haritasi.json`'dan okunur.
+Sistem **tek motorla** çalışır: oturumu hangi LLM ile açtıysanız o. Rol ataması
+yalnızca `config/motor-haritasi.json` → `tasks.dilekce_yazimi.rol`'dan okunur.
 
-- **dilekce_yazimi** task'i: `config/motor-haritasi.json` -> `tasks.dilekce_yazimi.engine` (= `antigravity_manual`) ve `model`
-- **Antigravity (sag panel)** uretir; terminal Claude SADECE devir blogu basar
-- **Claude'da kalir:** hesaplama sonuclarinin dilekceye enjeksiyonu (devir blogunda), MCP cagrilari, UYAP/UDF formatina donusturme (`md_to_docx.py`, `md_to_udf.py`)
-- **Self-review:** Antigravity ayni sohbette `prompts/muhakeme/self_review.md`'yi uygular; ek olarak ASAMA 7 Revizyon Ajani 7 boyutta tekrar denetler
-- **Prompt sablonu:** `prompts/muhakeme/dilekce_yazimi.md` (Antigravity'ye yapistirilir)
-- **Fallback:** Antigravity erisilemezse "fallback claude" → Claude uretir, `fallback_used: true`
+- **dilekce_yazimi** task'ı: rol **`MUHAKEME`**
+- **ORKESTRATOR'da kalan iş (deterministik / araç):** hesaplama sonuçlarının girdi olarak hazırlanması, MCP çağrıları, DOCX dönüşümü (`md_to_docx.py`)
+- **Prompt şablonu:** `prompts/muhakeme/dilekce_yazimi.md` + `prompts/muhakeme/_ortak-kurallar.md`
+- **Bağımsız denetim:** çıktı üretildikten sonra **DENETCI** (`ajanlar/denetci/SKILL.md`)
+  üretim bağlamını görmeden denetler; KIRMIZI kararda çıktı Drive'a yazılmaz.
+  Ek olarak ASAMA 7 Revizyon Ajanı 8 boyutta tekrar denetler.
+- **Motor damgası:** frontmatter `engine:` alanı `python scripts/motor.py damga dilekce_yazimi` ile
+  doldurulur; avukat motoru bildirmemişse `engine: bildirilmedi` yazılır.
 
 ---
 
@@ -56,104 +59,51 @@ Versiyon: 1.1
 
 ---
 
-## ZORUNLU ILK ADIM — Antigravity Devri (2026-05-13 → 3 Batch 2026-05-14)
+## Üretim Akışı (tek motor — ASAMA 5)
 
-Bu ASAMA hukuki uretimdir, Antigravity sag panelinde Gemini 3.1 Pro yapar.
-Terminal Claude burada SADECE devir blogu basar; dilekce v1'i dogrudan
-terminal Claude YAZMAZ.
+Elle devir bloğu, kopyala-yapıştır ve harici panel **yoktur**. Aynı oturumda:
+ORKESTRATOR hazırlar → MUHAKEME üretir → DENETCI bağımsız denetler → avukat onaylar.
 
-**ÖNEMLI — BATCH 3 ICINDE (2026-05-14 pilot sonrasi iyilestirme):**
-Mehmet Ali 2026-003 davasinda 5 ayri devir blogu yorucuydu. ASAMA 5
-(dilekce v1) artik tek basina degil, **BATCH 3** icinde uretilir:
+> **ASAMA 5-6-7 aynı oturumda ardışık yürür** (yaz → eleştir → revize doğal döngüsü).
+> Her çıktı ayrı dosyaya yazılır ve her biri ayrı DENETCI denetiminden geçer.
 
-> **BATCH 3 = ASAMA 5 + ASAMA 6 + ASAMA 7** tek Antigravity sohbetinde.
-> Antigravity once dilekce v1 yazar (bu ajan), sonra savunma simulasyonu
-> yapar (`savunma_simulasyonu` task), sonra v2 NIHAI revizyon (`revizyon`
-> task) yapar. Drive'a 3 ayri dosya yazilir; avukat tek devir bloguyla
-> 3 ciktinin hepsini alir.
+### Akış
 
-Bu ajan icin pratik etki:
-- **Devir blogu icerigi degisti:** Artik sadece "Dilekce v1 yaz, sonra
-  6 ve 7'ye devam et" diyen tek master blok kullanilir
-  (`AGENTS.md` > BATCH 3 sablonuna bak)
-- **Self-review hala her ADIM sonu yapilir** (ADIM A icin v1 self-review)
-- **DOCX/UDF uretimi tum batch bittiginde** yapilir (terminal Claude
-  "Hepsi bitti" sinyaliyle baslar)
+1. **Ön-hazırlık (ORKESTRATOR — deterministik / araç işi):**
+   - Önceki ASAMA çıktıları Drive'da hazır olmalı: briefing (1), araştırma raporu (2), usul raporu (3), stratejik analiz (4 — yazım rehberi)
+   - Stratejik analizdeki çerçeve önerisi (`prompts/muhakeme/cerceveler/`) belirlenir
 
-### Akis
+2. **Üretim (MUHAKEME):** Protokol `prompts/muhakeme/dilekce_yazimi.md` + `prompts/muhakeme/_ortak-kurallar.md`.
+   Girdiler sırayla okunur:
+     - `{dava-klasoru}/00-Briefing.md`
+     - `{dava-klasoru}/02-Arastirma/arastirma-raporu.md`
+     - `{dava-klasoru}/01-Usul/usul-raporu.md`
+     - `{dava-klasoru}/02-Arastirma/stratejik-analiz.md` — YAZIM REHBERİ: "Dilekçe Yazım Rehberi" bölümü birebir takip edilir (argüman sırası, ton, atıf kararları)
+     - `dilekce-yazim-kurallari.md` (proje kökü)
+   Çıktı: `{dava-klasoru}/03-Sentez-ve-Dilekce/dilekce-v1.md`
+   - Hesaplama tutarları usul raporundan birebir alınır (kendi hesabını yapma)
+   - En az 2 Yargıtay kararı atfı (künye + Bedesten documentId); "DOĞRULANMAMIŞ" damgalı karar dilekçeye taşınamaz
+   - HARD FAIL: doğrulanmamış atıf ≥ 2 · NotebookLM cevabını farklı davaya genelleme · uydurma Yargıtay alıntısı
 
-1. **On-hazirlik (Claude'da kalir):** Onceki ASAMA ciktilari Drive'da
-   hazir olmali:
-   - 00-Briefing.md (ASAMA 1)
-   - 02-Arastirma/arastirma-raporu.md (ASAMA 2)
-   - 01-Usul/usul-raporu.md (ASAMA 3)
-   - 02-Arastirma/stratejik-analiz.md (ASAMA 4 — yazim rehberi)
+3. **Bağımsız denetim (DENETCI):** Girdi yalnızca `{çıktı yolu, dava-id}`; üretim
+   bağlamı verilmez. Deterministik kapılar → künye içerik teyidi (her documentId
+   MCP'den yeniden çekilir) → doktrin clause sayımı → çıkarım denetimi → aleyhe beyanı.
+   Karar KIRMIZI / SARI / YEŞİL. YEŞİL değilse MUHAKEME revize eder; en çok 3 tur.
+   **YEŞİL olmadan çıktı Drive'a yazılmaz.**
 
-2. **Antigravity devir blogu bas (avukata sun):**
+4. **Avukat onayı:** Avukat "ASAMA 5 bitti" / `devam` diyene kadar bir sonraki ASAMA'ya geçilmez.
 
-   ```
-   ========== ANTIGRAVITY DEVIR BLOGU ==========
-   ASAMA: ASAMA 5 (Dilekce v1)
-   Dava-ID: {dava-id}
-
-   Sag panele yapistirilacak:
-   --------------------------------------------
-   Asagidaki dosyalari oku (sirayla):
-     - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\00-Briefing.md
-     - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\02-Arastirma\arastirma-raporu.md
-     - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\01-Usul\usul-raporu.md
-     - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\02-Arastirma\stratejik-analiz.md
-        ^ YAZIM REHBERI — ASAMA 4 sentez ciktisinin "Dilekce Yazim Rehberi"
-          bolumunu birebir takip et (arguman sirasi, ton, atif kararlari)
-
-   Protokol: prompts/muhakeme/dilekce_yazimi.md
-   Ortak kurallar: prompts/muhakeme/_ortak-kurallar.md
-   Dilekce yazim sablonu: dilekce-yazim-kurallari.md (proje kokunde)
-
-   Cikti: G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\03-Sentez-ve-Dilekce\dilekce-v1.md
-
-   KVKK kritik: dilekcede tum muvekkil verisi MASKELI token kalir
-   ([MUVEKKIL_1], [TC_1], [ADRES_2] vs.). Unmask sonra avukat yapar.
-   Hesaplama tutarlari usul raporundan birebir alinir (kendi hesabini yapma).
-   En az 2 Yargitay karari atif olmali (kunye + Bedesten documentId).
-   "DOGRULANMAMIS" damgali kararlar dilekceye TASINAMAZ.
-
-   Cikti sonunda self-review yap (prompts/muhakeme/self_review.md):
-     - HARD FAIL: Dogrulanmamis atif >= 2
-     - HARD FAIL: NotebookLM cevabini farkli davaya genelletirme
-     - HARD FAIL: Uydurma Yargitay alintisi
-   --------------------------------------------
-
-   Antigravity tamamlayinca buraya don ve "ASAMA 5 bitti" yaz.
-   =============================================
-   ```
-
-3. **Avukat onayini bekle:** Avukat "ASAMA 5 bitti" diyene kadar bir
-   sonraki ASAMA'ya gecme.
-
-4. **Avukat onayi sonrasi (Director yapar):**
-   - `qmd update` calistir (yeni dilekce-v1.md indexlenir)
-   - `mempalace_diary_write "dilekce_yazari"` ile dilekceden ogrenilen
-     uslup/strateji notlarini yaz
-   - `python scripts/md_to_docx.py {dava-klasoru}` calistir (DOCX zorunlu;
-     UDF v1 icin URETILMEZ — sadece NIHAI v2'de uretilir)
-   - ASAMA 6 (Savunma Simulasyonu) devir blogunu hazirla
+5. **Onay sonrası (ORKESTRATOR):**
+   - `qmd update`
+   - `mempalace_diary_write "dilekce_yazari"` — üslup/strateji notları
+   - `python scripts/md_to_docx.py {dava-klasoru}` (DOCX zorunlu; **UDF v1 için üretilmez**, yalnız NİHAİ v2'de)
+   - ASAMA 6 (Savunma Simülasyonu) hazırlığı
 
 ### Asla
 
-- Devir blogunu basmadan terminal Claude'da dilekce yazma
-- `gemini-bridge.sh` cagirma — DEPRECATED (exit 100)
-- Hesaplamayi Antigravity'ye yaptirma (usul raporundan birebir kopya)
-- Antigravity ciktisini "kontrol etmek icin" terminal Claude'da yeniden
-  uretme — kalite kapisi Antigravity self-review'da
-- Maskeli token'lari unmask edip dilekceye yazdirma (KVKK ihlali)
-
-### Fallback
-
-Antigravity erisilemezse avukat "fallback claude" → terminal Claude
-`prompts/muhakeme/dilekce_yazimi.md` protokolune gore dilekce v1 uretir,
-frontmatter `engine: claude`, `fallback_used: true`,
-`reason: antigravity_unavailable`.
+- Hesaplamayı LLM'e yaptırma (usul raporundan birebir kopya)
+- DENETCI YEŞİL vermeden çıktıyı Drive'a yazma
+- "Kontrol etmek için" aynı bağlamda ikinci bir taslak üretme — denetim DENETCI'nin işidir, bağımsız olmalıdır
 
 ---
 
@@ -637,7 +587,7 @@ zaten arastirma akisinda calistirilmaz.
 | Senaryo | Aksiyon |
 |---|---|
 | MCP baglanti hatasi (MemPalace) | Director Agent'a bildir, adimi atla, rapora `[MCP HATASI: buro-hafizasi]` notu ekle. Dilekce yazimina gecmis kaliplar olmadan devam et. |
-| Arastirma raporu veya usul raporu eksik | Director Agent'a bildir. Dilekce yazimi yeterli girdi olmadan BASLATILMAZ — minimum arastirma raporu + usul raporu zorunlu. Kuresel CLAUDE.md "Kalite Gate" bolumuyle uyumlu. |
+| Arastirma raporu veya usul raporu eksik | Director Agent'a bildir. Dilekce yazimi yeterli girdi olmadan BASLATILMAZ — minimum arastirma raporu + usul raporu zorunlu. AGENTS.md "Kalite Gate" bolumuyle uyumlu. |
 | Atif dogrulama basarisiz (Yargi CLI erisim hatasi) | Dogrulanamayan atiflar "[dogrulanmasi gerekir]" etiketiyle birakilir. 2+ dogrulanamayan atif varsa dilekce BLOKLANIR, Director Agent'a bildirilir. |
 | Context siniri doldu | Dilekce taslagindan once arguman omurgasini (mevzuat + karar atifi) ve netice-i talep bolumunu koru. Olgu kismi ozetlenebilir. |
 | Hesaplama tutarsizligi | Usul ajaninin hesaplama sonuclariyla netice-i talep karsilastirilir. Tutarsizlik varsa Director Agent'a UYARI gonderilir, dilekce duzeltme beklenir. |

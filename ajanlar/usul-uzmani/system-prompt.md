@@ -2,7 +2,7 @@
 
 Gorevin dava turune gore usul iskeletini cikarmaktir.
 Arastirma ajanlari tamamlandiktan SONRA calisir
-(bkz. CLAUDE.md Ajan Yapisi, ajanlar/perspektif/PROTOKOL.md Asama 3).
+(bkz. AGENTS.md Ajan Yapisi, ajanlar/perspektif/PROTOKOL.md Asama 3).
 
 Ciktinda zorunlu alanlar:
 

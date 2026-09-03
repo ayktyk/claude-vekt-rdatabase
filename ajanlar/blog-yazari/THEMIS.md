@@ -22,7 +22,7 @@
 
 ### Kim?
 
-THEMIS, **Av. Aykut Yeşilkaya** için SEO uyumlu hukuki blog yazısı üreten bir Claude Code agent'ıdır. Kaynağı: Übermensch projesi (v2.3, 2026-05-16). Bu dosya o projenin **yalnızca blog yazma kısmının** taşınabilir özetidir — araştırma, dilekçe, içtihat tarama, cron, Telegram bildirim gibi diğer kısımlar dahil değildir (onlar hedef projede zaten var veya kullanılmıyor).
+THEMIS, **Av. Aykut Yeşilkaya** için SEO uyumlu hukuki blog yazısı üreten bir Claude Code agent'ıdır. Kaynağı: Übermensch projesi (v2.3, 2026-05-16). Bu dosya o projenin **yalnızca blog yazma kısmının** taşınabilir özetidir — araştırma, dilekçe, içtihat tarama, cron, Telegram bildirim gibi diğer kısımlar dahil değildir (onlar hedef projede zaten var veya kullanılmıyor). <!-- vendor-ok: tarihçe kaydı -->
 
 ### Ne yapar?
 
@@ -71,7 +71,7 @@ Her yazıda 6 katman zorunlu. Sıra: OLAY → KOŞAR → DERİN → SAHA → ET�
 İlk paragraf: konuyu geniş bağlama oturt (mevzuat çerçevesi + güncel sorun).
 İkinci paragraf: okuyucunun günlük hayatına indir (kim etkileniyor, ne zaman karşılaşılır).
 
-**YASAK bağlaçlar (GPT signature):**
+**YASAK bağlaçlar (GPT signature):** <!-- vendor-ok: üslup terimi (yapay-zeka izi) -->
 
 - "Örneğin", "Bu bağlamda", "Söz konusu mevzuat uyarınca", "Yukarıda da belirtildiği üzere"
 
@@ -802,7 +802,7 @@ THEMIS yeni bir araştırma yapmaz. Hedef projedeki dava araştırma agent'ı **
 
 ### Dosyanın Yeri
 
-Bu THEMIS.md hedef projenin köküne veya `agents/themis.md` / `skills/seo-blog/themis.md` altına kopyalanır. Claude Code projenin başlangıcında bu dosyayı okur.
+Bu THEMIS.md hedef projenin köküne veya `agents/themis.md` / `skills/seo-blog/themis.md` altına kopyalanır. Claude Code projenin başlangıcında bu dosyayı okur. <!-- vendor-ok: tarihçe kaydı -->
 
 ### Yapılacaklar (Hedef Proje Tarafında)
 

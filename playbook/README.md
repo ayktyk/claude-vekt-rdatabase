@@ -8,7 +8,7 @@
 ## Kullanim Kurali (ZORUNLU)
 
 Bir dava turunde calisan HER ajan (arastirmaci, usul, dilekce, savunma
-sim, revizyon) ve her Gemini devir blogu, ise baslamadan once ilgili
+sim, revizyon) ve MUHAKEME rolu, ise baslamadan once ilgili
 `playbook/{dava-turu}.md` dosyasini OKUR ve talimatlarini uygular.
 Playbook yoksa Director avukata bildirir: "Bu dava turu icin playbook
 yok — dava sirasinda 2-3 soruyla baslatalim mi?"

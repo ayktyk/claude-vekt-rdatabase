@@ -33,7 +33,7 @@ muvekkil metninde gereklidir).
 ```yaml
 ---
 model: {motor id}
-engine: gemini | claude
+engine: <aktif motor — python scripts/motor.py damga>
 task_type: muvekkil_bilgilendirme
 run_id: {ISO_timestamp}-{pid}
 attempt: 1 | 2

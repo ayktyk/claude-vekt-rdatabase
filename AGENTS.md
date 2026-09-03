@@ -2,7 +2,7 @@
 
 > **ANAYASA — TEK DOĞRULUK KAYNAĞI.** Bu dosya sistemin tek anayasasıdır.
 > Hangi LLM ile bağlanılırsa bağlanılsın önce bu dosya okunur.
-> `CLAUDE.md`, `GEMINI.md` ve `.cursor/rules/hukuk.mdc` yalnızca buraya yönlendiren
+> `CLAUDE.md`, `GEMINI.md` ve `.cursor/rules/hukuk.mdc` yalnızca buraya yönlendiren <!-- vendor-ok: adaptör dosya adı -->
 > stub'lardır; kural içermezler.
 >
 > **Motor:** Sistem tek motorla çalışır — oturumu hangi LLM ile açtıysanız o.
@@ -58,43 +58,40 @@ Yargitay 12. HD T.27.09.2016 E.2016/17416 K.2016/19934
 
 **Hata gecmisi (sistemik risk):**
 - 2026-05-05 Tugba 2026-89 davasi: NotebookLM 89/4 cevabini 89/3'e yanlis genellestirme + uydurma HGK alintisi. Avukat tarafindan yakalandi. Doktrin yazildi.
-- 2026-05-06 Seydi Ahmet Baskaya 2025/139 davasi: Hibrit motor (Claude+Gemini) ASAMA basi bildirim ve sonu self-review yapilmadan tum cikti tek elden Claude tarafindan uretildi. Avukat farketti, Gemini self-review devreye alindi: 35+ format/uslup ihlali ve 1 HARD FAIL bulundu. **Hibrit Motor Zorunluluk Doktrini yazildi.**
-- **2026-05-17 Sahte Icra Mesaji blog (THEMIS v1):** Hizir `ictihat_ara`'in dondurdugu 30,939 sonuc icinden ilk 6 Bedesten ID'yi alip karar metinlerini ACMADAN Gemini'ye devir bloguna gomdu. Tum karar tarihleri 2026-04 oldugu icin avukat suphelendi, "uydurma karar atfi" uyarisini verdi. Bedesten document API 502 oldugu icin doğrulama yapılamadi, atıflar "yerleski uygulama" formuluyle degistirildi. **Sistemik fix:** `ajanlar/blog-yazari/SKILL.md` §1.5 + `prompts/muhakeme/blog_yazimi.md`'ye **Document Fetch Verification Zorunlulugu** eklendi: search listesinde gorunmek = atif YAPMAK icin yetmez; her Bedesten ID `ictihat_getir` ile acilip konuyla ilgili oldugu teyit edilmeden Gemini'ye gonderilmez. `verified: true` flag'i olmayan karar Gemini protokolünde reddedilir. API down -> kunye verilmez, "yerlesik uygulama" formulu zorunlu.
+- 2026-05-06 Seydi Ahmet Baskaya 2025/139 davasi: Hibrit motor (Claude+Gemini) ASAMA basi bildirim ve sonu self-review yapilmadan tum cikti tek elden Claude tarafindan uretildi. <!-- vendor-ok: tarihçe kaydı --> Avukat farketti, Gemini self-review devreye alindi: 35+ format/uslup ihlali ve 1 HARD FAIL bulundu. **Hibrit Motor Zorunluluk Doktrini yazildi.**
+- **2026-05-17 Sahte Icra Mesaji blog (THEMIS v1):** Hizir `ictihat_ara`'in dondurdugu 30,939 sonuc icinden ilk 6 Bedesten ID'yi alip karar metinlerini ACMADAN Gemini'ye devir bloguna gomdu. Tum karar tarihleri 2026-04 oldugu icin avukat suphelendi, "uydurma karar atfi" uyarisini verdi. Bedesten document API 502 oldugu icin doğrulama yapılamadi, atıflar "yerleski uygulama" formuluyle degistirildi. **Sistemik fix:** `ajanlar/blog-yazari/SKILL.md` §1.5 + `prompts/muhakeme/blog_yazimi.md`'ye **Document Fetch Verification Zorunlulugu** eklendi: search listesinde gorunmek = atif YAPMAK icin yetmez; her Bedesten ID `ictihat_getir` ile acilip konuyla ilgili oldugu teyit edilmeden Gemini'ye gonderilmez. `verified: true` flag'i olmayan karar Gemini protokolünde reddedilir. API down -> kunye verilmez, "yerlesik uygulama" formulu zorunlu. <!-- vendor-ok: tarihçe kaydı -->
 
 ## Doktrin Zorunluluk Kapıları (Çalıştırılabilir — 2026-06-02)
 
 0-Halüsinasyon + Anti-Sycophancy doktrini artık YALNIZ metin değil; **çalıştırılabilir
 kapılarla** zorlanır. Kanonik kaynak: `prompts/_doktrin-preamble.md` +
 `scripts/doktrin_contract.py` (SENTINEL `<!-- DOKTRIN-PREAMBLE v1 -->`, 8 clause token,
-Kaynak Doğrulama Tablosu grameri, TBB ifadeleri, KVKK allowlist). Tüm dış-prompt
-yüzeyleri (16 Gemini prompt + 5 perspektif ajanı + arastir/blog
-komutları + devir blokları) bu doktrini inline taşır.
+Kaynak Doğrulama Tablosu grameri, TBB ifadeleri, KVKK allowlist). Tüm prompt
+yüzeyleri (16 muhakeme prompt'u + 5 perspektif ajanı + arastir/blog
+komutları + AGENTS.md denetim çağrı bloğu) bu doktrini inline taşır.
 
-**Air-gap gerçeği:** Gemini devir bloğunu avukat ELLE yapıştırır ve çıktıyı doğrudan
-Drive'a yazar; hiçbir hook Gemini çıktısını yakalayamaz. Güven üç katmanlıdır:
-1. **`doktrin_lint.py`** (prompt-side, LIVE): prompt yüzeyleri + devir blokları SENTINEL
-   + 8 clause taşıyor mu. Prompt dosyası Edit/Write edilince hook otomatik çalışır (FAZ 4).
-2. **SENTINEL echo** (köprü): preamble Gemini'ye SENTINEL'i çıktıya yazdırır; dönen
-   dosyada yoksa doktrin ulaşmamış → `cikti_dogrula.py` HARD FAIL.
-3. **`cikti_dogrula.py`** (output-side YAPISAL, LIVE) + **bağımsız Claude reviewer**
-   (BAĞLAYICI): dönen Drive dosyası indirilir, yapısal kontrol (SENTINEL, Kaynak tablosu,
-   Aleyhe beyanı, TBB, KVKK) yapılır; AYRICA terminal Claude **bağımsız** (aynı-sohbet
-   self-review DEĞİL) her documentId'yi Pro MCP ile yeniden çekip alıntıyı kıyaslar.
-   İkisi de PASS olmadan çıktı avukata/Gmail/MemPalace'a GİTMEZ.
+**Güven üç katmanlıdır:**
+1. **`doktrin_lint.py`** (prompt-side, LIVE): prompt yüzeyleri SENTINEL + tüm clause'ları
+   taşıyor mu. Prompt dosyası Edit/Write edilince hook otomatik çalışır.
+2. **SENTINEL echo** (köprü): preamble üretici role SENTINEL'i çıktıya yazdırır; çıktıda
+   yoksa doktrin ulaşmamış → `cikti_dogrula.py` HARD FAIL.
+3. **`cikti_dogrula.py`** (output-side YAPISAL, LIVE) + **DENETCI** (BAĞLAYICI): çıktı
+   dosyası yapısal kontrolden geçer (SENTINEL, Kaynak tablosu, Aleyhe beyanı, TBB, KVKK);
+   AYRICA sıfır bağlamlı DENETCI (aynı-bağlam self-review DEĞİL) her documentId'yi MCP ile
+   yeniden çekip alıntıyı kıyaslar. İkisi de PASS olmadan çıktı avukata/Gmail/MemPalace'a GİTMEZ.
 
 **Kapı yerleşimi (her oturum bunu uygular):**
 | Yüzey | Komut | Ne zaman |
 |---|---|---|
-| Prompt dosyaları + devir blokları | `python scripts/doktrin_lint.py` | Edit/Write hook + manuel |
+| Prompt dosyaları + denetim çağrı bloğu | `python scripts/doktrin_lint.py` | Edit/Write hook + manuel |
 | Araştırma sentezi (`arastirma-raporu.md` / `arastirma-cevabi.md`) | `python scripts/cikti_dogrula.py <dosya> --dict {dava-id}` + `quality_gate.py asama2` | ASAMA 2 sonu (Kalite Kapısı 1) |
-| Gemini batch dönüşü (usul/stratejik/dilekçe/savunma/revizyon) | `cikti_dogrula.py <dosya> --dict {dava-id}` + bağımsız reviewer | "ASAMA N bitti" → indirilen dosyada |
-| Blog çıktısı | `python scripts/blog_validator.py <blog.md> --dict {dava-id}` (PENDING FAZ 3) | Gmail `create_draft` ÖNCESİ — BLOCKING |
+| MUHAKEME çıktıları (usul/stratejik/dilekçe/savunma/revizyon) | `cikti_dogrula.py <dosya> --dict {dava-id}` + DENETCI | Her çıktı sonrası, Drive'a yazılmadan |
+| Blog çıktısı | `python scripts/blog_validator.py <blog.md> --dict {dava-id}` | Gmail `create_draft` ÖNCESİ — BLOCKING |
 | MemPalace künye taşıyan drawer | `cikti_dogrula.py` | `mempalace_add_drawer` ÖNCESİ; promotion yalnız `verified:true` |
 
 **Kritik:** `cikti_dogrula.py` YAPISAL kapıdır — documentId'nin gerçekliğini DOĞRULAYAMAZ.
-İçerik-eşleşme (her documentId'yi Pro MCP ile teyit + alıntı kıyas) **bağımsız Claude
-adımıdır**, script onun yerine GEÇMEZ. Detay + faz durumu:
-`~/.claude/plans/ultrathink-workflow-claude-code-setup-pl-fluffy-frost.md`.
+İçerik-eşleşme (her documentId'yi Pro MCP ile teyit + alıntı kıyas) **DENETCI
+adımıdır**, script onun yerine GEÇMEZ.
 
 ## Motor Mimarisi
 
@@ -163,7 +160,7 @@ akis calistirilmaz.
 
 ## KVKK Maskeleme (ERTELENDI — yerel LLM'e gecise kadar)
 
-**Avukatin karari (2026-07-09):** Bulut LLM'lerle (Claude / Gemini)
+**Avukatin karari (2026-07-09):** Bulut LLM'lerle (Claude / Gemini) <!-- vendor-ok: tarihçe kaydı -->
 calisirken maskeleme UYGULANMAZ. Dava komutlari ve ASAMA ciktilari
 gercek veriyle calisir. Avukat YEREL LLM kullanmaya basladiginda
 maskeleme zorunlulugu geri gelecek.
@@ -191,8 +188,8 @@ degil karar vericiye terfi eder; govdeyi ancak gerektiginde okur.
 **Arguman guven etiketi (ZORUNLU — 2026-07-10):** Ileri surulen her
 hukuki arguman `[YERLESIK] / [GELISEN] / [ACIK SORU] / [ZORLAMA]`
 etiketlerinden birini tasir ([ZORLAMA] yalniz avukat acikca isterse).
-Detay: `prompts/muhakeme/_ortak-kurallar.md` madde 13-14 (Gemini) —
-ayni kurallar terminal Claude ciktilari (arastirma sentezi, danisma
+Detay: `prompts/muhakeme/_ortak-kurallar.md` madde 13-14 (MUHAKEME) —
+ayni kurallar ORKESTRATOR ciktilari (arastirma sentezi, danisma
 cevabi) icin de gecerlidir.
 
 **UDF uretimi yalnizca NIHAI DILEKCE icin** yapilir:
@@ -270,7 +267,7 @@ Bu kuralin sonucu:
 
 ```text
 ~/hukuk-otomasyon/
-|-- CLAUDE.md
+|-- CLAUDE.md   <!-- vendor-ok: adaptör stub -->
 |-- legal.local.md
 |-- dilekce-yazim-kurallari.md
 |-- .mcp.json
@@ -377,9 +374,9 @@ Bu katman yalnizca avukatin isaret ettigi kritik nokta icin calistirilir.
 Genis, konusuz arastirma yapma.
 
 **ONEMLI - Her Zaman Derin Mod:** Yargi MCP ve Mevzuat MCP her sorguda
-**iteratif derin protokol** ile calisir. 2B ve 2C TEK ELDEN Claude Fable 5
+**iteratif derin protokol** ile calisir. 2B ve 2C TEK ELDEN ARASTIRMACI rolü
 tarafindan yurutulur (`config/motor-haritasi.json` -> `tasks.yargi_mcp` /
-`tasks.mevzuat_mcp`, engine: claude; protokol: 6 Faz + Gap Check, min sorgu
+`tasks.mevzuat_mcp`, rol: ARASTIRMACI; protokol: 6 Faz + Gap Check, min sorgu
 kurallari `modes` altinda). Tek-shot sorgu yasaktir. Yargi CLI / Mevzuat CLI
 yalniz MCP fail durumunda fallback olarak devreye girer.
 
@@ -443,7 +440,7 @@ Kaynak turleri ve erisim yontemleri:
 - NotebookLM notebook -> NotebookLM MCP ile sorgula
 - Google Drive klasoru veya dosyasi -> Google Drive MCP ile oku
 - Yerel dosya -> avukat yukler veya yapistirir
-- Claude Projects -> avukat icerigi yapistirir
+- Claude Projects -> avukat icerigi yapistirir <!-- vendor-ok: kaynak türü adı -->
 
 ### Destek Araclari
 
@@ -497,7 +494,7 @@ avukat "devam" demeden bir sonraki asamaya GECMEZ.
 
 ```
 [ASAMA N: {asama adi}]
-Motor: {gemini | claude}
+Rol: {ORKESTRATOR | ARASTIRMACI | MUHAKEME | DENETCI}
 Model: {model-id}
 Fallback: {kullanildi / kullanilmadi}
 Giris: {okunan dosyalar}
@@ -755,168 +752,42 @@ Ajan 3 cikti uretti:
 Hicbir ajan ciktisi "final" olarak isaretlenmez.
 Tum ciktilar "TASLAK" ibaresiyle kaydedilir.
 
-### Antigravity Self-Review Kalite Gate Adimi
+### DENETCI Kapısı (her hukuki çıktı sonrası)
 
-Antigravity her hukuki cikti urettikten sonra **AYNI SOHBETTE**
-`prompts/muhakeme/self_review.md` protokolunu uygulayip kendi ciktisini denetler.
-Bridge cagrisi yok, ek tool yok — sadece Antigravity sohbet icinde "simdi
-kendi ciktini self-review et" diye yonlendirilir (devir blogunun son
-satirinda yazar).
+Kalite gate'in son halkası bağımsız denetimdir. Çıktıyı üreten bağlam değil,
+**sıfır bağlamlı DENETCI** denetler (`ajanlar/denetci/SKILL.md`):
 
-Akis:
-1. Antigravity hukuki ciktiyi uretir (TASLAK)
-2. Ayni sohbette `prompts/muhakeme/self_review.md` protokolune gore
-   ciktiyi denetler:
-   - Yargitay/HGK/IBK atiflari Bedesten documentId ile dogrulanmis mi?
-   - Tirnak alintilari kaynaktan birebir mi?
-   - DOGRULANMAMIS atif >=2 var mi (HARD FAIL)?
-   - Format ihlali var mi (emoji, slogan tonu, vb.)?
-3. Karar:
-   - **KIRMIZI / YENIDEN YAZ** → Antigravity sohbette revize eder
-   - **SARI / REVIZYON GEREK** → Antigravity duzeltir veya avukatin
-     onayini sorar
-   - **YESIL / KABUL** → Cikti Drive'a yazilir, avukat terminale donup
-     "ASAMA N bitti" der
-4. Self-review sonucu (KIRMIZI/SARI/YESIL) ciktinin sonunda kisa bir
-   blok olarak yazilir (frontmatter sonrasi).
+1. Üretici rol (MUHAKEME / ARASTIRMACI) çıktıyı TASLAK olarak yazar
+2. ORKESTRATOR, DENETCI'yi yalnızca `{çıktı yolu, dava-id}` ile çağırır — üretim
+   bağlamı, taslak sürümleri, gerekçeler verilmez
+3. DENETCI sırayla: deterministik kapılar (`cikti_dogrula.py`, `quality_gate.py`) →
+   her documentId'yi MCP'den yeniden çekip alıntıyı birebir kıyaslama → doktrin
+   clause sayımı → çıkarım denetimi → aleyhe beyanı
+4. Karar: **KIRMIZI** (çıktı Drive'a yazılmaz, revize) / **SARI** (düzelt, tekrar) /
+   **YEŞİL** (Drive'a yazılır). En çok 3 tur; sonra avukata escalate
+5. Denetim sonucu çıktının sonuna kısa blok olarak yazılır
 
-Prompt: `prompts/muhakeme/self_review.md`
+Denetim ölçütleri: `prompts/muhakeme/self_review.md` (DENETCI'nin kontrol listesi)
 
----
 
-## Model Routing (Antigravity Hibrit Mimarisi)
+## Çıktı Frontmatter (her çıktıda zorunlu)
 
-Sistem haritasi (14 uzman ajan + Director) ve 7 ASAMA workflow'u DEGISMEZ.
-Her ajanin arkasinda hangi motorun (Claude terminal veya Antigravity sag
-panel) calisacagi `config/motor-haritasi.json` dosyasindan okunur.
-
-**7 ASAMA kullanici-kontrollu protokolunde** her asama basinda Director
-motor + model bilgisini bildirir. Avukat "motor degistir" diyerek tek
-seferlik override yapabilir.
-
-### Calisma Modlari
-
-| Mod | Davranis |
-|---|---|
-| `auto` | Config'teki default motoru kullan, sorma |
-| `ask` | Her tetikte avukata "Bu is icin Claude mu Antigravity mi?" diye sor |
-| `fixed` | Sadece belirtilen motoru kullan, fallback dahi yok |
-
-Global mod `config/motor-haritasi.json` -> `mode` alanindadir.
-Komut satirinda `fallback claude` (terminal Claude'a cevirme) ile
-tek seferlik override yapilabilir.
-
-### Task -> Default Motor Haritasi
-
-| Task Tipi | Ajan | Default Motor | Fallback |
-|---|---|---|---|
-| Kritik nokta tespiti | Director on-adim (ASAMA 1) | Claude (terminal) | - |
-| 2B YargiMCP | Arastirmaci (ASAMA 2B) | Claude Fable 5 (iteratif derin protokol) | Claude Opus 4.8 |
-| Arastirma sentezi | Arastirmaci (ASAMA 2) | Claude (terminal) | - |
-| Arama plani | Arastirmaci (ASAMA 2 hazirlik) | Antigravity (sag panel) | Claude |
-| Usul raporu | Usul Uzmani (ASAMA 3) | **Antigravity (sag panel)** | Claude |
-| Stratejik analiz | 5 Ajan (ASAMA 4) | **Antigravity (sag panel)** | Claude |
-| Dilekce yazimi | Belge Yazari (ASAMA 5) | **Antigravity (sag panel)** | Claude |
-| Savunma simulasyonu | Savunma Simulatoru (ASAMA 6) | **Antigravity (sag panel)** | Claude |
-| Revizyon | Revizyon Ajani (ASAMA 7) | **Antigravity (sag panel)** | Claude |
-| Blog yazimi + kapak gorseli | Blog Yazari (THEMIS — 7 ASAMA disi) | **Antigravity (sag panel)** + Imagen | Claude (metin) / kapak: manuel |
-| Self-review (kalite gate) | Antigravity ayni sohbet | **Antigravity (sag panel)** | - (manuel) |
-
-### Claude (terminal) - Kalici Gorevler
-
-Bu gorevler her zaman terminal Claude'da kalir, Antigravity'ye gitmez:
-
-- Director Agent orkestrasyonu (komut siniflandirma, ASAMA gecisleri)
-- MCP cagrilari (MemPalace, Drive, NotebookLM, Calendar, Gmail)
-- Yargi 2B derin arastirmasi (Yargi-MCP-Pro, tek elden — iteratif derin
-  protokol: derin mod min 15 sorgu / 5 tam metin, hafif mod 6 / 3)
-- Mevzuat MCP / NotebookLM MCP
-- Yargi CLI ve Mevzuat CLI cagrilari (fallback)
-- ASAMA 2 sentezi (MCP ciktilari ayni oturumda raporlanir)
-- PII mask/unmask islemi (`scripts/maske.py` — su an ERTELENDI, yerel LLM'e gecince)
-- Iscilik alacaklari hesaplama modulu (deterministik)
-- MemPalace diary write
-- `qmd update`, `md_to_docx.py`, `md_to_udf.py` cagrilari
-- Antigravity devir blogu uretimi
-
-### Fallback Politikasi (Yeni)
-
-1. **Default akis:** Antigravity devir blogu basilir → avukat sag panele
-   yapistirir → Antigravity uretir + self-review yapar → Drive'a yazar
-   → avukat "ASAMA N bitti" der → Claude devam eder.
-2. **Antigravity erisilemez / cevap vermez:** Avukat terminale donup
-   "fallback claude" yazar → terminal Claude o ASAMA'yi uretir.
-3. **Fallback ciktilari isaretlenir:** Frontmatter'da
-   `engine: claude`, `fallback_used: true`, `reason: antigravity_unavailable`.
-4. **Loglama:** Her fallback olayi `logs/model-events.jsonl`'a kaydedilir.
-5. **DEPRECATED:** Eski `gemini-bridge.sh` retry/auth fallback zinciri
-   2026-05-13 itibariyla devre disi (exit 100). Gemini CLI / OAuth
-   bagimliligi tamamen kaldirildi.
-
-### Komut Sirasinda Model Secimi
-
-`mode: ask` ise Director her ajan cagirmadan once:
-
-```text
-"Usul raporu hazirlamak uzereyim.
-Motor: [1] Antigravity (default — sag panel) [2] Claude (terminal — fallback)
-Sec (Enter = default):"
-```
-
-Avukat cevabi MemPalace'a `wing_buro_aykut/hall_model_tercihleri`
-drawer'ina yazilir, sonraki benzer tasklarda tercih olarak sunulur.
-
-### Model Metadata (Her Ciktida Zorunlu)
-
-Gemini veya Claude fark etmez, her ajan ciktisinin basina YAML frontmatter eklenir:
+Her hukuki çıktının başına YAML frontmatter konur; `engine` alanı **tahmin edilmez**,
+`python scripts/motor.py damga <task_type>` ile üretilir:
 
 ```yaml
 ---
-model: gemini-3.1-pro-preview | claude-fable-5 | claude-opus-4-8
-engine: gemini | claude
+engine: <avukatın bildirdiği motor | bildirilmedi>
 task_type: usul_raporu | arastirma_sentezi | dilekce_yazimi | ...
-run_id: {ISO_timestamp}-{pid}
-attempt: 1 | 2
-fallback_used: false | true
-timestamp_utc: 2026-04-14T12:34:56Z
+timestamp_utc: 2026-09-02T12:34:56Z
 status: TASLAK
 ---
 ```
 
-- `gemini-bridge.sh` Gemini ciktilarina bunu otomatik ekler
-- Director Agent Claude fallback ciktilarina ayni formati manuel ekler
-- MemPalace'a drawer yazilirken bu metadata drawer payload'inin icinde saklanir
-- Avukat hangi ciktinin hangi motordan geldigini tek bakista gorur
+Avukat motoru `motor: <ad>` komutuyla bildirir (`python scripts/motor.py ayarla <ad>`).
+Rol tanımları ve task→rol eşlemesi: `config/motor-haritasi.json`. Motor mimarisi ve
+DENETCI kapısı: yukarıdaki "Motor Mimarisi" bölümü.
 
-### Fallback Event Log
-
-Her Gemini cagrisi (basarili veya basarisiz) `logs/model-events.jsonl`
-dosyasina bir satir yazar:
-
-```json
-{"ts":"...","run_id":"...","task":"...","model":"...","engine":"gemini","attempt":N,"fallback_used":false,"status":"ok|failed"}
-```
-
-Haftalik rapor: Gemini first-pass success rate, fallback orani, task bazli dagilim.
-Director Agent otonom dongude bu dosyayi tarayip benchmark kayar mi diye ozet uretir.
-
-### MemPalace `hall_model_tercihleri` Drawer Sablonu
-
-```yaml
-wing: wing_buro_aykut
-hall: hall_model_tercihleri
-drawer:
-  task_type: dilekce_yazimi
-  tercih_edilen_motor: gemini
-  son_guncelleme: 2026-04-14
-  gerekce: "Son 5 taslaktaki dilinden memnun, fallback yok"
-  fallback_count_son_30_gun: 0
-```
-
-Bu drawer'lar avukat `default_mode: ask` sectiginde dolmaya baslar;
-ileride `auto` moduna gecilirse bu tercihler default olarak kullanilir.
-
----
 
 ## ADIM -1: MemPalace Wake-up (Buro Hafizasi - Her Komutta Zorunlu)
 
@@ -1081,7 +952,7 @@ Asagidakilerden hangisi hazir ve bu dava icin kullanalim?
 [ ] NotebookLM - notebook adi: ___________
 [ ] Google Drive - klasor yolu: ___________
 [ ] Masaustu / yerel dosya - dosya adi veya yolu: ___________
-[ ] Claude Projects - proje adi: ___________
+[ ] Claude Projects - proje adi: ___________ <!-- vendor-ok: kaynak türü adı -->
 [ ] Bu dava icin hazir kaynak yok - sadece Yargi/Mevzuat MCP ile devam et
 [ ] Kaynagi henuz hazirlamadim - once onu hazirlayalim
 
@@ -1096,7 +967,7 @@ Avukatin cevabini bekle. Cevap gelmeden arastirma ajanlarini baslatma.
 Protokol: `.claude/skills/yargi-uyap-workspace/SKILL.md`.
 Ozet akis: `npx dava-cli@latest clone` → avukat Chrome'da UYAP'a girip
 davayi secer → tum evrak (.udf/.pdf/.tiff) + INDEX.md yerel klasore
-iner (`~/Documents/YargiPRO/...`) → Claude INDEX.md'yi okur, kritik
+iner (`~/Documents/YargiPRO/...`) → ORKESTRATOR INDEX.md'yi okur, kritik
 evraki (dava dilekcesi, cevap, bilirkisi raporu, durusma tutanaklari)
 tasnif eder → evrak-listesi.md yazilir → briefing bu evraka dayanir.
 Evrak formati okuma: `udf_tiff_pdf_guide` MCP tool'u (udf-cli/TIFF/PDF).
@@ -1113,7 +984,7 @@ Ajan 2, Google Drive MCP ile belirtilen klasoru okur.
 **Masaustu / yerel dosya secildi:**
 "Bu dosyayi buraya yukler misin veya icerigini yapistirir misin?" de.
 
-**Claude Projects secildi:**
+**Claude Projects secildi:** <!-- vendor-ok: kaynak türü adı -->
 Avukattan proje baglantisini veya icerigi yapistirmasini iste.
 
 **Hazir kaynak yok:**
@@ -1216,13 +1087,13 @@ calistirmanin parcasi olur." Birincil kayit: `dersler/` klasoru
 (git'te izlenen duz-metin dosyalar — MemPalace bagli olmasa da calisir).
 
 **Kural 1 — Kapanis ritueli:** Her dava akisi / tekil komut / danisma
-arastirmasi KAPANIRKEN Claude avukata TEK soru sorar:
+arastirmasi KAPANIRKEN ORKESTRATOR avukata TEK soru sorar:
 > "Bu iste ben neyi kacirdim / sen neyi duzelttin? (yoksa 'yok' de)"
 Cevap `dersler/{arastirma|dilekce|usul|sistem}.md`'ye 3 satirlik formatta
 eklenir (KACIRILAN / DUZELTME / KURAL ADAYI). Detay: `dersler/README.md`.
 
 **Kural 2 — Terfi:** Ayni yonde 2+ ders veya kritik tek ders → ilgili
-kalici dosyaya (SKILL / dilekce-yazim-kurallari / playbook / CLAUDE.md)
+kalici dosyaya (SKILL / dilekce-yazim-kurallari / playbook / AGENTS.md)
 islenir; ders dosyasinda `[TERFI → hedef]` etiketi kalir.
 
 **Kural 3 — Is baslarken oku:** Ajan calismaya baslamadan once kendi
@@ -1236,7 +1107,7 @@ alaninin `dersler/` dosyasini okur (MemPalace wake-up'in dosya-temelli esi).
 kontrol listelerini ve muhakemesini kodlar (surec degil, YARGI):
 her zaman kontrol ettikleri, karsi tarafin klasik oyunlari, yapilmayacak
 argumanlar, muvekkile risk anlatim tarzi. Ilgili dava turunde calisan HER
-ajan (arastirmaci, dilekce, savunma sim, revizyon + Gemini devir bloklari)
+ajan (arastirmaci, dilekce, savunma sim, revizyon + MUHAKEME prompt yuzeyleri)
 once ilgili playbook'u okur. Playbook'lar IS YAPILIRKEN doldurulur:
 her aktif davada Director avukata 2-3 hedefli muhakeme sorusu sorup
 cevabi playbook'a isler. Detay: `playbook/README.md`.
@@ -1403,7 +1274,7 @@ Context window %70'e ulastiginda otomatik state dump:
 | NotebookLM erisilemiyor | Avukata bildir, adimi atla, dilekcede "dahili kaynak eksik" notu dus. |
 | Harc tarifesi guncel degil | "Bu hesaplama [yil] tarifesine goredir, UYAP'tan dogrulayin." notu ekle. |
 | Dilekce yapay zeka gibi gorunuyor | `sablonlar/` klasorune onaylanmis dilekceler ekle, uslubu buna gore duzelt. |
-| MCP baglanti hatasi | `~/.claude/settings.json` ve Claude Desktop user-level MCP ayarlarini kontrol et. |
+| MCP baglanti hatasi | `~/.claude/settings.json` ve Claude Desktop user-level MCP ayarlarini kontrol et. | <!-- vendor-ok: araç/kaynak adı -->
 | **Arsivlenmis modul komutu geldi** (`arastir stajyer:`, `2A cevap al:`, `arastir arguman:`) | Avukata modulun 2026-07-09'da arsivlendigini bildir (`arsiv/README.md`), akisi calistirma. Arastirma icin `arastir:` cekirdek komutunu oner. |
 
 ---
@@ -1418,7 +1289,7 @@ Context window %70'e ulastiginda otomatik state dump:
 | `davayi cek` / `yargi pro baslat` | UYAP Avukat dava dosyasi indirme — `dava-cli clone` akisi (`.claude/skills/yargi-uyap-workspace/SKILL.md`) |
 | `dava guncelle` | Clone'lanmis davaya yeni evrak indir — `dava-cli sync` (delta, tarayicisiz) |
 | `arastir: [kritik nokta]` | Director + arastirma cekirdegi (2B→2C sirali zincir + 2D paralel) |
-| `arastir yargi: [kritik nokta]` | Arastirma - 2B Yargi-MCP-Pro (Claude Fable 5, iteratif derin protokol) |
+| `arastir yargi: [kritik nokta]` | Arastirma - 2B Yargi-MCP-Pro (ARASTIRMACI, iteratif derin protokol) |
 | `arastir mevzuat: [kritik nokta]` | Arastirma - 2C Mevzuat MCP (CLI fallback) |
 | `arastir notebook: [kritik nokta]` | Arastirma - 2D NotebookLM / Drive |
 | `arastir danisma: [hukuki soru]` | **Hızlı Araştırma Modülü** (`@ajanlar/arastirmaci/danisma-hatti.md`) — müvekkil adayı sorusu için bağımsız hafif hat. Yargı-MCP-Pro + Mevzuat + Mülga denetimi + Künye doğrulama. Çıktı: `Hukuk Bürosu\Research\{tarih}-{slug}\arastirma-cevabi.md` (yol `scripts/paths.py` ile çözümlenir). Dava akışına dokunmaz. |
@@ -1440,8 +1311,8 @@ Context window %70'e ulastiginda otomatik state dump:
 | `istinaf yaz: [dava-id]` | Dilekce Yazari (Istinaf/Temyiz alt-modu) |
 | `temyiz yaz: [dava-id]` | Dilekce Yazari (Istinaf/Temyiz alt-modu) |
 | `muvekkil bilgilendir: [dava-id]` | Director (Muvekkil Bilgilendirme alt-modu) |
-| `strateji degerlendir: [dava-id]` | Director (Strateji Degerlendirme — Gemini-primary + Claude fallback) |
-| `blog yaz: [konu]` | Blog Yazari (THEMIS — serbest konu modu, Antigravity + Imagen kapak gorseli) |
+| `strateji degerlendir: [dava-id]` | Director (Strateji Degerlendirme — MUHAKEME rolu) |
+| `blog yaz: [konu]` | Blog Yazari (THEMIS — serbest konu modu, MUHAKEME rolu + kapak gorseli) |
 | `blog yaz dava: [dava-id]` | Blog Yazari (THEMIS — dava modu, arastirma raporundan, KVKK extra sert) |
 | `ictihat tara` | Otonom dongu |
 | `sure ekle: [tarih, tur]` | Calendar MCP |
@@ -1451,11 +1322,11 @@ Context window %70'e ulastiginda otomatik state dump:
 ## isbu-ofis Alt Projesi (Baglanti Notu)
 
 `isbu-ofis/hukuk-takip/` dizini bagimsiz bir web uygulamasidir.
-Kendi CLAUDE.md'si `isbu-ofis/hukuk-takip/CLAUDE.md` yolundadir ve
+Kendi CLAUDE.md'si `isbu-ofis/hukuk-takip/CLAUDE.md` yolundadir ve <!-- vendor-ok: bağımsız alt proje dosyası -->
 bu ana otomasyon sistemiyle DOGRUDAN entegre degildir.
 
 Baglanti stratejisi:
-- isbu-ofis icinde calisirken `isbu-ofis/hukuk-takip/CLAUDE.md` referans dosyadir
+- isbu-ofis icinde calisirken `isbu-ofis/hukuk-takip/CLAUDE.md` referans dosyadir <!-- vendor-ok: bağımsız alt proje dosyası -->
 - Ana hukuk otomasyon sisteminde calisirken BU dosya referanstir
 - Iki sistem arasinda paylasilan veri yok (ayri .env, ayri DB)
 - Gelecekte entegrasyon planlanirsa: Drive API veya ortak vektor DB uzerinden

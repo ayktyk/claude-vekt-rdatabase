@@ -26,6 +26,8 @@ ROOT = Path(__file__).resolve().parent.parent
 
 SAGLAYICILAR = ["Claude", "Gemini", "Antigravity", "Codex", "GPT", "OpenAI", "Anthropic"]
 MUAFIYET = "vendor-ok:"
+# JSON tarihce girdileri ("YYYY-MM-DD": "...") tanim geregi tarihcedir, muaf
+TARIHCE_RE = re.compile(r'^\s*"\d{4}-\d{2}-\d{2}"\s*:')
 
 # Kanonik yüzeyler: motor-nötr olması ZORUNLU dosyalar
 HEDEF_GLOBLAR = [
@@ -56,7 +58,7 @@ def sizintilar(dosya: Path) -> list[tuple[int, str]]:
         return []
     bulgular: list[tuple[int, str]] = []
     for no, satir in enumerate(satirlar, start=1):
-        if MUAFIYET in satir:
+        if MUAFIYET in satir or TARIHCE_RE.match(satir):
             continue
         for ad, desen in _DESENLER.items():
             if desen.search(satir):

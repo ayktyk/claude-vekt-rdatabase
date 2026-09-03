@@ -5,16 +5,18 @@ Versiyon: 1.0
 
 ---
 
-## Motor
+## Rol ve Motor
 
-**TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/motor-haritasi.json`'dan okunur.
+Sistem **tek motorla** çalışır: oturumu hangi LLM ile açtıysanız o. Rol ataması
+yalnızca `config/motor-haritasi.json` → `tasks.usul_raporu.rol`'dan okunur.
 
-- **usul_raporu** task'i: `config/motor-haritasi.json` -> `tasks.usul_raporu.engine` (= `antigravity_manual`) ve `model`
-- **Antigravity (sag panel)** uretir; terminal Claude SADECE devir blogu basar
-- **Claude'da kalir:** iscilik hesaplama modulu (matematiksel hesap), MCP cagrilari, Calendar ekleme, yetkili adliye WebSearch dogrulamasi — bunlar arac kullanimidir, Antigravity'ye gitmez
-- **Self-review:** Antigravity ayni sohbette `prompts/muhakeme/self_review.md`'yi uygular (bridge YOK)
-- **Prompt sablonu:** `prompts/muhakeme/usul_raporu.md` (Antigravity'ye yapistirilir)
-- **Fallback:** Antigravity erisilemezse avukat "fallback claude" der → Claude uretir, frontmatter `fallback_used: true`
+- **usul_raporu** task'ı: rol **`MUHAKEME`**
+- **ORKESTRATOR'da kalan iş (deterministik / araç):** işçilik hesaplama modülü (Python, matematiksel hesap), MCP çağrıları, Calendar ekleme, yetkili adliye WebSearch doğrulaması
+- **Prompt şablonu:** `prompts/muhakeme/usul_raporu.md` + `prompts/muhakeme/_ortak-kurallar.md`
+- **Bağımsız denetim:** çıktı üretildikten sonra **DENETCI** (`ajanlar/denetci/SKILL.md`)
+  üretim bağlamını görmeden denetler; KIRMIZI kararda çıktı Drive'a yazılmaz.
+- **Motor damgası:** frontmatter `engine:` alanı `python scripts/motor.py damga usul_raporu` ile
+  doldurulur; avukat motoru bildirmemişse `engine: bildirilmedi` yazılır.
 
 ---
 
@@ -34,78 +36,47 @@ Versiyon: 1.0
 
 ---
 
-## ZORUNLU ILK ADIM — Antigravity Devri (2026-05-13)
+## Üretim Akışı (tek motor — ASAMA 3)
 
-Bu ASAMA hukuki uretimdir, Antigravity sag panelinde Gemini 3.1 Pro yapar.
-Terminal Claude burada SADECE devir blogu basar; usul raporunu dogrudan
-terminal Claude YAZMAZ.
+Elle devir bloğu, kopyala-yapıştır ve harici panel **yoktur**. Aynı oturumda:
+ORKESTRATOR hazırlar → MUHAKEME üretir → DENETCI bağımsız denetler → avukat onaylar.
 
-### Akis
+### Akış
 
-1. **On-hazirlik (Claude'da kalir):**
-   - Iscilik alacaklari hesaplama modulu Python ile yapilir, sonuclar
-     Antigravity context'ine ekkenir (devir blogunda yol verilir)
-   - Yetkili Mahkeme — Adliye Esleme Protokolune ait WebSearch/WebFetch
-     dogrulamasi terminal Claude'da yapilir, sonuc `tmp/{dava-id}-adliye-dogrulama.md`
-     dosyasina yazilir
-   - Bu iki cikti devir blogunda Antigravity'nin okumasi gereken
-     dosyalar listesine eklenir
+1. **Ön-hazırlık (ORKESTRATOR — deterministik / araç işi):**
+   - İşçilik alacakları hesaplaması Python modülüyle yapılır, sonuç `tmp/{dava-id}-hesaplama.md`'ye yazılır — LLM hesap yapmaz
+   - Yetkili Mahkeme — Adliye Eşleme Protokolü WebSearch/WebFetch doğrulaması yapılır, sonuç `tmp/{dava-id}-adliye-dogrulama.md`'ye yazılır (kaynak URL + tarih zorunlu)
+   - Bu iki dosya MUHAKEME'nin girdi listesine eklenir
 
-2. **Antigravity devir blogu bas (avukata sun):**
+2. **Üretim (MUHAKEME):** Protokol `prompts/muhakeme/usul_raporu.md` + `prompts/muhakeme/_ortak-kurallar.md`.
+   Girdiler sırayla okunur:
+     - `{dava-klasoru}/00-Briefing.md`
+     - `{dava-klasoru}/02-Arastirma/arastirma-raporu.md`
+     - `tmp/{dava-id}-hesaplama.md` (ORKESTRATOR'un yaptığı hesap)
+     - `tmp/{dava-id}-adliye-dogrulama.md`
+   Çıktı: `{dava-klasoru}/01-Usul/usul-raporu.md`
+   - Hesap tutarları hesaplama dosyasından birebir alınır; MUHAKEME kendi hesabını yapmaz
+   - Yetkili adliye doğrulanamadıysa `RISK FLAG: Yetkili Adliye dogrulanamadi` yazılır
 
-   ```
-   ========== ANTIGRAVITY DEVIR BLOGU ==========
-   ASAMA: ASAMA 3 (Usul Raporu)
-   Dava-ID: {dava-id}
+3. **Bağımsız denetim (DENETCI):** Girdi yalnızca `{çıktı yolu, dava-id}`; üretim
+   bağlamı verilmez. Deterministik kapılar → künye içerik teyidi (her documentId
+   MCP'den yeniden çekilir) → doktrin clause sayımı → çıkarım denetimi → aleyhe beyanı.
+   Karar KIRMIZI / SARI / YEŞİL. YEŞİL değilse MUHAKEME revize eder; en çok 3 tur.
+   **YEŞİL olmadan çıktı Drive'a yazılmaz.**
 
-   Sag panele yapistirilacak:
-   --------------------------------------------
-   Asagidaki dosyalari oku:
-     - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\00-Briefing.md
-     - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\02-Arastirma\arastirma-raporu.md
-     - tmp/{dava-id}-hesaplama.md   (Claude'un yaptigi iscilik hesabi)
-     - tmp/{dava-id}-adliye-dogrulama.md   (Claude'un yaptigi adliye dogrulama)
+4. **Avukat onayı:** Avukat "ASAMA 3 bitti" / `devam` diyene kadar bir sonraki ASAMA'ya geçilmez.
 
-   Protokol: prompts/muhakeme/usul_raporu.md  (bu dosyayi da oku)
-   Ortak kurallar: prompts/muhakeme/_ortak-kurallar.md
-
-   Cikti: G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\01-Usul\usul-raporu.md
-
-   KVKK: tum token'lar maskeli kalir ([MUVEKKIL_1], [TC_1], [ADRES_2] vs.)
-   Cikti sonunda self-review yap (prompts/muhakeme/self_review.md).
-   --------------------------------------------
-
-   Antigravity tamamlayinca buraya don ve "ASAMA 3 bitti" yaz.
-   =============================================
-   ```
-
-3. **Avukat onayini bekle:** Avukat "ASAMA 3 bitti" diyene kadar bir
-   sonraki ASAMA'ya gecme.
-
-4. **Avukat onayi sonrasi (Director yapar):**
-   - `qmd update` calistir (yeni usul-raporu.md indexlenir)
-   - `mempalace_diary_write "usul_uzmani"` ile bu davadan ogrenilenleri
-     yaz (3 onemli ogrenme)
-   - `python scripts/md_to_docx.py {dava-klasoru}` calistir (DOCX zorunlu)
-   - ASAMA 4 (Stratejik Analiz) devir blogunu hazirla ve avukata sun
+5. **Onay sonrası (ORKESTRATOR):**
+   - `qmd update` (yeni usul-raporu.md indekslenir)
+   - `mempalace_diary_write "usul_uzmani"` — 3 önemli öğrenme
+   - `python scripts/md_to_docx.py {dava-klasoru}` (DOCX zorunlu)
+   - ASAMA 4 (Stratejik Analiz) hazırlığı
 
 ### Asla
 
-- Devir blogunu basmadan terminal Claude'da usul raporu yazma
-- `gemini-bridge.sh` cagirma — DEPRECATED (exit 100)
-- Hesaplamayi Antigravity'ye yaptir (yanlis cikabilir, hesaplama
-  Claude/Python'da kalir)
-- Adliye dogrulamasini atla (Selin Uyar 2026-003 davasinda
-  Zeytinburnu-Caglayan karisikligi yasanmasti — WebSearch zorunlu)
-- Antigravity ciktisini "kontrol etmek icin" terminal Claude'da yeniden
-  uretme — kalite kapisi zaten Antigravity self-review'da
-
-### Fallback
-
-Antigravity erisilemez veya cevap vermezse avukat "fallback claude"
-yazar → terminal Claude `prompts/muhakeme/usul_raporu.md` protokolune
-gore usul raporunu uretir; frontmatter'a `engine: claude`,
-`fallback_used: true`, `reason: antigravity_unavailable` yazar.
+- Hesaplamayı LLM'e yaptırma — Python'da kalır (sapma riski)
+- Adliye doğrulamasını atlama (Selin Uyar 2026-003 davasında Zeytinburnu-Çağlayan karışıklığı yaşandı — WebSearch zorunlu)
+- DENETCI YEŞİL vermeden çıktıyı Drive'a yazma
 
 ---
 
@@ -128,7 +99,7 @@ Gorevin, kritik noktanin esasina dagilmadan davayi dogru zemin uzerine oturtmakt
 ## Ne Zaman Calisir
 
 Director Agent yeni dava akisinda veya sadece usul analizi istendiginde.
-Arastirma ajanlari tamamlandiktan sonra calisir (bkz. CLAUDE.md Ajan Yapisi ve ajanlar/perspektif/PROTOKOL.md Asama 3).
+Arastirma ajanlari tamamlandiktan sonra calisir (bkz. AGENTS.md Ajan Yapisi ve ajanlar/perspektif/PROTOKOL.md Asama 3).
 
 ## Zorunlu Girdiler
 

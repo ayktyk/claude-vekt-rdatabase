@@ -4,12 +4,12 @@
   "_spec": "docs/superpowers/specs/2026-09-02-tek-motor-agnostik-toparlama-design.md",
   "_history": {
     "2026-05-04": "Hibrit motor (Claude+Gemini bridge) onaylandi",
-    "2026-05-13": "Antigravity hibrit mimarisine gecildi. Bridge DEPRECATED.",
+    "2026-05-13": "Antigravity hibrit mimarisine gecildi. Bridge DEPRECATED.", <!-- vendor-ok: tarihçe kaydı -->
     "2026-05-19": "FAZ 2: Yargi-MCP-Pro entegrasyonu (Senaryo B - ayri toollar). Eski mcp__claude_ai_Yarg_MCP__* + mcp__claude_ai_Mevuzat_MCP__* yerine mcp__yargi-mcp-pro__* aktif. yargi_mcp + mevzuat_mcp task'lari AYRI kalir (siraili zincir 2B->2C korunur). 9 spesifik mevzuat toolu (search_kanun/search_khk/...) tek search_mevzuat + mevzuat_tur_list[] altinda birlesti. Rate-limit 3sn protokolu gevsetildi (zorunluluk degil, fallback). 2E Akademik decommissioned (Faz 1, 2026-05-19).",
     "2026-07-09": "ARASTIRMA REVIZYONU (avukat karari): 2A Super Stajyer (stajyer_prompt_uret) + Faz D Arguman.ai (arguman_ai) task'lari KALDIRILDI, dosyalar arsiv/ altinda. KVKK maskeleme ERTELENDI (yerel LLM'e gecise kadar). ASAMA 2 cekirdegi = 2B->2C sirali zincir + 2D async paralel. Ana omurga Yargi-MCP-Pro (UYAP entegrasyonu dahil - envanter cikarilinca tools[] guncellenecek).",
     "2026-07-13": "YARGI COK MODELLI ROUTING: 2B sirasi Sol -> Terra -> Luna -> Claude kisa QA. (2026-07-19'da kaldirildi)",
-    "2026-07-18": "CLAUDESUZ REVIZYON: orkestrator Codex/Sol (AGENTS.md), 2B Sol->Terra->Sol->Terra, Claude tum rollerden cikarildi. (2026-07-19'da geri alindi)",
-    "2026-07-19": "CLAUDE+GEMINI DONUSU (avukat karari): Codex TAMAMEN kaldirildi (arsiv/codex-motor/). Orkestra sefi + tum tool kullanimi claude-fable-5; limit dolarsa claude-opus-4-8 (avukat /model ile gecer, cikti frontmatter + ASAMA bildirimi damgalar). 2B tek elden Claude iteratif derin protokol (derin 15/5, hafif 6/3). Antigravity task'lari degismedi. MemPalace/Gmail/Takvim/NotebookLM MCP'leri yeniden aktif.",
+    "2026-07-18": "CLAUDESUZ REVIZYON: orkestrator Codex/Sol (AGENTS.md), 2B Sol->Terra->Sol->Terra, Claude tum rollerden cikarildi. (2026-07-19'da geri alindi)", <!-- vendor-ok: tarihçe kaydı -->
+    "2026-07-19": "CLAUDE+GEMINI DONUSU (avukat karari): Codex TAMAMEN kaldirildi (arsiv/codex-motor/). Orkestra sefi + tum tool kullanimi claude-fable-5; limit dolarsa claude-opus-4-8 (avukat /model ile gecer, cikti frontmatter + ASAMA bildirimi damgalar). 2B tek elden Claude iteratif derin protokol (derin 15/5, hafif 6/3). Antigravity task'lari degismedi. MemPalace/Gmail/Takvim/NotebookLM MCP'leri yeniden aktif.", <!-- vendor-ok: tarihçe kaydı -->
     "2026-09-02": "TEK MOTOR + ROL DILI (avukat karari): model adlari kaldirildi, dort rol tanimlandi (ORKESTRATOR/ARASTIRMACI/MUHAKEME/DENETCI). Iki motorlu elle devir mimarisi kalkti; bagimsizlik sifir-baglamli DENETCI alt-ajanindan geliyor. Dosya adi motor-haritasi.json -> motor-haritasi.json. self_review task'i DENETCI roluna baglandi."
   },
   "_last_updated": "2026-09-02",
@@ -32,7 +32,7 @@
   "tasks": {
     "director": {
       "rol": "ORKESTRATOR",
-      "aciklama": "Director Agent: workflow orkestrasyonu, ASAMA gecisleri, kalite kapilari, kullanici-kontrol komutlari (devam/atla/dur/motor-degistir), Antigravity devir bloklari uretimi"
+      "aciklama": "Director Agent: workflow orkestrasyonu, ASAMA gecisleri, kalite kapilari, kullanici-kontrol komutlari (devam/atla/dur/motor-degistir), DENETCI cagri blogu uretimi"
     },
     "mcp_arac_yonetimi": {
       "rol": "ORKESTRATOR",
@@ -62,7 +62,7 @@
           "min_full_text": 3
         }
       },
-      "aciklama": "Yargi-MCP-Pro 2B derin arastirma — TEK ELDEN Claude Fable 5 (iteratif derin protokol, 6 Faz + Gap Check). Min sorgu/tam-metin kurallari 'modes' altinda. MCP fail -> yargi CLI fallback (rapora mcp_fallback_used: true). 2C yalnizca 2B tamamlanip atif-maddeleri.json uretilince baslar. Sorgu lehceleri ve tuzaklar: yargi-legal-research-guide skill."
+      "aciklama": "Yargi-MCP-Pro 2B derin arastirma — TEK ELDEN ARASTIRMACI rolü (iteratif derin protokol, 6 Faz + Gap Check). Min sorgu/tam-metin kurallari 'modes' altinda. MCP fail -> yargi CLI fallback (rapora mcp_fallback_used: true). 2C yalnizca 2B tamamlanip atif-maddeleri.json uretilince baslar. Sorgu lehceleri ve tuzaklar: yargi-legal-research-guide skill."
     },
     "mevzuat_mcp": {
       "rol": "ARASTIRMACI",
@@ -92,49 +92,49 @@
     },
     "arastirma_sentezi": {
       "rol": "ARASTIRMACI",
-      "aciklama": "MCP/CLI ciktilarini ASAMA 2 esas raporuna cevirme. Claude'da kalir cunku ham MCP ciktilari ayni oturumda uretiliyor; copy-paste yorgunlugu olusmasin diye Antigravity'ye gitmez. 2026-05-13 karari."
+      "aciklama": "MCP/CLI ciktilarini ASAMA 2 esas raporuna cevirme. ORKESTRATOR'da kalir cunku ham MCP ciktilari ayni oturumda uretiliyor; copy-paste yorgunlugu olusmasin diye baska bir motora gitmez. 2026-05-13 karari."
     },
     "arama_plani": {
       "rol": "ARASTIRMACI",
       "prompt_template": "prompts/muhakeme/arama_plani.md",
-      "aciklama": "Yargi/Mevzuat/Akademik icin sorgu terimi listesi + filtre plani uretmek. Antigravity sag panel."
+      "aciklama": "Yargi/Mevzuat/Akademik icin sorgu terimi listesi + filtre plani uretmek. MUHAKEME rolu."
     },
     "usul_raporu": {
       "rol": "MUHAKEME",
       "prompt_template": "prompts/muhakeme/usul_raporu.md",
-      "aciklama": "Usul Uzmani (ASAMA 3): yetkili mahkeme, zamanasimi, harc, risk analizi. Antigravity sag panel."
+      "aciklama": "Usul Uzmani (ASAMA 3): yetkili mahkeme, zamanasimi, harc, risk analizi. MUHAKEME rolu."
     },
     "stratejik_analiz": {
       "rol": "MUHAKEME",
       "prompt_template": "prompts/muhakeme/stratejik_analiz.md",
-      "aciklama": "ASAMA 4: 5 ajan stratejik analiz (4A-4E). Antigravity sag panelde paralel sohbet veya tek-sohbet siralı."
+      "aciklama": "ASAMA 4: 5 ajan stratejik analiz (4A-4E). MUHAKEME rolu — 4 perspektif ardisik veya paralel, 4E sentez."
     },
     "dilekce_yazimi": {
       "rol": "MUHAKEME",
       "prompt_template": "prompts/muhakeme/dilekce_yazimi.md",
-      "aciklama": "Belge Yazari (ASAMA 5): dilekce v1 / ihtarname / sozlesme taslagi. Antigravity sag panel."
+      "aciklama": "Belge Yazari (ASAMA 5): dilekce v1 / ihtarname / sozlesme taslagi. MUHAKEME rolu."
     },
     "savunma_simulasyonu": {
       "rol": "MUHAKEME",
       "prompt_template": "prompts/muhakeme/savunma_simulasyonu.md",
-      "aciklama": "Savunma Simulatoru (ASAMA 6): karsi taraf perspektifi + risk flag. Antigravity sag panel."
+      "aciklama": "Savunma Simulatoru (ASAMA 6): karsi taraf perspektifi + risk flag. MUHAKEME rolu."
     },
     "revizyon": {
       "rol": "MUHAKEME",
       "prompt_template": "prompts/muhakeme/revizyon.md",
-      "aciklama": "Revizyon Ajani (ASAMA 7): v1 dilekce -> v2 NIHAI. Antigravity sag panel."
+      "aciklama": "Revizyon Ajani (ASAMA 7): v1 dilekce -> v2 NIHAI. MUHAKEME rolu."
     },
     "blog_yazimi": {
       "rol": "MUHAKEME",
       "prompt_template": "prompts/muhakeme/blog_yazimi.md",
       "image_generation": true,
       "image_tool": "imagen_nano_banana",
-      "aciklama": "Blog Yazari (THEMIS): SEO uyumlu hukuki blog yazisi + kapak gorseli. Iki tetik: serbest konu (blog yaz: [konu]) veya dava sonrasi (blog yaz dava: [dava-id]). 6 katman Aykut Sesi + 22 alan frontmatter v3 + Imagen kapak. Antigravity sag panel. Cikti: blog.md + blog.cms.md + blog.mail.md + kapak.png. Self-review HARD FAIL -> Drive'a yazilmaz."
+      "aciklama": "Blog Yazari (THEMIS): SEO uyumlu hukuki blog yazisi + kapak gorseli. Iki tetik: serbest konu (blog yaz: [konu]) veya dava sonrasi (blog yaz dava: [dava-id]). 6 katman Aykut Sesi + 22 alan frontmatter v3 + Imagen kapak. MUHAKEME rolu. Cikti: blog.md + blog.cms.md + blog.mail.md + kapak.png. Self-review HARD FAIL -> Drive'a yazilmaz."
     },
     "self_review": {
       "rol": "DENETCI",
       "prompt_template": "prompts/muhakeme/self_review.md",
-      "aciklama": "Kalite gate: Antigravity kendi ciktisini elestirir (her uretim sonrasi, ayni sohbette)."
+      "aciklama": "Kalite gate: DENETCI sifir baglamli bagimsiz denetim (her uretim sonrasi, uretim baglamini gormeden)."
     }
   }
 }

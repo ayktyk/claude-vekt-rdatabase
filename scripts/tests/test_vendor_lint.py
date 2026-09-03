@@ -52,3 +52,16 @@ def test_kod_blogu_icindeki_dosya_yolu_muaf(tmp_path):
     d = tmp_path / "a.md"
     d.write_text("Komut dosyasi: `.claude/commands/arastir.md`", encoding="utf-8")
     assert vl.sizintilar(d) == []
+
+
+def test_tarihli_history_satiri_muaf(tmp_path):
+    # config _history blogundaki "YYYY-MM-DD": "..." satirlari tarihce kaydidir
+    d = tmp_path / "h.json"
+    d.write_text('{\n  "_history": {\n    "2026-07-19": "Codex kaldirildi, Claude geri geldi"\n  }\n}\n', encoding="utf-8")
+    assert vl.sizintilar(d) == []
+
+
+def test_tarihli_olmayan_json_satiri_yakalanir(tmp_path):
+    d = tmp_path / "h.json"
+    d.write_text('{\n  "model": "claude-fable-5"\n}\n', encoding="utf-8")
+    assert (2, "Claude") in vl.sizintilar(d)

@@ -4,7 +4,7 @@ Avukat bürosu için uçtan uca hukuki üretim sistemi: derin araştırma, usul 
 stratejik analiz, dilekçe taslağı, savunma simülasyonu ve blog.
 
 **Sistem tek motorla çalışır** — oturumu hangi LLM ile açtıysanız o. Anayasa
-`AGENTS.md`'dir; `CLAUDE.md`, `GEMINI.md` ve `.cursor/rules/hukuk.mdc` yalnızca
+`AGENTS.md`'dir; `CLAUDE.md`, `GEMINI.md` ve `.cursor/rules/hukuk.mdc` yalnızca <!-- vendor-ok: adaptör dosya adları -->
 oraya yönlendiren stub'lardır, kural içermezler.
 
 Her çıktı **TASLAK**'tır. Son kontrol avukattadır.

@@ -5,16 +5,18 @@ Versiyon: 1.1 (FAZ 4 — Arguman.ai karsi-arguman skill on-sorgu entegrasyonu)
 
 ---
 
-## Motor
+## Rol ve Motor
 
-**TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/motor-haritasi.json`'dan okunur.
+Sistem **tek motorla** çalışır: oturumu hangi LLM ile açtıysanız o. Rol ataması
+yalnızca `config/motor-haritasi.json` → `tasks.savunma_simulasyonu.rol`'dan okunur.
 
-- **savunma_simulasyonu** task'i: `config/motor-haritasi.json` -> `tasks.savunma_simulasyonu.engine` (= `antigravity_manual`) ve `model`
-- **Antigravity (sag panel)** uretir; terminal Claude SADECE devir blogu basar
-- **Claude'da kalir:** MCP cagrilari, dilekce dosyasi okuma yardimi (Drive'da hazir bekler)
-- **Self-review:** Antigravity ayni sohbette `prompts/muhakeme/self_review.md`
-- **Prompt sablonu:** `prompts/muhakeme/savunma_simulasyonu.md` (Antigravity'ye yapistirilir)
-- **Fallback:** Antigravity erisilemezse "fallback claude" → Claude uretir, `fallback_used: true`
+- **savunma_simulasyonu** task'ı: rol **`MUHAKEME`**
+- **ORKESTRATOR'da kalan iş (deterministik / araç):** MCP çağrıları (karşı-argüman ön-sorgu: `ictihat_ara` / `ictihat_getir`), dosya yönetimi
+- **Prompt şablonu:** `prompts/muhakeme/savunma_simulasyonu.md` + `prompts/muhakeme/_ortak-kurallar.md`
+- **Bağımsız denetim:** çıktı üretildikten sonra **DENETCI** (`ajanlar/denetci/SKILL.md`)
+  üretim bağlamını görmeden denetler; KIRMIZI kararda çıktı Drive'a yazılmaz.
+- **Motor damgası:** frontmatter `engine:` alanı `python scripts/motor.py damga savunma_simulasyonu` ile
+  doldurulur; avukat motoru bildirmemişse `engine: bildirilmedi` yazılır.
 
 ---
 
@@ -29,148 +31,56 @@ Versiyon: 1.1 (FAZ 4 — Arguman.ai karsi-arguman skill on-sorgu entegrasyonu)
 
 ---
 
-## ZORUNLU ILK ADIM — Antigravity Devri (2026-05-13 → 3 Batch 2026-05-14)
+## Üretim Akışı (tek motor — ASAMA 6)
 
-Bu ASAMA hukuki uretimdir, Antigravity sag panelinde Gemini 3.1 Pro yapar.
-Terminal Claude burada SADECE devir blogu basar; savunma simulasyonunu
-dogrudan terminal Claude YAZMAZ.
+Elle devir bloğu, kopyala-yapıştır ve harici panel **yoktur**. Aynı oturumda:
+ORKESTRATOR hazırlar → MUHAKEME üretir → DENETCI bağımsız denetler → avukat onaylar.
 
-**ÖNEMLI — BATCH 3 ICINDE (2026-05-14 pilot sonrasi iyilestirme):**
-ASAMA 6 (savunma simulasyonu) artik tek basina devir blogu almaz;
-**BATCH 3** icinde **ADIM B** olarak Antigravity'nin tek sohbetinde uretilir:
+> **Olay çözüm protokolü Adım 17 ile ilişki:** ASAMA 1'deki "karşı tarafın muhtemel hamleleri"
+> dava açılmadan alınacak önlemleri (ihtiyati haciz/tedbir) yakalar; bu ASAMA ise yazılmış
+> dilekçeyi sınar. İkisi farklı işlerdir, biri diğerini iptal etmez.
 
-> **BATCH 3 akisi:** ADIM A = ASAMA 5 dilekce v1 → ADIM B = bu ajan
-> (savunma simulasyonu, v1'i karsi taraf gozuyle elestir) → ADIM C =
-> ASAMA 7 v2 NIHAI revizyon. Tum batch tek Antigravity sohbetinde
-> yurutulur; context kaybolmaz; v1'in yazim kararlari taze hafizada
-> kalir.
+### Akış
 
-Bu ajan icin pratik etki:
-- **Bagimsiz devir blogu YOK:** Batch 3 master blogunun ortasinda
-  "ADIM B" olarak konumlanir (`AGENTS.md` > BATCH 3 sablonu)
-- **Girdi:** Az once ADIM A'da yazilan v1 (sohbette taze) + briefing +
-  usul + stratejik analiz
-- **Cikti:** `02-Arastirma/savunma-simulasyonu.md` (3 ciktinin biri)
-- **Self-review ayrica yapilir:** Risk flag 0 cikarsa "analiz yetersiz"
-  notuyla ADIM B kendi icinde derinlestirilir
-- **DOCX uretimi tum batch bittiginde** yapilir
+1. **Ön-hazırlık (ORKESTRATOR — deterministik / araç işi):**
+   - Önceki ASAMA çıktıları hazır: dilekçe v1 (5), araştırma raporu (2), usul raporu (3), stratejik analiz (4 — özellikle 4B Davalı çıktısı)
+   - **Karşı-argüman ön-sorgu (ARASTIRMACI):** ASAMA 2 Faz 5 (çelişki/bozma taraması) bulguları temel alınır; gerekirse `ictihat_ara(phrase="<müvekkilin ana tezinin KARŞITI — doktrinal Türkçe>", court_types=["YARGITAYKARARI"])` + "{tez} bozma" / "{tez} reddi" varyantları
+   - Tehdit sınıflandırması 5 seviye: KRİTİK (HGK/CGK bağlıyorsa çok yüksek) / YÜKSEK / ORTA / DÜŞÜK / YOK. Çıktı: `02-Arastirma/karsi-arguman-onsorgu.md` — tehdit listesi, her tehdide ait künye + documentId, KRİTİK ve YÜKSEK olanların tam metni (`ictihat_getir`)
+   - Sorguya TC/IBAN gibi kimlik verisi yazılmaz (hukuki tez jenerik doktrinal terimlerle kurulur)
 
-### Akis
+2. **Üretim (MUHAKEME):** Protokol `prompts/muhakeme/savunma_simulasyonu.md` + `prompts/muhakeme/_ortak-kurallar.md`.
+   Girdiler sırayla okunur:
+     - `{dava-klasoru}/03-Sentez-ve-Dilekce/dilekce-v1.md`
+     - `{dava-klasoru}/02-Arastirma/arastirma-raporu.md`
+     - `{dava-klasoru}/01-Usul/usul-raporu.md`
+     - `{dava-klasoru}/02-Arastirma/stratejik-analiz.md` (özellikle 4B beklenen itirazlar)
+     - `{dava-klasoru}/02-Arastirma/karsi-arguman-onsorgu.md` — ÖNCELİKLİ GİRDİ: KRİTİK ve YÜKSEK tehditler MUTLAKA simülasyona dahil
+   Çıktı: `{dava-klasoru}/02-Arastirma/savunma-simulasyonu.md`
+   - Görev: karşı taraf avukatı gibi düşün, en güçlü savunmayı kur. Amaç dilekçe yazmak DEĞİL; v1'deki zayıf noktaları ve en tehlikeli itirazları tespit etmek
+   - Çıktı: en tehlikeli 5 itiraz (en kritik başta) · her itiraza karşı pozisyon önerisi (Revizyon Ajanı'na) · hâkimin olası soruları + ASAMA 7 cevap altyapısı · risk flag KIRMIZI/SARI/YEŞİL
+   - Risk flag 0 çıkarsa "analiz yetersiz" — ek sorgu yapılır. Lehe yorum dürtüsü TERS YÖNDE de geçerli: gerçek riskler küçümsenemez
+   - Karşı taraf adına atıf yapılan her künye DOĞRULANMIŞ olmalı; doğrulanmamışsa "(varsayılan)" notu zorunlu
 
-1. **On-hazirlik:** Onceki ASAMA ciktilari Drive'da hazir olmali:
-   - 03-Sentez-ve-Dilekce/dilekce-v1.md (ASAMA 5)
-   - 02-Arastirma/arastirma-raporu.md (ASAMA 2)
-   - 01-Usul/usul-raporu.md (ASAMA 3)
-   - 02-Arastirma/stratejik-analiz.md (ASAMA 4 — ozellikle 4B Davali ciktisi)
-   - 02-Arastirma/karsi-arguman-onsorgu.md (asagida ADIM 1.5)
+3. **Bağımsız denetim (DENETCI):** Girdi yalnızca `{çıktı yolu, dava-id}`; üretim
+   bağlamı verilmez. Deterministik kapılar → künye içerik teyidi (her documentId
+   MCP'den yeniden çekilir) → doktrin clause sayımı → çıkarım denetimi → aleyhe beyanı.
+   Karar KIRMIZI / SARI / YEŞİL. YEŞİL değilse MUHAKEME revize eder; en çok 3 tur.
+   **YEŞİL olmadan çıktı Drive'a yazılmaz.**
 
-1.5. **Karsi-Arguman On-Sorgu (REVIZE 2026-07-09 — Yargi-MCP-Pro ile):**
+4. **Avukat onayı:** Avukat "ASAMA 6 bitti" / `devam` diyene kadar bir sonraki ASAMA'ya geçilmez.
 
-(Eski Arguman.ai `karsi-arguman` skill'i ARSIVLENDI — `arsiv/README.md`.)
-Antigravity devir blogundan ONCE terminal Claude, ASAMA 2 Faz 5
-(celiski/bozma taramasi) bulgularini temel alir; gerekirse Pro MCP ile
-ek karsi-ictihat sorgusu yapar:
-
-```python
-mcp__yargi-mcp-pro__ictihat_ara(
-  phrase="<muvekkilin ana tezinin KARSITI — doktrinal Turkce>",
-  court_types=["YARGITAYKARARI"]
-)
-# + "{tez} bozma" / "{tez} reddi" varyantlari
-```
-
-**Tehdit siniflandirmasini terminal Claude yapar (5 seviye):**
-- KRITIK: pozisyonu yikici karsi-ictihat (HGK/CGK bagliyorsa cok yuksek tehdit)
-- YUKSEK: ciddi risk — Antigravity'nin onceliklendirmesi gerek
-- ORTA: dikkate alinmasi gereken sapma
-- DUSUK: marjinal karsi yaklasim
-- YOK / ILGISIZ: ana akistan sapma
-
-**Cikti dosyasi:** `02-Arastirma/karsi-arguman-onsorgu.md`
-- Frontmatter: `engine: claude`, `mcp: yargi-mcp-pro`, `status: TASLAK`
-- Tehdit listesi (5 seviye)
-- Her tehdide ait kararin kunyesi + documentId
-- KRITIK ve YUKSEK seviyedekilerin tam metni (`ictihat_getir`)
-
-**Not:** Sorguya TC/IBAN gibi kimlik verisi yazilmaz (gereksiz — hukuki
-tez jenerik doktrinal terimlerle kurulur; arama kalitesi de artar).
-
-**Antigravity devir blogu icin:** Bu cikti 5. dosya olarak eklenir
-(asagidaki devir blogu sablonunda gosterildi).
-
-2. **Antigravity devir blogu bas (avukata sun):**
-
-   ```
-   ========== ANTIGRAVITY DEVIR BLOGU ==========
-   ASAMA: ASAMA 6 (Savunma Simulasyonu)
-   Dava-ID: {dava-id}
-
-   Sag panele yapistirilacak:
-   --------------------------------------------
-   Asagidaki dosyalari oku:
-     - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\03-Sentez-ve-Dilekce\dilekce-v1.md
-     - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\02-Arastirma\arastirma-raporu.md
-     - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\01-Usul\usul-raporu.md
-     - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\02-Arastirma\stratejik-analiz.md
-        ^ Ozellikle 4B Davali Avukat ciktisindan beklenen itirazlar
-     - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\02-Arastirma\karsi-arguman-onsorgu.md
-        ^ YENI — FAZ 4 2026-05-19: Arguman.ai karsi-arguman skill ciktisi (5 seviyeli tehdit)
-     - prompts/muhakeme/savunma_simulasyonu.md  (protokol)
-     - prompts/muhakeme/_ortak-kurallar.md
-
-   Gorev: Karsi taraf avukati gibi dusun, en guclu savunmayi kur.
-   Amac dilekce yazmak DEGIL; muvekkilimizin dilekcesindeki zayif
-   noktalari ve karsi tarafin yapabilecegi en tehlikeli itirazlari
-   tespit etmektir.
-
-   ONCELIKLI GIRDI — karsi-arguman-onsorgu.md:
-     - KRITIK ve YUKSEK seviye tehditler MUTLAKA simulasyona dahil edilir
-     - Her tehdide ait kararin kunyesi savunma simulasyonunda ayrica gecer
-     - "Karsi taraf avukati su KRITIK karari ileri surebilir" formatu
-
-   Cikti formati:
-     - En tehlikeli 5 itiraz (siralama: en kritik basta)
-     - Her itiraza karsi pozisyon onerisi (Revizyon Ajani'na)
-     - Hakimin olasi sorulari + ASAMA 7 icin cevap altyapisi
-     - Risk flag'leri: KIRMIZI / SARI / YESIL
-     - Atif yapilan karsi-karar kunyeleri DOGRULANMIS olmali
-
-   Cikti: G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\02-Arastirma\savunma-simulasyonu.md
-
-   Self-review yap (prompts/muhakeme/self_review.md):
-     - Risk flag 0 cikarsa "analiz yetersiz" yaz, ek sorgular yap
-     - Karsi taraf adina uydurma karar atfi YASAK
-     - Lehe yorum durtusu TERS YONDE de gecerli: gercek riskler kucumsenemez
-   --------------------------------------------
-
-   Antigravity tamamlayinca buraya don ve "ASAMA 6 bitti" yaz.
-   =============================================
-   ```
-
-3. **Avukat onayini bekle:** Avukat "ASAMA 6 bitti" diyene kadar bir
-   sonraki ASAMA'ya gecme.
-
-4. **Avukat onayi sonrasi (Director yapar):**
-   - `qmd update` calistir
-   - `mempalace_diary_write "savunma_simulatoru"` ile bu davadan
-     ogrenilen karsi-itiraz pattern'lerini yaz
-   - `python scripts/md_to_docx.py {dava-klasoru}` calistir
-   - ASAMA 7 (Revizyon) devir blogunu hazirla
+5. **Onay sonrası (ORKESTRATOR):**
+   - `qmd update`
+   - `mempalace_diary_write "savunma_simulatoru"` — karşı-itiraz pattern'leri
+   - `python scripts/md_to_docx.py {dava-klasoru}`
+   - ASAMA 7 (Revizyon) hazırlığı
 
 ### Asla
 
-- Devir blogunu basmadan terminal Claude'da savunma simulasyonu yazma
-- `gemini-bridge.sh` cagirma — DEPRECATED (exit 100)
-- Karsi taraf adina sadece taslak savunma yaz (asil amac risk tespiti)
-- Risk flag uretmeden cikti tamamla (her ciktida KIRMIZI/SARI/YESIL zorunlu)
-- Karsi taraf "su Yargitay kararini ileri surebilir" derken kararin
-  varligi dogrulanmamissa "(varsayilan)" notu eklemeden yazma
-
-### Fallback
-
-Antigravity erisilemezse avukat "fallback claude" → terminal Claude
-`prompts/muhakeme/savunma_simulasyonu.md` protokolune gore savunma
-simulasyonu uretir, frontmatter `engine: claude`, `fallback_used: true`.
+- Karşı taraf adına sadece taslak savunma yazma (asıl amaç risk tespiti)
+- Risk flag üretmeden çıktı tamamlama (her çıktıda KIRMIZI/SARI/YEŞİL zorunlu)
+- Karşı taraf "şu Yargıtay kararını ileri sürebilir" derken kararın varlığı doğrulanmamışsa "(varsayılan)" notu eklemeden yazma
+- DENETCI YEŞİL vermeden çıktıyı Drive'a yazma
 
 ---
 

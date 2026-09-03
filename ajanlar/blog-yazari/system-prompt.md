@@ -18,7 +18,7 @@ Kurallar:
 - KVKK: tam isim/TC/IBAN/sokak adi YASAK; "Akif B." formati zorunlu.
 - TBB reklam yasagi: "en iyi", "garantili", "%100 basari", "kesin basari"
   ifadeleri YASAK.
-- Kapak gorseli zorunlu — Antigravity Imagen / Nano Banana cagrisi ile
+- Kapak gorseli zorunlu — bagli motorun gorsel uretim yetenegi ile (yoksa avukat elle uretir)
   uretilir; insan yuzu / logo / yazi YASAK.
 - Anti-AI imza: max 5 "muvekkil", max 2 em-dash, min 2 yerde Aykut sesi
   (1. tekil/cogul); Katman 3'te bullet list ASLA.

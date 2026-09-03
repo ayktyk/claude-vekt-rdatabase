@@ -5,20 +5,18 @@ Versiyon: 1.0
 
 ---
 
-## Motor
+## Rol ve Motor
 
-**TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/motor-haritasi.json`'dan okunur.
+Sistem **tek motorla** çalışır: oturumu hangi LLM ile açtıysanız o. Rol ataması
+yalnızca `config/motor-haritasi.json` → `tasks.blog_yazimi.rol`'dan okunur.
 
-- **blog_yazimi** task'i: `config/motor-haritasi.json` -> `tasks.blog_yazimi.engine` (= `antigravity_manual`) ve `model` (= `gemini-3.1-pro-preview`)
-- **Antigravity (sag panel)** uretir; terminal Claude SADECE devir blogu basar
-- **Claude'da kalir:** dava arastirma paketinden THEMIS girdi paketi
-  hazirlama, Drive klasor olusturma, validator script calistirma,
-  Gmail draft hazirlama
-- **Self-review:** Antigravity ayni sohbette yazinin sonunda kontrol uret;
-  HARD FAIL durumlarinda yeniden uret
-- **Prompt sablonu:** `prompts/muhakeme/blog_yazimi.md`
-- **Fallback:** Antigravity erisilemezse "fallback claude" → terminal Claude
-  uretir, frontmatter `engine: claude`, `fallback_used: true`
+- **blog_yazimi** task'ı: rol **`MUHAKEME`**
+- **ORKESTRATOR'da kalan iş (deterministik / araç):** dava araştırma paketinden THEMIS girdi paketi hazırlama, Bedesten document fetch verification, Drive klasörü oluşturma, `blog_validator.py`, Gmail draft hazırlama
+- **Prompt şablonu:** `prompts/muhakeme/blog_yazimi.md` + `prompts/muhakeme/_ortak-kurallar.md`
+- **Bağımsız denetim:** çıktı üretildikten sonra **DENETCI** (`ajanlar/denetci/SKILL.md`)
+  üretim bağlamını görmeden denetler; KIRMIZI kararda çıktı Drive'a yazılmaz.
+- **Motor damgası:** frontmatter `engine:` alanı `python scripts/motor.py damga blog_yazimi` ile
+  doldurulur; avukat motoru bildirmemişse `engine: bildirilmedi` yazılır.
 
 ---
 
@@ -81,192 +79,73 @@ TBB Meslek Kurallari (E.2024/990, K.2025/66) blog'a su sertlikte uygulanir:
 
 ---
 
-## ZORUNLU ILK ADIM — Antigravity Devri
+## Üretim Akışı (tek motor — Blog / THEMIS)
 
-Bu ajan hukuki yazim uretimi yapar; terminal Claude SADECE devir blogu basar.
-Antigravity sag panelinde Gemini 3.1 Pro uretir ve Drive'a yazar.
+Elle devir bloğu, kopyala-yapıştır ve harici panel **yoktur**. Aynı oturumda:
+ORKESTRATOR hazırlar → MUHAKEME üretir → DENETCI bağımsız denetler → avukat onaylar.
 
-### Akis
+### Kapak görseli üretimi
 
-1. **On-hazirlik (Claude'da kalir):**
-   - Komut tetikleyicisi: `blog yaz: [konu]` veya `blog yaz dava: [dava-id]`
-   - **Serbest konu modunda:** Avukattan ek parametre topla
-     (primary keyword, kategori, intent, sayfa tipi). MemPalace search
-     yap: gecmis benzer konu yazildi mi?
-   - **Dava modunda:** Dava arastirma raporundan THEMIS girdi paketi cikar:
-     - Emsal kararlar (Bedesten ID'li, min 3)
-     - Mevzuat maddeler (min 2)
-     - Entity graph (pillar/cluster/tool)
-     - KVKK kontrol: muvekkil verisi paketten temizlendi mi?
-   - Cikti klasoru olustur: `G:\Drive'im\Hukuk Burosu\Blog\{YYYY-MM-DD}-{slug-taslagi}\`
-     - Dava modunda alternatif: `G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\06-Blog\`
-   - `config/author.json`'dan Aykut sameAs URL'lerini cek
+Kapak, oturumun bağlı olduğu motorun görsel üretim yeteneği varsa onunla; yoksa
+avukatın oturum açık olduğu bir görsel üretim aracında aşağıdaki formülle üretilir.
+Hiçbiri yoksa `coverImage.path: ""` bırakılır, `coverImage.prompt` doldurulur (avukat elle üretir).
 
-   **1.5. DOCUMENT FETCH VERIFICATION (ZORUNLU — 2026-05-17 sistemik fix):**
+### VEGA Kapak Tarz Formülü (2026-07-20 — sitedeki yayınlı kapaklardan çıkarıldı)
 
-   `ictihat_ara` arama sonucunda gelen her Bedesten documentId
-   icin DEVIR BLOGUNU BASMADAN ONCE `ictihat_getir`
-   ile **karar tam metni cekilir + konuyla ilgili oldugu kontrol edilir**.
+Sitenin yerleşik kapak tarzı FOTOGERÇEKÇİ'dir (soyut illüstrasyon DEĞİL):
+- Sabit sahne: sıcak, loş ışıklı KOYU AHŞAP avukat masası; tokmak + pirinç terazi +
+  deri ciltli kitaplar + dolma kalem/evrak. Zengin kahve + pirinç altın tonlar,
+  sinematik ışık, sığ alan derinliği. Oran 3:2 (min 1536x1024).
+- Konuya özel 1-2 TEMA OBJESİ (sahte icra → kırmızı uyarılı telefon; trafik → maket
+  araçlar + form; bahis → kırmızı uyarılı telefon + futbol topu + kuponlar).
+- YASAK: insan yüzü, okunabilir metin, logo, para görseli.
+- Prompt İNGİLİZCE:
+  "Photorealistic editorial photo for a Turkish law firm blog article about {KONU}.
+  Scene: a warm, dimly lit lawyer's desk in dark wood — a wooden judge's gavel and
+  brass scales of justice, leather-bound law books stacked behind, a fountain pen
+  resting on documents. Theme objects: {KONUYA ÖZEL 1-2 OBJE}. Cinematic warm
+  lighting, shallow depth of field, rich browns and brass gold tones. No people,
+  no faces, no readable text, no logos, no money."
 
-   - **Search listesinde gorunmek = atif YAPMAK icin yetmez.** Search
-     bazen alakasiz veya cok genis kapsamli sonuc dondurur (orn:
-     "bilisim dolandiriciligi" sorgusu 30K+ sonuc icinde sahte SMS
-     konusuyla alakasiz kararlar da var).
-   - Her aday karar icin: documentId -> ictihat_getir
-     -> metni oku -> blog konusu ile **gercekten ilgili mi?** sor.
-     Eger metin sahte SMS / bilisim dolandiriciligi / phishing /
-     ilgili spesifik konuya degmiyor ise o karari **kullanma**.
-   - Verified flag: dogrulanan kararlar `verified: true` ve
-     `verified_summary: "<karar metninden cikan kisa ozet>"` ile
-     devir bloguna gomulur. Verified olmayan kararlar gonderilmez.
-   - **Bedesten API down ise (502, timeout):** 2-3 retry (60+ sn
-     beklemeyle) sonrasi hala fail varsa, **hicbir Yargitay kunyesi
-     blog'da kullanilmaz** — yazi "yerlesik Yargitay uygulamasina
-     gore..." formuluyle uretilir (kunye verilmez). Cikti
-     frontmatter'inda `relatedCases: []` + aciklama notu.
-   - **Hata gecmisi (2026-05-17):** Bu kural Aykut'un "yargıtay karar
-     numaralarını sallamışsın böyle kararlar yok hepsi 2026 tarihli"
-     uyarisindan sonra eklendi. Search sonucu listeye guvenip document
-     fetch yapmadan Gemini'ye karar gondermenin doktrin ihlali
-     oldugu netlesti.
+### Akış
 
-2. **Antigravity devir blogu bas (avukata sun):**
+1. **Ön-hazırlık (ORKESTRATOR — deterministik / araç işi):**
+   - Komut: `blog yaz: [konu]` veya `blog yaz dava: [dava-id]`
+   - **Serbest konu modunda:** avukattan ek parametre (primary keyword, kategori, intent, sayfa tipi); MemPalace search — geçmişte benzer konu yazıldı mı
+   - **Dava modunda:** araştırma raporundan THEMIS girdi paketi: emsal kararlar (Bedesten ID'li, min 3), mevzuat maddeleri (min 2), entity graph (pillar/cluster/tool), KVKK kontrol (müvekkil verisi paketten temizlendi mi)
+   - Çıktı klasörü: `Blog/{YYYY-MM-DD}-{slug}/` (dava modunda `{dava-id}/06-Blog/`); `config/author.json`'dan sameAs URL'leri
+   - **1.5 DOCUMENT FETCH VERIFICATION (ZORUNLU — 2026-05-17 sistemik fix):** `ictihat_ara` sonucundaki her documentId için üretimden ÖNCE `ictihat_getir` ile tam metin çekilir ve konuyla gerçekten ilgili olduğu teyit edilir. Search listesinde görünmek = atıf yapmak için YETMEZ. Doğrulananlar `verified: true` + `verified_summary` ile pakete girer; doğrulanmayan gönderilmez. Bedesten API down ise (502/timeout) 2-3 retry; hâlâ fail → hiçbir künye kullanılmaz, "yerleşik uygulamaya göre" formülü + `relatedCases: []`. Hata geçmişi: 2026-05-17 "karar numaralarını sallamışsın, hepsi 2026 tarihli" uyarısı
 
-   ```
-   ========== ANTIGRAVITY DEVIR BLOGU ==========
-   ASAMA: Blog Yazimi (THEMIS)
-   Mod: serbest | dava
-   {dava-id: ... (dava modunda)}
+2. **Üretim (MUHAKEME):** Protokol `prompts/muhakeme/blog_yazimi.md` + `prompts/muhakeme/_ortak-kurallar.md`.
+   Girdiler sırayla okunur:
+     - THEMIS girdi paketi (mod, primary_keyword, secondary_keywords, intent I|C|T, kategori, sayfa_tipi, hedef_kelime 1500-2500, emsal_kararlar[bedesten_id, daire, esas, karar, tarih, ozet, cited_text birebir], mevzuat[code, madde, title, yururluk], saha_ornek, entity_graph, author_sameAs)
+     - `ajanlar/blog-yazari/THEMIS.md` (protokol)
+   Çıktı: `Blog/{YYYY-MM-DD}-{slug}/ → blog.md · blog.cms.md · blog.mail.md · kapak.png`
+   - 6 katman: OLAY → KOSAR → DERİN → SAHA → ETİK → AKSİYON
+   - Min 1500 kelime, min 3 Bedesten ID atfı, min 5 FAQ; Bedesten ID YOKSA atıf yapılmaz
+   - KVKK: tam isim/TC/IBAN/sokak adı YASAK · TBB: "en iyi/garantili/%100/kesin başarı" YASAK
+   - Kapak görseli: "VEGA Kapak Tarz Formülü" (aşağıda) — insan yüzü/logo/yazı YASAK
 
-   Sag panele yapistirilacak:
-   --------------------------------------------
-   Asagidaki context'i alip THEMIS protokolune gore SEO uyumlu hukuki
-   blog yazisi uret. Cikti: 4 dosya (blog.md, blog.cms.md, blog.mail.md,
-   kapak.png).
+3. **Bağımsız denetim (DENETCI):** Girdi yalnızca `{çıktı yolu, dava-id}`; üretim
+   bağlamı verilmez. Deterministik kapılar → künye içerik teyidi (her documentId
+   MCP'den yeniden çekilir) → doktrin clause sayımı → çıkarım denetimi → aleyhe beyanı.
+   Karar KIRMIZI / SARI / YEŞİL. YEŞİL değilse MUHAKEME revize eder; en çok 3 tur.
+   **YEŞİL olmadan çıktı Drive'a yazılmaz.**
 
-   Protokol: prompts/muhakeme/blog_yazimi.md (ayni Antigravity workspace'inde
-   acik tut)
-   Ortak kurallar: prompts/muhakeme/_ortak-kurallar.md
+4. **Avukat onayı:** Avukat "Blog bitti" / `devam` diyene kadar bir sonraki ASAMA'ya geçilmez.
 
-   Cikti yolu: G:\Drive'im\Hukuk Burosu\Blog\{YYYY-MM-DD}-{slug}\
-   (veya dava modunda: ...\Aktif Davalar\{dava-id}\06-Blog\)
-
-   --- GIRDI PAKETI ---
-
-   mod: serbest|dava
-   primary_keyword: "..."
-   secondary_keywords:
-     - "..."
-   intent: I|C|T
-   kategori: is-hukuku|tuketici|trafik|icra|aile|diger
-   sayfa_tipi: blog|cluster|pillar
-   hedef_kelime: 1500-2500
-
-   emsal_kararlar:
-     - bedesten_id: "..."
-       daire: "..."
-       esas: "..."
-       karar: "..."
-       tarih: "..."
-       ozet: "..."
-       cited_text: "..."  # karar tam metninden birebir
-
-   mevzuat:
-     - code: "..."
-       madde: "..."
-       title: "..."
-       yururluk: "..."
-
-   saha_ornek: |
-     (opsiyonel anonim muvekkil senaryosu — Katman 4 SAHA icin)
-
-   entity_graph:
-     pillar: "/..."
-     clusters: ["/..."]
-     tools: ["/..."]
-     dis_otorite: "https://..."
-
-   author_sameAs:
-     - "..."  # config/author.json'dan
-
-   --- KURALLAR (HATIRLATMA) ---
-   1. 6 katman: OLAY -> KOSAR -> DERIN -> SAHA -> ETIK -> AKSIYO
-   2. Min 1500 kelime, min 3 Bedesten ID atfi, min 5 FAQ
-   3. Bedesten ID YOKSA atif yapma — "yerlesik uygulamaya gore" formulu
-   4. KVKK: tam isim/TC/IBAN/sokak adi YASAK
-   5. TBB: "en iyi/garantili/%100/kesin basari" YASAK
-   6. Kapak gorseli Imagen ile uret (insan yuzu/logo/yazi YASAK)
-   7. Cikti sonunda self-review yap; KIRMIZI = Drive'a YAZMA, yeniden uret
-
-   Drive'a 4 dosyayi yaz:
-     - blog.md          (frontmatter + tam icerik)
-     - blog.cms.md      (CMS panel formati)
-     - blog.mail.md     (Gmail draft formati + self-check 12)
-     - kapak.png        (Imagen kapak gorseli)
-   --------------------------------------------
-
-   Antigravity tamamlayinca buraya don ve "Blog bitti" yaz.
-   =============================================
-   ```
-
-3. **Avukat onayini bekle:** Avukat "Blog bitti" diyene kadar bir
-   sonraki adima gecme.
-
-4. **Avukat onayi sonrasi (Director yapar):**
-   - Validator script calistir (Bolum 9 — ZORUNLU, BLOCKING; PASS olmadan
-     Gmail draft ACILMAZ — 2026-05-17 sahte icra blog dersi):
-     `python scripts/blog_validator.py {cikti-klasoru}\blog.md`
-   - Eger validator FAIL: avukati bilgilendir, duzeltme oner
-   - PASS: `mempalace_diary_write "blog_yazari"` ile yazidan ogrenilen
-     ton/konu notlarini kaydet
-   - Gmail draft acmak isteyip istemedigini sor:
-     - EVET → Gmail MCP `create_draft` ile blog.mail.md'yi draft olarak yukle
-     - HAYIR → Avukat dosyalari elle alir
-   - QMD update calistir (yeni blog yazisi indexlenir)
-   - `mempalace_add_drawer` ile `wing_buro_aykut/hall_blog_konulari`
-     drawer'i olustur (gelecekte kanibalizasyon kontrolu icin)
+5. **Onay sonrası (ORKESTRATOR):**
+   - **Validator (ZORUNLU, BLOCKING):** `python scripts/blog_validator.py {klasor}/blog.md` — PASS olmadan Gmail draft AÇILMAZ
+   - PASS → `mempalace_diary_write "blog_yazari"`; Gmail draft açmak isteyip istemediğini sor (EVET → `create_draft` ile blog.mail.md)
+   - `qmd update` · `mempalace_add_drawer` → `wing_buro_aykut/hall_blog_konulari` (kanibalizasyon kontrolü)
 
 ### Asla
 
-- Devir blogunu basmadan terminal Claude'da blog yazma
-- Uydurma Yargitay E./K. numarasi uretme — meslek riski
-- Muvekkil verisi blog'a tasima (KVKK)
-- "en iyi", "garantili", "%100", "kesin basari" ifadeleri kullanma (TBB)
-- Otomatik yayinlama (THEMIS taslak uretir, Aykut elle yayinlar)
-- Ayni primary keyword'u baska URL'e atama (kanibalizasyon — MemPalace kontrol)
-- Insan yuzu / logo / yazi iceren gorsel uretme
-
-### Fallback
-
-Antigravity erisilemezse avukat "fallback claude" → terminal Claude
-`prompts/muhakeme/blog_yazimi.md` protokolune gore uretir, frontmatter
-`engine: claude`, `fallback_used: true`, `reason: antigravity_unavailable`.
-Kapak gorseli fallback'te (2026-07-20 itibariyla): Claude-in-Chrome ile
-avukatin OTURUM ACIK oldugu gemini.google.com'da, asagidaki "VEGA Kapak
-Tarz Formulu" prompt'uyla uretilir; tam boyut indirilip klasore kapak.png
-yazilir, `coverImage.path: "kapak.png"` guncellenir. Gemini oturumu da
-yoksa `coverImage.path: ""` birakilir, `coverImage.prompt` doldurulur
-(avukat elle uretir).
-
-### VEGA Kapak Tarz Formulu (2026-07-20 — sitedeki yayinli kapaklardan cikarildi)
-
-Sitenin yerlesik kapak tarzi FOTOGERCEKCI'dir (soyut illustrasyon DEGIL):
-- Sabit sahne: sicak, los isikli KOYU AHSAP avukat masasi; tokmak + pirinc
-  terazi + deri ciltli kitaplar + dolma kalem/evrak. Zengin kahve + pirinc
-  altin tonlar, sinematik isik, sig alan derinligi. Oran 3:2 (min 1536x1024).
-- Konuya ozel 1-2 TEMA OBJESI eklenir (ornekler: sahte icra → kirmizi uyarili
-  telefon; trafik → maket araclar + form; bahis → kirmizi uyarili telefon +
-  futbol topu + kuponlar).
-- YASAK: insan yuzu, okunabilir metin, logo, para gorseli.
-- Prompt INGILIZCE, su sablonla:
-  "Photorealistic editorial photo for a Turkish law firm blog article about
-  {KONU}. Scene: a warm, dimly lit lawyer's desk in dark wood — a wooden
-  judge's gavel and brass scales of justice, leather-bound law books stacked
-  behind, a fountain pen resting on documents. Theme objects: {KONUYA OZEL
-  1-2 OBJE}. Cinematic warm lighting, shallow depth of field, rich browns and
-  brass gold tones. No people, no faces, no readable text, no logos, no money."
-Bu formul HER kapak uretiminde kullanilir (Antigravity/Imagen dahil —
-`prompts/muhakeme/blog_yazimi.md` kapak bolumu bu formule uyar).
+- Uydurma Yargıtay E./K. numarası üretme — meslek riski
+- Müvekkil verisi blog'a taşıma (KVKK)
+- Otomatik yayınlama (THEMIS taslak üretir, avukat elle yayınlar)
+- Aynı primary keyword'ü başka URL'e atama (kanibalizasyon — MemPalace kontrol)
+- İnsan yüzü / logo / yazı içeren görsel üretme
 
 ---
 
@@ -378,7 +257,7 @@ Aranacak haller:
 Eger MEMORY MATCH bulunduysa:
 - Kanibalizasyon: ayni primary keyword baska URL'de varsa avukati uyar
   ("[konu] icin daha once /[url] yazilmisti — guncelleme mi yeni yazi mi?")
-- Kategori argumanlari: hall_argumanlar'dan olgun argumanlari Antigravity
+- Kategori argumanlari: hall_argumanlar'dan olgun argumanlari MUHAKEME
   context'ine ek olarak ver (devir blogunda)
 
 Eger MEMORY MATCH yoksa: Normal akis.
@@ -402,10 +281,10 @@ qmd search "{primary_keyword}" --collection ajan-blog-yazari
 4. **Author config oku:** `config/author.json` → sameAs URL'ler.
 5. **Dava modunda girdi paketi hazirla:** Arastirma raporundan emsal
    kararlar + mevzuat + entity graph cikar, KVKK temizle.
-6. **Devir blogu uret:** Yukaridaki sablonu doldur, avukata sun.
-7. **Antigravity uretsin:** Avukat sag panele yapistirir, Gemini uretir +
-   kapak gorseli uretir, Drive'a 4 dosya yazar.
-8. **Onay bekle:** Avukat "Blog bitti" deyene kadar.
+6. **Girdi paketini hazirla:** Yukaridaki sablonu doldur (ORKESTRATOR).
+7. **Uretim (MUHAKEME):** THEMIS protokolune gore yazi + kapak gorseli uretilir.
+8. **DENETCI denetimi:** sifir baglamli bagimsiz denetim; YESIL olmadan Drive'a
+   4 dosya yazilmaz. Sonra avukat "Blog bitti" der.
 9. **Validator (ZORUNLU — BLOCKING):** `python scripts/blog_validator.py blog.md`
    — PASS olmadan Gmail draft acilmaz (2026-05-17 sahte icra blog dersi).
    PASS sonrasi WhatsApp paketi uret (2026-07-20 eklendi):
@@ -547,7 +426,7 @@ edilir (otomatik mekanizma — `cross-project-learning.md` kuralina paralel).
 
 ## Kalite Kontrol Listesi (Yayin Oncesi)
 
-Antigravity self-review'unun yaninda terminal Claude da bu kontrolleri
+DENETCI'nin yaninda ORKESTRATOR da bu kontrolleri
 yapar (devir blogu donduginde):
 
 ### Zorunlu (FAIL = avukati uyar, duzelt)
@@ -589,12 +468,11 @@ yapar (devir blogu donduginde):
 
 | Sorun | Yapilacak |
 |-------|-----------|
-| Antigravity erisilemez | "fallback claude" → terminal Claude uretir; kapak Claude-in-Chrome + gemini.google.com (avukat oturumu) ile VEGA formulunden uretilir |
-| Imagen / Nano Banana tool erisilemez | Gemini metni tamamlar, `coverImage.path: ""`, `coverImage.prompt` doldurur (avukat elle uretir) |
+| Bagli motorun gorsel uretim yetenegi yok | Metin tamamlanir; kapak avukatin oturum actigi bir gorsel aracinda VEGA formuluyle uretilir, ya da `coverImage.path: ""` + `coverImage.prompt` (avukat elle uretir) |
 | Bedesten ID < 3 | Avukatdan ek arastirma iste; veya yazinin scope'unu daralt |
 | KVKK leak tespit edildi | HARD FAIL — yeniden uret; sistemli ise self-learner ile kural ekle |
 | TBB yasak ifade tespit edildi | HARD FAIL — yeniden uret |
-| Kelime sayisi < 1500 | Antigravity'ye "Katman 3'u 2 paragraf daha derinlestir" diye geri donus |
+| Kelime sayisi < 1500 | MUHAKEME'ye "Katman 3'u 2 paragraf daha derinlestir" diye geri donus |
 | Kanibalizasyon riski | Mevcut URL guncelle (yeni icerik eklenir) veya farkli keyword sec |
 | Gorsel: insan yuzu uretildi | Prompt'a "no human faces" sertlestir, yeniden uret |
 
@@ -612,8 +490,8 @@ yapar (devir blogu donduginde):
 
 ## Iliskili Dosyalar
 
-- `prompts/muhakeme/blog_yazimi.md` — Antigravity'ye yapistirilan protokol
-- `prompts/muhakeme/_ortak-kurallar.md` — tum Gemini prompt'larinin ortak kurallari
+- `prompts/muhakeme/blog_yazimi.md` — MUHAKEME protokolu
+- `prompts/muhakeme/_ortak-kurallar.md` — tum MUHAKEME prompt'larinin ortak kurallari
 - `config/motor-haritasi.json` — `tasks.blog_yazimi` engine config
 - `config/author.json` — Aykut sameAs URL'leri (schema.org)
 - `ajanlar/blog-yazari/THEMIS.md` — proje kokunde tam THEMIS protokolu (referans)

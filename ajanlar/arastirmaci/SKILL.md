@@ -1,7 +1,7 @@
 # Arastirmaci -- Skill Dosyasi
 
 Son guncelleme: 2026-07-19
-Versiyon: 3.2 (2B Yargi TEK ELDEN Claude Fable 5 — iteratif derin protokol;
+Versiyon: 3.2 (2B Yargi TEK ELDEN ARASTIRMACI rolü — iteratif derin protokol;
 cekirdek = 2B→2C sirali zincir + 2D async paralel kol; ana omurga Yargi-MCP-Pro)
 
 > **ARSIVLENEN KOLLAR (2026-07-09 avukat karari):** 2A Super Stajyer
@@ -11,29 +11,20 @@ cekirdek = 2B→2C sirali zincir + 2D async paralel kol; ana omurga Yargi-MCP-Pr
 
 ---
 
-## Motor
+## Rol ve Motor
 
-**TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/motor-haritasi.json`'dan
-okunur. Bu dosyada hardcoded model adi YOKTUR.
+Sistem **tek motorla** çalışır. Rol ataması `config/motor-haritasi.json`'dan okunur;
+bu dosyada hardcoded model adı YOKTUR.
 
-- **arastirma_sentezi** task'i icin: `engine: claude` (2026-05-13 itibariyla
-  terminal Claude'da kalir; MCP ciktilari ayni oturumda raporlanir, Antigravity'ye
-  copy-paste yorgunlugu olmasin diye)
-- **yargi_mcp (2B)** task'i icin: Claude Fable 5 tum 2B'yi TEK ELDEN yurutur —
-  tarama, tam metin teyidi, nihai rapor ve kalite kontrolu (iteratif derin
-  protokol, 6 Faz + Gap Check; fallback: Claude Opus 4.8).
-- **Diger MCP/CLI cagrilari** (MemPalace, Drive, NotebookLM, Mevzuat MCP ve
-  CLI fallback'lari) icin: ilgili task'in config'teki motoru kullanilir.
-- **arama_plani** task'i (sorgu terimi listesi uretmek): `engine: antigravity_manual`
-  (opsiyonel — Antigravity'ye copy-paste blok ile gonderilir; pas gecilebilir)
-- **self_review** task'i: `engine: antigravity_manual` (Antigravity ASAMA
-  ciktisini ayni sohbette kendi denetler; bridge cagrisi YOK)
-- **DEPRECATED Fallback chain:** `fallback.gemini_chain_deprecated` artik
-  kullanilmiyor. Yeni fallback: Antigravity erisilemezse terminal Claude.
-- **Override:** Avukat "fallback claude" yazarak tek seferlik Claude'a cevirebilir
-- **Prompt sablonlari:** `prompts/muhakeme/arastirma_sentezi.md` (Claude
-  okuyacak ana sentez sablonu), `prompts/muhakeme/self_review.md` (Antigravity'ye
-  yapistirilir)
+- **yargi_mcp (2B), mevzuat_mcp (2C), notebooklm_mcp (2D), arastirma_sentezi, arama_plani:**
+  rol **`ARASTIRMACI`** — MCP çıktıları aynı oturumda raporlanır, kopyala-yapıştır yoktur
+- **2B iteratif derin protokol:** tarama, tam metin teyidi, nihai rapor ve kalite kontrolü
+  tek elden (6 Faz + Gap Check; min sorgu/tam-metin kuralları `tasks.yargi_mcp.modes`)
+- **Diğer MCP/CLI çağrıları** (MemPalace, Drive, CLI fallback'leri): ilgili task'ın rolü
+- **self_review** task'ı: rol **`DENETCI`** — üretim bağlamını görmeyen bağımsız denetim
+  (`ajanlar/denetci/SKILL.md`)
+- **Prompt şablonları:** `prompts/muhakeme/arastirma_sentezi.md`, `prompts/muhakeme/arama_plani.md`
+- **Motor damgası:** `python scripts/motor.py damga arastirma_sentezi`
 
 ---
 
@@ -44,9 +35,9 @@ Gorevin, doktrin, ictihat, mevzuat ve dahili kaynaklari tek raporda birlestirmek
 
 ## KVKK Maskeleme (ERTELENDI — 2026-07-09 avukat karari)
 
-Bulut LLM'lerle (Claude/Gemini) calisirken maskeleme UYGULANMAZ; kritik
+Bulut LLM'lerle calisirken maskeleme UYGULANMAZ; kritik
 nokta ve rapor gercek veriyle yazilir. Yerel LLM'e geciste zorunluluk
-geri gelir (detay: CLAUDE.md "KVKK Maskeleme (ERTELENDI)").
+geri gelir (detay: AGENTS.md "KVKK Maskeleme (ERTELENDI)").
 
 Yururlukte KALAN kurallar:
 - Zorunlu olmasa da sorgu metinlerine TC kimlik / IBAN / telefon YAZMA
@@ -104,7 +95,7 @@ qmd search "{kritik_nokta}" --collection proje-bilgi
 qmd search "{kritik_nokta}" --collection ajan-arastirmaci
 ```
 
-- `proje-bilgi` → CLAUDE.md, SKILL.md'ler, sablonlar, legal.local.md icinde arama
+- `proje-bilgi` → AGENTS.md, SKILL.md'ler, sablonlar, legal.local.md icinde arama
 - `ajan-arastirmaci` → Gecmis arastirma raporlari, basarili arama terimleri icinde arama
 
 QMD sonuclari MemPalace sonuclariyla BIRLESTIRILIR:
@@ -200,9 +191,9 @@ KALDIRILDI.
 **Thinking budget:** Engine + model `config/motor-haritasi.json` -> ilgili task'tan okunur, MAX EFFORT thinking aktif
 **Min sorgu sayilari (15, 6 faz, vb.) DEGISMEZ — sadece arac Pro MCP olur.**
 
-**Kanonik calistirici:** 2B dogrudan bu oturumda Claude Fable 5 tarafindan
+**Kanonik calistirici:** 2B dogrudan bu oturumda ARASTIRMACI rolü tarafindan
 yurutulur (`config/motor-haritasi.json -> tasks.yargi_mcp`, mod: derin —
-min 15 sorgu / 5 tam metin). Ayri calistirici script YOKTUR. Claude
+min 15 sorgu / 5 tam metin). Ayri calistirici script YOKTUR. ARASTIRMACI
 `yargi-bulgulari.md` ve `atif-maddeleri.json` dosyalarini uretir; uretim
 sonrasi kalite kontrol listesi ayni oturumda uygulanir.
 `atif-maddeleri.json` uretilmeden ve kalite listesi tamamlanmadan 2C baslatilmaz.
@@ -714,7 +705,7 @@ Fallback kullanildiginda raporda "Kullanilan Kaynaklar" bolumune
 ### Bolum 2.5 - 2B → 2C Sirali Zincir + Mulga Eleme Protokolu (YENI)
 
 2B Yargi MCP ve 2C Mevzuat MCP **sirali** calisir (paralelden CIKARILDI).
-2C, 2B'nin atif madde ciktisi ve Claude kalite kapisi `GECTI` olmadan
+2C, 2B'nin atif madde ciktisi ve ORKESTRATOR kalite kapisi `GECTI` olmadan
 baslamaz. Akis:
 
 #### Adim 1 — 2B Yargi MCP Detayli Arama
@@ -936,47 +927,47 @@ Bu, tek-shot aramada olmayan bir muhakeme katmanidir ve kalitenin temelidir.
 
 ---
 
-## ASAMA 2 Konsolide Sentezi — Claude'da Kalir (2026-05-13)
+## ASAMA 2 Konsolide Sentezi — ARASTIRMACI Rolunde
 
 Bu bolum 2B'nin kendi nihai raporunu degil, 2B+2C+2D bittikten sonraki genel
-ASAMA 2 konsolidasyonunu anlatir. 2B'nin nihai raporunu da Claude yazar;
+ASAMA 2 konsolidasyonunu anlatir. 2B'nin nihai raporunu da ARASTIRMACI yazar;
 uretim sonrasi kalite kontrolu ayni oturumda yapilir.
 
 Tum kollar (2B+2C+2D) tamamlandiktan sonra konsolide arastirma raporunu
-**terminal Claude** yazar. MCP ciktilari zaten Claude oturumunda ham olarak
+**ORKESTRATOR** yazar. MCP ciktilari zaten ORKESTRATOR oturumunda ham olarak
 mevcut — copy-paste yorgunlugu olusmasin ve butunluk korunsun diye sentez
-Antigravity'ye gitmez.
+baska bir motora gitmez.
 
-**Karar gerekcesi (2026-05-13):** Diger ASAMA'lar Antigravity'ye tasinirken
-ASAMA 2 sentezi Claude'da birakildi. Cunku:
-- MCP ciktilari (kunye, ozet, tam metin) Claude oturumunda ham veri olarak
+**Karar gerekcesi (2026-05-13):** Iki motorlu donemde diger ASAMA'lar harici panele tasinirken <!-- vendor-ok: tarihçe kaydı -->
+ASAMA 2 sentezi ORKESTRATOR'da birakildi. Cunku:
+- MCP ciktilari (kunye, ozet, tam metin) ORKESTRATOR oturumunda ham veri olarak
   uretiliyor; baska panele tasimak gereksiz cevirme yapar
 - Sentez teknik bir derleme isi (yapilandirilmis rapora cevirme), hukuki
   yaratici uretim degil
-- Antigravity'ye gitse zincir + kol ciktilari tek dosyada toplanip
+- Harici panele gitse zincir + kol ciktilari tek dosyada toplanip
   yapistirilmali — buyuk context, hata riski
 
-**DEPRECATED:** Eski `scripts/gemini-bridge.sh arastirma_sentezi` cagrisi
+**DEPRECATED:** Eski `scripts/gemini-bridge.sh arastirma_sentezi` cagrisi <!-- vendor-ok: tarihçe kaydı -->
 2026-05-13 itibariyla devre disi. Bridge cagrilirsa exit 100 doner.
 
 ### Akis (Yeni)
 
 1. **Ham bulgulari topla (paralel + sirali zincir):**
-   - 2B Claude Fable 5 -> bulunan kararlar + atif maddeleri + son 5 yil seyri
+   - 2B ARASTIRMACI rolü -> bulunan kararlar + atif maddeleri + son 5 yil seyri
    - 2C Mevzuat MCP -> kanunlar + mulga eleme tablosu + normlar hiyerarsisi
    - 2D NotebookLM -> 10 iteratif sorgu cevaplari (6 irdeleme + 4 perspektif)
 
-2. **Konsolide raporu Claude yazar:**
-   - `02-Arastirma/arastirma-raporu.md` — terminal Claude doğrudan yazar
+2. **Konsolide raporu ARASTIRMACI yazar:**
+   - `02-Arastirma/arastirma-raporu.md` — ORKESTRATOR doğrudan yazar
    - Format: ajanlar/perspektif/PROTOKOL.md "Cikti Format Kurallari" + Kalite Kapi 1
      gereksinimlerine birebir uyar
-   - Frontmatter: `engine: claude`, `model: {config/motor-haritasi.json
+   - Frontmatter: `engine: <aktif motor — scripts/motor.py>`, `model: {config/motor-haritasi.json
      -> tasks.arastirma_sentezi.model}`, `status: TASLAK`
    - Yan dosyalar:
      - `02-Arastirma/atif-maddeleri.json` (2B → 2C zinciri girdisi)
      - `02-Arastirma/mulga-eleme.json` (eleme tablosu)
 
-3. **Kalite Kapisi 1 (Claude self-check):**
+3. **Kalite Kapisi 1 (ORKESTRATOR self-check):**
    - [ ] 15 Yargi sorgu listesi (kunye + ozet) raporda var mi?
    - [ ] Min 5 karar tam metin kunye var mi?
    - [ ] `02-Arastirma/atif-maddeleri.json` doldu mu?
@@ -992,14 +983,14 @@ ASAMA 2 sentezi Claude'da birakildi. Cunku:
    sadece o 3 sorguyu) tekrar calistir. Tum Faz 2'yi bastan baslatma.
 
 5. **Avukata sun:** Rapor hazir; bir sonraki ASAMA (ASAMA 3 Usul Raporu)
-   Antigravity'ye gidecek — devir blogu hazirla.
+   MUHAKEME rolune gecilir (ASAMA 3).
 
 ### Asla
 
-- `gemini-bridge.sh` cagirma — DEPRECATED (exit 100)
-- Sentez raporunu Antigravity'ye yaptir (MCP ciktilari Claude'da kaldi,
+- `gemini-bridge.sh` cagirma — DEPRECATED (exit 100) <!-- vendor-ok: tarihçe kaydı -->
+- Sentez raporunu baska bir motora/panele yaptir (MCP ciktilari bu oturumda,
   copy-paste yorgunlugu olmasin)
-- KVKK ihlali: rapora ham muvekkil verisi yazma (zaten Claude maskeli
+- KVKK ihlali: rapora ham muvekkil verisi yazma (zaten motor maskeli
   context'le calisiyor, ama ek kontrol)
 - Sentez ciktisinda atif maddesi denetimi atla (mulga eleme onceden 2C'de
   yapilmis, bu noktada zaten temiz set var)
@@ -1376,7 +1367,7 @@ Standart arastirma raporundan farklı olarak, dava hakkinda:
 ### Kaynak Prompt
 
 Disaridan `C:\Users\user\Desktop\prompts\dava-strateji-analizi.md` adaptasyonu.
-Sistem iclerinde henuz Gemini promptu yok (opsiyonel gelecekte `prompts/muhakeme/swot_strateji.md`
+Sistem iclerinde henuz MUHAKEME promptu yok (opsiyonel gelecekte `prompts/muhakeme/swot_strateji.md`
 olarak tasinabilir; su an ana prompt Arastirmaci'nin bu bolumunden okunur).
 
 ### Cikti

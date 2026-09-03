@@ -1,7 +1,7 @@
 # legal.local.md — Büro Kuralları ve Tercihleri
 
 Bu dosya Avukat Aykut'un bürosuna özgü kuralları içerir.
-Claude her dilekçe yazımında ve usul analizinde bu dosyayı oku ve kurallara uy.
+Sistem her dilekçe yazımında ve usul analizinde bu dosyayı oku ve kurallara uy.
 Genel hukuk bilgisi bu dosyadaki büro tercihlerine göre şekillendirilir.
 
 > **Statik vs Dinamik:** Bu dosya bürünün **statik kalıcı kurallarını** içerir
