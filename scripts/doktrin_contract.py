@@ -28,6 +28,7 @@ REQUIRED_CLAUSE_TOKENS = [
     "ÇİFT KAYNAK",             # Pozitif: çift kaynak doğrulama
     "KAYNAK DOĞRULAMA",        # Pozitif: doğrulama tablosu zorunlu
     "ALEYHE İÇTİHAT",          # Pozitif: aleyhe içtihat beyanı
+    "ÇIKARIM GEÇERLİLİĞİ",     # Yasak 9: gerçek kaynaktan geçersiz sonuç (2026-09-02)
 ]
 
 # --- Output-side: Kaynak Doğrulama Tablosu grameri (sabit kolonlar) ---
@@ -114,7 +115,7 @@ def body_has_kunye(text: str) -> bool:
 # ---------------------------------------------------------------------------
 # Enjekte edilecek kompakt başlık (tüm prompt yüzeylerine AYNEN eklenir)
 # ---------------------------------------------------------------------------
-# Tam doktrin: prompts/_doktrin-preamble.md. Bu kompakt blok tüm 8 clause token'ı
+# Tam doktrin: prompts/_doktrin-preamble.md. Bu kompakt blok tüm 9 clause token'ı
 # + SENTINEL'i içerir; doktrin_lint bu tokenleri arar. Prompt dosyalarına bunu
 # prepend etmek lint'i geçirir; devir bloğuna TAM preamble gömülür.
 STANDARD_HEADER = """<!-- DOKTRIN-PREAMBLE v1 -->
@@ -125,6 +126,7 @@ STANDARD_HEADER = """<!-- DOKTRIN-PREAMBLE v1 -->
 > - Avukatı memnun etmek için LEHE YORUM YASAK; ALEYHE İÇTİHAT açıkça gösterilir, gizlenmez.
 > - "KAYNAK YOK" demek dürüstlüktür — sayı doldurmak için uydurma atıf HARD FAIL.
 > - Kritik kuralda ÇİFT KAYNAK şart.
+> - ÇIKARIM GEÇERLİLİĞİ: Kaynak gerçek olsa dahi ondan çıkarılan sonuç geçersizse HARD FAIL — bağlam kayması, meşru olmayan genelleme, caiz olmayan kıyas, bilinçli susmayı boşluk sayma reddedilir.
 > - Çıktının sonunda KAYNAK DOĞRULAMA tablosu (| İddia | Kaynak | documentId | Tam Alıntı | Doğrulama |) + "Aleyhe içtihat: VAR/YOK/ARANMADI" beyanı ZORUNLU.
 """
 

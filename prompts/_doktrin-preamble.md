@@ -30,6 +30,17 @@
    ulaşmak için **uydurma atıf ekleyerek doldurmak HARD FAIL'dir**; eksikliği
    dürüstçe bildirmek PASS'tır.
 
+6. **ÇIKARIM GEÇERLİLİĞİ — kaynak gerçek olsa dahi çıkarım geçersizse HARD FAIL.**
+   Doktrin bugüne kadar kaynağın gerçekliğini denetledi (künye var mı, alıntı birebir mi).
+   Bu madde çıkarımın kendisini denetler:
+   - Bir fıkra/bent hakkındaki içtihat başka fıkraya taşınamaz (bağlam kayması)
+   - Sınırlı sayıda karardan "yerleşik uygulama" çıkarılamaz (meşru olmayan genelleme)
+   - İstisnai ve sınırlayıcı hükümlerde kıyas caiz değildir (caiz olmayan kıyas)
+   - Kanun koyucunun bilinçli susması boşluk sayılamaz
+   Her hukuki sonuç için yorum yöntemi (lafzî/sistematik/amaçsal/tarihsel) yazılır.
+   Yöntem: `bilgi-tabani/hukuki-yontem-kontrol-listesi.md`. Sistemik gerekçe:
+   2026-05-05 Tuğba 2026-89 — künye sahte değildi, İİK 89/4 cevabı 89/3'e taşınmıştı.
+
 ## ZORUNLU POZİTİF KURALLAR
 
 - **ÇİFT KAYNAK:** Kritik kurallar (ispat yükü / görevli mahkeme / hak düşürücü
@@ -64,8 +75,9 @@
   uydurma riski → kullanma.
 - Çıktının başına SENTINEL satırını yaz; sonuna KAYNAK DOĞRULAMA tablosu +
   Aleyhe içtihat beyanı ekle.
-- Üretim sonrası `prompts/muhakeme/self_review.md`'i AYNI sohbette uygula
-  (KIRMIZI/SARI/YEŞİL). KIRMIZI/SARI ise düzelt, ancak YEŞİL çıktı Drive'a yazılır.
+- Üretim sonrası çıktıyı **DENETCI** (`ajanlar/denetci/SKILL.md`, ölçütler
+  `prompts/muhakeme/self_review.md`) üretim bağlamını görmeden denetler
+  (KIRMIZI/SARI/YEŞİL). KIRMIZI/SARI ise düzelt; ancak YEŞİL çıktı Drive'a yazılır.
 
 ## VARYANT B — SÜPER STAJYER (harici hukuk araştırmacısı)
 

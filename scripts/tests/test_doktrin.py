@@ -143,3 +143,26 @@ def test_cikti_kamuya_acik_esas_no_flaglenmez():
     metin = _temiz_cikti() + "\nDava E.2026/12345, talep 50000 TL.\n"
     fails = cikti_dogrula.validate_text(metin, denylist=[])
     assert not any("TC" in f or "IBAN" in f for f in fails), f"kamuya açık sayı flag'lendi: {fails}"
+
+
+# --- 9. clause: çıkarım geçerliliği (2026-09-02) ---
+
+def test_dokuzuncu_clause_kontratta_var():
+    assert "ÇIKARIM GEÇERLİLİĞİ" in dc.REQUIRED_CLAUSE_TOKENS
+    assert len(dc.REQUIRED_CLAUSE_TOKENS) == 9
+
+
+def test_dokuzuncu_clause_standard_headerda_var():
+    assert "ÇIKARIM GEÇERLİLİĞİ" in dc.STANDARD_HEADER
+    assert dc.missing_clauses(dc.STANDARD_HEADER) == []
+
+
+def test_dokuzuncu_clause_preamblede_var():
+    text = PREAMBLE.read_text(encoding="utf-8")
+    assert "ÇIKARIM GEÇERLİLİĞİ" in text
+    assert dc.missing_clauses(text) == []
+
+
+def test_eksik_dokuzuncu_clause_yakalanir():
+    eski = dc.STANDARD_HEADER.replace("ÇIKARIM GEÇERLİLİĞİ", "xxx")
+    assert "ÇIKARIM GEÇERLİLİĞİ" in dc.missing_clauses(eski)
