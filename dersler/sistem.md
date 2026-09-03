@@ -59,3 +59,17 @@
 - ÜÇÜNCÜ DERS: Bedesten sık sık ~Nisan 2025 yedek arşivine düşüyor; snippet'ler
   tam metin okunmadan kullanıldıysa tabloda işaretlendi, son ~3 ay eksik notu
   kondu.
+
+## 2026-09-02 — DENETCI kapısı uçtan uca doğrulandı (tek motora geçiş)
+
+**KAÇIRILAN:** Tek motora geçerken "bağımsız denetim aynı modelle de çalışır" iddiası
+kağıt üzerindeydi; çalıştığı gösterilmemişti.
+**DÜZELTME:** Bilerek kusurlu çıktı (uydurma 9. HD künyesi, uydurma alıntı, "Yargıtay
+yerleşmiştir", "işveren mutlaka kaybeder", İİK 89/4→89/3 taşıma) sıfır bağlamlı
+DENETCI'ye yalnız dosya yolu + dava-id ile verildi. Sonuç KIRMIZI, 7 KIRMIZI + 4 SARI
+bulgu; künye Bedesten docket aramasıyla, alıntı tam-ifade aramasıyla, bağlam kayması
+İİK m.89 kaynak metniyle çürütüldü. Çıktı Drive'a yazılmadı.
+**KURAL ADAYI:** (1) Denetim mekanizması değiştiğinde sahte-kusurlu çıktı ile uçtan uca
+denenmeden canlıya alınmaz. (2) `TBB_BANNED_PHRASES` "mutlaka kaybed" kalıbını
+içermiyor — denetçi muhakeme düzeyinde yakaladı; listeye "mutlaka kaybed", "kesin
+kaybed" eklenmesi değerlendirilsin (ters yönlü aşırı vaat).

@@ -360,3 +360,35 @@ Faz 4 ile Faz 5 arasında bu kontrol avukattadır.
 - `isbu-ofis/` alt projesi — bağımsız web uygulaması, bu spec'in dışındadır.
 - Vektör DB'ye kitap metni indeksleme — bilinçli olarak reddedildi
   (`EKLENECEKKITAPLAR.md` üçüncü bölümü).
+
+---
+
+## Uygulama Kaydı
+
+**Tamamlanma:** 2026-09-02 (tek oturum)
+**Plan:** `docs/superpowers/plans/2026-09-02-tek-motor-agnostik-toparlama.md`
+**Kabul kriterleri:** 13/13 doğrulandı.
+
+| # | Kriter | Sonuç |
+|---|---|---|
+| 1 | Kökte 6 kanonik + 3 stub | ✓ AGENTS/README/legal.local/dilekce-yazim/EKLENECEKKITAPLAR + CLAUDE/GEMINI/.cursor |
+| 2 | AGENTS.md'de rol tanımı olarak sağlayıcı adı yok | ✓ vendor_lint TEMİZ (76 dosya) |
+| 3 | doktrin_lint 9 clause ile PASS | ✓ 29 yüzey |
+| 4 | Yollar çözümleniyor | ✓ paths.py check |
+| 5 | DENETCI KIRMIZI'da yazımı engelliyor | ✓ sahte çıktı → KIRMIZI, 11 bulgu, sıfır bağlam (dersler/sistem.md) |
+| 6 | 306 sayfa OCR, şüpheliler işaretli | ✓ 18 şüpheli → inceleme: boş/ayırıcı sayfalar, içerik kaybı yok |
+| 7 | Okuma notları 3 bölüm, `[s. NNN]` | ✓ 118 sayfa referansı |
+| 8 | Protokol adımları etiketli | ✓ 24 adım: 21 `[s.]` + 3 `[SİSTEM EKİ]` |
+| 9 | Teyit turu | ✓ 36/36 atıf OCR'da doğrulandı |
+| 10 | ASAMA 1 yüzeyleri bağlı | ✓ AGENTS / briefing şablonu / director SKILL / playbook şablonu |
+| 11 | Yöntem kontrol listesi | ✓ — **sapma kaydı:** Polat yorum kurallarını içermiyor; §1–5 `[SİSTEM EKİ]`, Serozan bekleniyor |
+| 12 | OCR tam metni repoda yok | ✓ `git ls-files` boş |
+| 13 | DavaTek keşif notu | ✓ kurulum bekleniyor durumuyla |
+
+**Sapmalar (dürüst kayıt):**
+- §3.4.5 "yorum yöntemi kontrol listesi sayfa referanslı" — Polat bu kuralları vermiyor
+  (s.37–38 yalnız çerçeve). Liste yazıldı ama kurallar `[SİSTEM EKİ]`; Serozan öncelikli.
+- §3.2 "vendor_lint" kapsamı: JSON tarihli `_history` girdileri ve `<!-- vendor-ok -->`
+  işaretli meşru mention'lar (araç adı, alt proje, tarihçe) muaf tutuldu.
+- Faz sırası: Faz 3 (kitap) Faz 2'den önce yürütüldü (avukat kararı); çakışma olmadı.
+
