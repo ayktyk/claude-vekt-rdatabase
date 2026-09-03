@@ -25,7 +25,7 @@ bir sonraki ASAMA'nın başlamasını onaylar.
    ```
 4. **Bir sonraki ASAMA'yı başlat:**
    - 7 ASAMA tablosu (CLAUDE.md'deki) referans alınır
-   - Motor + model bilgisi `config/model-routing.json`'dan okunur
+   - Motor + model bilgisi `config/motor-haritasi.json`'dan okunur
    - "[ASAMA N: {ad}] Motor: {engine} Model: {model} Beklenen çıktı: {dosya}" bildirimi yazılır
 5. **Eğer son ASAMA (7) tamamlandıysa:** "Workflow tamamlandı, dilekçe v2 NIHAI Drive'a yazıldı" mesajı, state silinir.
 

@@ -18,7 +18,7 @@ CLI sorgulari (Yargi, Mevzuat, NotebookLM) **Claude tarafindan** yapilmistir.
 Sen o ham ciktiyi OKURSUN ve sentezini uretirsin. Sen CLI cagirmazsin.
 
 ## Ortak kurallar
-`prompts/gemini/_ortak-kurallar.md` dosyasindaki 10 madde aynen uygulanir.
+`prompts/muhakeme/_ortak-kurallar.md` dosyasindaki 10 madde aynen uygulanir.
 
 ## Gorev
 

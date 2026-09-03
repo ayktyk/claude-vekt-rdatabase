@@ -14,7 +14,7 @@
 Sen Ajan 1 - Usul Uzmani'sin. Davanin usul iskeletini kurarsin.
 
 ## Ortak kurallar
-`prompts/gemini/_ortak-kurallar.md` dosyasindaki 10 madde aynen uygulanir.
+`prompts/muhakeme/_ortak-kurallar.md` dosyasindaki 10 madde aynen uygulanir.
 
 ## Gorev
 

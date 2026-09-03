@@ -7,16 +7,16 @@ Versiyon: 1.0
 
 ## Motor
 
-**TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/model-routing.json`'dan okunur.
+**TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/motor-haritasi.json`'dan okunur.
 
-- **blog_yazimi** task'i: `config/model-routing.json` -> `tasks.blog_yazimi.engine` (= `antigravity_manual`) ve `model` (= `gemini-3.1-pro-preview`)
+- **blog_yazimi** task'i: `config/motor-haritasi.json` -> `tasks.blog_yazimi.engine` (= `antigravity_manual`) ve `model` (= `gemini-3.1-pro-preview`)
 - **Antigravity (sag panel)** uretir; terminal Claude SADECE devir blogu basar
 - **Claude'da kalir:** dava arastirma paketinden THEMIS girdi paketi
   hazirlama, Drive klasor olusturma, validator script calistirma,
   Gmail draft hazirlama
 - **Self-review:** Antigravity ayni sohbette yazinin sonunda kontrol uret;
   HARD FAIL durumlarinda yeniden uret
-- **Prompt sablonu:** `prompts/gemini/blog_yazimi.md`
+- **Prompt sablonu:** `prompts/muhakeme/blog_yazimi.md`
 - **Fallback:** Antigravity erisilemezse "fallback claude" → terminal Claude
   uretir, frontmatter `engine: claude`, `fallback_used: true`
 
@@ -144,9 +144,9 @@ Antigravity sag panelinde Gemini 3.1 Pro uretir ve Drive'a yazar.
    blog yazisi uret. Cikti: 4 dosya (blog.md, blog.cms.md, blog.mail.md,
    kapak.png).
 
-   Protokol: prompts/gemini/blog_yazimi.md (ayni Antigravity workspace'inde
+   Protokol: prompts/muhakeme/blog_yazimi.md (ayni Antigravity workspace'inde
    acik tut)
-   Ortak kurallar: prompts/gemini/_ortak-kurallar.md
+   Ortak kurallar: prompts/muhakeme/_ortak-kurallar.md
 
    Cikti yolu: G:\Drive'im\Hukuk Burosu\Blog\{YYYY-MM-DD}-{slug}\
    (veya dava modunda: ...\Aktif Davalar\{dava-id}\06-Blog\)
@@ -239,7 +239,7 @@ Antigravity sag panelinde Gemini 3.1 Pro uretir ve Drive'a yazar.
 ### Fallback
 
 Antigravity erisilemezse avukat "fallback claude" → terminal Claude
-`prompts/gemini/blog_yazimi.md` protokolune gore uretir, frontmatter
+`prompts/muhakeme/blog_yazimi.md` protokolune gore uretir, frontmatter
 `engine: claude`, `fallback_used: true`, `reason: antigravity_unavailable`.
 Kapak gorseli fallback'te (2026-07-20 itibariyla): Claude-in-Chrome ile
 avukatin OTURUM ACIK oldugu gemini.google.com'da, asagidaki "VEGA Kapak
@@ -266,7 +266,7 @@ Sitenin yerlesik kapak tarzi FOTOGERCEKCI'dir (soyut illustrasyon DEGIL):
   1-2 OBJE}. Cinematic warm lighting, shallow depth of field, rich browns and
   brass gold tones. No people, no faces, no readable text, no logos, no money."
 Bu formul HER kapak uretiminde kullanilir (Antigravity/Imagen dahil —
-`prompts/gemini/blog_yazimi.md` kapak bolumu bu formule uyar).
+`prompts/muhakeme/blog_yazimi.md` kapak bolumu bu formule uyar).
 
 ---
 
@@ -612,9 +612,9 @@ yapar (devir blogu donduginde):
 
 ## Iliskili Dosyalar
 
-- `prompts/gemini/blog_yazimi.md` — Antigravity'ye yapistirilan protokol
-- `prompts/gemini/_ortak-kurallar.md` — tum Gemini prompt'larinin ortak kurallari
-- `config/model-routing.json` — `tasks.blog_yazimi` engine config
+- `prompts/muhakeme/blog_yazimi.md` — Antigravity'ye yapistirilan protokol
+- `prompts/muhakeme/_ortak-kurallar.md` — tum Gemini prompt'larinin ortak kurallari
+- `config/motor-haritasi.json` — `tasks.blog_yazimi` engine config
 - `config/author.json` — Aykut sameAs URL'leri (schema.org)
 - `ajanlar/blog-yazari/THEMIS.md` — proje kokunde tam THEMIS protokolu (referans)
 - `.claude/commands/blog.md` — serbest konu slash komutu

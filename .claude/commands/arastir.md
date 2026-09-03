@@ -22,7 +22,7 @@ tek-shot araştırma YASAK.
 - `ajanlar/arastirmaci/SKILL.md` → Bölüm 1 (Yargı), 2 (Mevzuat), 2.5 (zincir + mülga eleme), 2.7 (NotebookLM)
 - `ajanlar/perspektif/PROTOKOL.md` → ASAMA 2 kesiti
 - `CLAUDE.md` → Araç Katmanı + ASAMA 2
-- `config/model-routing.json` → motor routing
+- `config/motor-haritasi.json` → motor routing
 
 ## Ön-koşullar (otomatik)
 1. `tmp/current-run-id.txt` oluştur (yoksa): `{YYYYMMDD}-{HHMMSS}-{dava-id}`
@@ -54,7 +54,7 @@ ZİNCİR + KOL TAMAMLANINCA → Konsolide Sentez (Terminal Claude)
 
 ### 2B Yargı — `/arastir-yargi` protokolü
 - 2B **bu oturumda Claude Fable 5 tek elden** yürütülür
-  (`config/model-routing.json -> tasks.yargi_mcp`, mod: derin); ayrı
+  (`config/motor-haritasi.json -> tasks.yargi_mcp`, mod: derin); ayrı
   pipeline scripti YOKTUR
 - Min 15 sorgu / 6 faz / temporal evolution / min 5 tam metin
 - **Temporal evolution DİNAMİK:** içinde bulunulan yıl dahil son 5 takvim
@@ -96,7 +96,7 @@ Sentez **terminal Claude** tarafından yazılır; MCP çıktıları zaten Claude
 oturumunda hazır. (Eski gemini-bridge sentezi DEPRECATED — exit 100.)
 
 Zincir + kol tamamlandığında Claude konsolide raporu doğrudan yazar:
-- Frontmatter: `engine: claude`, `model: {config/model-routing.json ->
+- Frontmatter: `engine: claude`, `model: {config/motor-haritasi.json ->
   tasks.arastirma_sentezi.model}`, `status: TASLAK`
 - Format: ajanlar/perspektif/PROTOKOL.md "Cikti Format Kurallari" + Kalite Kapı 1 gereklilikleri
 - Çıktı: `02-Arastirma/arastirma-raporu.md`

@@ -240,7 +240,7 @@ THEMIS çıktısı **üç parçaya ayrılır**: kısa özet, CMS panel formatı 
 
 Panel: https://vegahukukistanbul.com/admin/#/collections/blog/new
 Alan adları panel şemasıyla birebir (kaynak: /admin/cms-config.yml, 2026-07-20).
-Tam sıralı yapıştırma sayfası şablonu: prompts/gemini/blog_yazimi.md → "blog.cms.md" bölümü.
+Tam sıralı yapıştırma sayfası şablonu: prompts/muhakeme/blog_yazimi.md → "blog.cms.md" bölümü.
 
 ## KİMLİK
 - Başlık (title): [H1 ile aynı, ≤100 char — site H1'i bu alandan üretir]

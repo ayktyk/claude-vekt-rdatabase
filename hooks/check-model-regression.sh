@@ -26,7 +26,7 @@ exit 0
 # PostToolUse hook: Edit/Write sonrasi yazilan dosya frontmatter'inda
 # beklenen engine ile gercek engine eslesiyor mu kontrol eder.
 #
-# config/model-routing.json'da task icin engine belirtilmis ise:
+# config/motor-haritasi.json'da task icin engine belirtilmis ise:
 #   - dilekce-v*.md / usul-raporu.md / arastirma-raporu.md / stratejik-analiz.md
 #     yazildiginda frontmatter `engine` field'i kontrol edilir
 #   - Beklenen ile gercek farkli ise stderr'e UYARI basar (block etmez)
@@ -37,7 +37,7 @@ exit 0
 set -uo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-CONFIG_FILE="$REPO_ROOT/config/model-routing.json"
+CONFIG_FILE="$REPO_ROOT/config/motor-haritasi.json"
 
 # Tool input'tan file_path cikar
 INPUT="${CLAUDE_TOOL_INPUT:-}"
@@ -90,7 +90,7 @@ esac
 EXPECTED_ENGINE=$( cd "$REPO_ROOT" && python -X utf8 -c "
 import json, sys
 try:
-    with open('config/model-routing.json', 'r', encoding='utf-8') as f:
+    with open('config/motor-haritasi.json', 'r', encoding='utf-8') as f:
         cfg = json.load(f)
     print(cfg.get('tasks', {}).get('$TASK_TYPE', {}).get('engine', ''))
 except Exception:
@@ -127,14 +127,14 @@ if [[ "$ACTUAL_ENGINE" != "$EXPECTED_ENGINE" ]]; then
     echo "================================================================" >&2
     echo "Dosya:    $FILE_PATH" >&2
     echo "Task:     $TASK_TYPE" >&2
-    echo "Beklenen: engine=$EXPECTED_ENGINE (config/model-routing.json)" >&2
+    echo "Beklenen: engine=$EXPECTED_ENGINE (config/motor-haritasi.json)" >&2
     echo "Gercek:   engine=$ACTUAL_ENGINE (frontmatter)" >&2
     echo "Fallback: $ACTUAL_FALLBACK" >&2
     echo "" >&2
     echo "Olasi sebepler:" >&2
     echo "  1. Bridge cagrisi atlandi (uretim ajani direkt yazdi)" >&2
     echo "  2. Bridge fail oldu ama fallback_used: true notu eksik" >&2
-    echo "  3. config/model-routing.json yeni guncellendi, eski cikti silinmemis" >&2
+    echo "  3. config/motor-haritasi.json yeni guncellendi, eski cikti silinmemis" >&2
     echo "" >&2
     echo "Kontrol icin: scripts/gemini-bridge.sh $TASK_TYPE ..." >&2
     echo "================================================================" >&2

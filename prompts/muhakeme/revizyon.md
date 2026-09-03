@@ -15,7 +15,7 @@ Sen v1 dilekceyi 7 boyutta denetleyip iyilestirilmis v2 icin somut talimat
 veren revizyon uzmanisin.
 
 ## Ortak kurallar
-`prompts/gemini/_ortak-kurallar.md` uygulanir.
+`prompts/muhakeme/_ortak-kurallar.md` uygulanir.
 
 ## Gorev
 
@@ -38,7 +38,7 @@ Senden istenen: 7 boyutta denetim + v2 icin somut degisiklik listesi.
 5. **Ton ve uslup** - Yapay zeka dili, asiri duygusal ifade, belirsizlik var mi?
 6. **Hesap tutarliligi** - Sonuc-istem rakamlari usul raporu ve hesaplama ile tutarli mi?
 7. **Cerceve butunlugu** - v1 bir arguman cercevesiyle yazildiysa
-   (`prompts/gemini/cerceveler/<ad>.md` dosyasindaki "Cerceve dogrulama listesi")
+   (`prompts/muhakeme/cerceveler/<ad>.md` dosyasindaki "Cerceve dogrulama listesi")
    iskelet eksiksiz mi? Ozellikle: warrant'lar (vakia->talep koprusu) acik mi;
    karsi arguman/rebuttal bolumu savunma simulasyonundaki "Hedeflenen kopru"
    saldirilarini karsiliyor mu? Cerceve kullanilmadiysa "UYGULANMADI" yaz.

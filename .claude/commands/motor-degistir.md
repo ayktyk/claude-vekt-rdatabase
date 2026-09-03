@@ -16,7 +16,7 @@ alternatif motorla (Antigravity ↔ Claude) yeniden üretir.
 1. **Aktif workflow state'i oku:** `tmp/workflow-state-{dava-id}.json`
 2. **Mevcut motoru tespit et:**
    - `son_motor` alanından oku (`antigravity_manual` veya `claude`)
-   - `config/model-routing.json`'dan ASAMA'nın default engine'ini al
+   - `config/motor-haritasi.json`'dan ASAMA'nın default engine'ini al
 3. **Avukata seçenek sun:**
 
    ASAMA Antigravity'de üretildiyse:
@@ -62,7 +62,7 @@ alternatif motorla (Antigravity ↔ Claude) yeniden üretir.
      }
      ```
    - ASAMA'yı yeni motorla yeniden çalıştır:
-     - **Antigravity → Claude:** Terminal Claude `prompts/gemini/{task_type}.md`
+     - **Antigravity → Claude:** Terminal Claude `prompts/muhakeme/{task_type}.md`
        protokolüne göre üretir, `fallback_used: true` işaretler.
      - **Claude → Antigravity:** Yeni devir bloğu bas, avukat sağ panele
        yapıştırır.

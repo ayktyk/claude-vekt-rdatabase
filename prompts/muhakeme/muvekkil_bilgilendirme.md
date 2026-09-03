@@ -23,7 +23,7 @@ Bu is dilekce yazimi degildir. Muvekkile dogru olan baska bir dildir:
 
 ## Ortak Kurallar
 
-Bu dosya `prompts/gemini/_ortak-kurallar.md`'yi miras alir. On madde aynen
+Bu dosya `prompts/muhakeme/_ortak-kurallar.md`'yi miras alir. On madde aynen
 uygulanir. Ozel durum: muvekkile yazarken teknik terim geldiginde parantez
 icinde kisa aciklama eklemek SERBESTTIR (dilekcede yasak olan bu kullanim
 muvekkil metninde gereklidir).

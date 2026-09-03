@@ -34,9 +34,9 @@ de gecerli olup olmadigini dogrulamak.
    ```
    Cikti geldiyse: basarili. Exit 4 geldiyse: auth tekrar.
 
-3. `config/model-routing.json` kontrol:
+3. `config/motor-haritasi.json` kontrol:
    ```bash
-   cat config/model-routing.json
+   cat config/motor-haritasi.json
    ```
    `default_mode: ask` oldugundan emin ol (pilotta her karar avukata sorulur).
 
@@ -57,7 +57,7 @@ Onerilen: Kurgu "Ahmet Yilmaz - fazla mesai / istifa haklı fesih" davasi
 
 ## A Turu: Full-Claude
 
-1. `config/model-routing.json` -> tum default'lari `claude-opus-4.6` yap
+1. `config/motor-haritasi.json` -> tum default'lari `claude-opus-4.6` yap
    (veya komut satirinda `--model claude` ile override et)
 2. Komut:
    ```
@@ -72,7 +72,7 @@ Onerilen: Kurgu "Ahmet Yilmaz - fazla mesai / istifa haklı fesih" davasi
 
 ## B Turu: Hibrit
 
-1. `config/model-routing.json` -> default'lar `gemini-3.1-pro-preview`
+1. `config/motor-haritasi.json` -> default'lar `gemini-3.1-pro-preview`
 2. Ayni komutu calistir, ayni veri.
 3. Her ajan cagrisi oncesi Director motor sorar -> hepsine Gemini de.
 4. Ciktilari `G:\Drive'im\Hukuk Burosu\Aktif Davalar\PILOT-B-Hibrit\` altina al.
@@ -95,7 +95,7 @@ Onerilen: Kurgu "Ahmet Yilmaz - fazla mesai / istifa haklı fesih" davasi
 | Self-review yakaladigi hata | - | | |
 
 Avukat her satirda sezgisiyle galip isaretler. 6+/10 olan mod
-production default olur. `config/model-routing.json` ona gore guncellenir.
+production default olur. `config/motor-haritasi.json` ona gore guncellenir.
 
 ---
 
@@ -122,5 +122,5 @@ Gemini kotu calisirsa:
 - Avukat dilekceyi "robot yazmis" diye uyarir
 - Karar atiflari bos veya hatali
 
-Pilot sonucuna gore `config/model-routing.json` guncellenir veya
+Pilot sonucuna gore `config/motor-haritasi.json` guncellenir veya
 belirli tasklar Claude'a geri alinir.

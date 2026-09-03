@@ -110,7 +110,7 @@ Tam doktrin: `@ajanlar/0-halusinasyon-doktrini.md`. Bu modül için kritik kural
 Dava akışının 2B'sinin mini versiyonu — **min 6 sorgu / 3 alt-adım**
 (15-sorguluk tam protokol dava akışında; danışma hattı hız önceliklidir):
 
-Faz 1'i **Claude Fable 5 tek elden** yürütür (`config/model-routing.json ->
+Faz 1'i **Claude Fable 5 tek elden** yürütür (`config/motor-haritasi.json ->
 tasks.yargi_mcp`, hafif mod: min 6 sorgu / 3 tam metin). Ayrı pipeline
 scripti YOKTUR — sorgular bu oturumda Yargı-MCP-Pro araçlarıyla atılır,
 MCP fail olursa `yargi` CLI fallback (rapora `mcp_fallback_used: true`).
@@ -230,7 +230,7 @@ tamamlar. Antigravity/Gemini gerekmez (hafiflik prensibi).
 ```markdown
 ---
 engine: claude
-model: {config/model-routing.json -> tasks.arastirma_sentezi.model}
+model: {config/motor-haritasi.json -> tasks.arastirma_sentezi.model}
 task_type: arastirma_cevabi
 arastirma_id: {YYYY-MM-DD}-{slug}
 timestamp_utc: {ISO}

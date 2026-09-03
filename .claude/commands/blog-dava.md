@@ -18,10 +18,10 @@ Muvekkil verisi blog'a TASINMAZ — sadece hukuki tezler / icithat / mevzuat.
 ## Zorunlu Referans Dokumanlar
 
 - `ajanlar/blog-yazari/SKILL.md` — tam protokol
-- `prompts/gemini/blog_yazimi.md` — Antigravity'ye yapistirilan prompt
+- `prompts/muhakeme/blog_yazimi.md` — Antigravity'ye yapistirilan prompt
 - `ajanlar/blog-yazari/THEMIS.md` — proje kokunde tam THEMIS referansi
 - `config/author.json` — Aykut sameAs URL'leri
-- `config/model-routing.json` -> `tasks.blog_yazimi`
+- `config/motor-haritasi.json` -> `tasks.blog_yazimi`
 
 ## Workflow
 
@@ -163,8 +163,8 @@ Asagidaki girdi paketini alip THEMIS protokolune gore SEO uyumlu hukuki
 blog yazisi uret. Cikti: 4 dosya (blog.md, blog.cms.md, blog.mail.md,
 kapak.png).
 
-Protokol: prompts/gemini/blog_yazimi.md (ayni workspace'de acik)
-Ortak kurallar: prompts/gemini/_ortak-kurallar.md
+Protokol: prompts/muhakeme/blog_yazimi.md (ayni workspace'de acik)
+Ortak kurallar: prompts/muhakeme/_ortak-kurallar.md
 
 Cikti yolu: G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\06-Blog\
 

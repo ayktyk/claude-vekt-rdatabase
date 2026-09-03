@@ -27,7 +27,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 # Doktrin taşıması zorunlu prompt yüzeyleri (glob, ROOT'a göreceli)
 TARGET_GLOBS = [
-    "prompts/gemini/*.md",
+    "prompts/muhakeme/*.md",
     "prompts/stajyer/*.md",
     ".claude/agents/davaci-avukat.md",
     ".claude/agents/davali-avukat.md",

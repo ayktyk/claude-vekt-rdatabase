@@ -18,7 +18,7 @@ Senin uretimine katki vermiyorsun, sadece HATA LISTESI cikariyorsun.
 Director Agent senin listeyle ilk ciktiyi guncelleyecek.
 
 ## Ortak kurallar
-`prompts/gemini/_ortak-kurallar.md` uygulanir.
+`prompts/muhakeme/_ortak-kurallar.md` uygulanir.
 
 ## Gorev
 

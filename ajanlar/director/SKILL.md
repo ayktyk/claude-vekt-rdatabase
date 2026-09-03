@@ -7,16 +7,16 @@ Versiyon: 1.0
 
 ## Motor
 
-**TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/model-routing.json`'dan okunur.
+**TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/motor-haritasi.json`'dan okunur.
 
-- **Director** task'i: `config/model-routing.json` -> `tasks.director` (engine: claude, koordinasyon ve orkestrasyon)
+- **Director** task'i: `config/motor-haritasi.json` -> `tasks.director` (engine: claude, koordinasyon ve orkestrasyon)
 - **Fallback:** YOK - Director tek motor (Claude). Hukuki uretim degildir, koordinasyondur.
 - **Gemini'ye gitmez:** komut siniflandirma, ajan secimi, kalite gate,
   MCP cagrilari, MemPalace wake-up, PII mask/unmask, kaynak sorgulama (hepsi `tasks.mcp_arac_yonetimi` ve `tasks.director` engine: claude)
-- **Alt ajanlari cagirirken** `config/model-routing.json` okur, her ajana
+- **Alt ajanlari cagirirken** `config/motor-haritasi.json` okur, her ajana
   kendi motorunu (Gemini veya Claude) ayarlar
 - `mode: ask` ise her ajan cagrisi oncesi avukata motor sorar
-- **Kritik nokta tespiti** Director'un on-adimidir; bu adim icin engine: `config/model-routing.json` -> `tasks.kritik_nokta_tespiti.engine` (varsayilan claude — muvekkil belgelerini MCP ile okur)
+- **Kritik nokta tespiti** Director'un on-adimidir; bu adim icin engine: `config/motor-haritasi.json` -> `tasks.kritik_nokta_tespiti.engine` (varsayilan claude — muvekkil belgelerini MCP ile okur)
 
 ---
 
@@ -319,7 +319,7 @@ muvekkil bilgilendir: [dava-id]
 
 ### Prompt
 
-`prompts/gemini/muvekkil_bilgilendirme.md`
+`prompts/muhakeme/muvekkil_bilgilendirme.md`
 
 Default motor Gemini, fallback Claude. Cikti dili muvekkile yoneliktir:
 jargon parantez icinde kisa aciklama ile sadelestirilir, kesin vaat
@@ -370,10 +370,10 @@ strateji degerlendir: [dava-id]
 
 ### Prompt
 
-`prompts/gemini/strateji_degerlendirme.md`
+`prompts/muhakeme/strateji_degerlendirme.md`
 
 Bu prompt **Gemini-birincil, Claude-fallback** yapisindadir. Config:
-`config/model-routing.json -> strateji_degerlendirme`. 2 denemede
+`config/motor-haritasi.json -> strateji_degerlendirme`. 2 denemede
 Gemini basarisiz olursa otomatik Claude'a gecer. `fallback_used: true`
 metadata'si ciktida isaretlenir.
 
@@ -511,12 +511,12 @@ Asagidaki dosyalari oku:
   - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\{girdi-1}.md
   - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\{girdi-2}.md
 
-Protokol: prompts/gemini/{task_type}.md  (bu dosyayi da oku, kurallari uygula)
+Protokol: prompts/muhakeme/{task_type}.md  (bu dosyayi da oku, kurallari uygula)
 
 Cikti: G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\{cikti}.md
 
 KVKK: tum token'lar maskeli kalir ([MUVEKKIL_1], [TC_1], vs.)
-Cikti sonunda self-review yap (prompts/gemini/self_review.md).
+Cikti sonunda self-review yap (prompts/muhakeme/self_review.md).
 --------------------------------------------
 
 Antigravity tamamlayinca buraya don ve "ASAMA N bitti" yaz.

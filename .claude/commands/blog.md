@@ -23,12 +23,12 @@ Eger argument bossa: avukata "hangi konuyu blog yapacagiz?" diye sor.
 ## Zorunlu Referans Dokumanlar
 
 - `ajanlar/blog-yazari/SKILL.md` — tam protokol
-- `prompts/gemini/blog_yazimi.md` — Antigravity'ye yapistirilan prompt
+- `prompts/muhakeme/blog_yazimi.md` — Antigravity'ye yapistirilan prompt
 - `prompts/themis-blog-pr-v3-format.md` — **Gmail PR çıktısının ZORUNLU formatı (THEMIS v3)**. Blog maili/CMS çıktısı AYNEN bu yapıda üretilir (avukat onaylı, 2026-06-03).
-- `prompts/gemini/_ortak-kurallar.md` — Gemini ortak kurallari
+- `prompts/muhakeme/_ortak-kurallar.md` — Gemini ortak kurallari
 - `ajanlar/blog-yazari/THEMIS.md` — proje kokunde tam THEMIS referansi
 - `config/author.json` — Aykut sameAs URL'leri
-- `config/model-routing.json` -> `tasks.blog_yazimi`
+- `config/motor-haritasi.json` -> `tasks.blog_yazimi`
 
 ## Workflow
 
@@ -124,7 +124,7 @@ Konu: {konu}
 Sag panele yapistirilacak:
 --------------------------------------------
 {ajanlar/blog-yazari/SKILL.md "Antigravity Devri" bolumundeki sablon}
-{prompts/gemini/blog_yazimi.md PROTOKOL DOSYASINI Antigravity workspace'inde ac}
+{prompts/muhakeme/blog_yazimi.md PROTOKOL DOSYASINI Antigravity workspace'inde ac}
 
 mod: serbest
 primary_keyword: "{...}"

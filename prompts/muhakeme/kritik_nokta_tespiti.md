@@ -15,7 +15,7 @@ Sen muvekkil belgelerini okuyan ve davadaki kritik hukuki meseleleri tespit
 eden bir hukuk analistisin.
 
 ## Ortak kurallar
-`prompts/gemini/_ortak-kurallar.md` dosyasindaki 10 madde aynen uygulanir.
+`prompts/muhakeme/_ortak-kurallar.md` dosyasindaki 10 madde aynen uygulanir.
 
 ## Gorev
 

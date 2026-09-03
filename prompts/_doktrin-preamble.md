@@ -64,7 +64,7 @@
   uydurma riski → kullanma.
 - Çıktının başına SENTINEL satırını yaz; sonuna KAYNAK DOĞRULAMA tablosu +
   Aleyhe içtihat beyanı ekle.
-- Üretim sonrası `prompts/gemini/self_review.md`'i AYNI sohbette uygula
+- Üretim sonrası `prompts/muhakeme/self_review.md`'i AYNI sohbette uygula
   (KIRMIZI/SARI/YEŞİL). KIRMIZI/SARI ise düzelt, ancak YEŞİL çıktı Drive'a yazılır.
 
 ## VARYANT B — SÜPER STAJYER (harici hukuk araştırmacısı)

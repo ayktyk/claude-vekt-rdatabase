@@ -19,7 +19,7 @@ gorseli (Imagen / Nano Banana).
 
 ## Ortak kurallar
 
-`prompts/gemini/_ortak-kurallar.md` dosyasindaki 10 madde aynen uygulanir.
+`prompts/muhakeme/_ortak-kurallar.md` dosyasindaki 10 madde aynen uygulanir.
 Ek olarak: `ajanlar/blog-yazari/THEMIS.md` proje kokunde — tam protokol referansi.
 
 ## 0-Halusinasyon (THEMIS Versiyonu — KRITIK)

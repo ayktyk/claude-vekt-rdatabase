@@ -7,13 +7,13 @@ Versiyon: 1.1 (FAZ 4 — Arguman.ai karsi-arguman skill on-sorgu entegrasyonu)
 
 ## Motor
 
-**TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/model-routing.json`'dan okunur.
+**TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/motor-haritasi.json`'dan okunur.
 
-- **savunma_simulasyonu** task'i: `config/model-routing.json` -> `tasks.savunma_simulasyonu.engine` (= `antigravity_manual`) ve `model`
+- **savunma_simulasyonu** task'i: `config/motor-haritasi.json` -> `tasks.savunma_simulasyonu.engine` (= `antigravity_manual`) ve `model`
 - **Antigravity (sag panel)** uretir; terminal Claude SADECE devir blogu basar
 - **Claude'da kalir:** MCP cagrilari, dilekce dosyasi okuma yardimi (Drive'da hazir bekler)
-- **Self-review:** Antigravity ayni sohbette `prompts/gemini/self_review.md`
-- **Prompt sablonu:** `prompts/gemini/savunma_simulasyonu.md` (Antigravity'ye yapistirilir)
+- **Self-review:** Antigravity ayni sohbette `prompts/muhakeme/self_review.md`
+- **Prompt sablonu:** `prompts/muhakeme/savunma_simulasyonu.md` (Antigravity'ye yapistirilir)
 - **Fallback:** Antigravity erisilemezse "fallback claude" → Claude uretir, `fallback_used: true`
 
 ---
@@ -115,8 +115,8 @@ tez jenerik doktrinal terimlerle kurulur; arama kalitesi de artar).
         ^ Ozellikle 4B Davali Avukat ciktisindan beklenen itirazlar
      - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\02-Arastirma\karsi-arguman-onsorgu.md
         ^ YENI — FAZ 4 2026-05-19: Arguman.ai karsi-arguman skill ciktisi (5 seviyeli tehdit)
-     - prompts/gemini/savunma_simulasyonu.md  (protokol)
-     - prompts/gemini/_ortak-kurallar.md
+     - prompts/muhakeme/savunma_simulasyonu.md  (protokol)
+     - prompts/muhakeme/_ortak-kurallar.md
 
    Gorev: Karsi taraf avukati gibi dusun, en guclu savunmayi kur.
    Amac dilekce yazmak DEGIL; muvekkilimizin dilekcesindeki zayif
@@ -137,7 +137,7 @@ tez jenerik doktrinal terimlerle kurulur; arama kalitesi de artar).
 
    Cikti: G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\02-Arastirma\savunma-simulasyonu.md
 
-   Self-review yap (prompts/gemini/self_review.md):
+   Self-review yap (prompts/muhakeme/self_review.md):
      - Risk flag 0 cikarsa "analiz yetersiz" yaz, ek sorgular yap
      - Karsi taraf adina uydurma karar atfi YASAK
      - Lehe yorum durtusu TERS YONDE de gecerli: gercek riskler kucumsenemez
@@ -169,7 +169,7 @@ tez jenerik doktrinal terimlerle kurulur; arama kalitesi de artar).
 ### Fallback
 
 Antigravity erisilemezse avukat "fallback claude" → terminal Claude
-`prompts/gemini/savunma_simulasyonu.md` protokolune gore savunma
+`prompts/muhakeme/savunma_simulasyonu.md` protokolune gore savunma
 simulasyonu uretir, frontmatter `engine: claude`, `fallback_used: true`.
 
 ---
@@ -266,9 +266,9 @@ QMD sonuclari MemPalace ile BIRLESTIRILIR. QMD erisilemiyorsa adimi atla.
    hiyerarsisi uzerinden saldirabilecegi noktalar
 
 ### Toulmin Warrant Analizi (2026-08-07)
-Simulasyon oncesi `prompts/gemini/cerceveler/toulmin.md` okunur; v1'deki her
+Simulasyon oncesi `prompts/muhakeme/cerceveler/toulmin.md` okunur; v1'deki her
 ana arguman icin Claim-Grounds-Warrant cikarilir ve savunma hatlari oncelikle
-zayif warrant'lara yoneltilir (prompts/gemini/savunma_simulasyonu.md ile ayni kural).
+zayif warrant'lara yoneltilir (prompts/muhakeme/savunma_simulasyonu.md ile ayni kural).
 
 ### Hiyerarsi Saldiri Vektorleri
 

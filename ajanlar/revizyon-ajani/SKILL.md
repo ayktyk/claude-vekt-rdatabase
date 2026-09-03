@@ -7,13 +7,13 @@ Versiyon: 1.1 (FAZ 4 — Pro MCP documentId dogrulama + HARD FAIL kurali netlest
 
 ## Motor
 
-**TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/model-routing.json`'dan okunur.
+**TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/motor-haritasi.json`'dan okunur.
 
-- **revizyon** task'i: `config/model-routing.json` -> `tasks.revizyon.engine` (= `antigravity_manual`) ve `model`
+- **revizyon** task'i: `config/motor-haritasi.json` -> `tasks.revizyon.engine` (= `antigravity_manual`) ve `model`
 - **Antigravity (sag panel)** uretir; terminal Claude SADECE devir blogu basar + UDF/DOCX donusturur
 - **Claude'da kalir:** MCP cagrilari, dilekce v1/v2 dosya yonetimi, UDF format uretimi (`scripts/md_to_udf.py`), DOCX uretimi (`scripts/md_to_docx.py`)
 - **Self-review:** Revizyon Ajani zaten denetci rolunde — Antigravity bu sohbette ek self-review yapmasi opsiyonel, ama 7 boyutlu denetim mecburidir
-- **Prompt sablonu:** `prompts/gemini/revizyon.md` (Antigravity'ye yapistirilir)
+- **Prompt sablonu:** `prompts/muhakeme/revizyon.md` (Antigravity'ye yapistirilir)
 - **Fallback:** Antigravity erisilemezse "fallback claude" → Claude revize eder, `fallback_used: true`
 
 ---
@@ -120,8 +120,8 @@ Bu ajan icin pratik etki:
      - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\02-Arastirma\savunma-simulasyonu.md
      - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\02-Arastirma\arastirma-raporu.md
      - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\02-Arastirma\stratejik-analiz.md
-     - prompts/gemini/revizyon.md  (protokol — 7 boyutlu revizyon + 8. boyut KAYNAK AUDITI)
-     - prompts/gemini/_ortak-kurallar.md
+     - prompts/muhakeme/revizyon.md  (protokol — 7 boyutlu revizyon + 8. boyut KAYNAK AUDITI)
+     - prompts/muhakeme/_ortak-kurallar.md
 
    Gorev: Dilekce v1'i 8 boyutlu denetimden gecir, v2 NIHAI uret:
      1. Kunye dogrulamasi (her Yargitay kunyesi Bedesten documentId ile)
@@ -147,7 +147,7 @@ Bu ajan icin pratik etki:
    KVKK: dilekce v2 de MASKELI uretilir; unmask + UDF/DOCX donusumu
    terminal Claude'da yapilir (KVKK Seviye 2 protokolu).
 
-   Self-review zorunlu (prompts/gemini/self_review.md):
+   Self-review zorunlu (prompts/muhakeme/self_review.md):
      - HARD FAIL: dogrulanmamis atif >= 2 → Drive'a yazma, sohbette revize et
      - HARD FAIL: ham muvekkil verisi (unmask siz icerik) tespit edilirse
      - HARD FAIL: mulga karara atif tespiti
@@ -200,7 +200,7 @@ Bu ajan icin pratik etki:
 ### Fallback
 
 Antigravity erisilemezse avukat "fallback claude" → terminal Claude
-`prompts/gemini/revizyon.md` protokolune gore v2'yi uretir, frontmatter
+`prompts/muhakeme/revizyon.md` protokolune gore v2'yi uretir, frontmatter
 `engine: claude`, `fallback_used: true`. UDF/DOCX donusumu yine
 terminal Claude'da yapilir.
 
@@ -318,9 +318,9 @@ dogru yansitilmis mi kontrol edilir:
       ruhu" gibi genel soylemler varsa HATA)
 
 ### Cerceve Butunlugu (ek boyut — 2026-08-07)
-v1 bir cerceveyle yazildiysa `prompts/gemini/cerceveler/<ad>.md` icindeki
+v1 bir cerceveyle yazildiysa `prompts/muhakeme/cerceveler/<ad>.md` icindeki
 "Cerceve dogrulama listesi" uygulanir; warrant aciklik ve rebuttal karsilama
-kontrolu yapilir (prompts/gemini/revizyon.md 7. boyut ile ayni kural).
+kontrolu yapilir (prompts/muhakeme/revizyon.md 7. boyut ile ayni kural).
 
 ## Cikti Formati
 

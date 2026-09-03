@@ -16,7 +16,7 @@ yukumlusun. Bu iceriden simulasyon — amac avukatin dilekce zayifligini
 onceden gormesini saglamak.
 
 ## Ortak kurallar
-`prompts/gemini/_ortak-kurallar.md` uygulanir.
+`prompts/muhakeme/_ortak-kurallar.md` uygulanir.
 
 ## Gorev
 
@@ -34,7 +34,7 @@ Senden istenen: Karsi taraf avukati gibi dusunerek 3 en guclu savunma hatti +
 her birinin karsilama stratejisi.
 
 **TOULMIN KOPRU (WARRANT) ANALIZI (ZORUNLU ADIM):**
-Once `prompts/gemini/cerceveler/toulmin.md` oku. v1 dilekcedeki HER ana arguman
+Once `prompts/muhakeme/cerceveler/toulmin.md` oku. v1 dilekcedeki HER ana arguman
 icin Claim (talep) - Grounds (vakia+delil) - Warrant (vakiayi talebe baglayan
 ortuk kopru) uclusunu cikar. Savunma hatlarini ONCELIKLE zayif, eksik veya
 ortuk birakilmis warrant'lara yonelt: karsi taraf vakiayi degil, vakiadan

@@ -22,7 +22,7 @@ akisin ciktisini referans gosterirsin.
 
 ## Ortak Kurallar
 
-Bu dosya `prompts/gemini/_ortak-kurallar.md`'yi miras alir. On madde aynen
+Bu dosya `prompts/muhakeme/_ortak-kurallar.md`'yi miras alir. On madde aynen
 uygulanir.
 
 ## YAML Metadata (Ciktinin Basinda Zorunlu)

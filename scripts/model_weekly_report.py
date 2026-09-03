@@ -179,7 +179,7 @@ def report(events: list[dict], target: float, fmt: str) -> None:
         if durum == "KIRMIZI":
             print("UYARI [KIRMIZI]: Gemini orani %50'nin altinda!")
             print("  - Bridge cagrilmiyor olabilir (uretim ajanlari direkt Claude yaziyor)")
-            print("  - config/model-routing.json kontrol et")
+            print("  - config/motor-haritasi.json kontrol et")
             print("  - SKILL.md zorunlu bridge cagrisi var mi bak")
         elif durum == "SARI":
             print("UYARI [SARI]: Gemini orani hedefin altinda.")

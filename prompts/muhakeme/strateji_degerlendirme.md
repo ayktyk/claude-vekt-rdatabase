@@ -31,7 +31,7 @@ Avukat tercihi MemPalace `wing_buro_aykut/hall_model_tercihleri` drawer'ina
 
 ## Ortak Kurallar
 
-Bu dosya `prompts/gemini/_ortak-kurallar.md`'yi miras alir. On madde aynen
+Bu dosya `prompts/muhakeme/_ortak-kurallar.md`'yi miras alir. On madde aynen
 uygulanir.
 
 ## YAML Metadata (Ciktinin Basinda Zorunlu)

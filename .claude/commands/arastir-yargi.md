@@ -24,7 +24,7 @@ Mevcut kısa prompt YASAK — bu komut tam protokolü zorunlu uygular.
 ## Kanonik Çalıştırıcı
 
 2B araştırmasını **bu oturumda Claude Fable 5 tek elden** yürütür
-(`config/model-routing.json -> tasks.yargi_mcp`, mod: derin — min 15 sorgu /
+(`config/motor-haritasi.json -> tasks.yargi_mcp`, mod: derin — min 15 sorgu /
 min 5 tam metin). Ayrı pipeline scripti YOKTUR. Fable limiti dolarsa avukat
 `/model` ile Claude Opus 4.8'e geçer; rapor frontmatter'ı modeli damgalar.
 Aşağıdaki 6 Faz + Gap Check tamamlanmadan 2C başlatılmaz.

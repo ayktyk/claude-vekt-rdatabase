@@ -7,13 +7,13 @@ Versiyon: 1.0
 
 ## Motor
 
-**TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/model-routing.json`'dan okunur.
+**TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/motor-haritasi.json`'dan okunur.
 
-- **usul_raporu** task'i: `config/model-routing.json` -> `tasks.usul_raporu.engine` (= `antigravity_manual`) ve `model`
+- **usul_raporu** task'i: `config/motor-haritasi.json` -> `tasks.usul_raporu.engine` (= `antigravity_manual`) ve `model`
 - **Antigravity (sag panel)** uretir; terminal Claude SADECE devir blogu basar
 - **Claude'da kalir:** iscilik hesaplama modulu (matematiksel hesap), MCP cagrilari, Calendar ekleme, yetkili adliye WebSearch dogrulamasi — bunlar arac kullanimidir, Antigravity'ye gitmez
-- **Self-review:** Antigravity ayni sohbette `prompts/gemini/self_review.md`'yi uygular (bridge YOK)
-- **Prompt sablonu:** `prompts/gemini/usul_raporu.md` (Antigravity'ye yapistirilir)
+- **Self-review:** Antigravity ayni sohbette `prompts/muhakeme/self_review.md`'yi uygular (bridge YOK)
+- **Prompt sablonu:** `prompts/muhakeme/usul_raporu.md` (Antigravity'ye yapistirilir)
 - **Fallback:** Antigravity erisilemezse avukat "fallback claude" der → Claude uretir, frontmatter `fallback_used: true`
 
 ---
@@ -66,13 +66,13 @@ terminal Claude YAZMAZ.
      - tmp/{dava-id}-hesaplama.md   (Claude'un yaptigi iscilik hesabi)
      - tmp/{dava-id}-adliye-dogrulama.md   (Claude'un yaptigi adliye dogrulama)
 
-   Protokol: prompts/gemini/usul_raporu.md  (bu dosyayi da oku)
-   Ortak kurallar: prompts/gemini/_ortak-kurallar.md
+   Protokol: prompts/muhakeme/usul_raporu.md  (bu dosyayi da oku)
+   Ortak kurallar: prompts/muhakeme/_ortak-kurallar.md
 
    Cikti: G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\01-Usul\usul-raporu.md
 
    KVKK: tum token'lar maskeli kalir ([MUVEKKIL_1], [TC_1], [ADRES_2] vs.)
-   Cikti sonunda self-review yap (prompts/gemini/self_review.md).
+   Cikti sonunda self-review yap (prompts/muhakeme/self_review.md).
    --------------------------------------------
 
    Antigravity tamamlayinca buraya don ve "ASAMA 3 bitti" yaz.
@@ -103,7 +103,7 @@ terminal Claude YAZMAZ.
 ### Fallback
 
 Antigravity erisilemez veya cevap vermezse avukat "fallback claude"
-yazar → terminal Claude `prompts/gemini/usul_raporu.md` protokolune
+yazar → terminal Claude `prompts/muhakeme/usul_raporu.md` protokolune
 gore usul raporunu uretir; frontmatter'a `engine: claude`,
 `fallback_used: true`, `reason: antigravity_unavailable` yazar.
 

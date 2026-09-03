@@ -95,5 +95,5 @@ Detay: `AGENTS.md` > "3 BATCH DEVIR BLOGU ŞABLONLARI" bölümü.
 - KVKK Seviye 2 maskeleme her ASAMA'da korunur — dilekçe v2 unmask
   + UYAP yüklemesi avukatın elinde, sistemin değil
 - Antigravity erişilemezse avukat "fallback claude" → terminal Claude
-  o ASAMA'yı `prompts/gemini/{task_type}.md` ile üretir
+  o ASAMA'yı `prompts/muhakeme/{task_type}.md` ile üretir
 - `gemini-bridge.sh` cagirma — DEPRECATED (exit 100)

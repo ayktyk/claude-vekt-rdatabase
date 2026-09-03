@@ -206,7 +206,7 @@ karar noktasi).
 **Fallback davranisi (Antigravity erisilemez):**
 
 1. Avukat "fallback claude" yazar (terminalde, devir blogundan sonra)
-2. Terminal Claude o ASAMA'yi `prompts/gemini/{task_type}.md` protokolune
+2. Terminal Claude o ASAMA'yi `prompts/muhakeme/{task_type}.md` protokolune
    gore uretir
 3. Cikti frontmatter'inda isaretlenir:
    ```yaml
@@ -258,10 +258,10 @@ motor doktrini ilk kez "calisan sistem" oldu.
 
 **Referans:**
 
-- `config/model-routing.json` - tum gorev tipleri (`engine: antigravity_manual` veya `engine: claude`)
+- `config/motor-haritasi.json` - tum gorev tipleri (`engine: antigravity_manual` veya `engine: claude`)
 - `CLAUDE.md` -> "Antigravity Hibrit Mimarisi (2026-05-13)" bolumu
 - `AGENTS.md` -> Devir bloklari, self-review, fallback rehberi
-- `prompts/gemini/*.md` - Antigravity'ye yapistirilacak prompt sablonlari
+- `prompts/muhakeme/*.md` - Antigravity'ye yapistirilacak prompt sablonlari
 
 ---
 
@@ -636,7 +636,7 @@ resim cikarilir ve kritik noktalar netlestirilir.
 
 ### ASAMA 2: Derin Arastirma (2B→2C sirali zincir + 2D async paralel kol)
 
-> **Motor:** 2B, `config/model-routing.json -> tasks.yargi_mcp` uyarinca
+> **Motor:** 2B, `config/motor-haritasi.json -> tasks.yargi_mcp` uyarinca
 > Claude Fable 5 tarafindan TEK ELDEN calisir; nihai 2B raporunu da Claude
 > yazar (iteratif derin protokol, 6 Faz + Gap Check). 2C/2D ve genel ASAMA 2
 > sentezi kendi routing task'larinda kalir.
@@ -1486,7 +1486,7 @@ Google Calendar'a hatirlatma ekler:
 
 ### Model Routing Konfigurasyonu
 
-Tum ASAMA'larin model atamalari `config/model-routing.json` dosyasindan
+Tum ASAMA'larin model atamalari `config/motor-haritasi.json` dosyasindan
 okunur. Avukat manuel olarak guncelleyebilir. Modlar:
 
 - `auto` (varsayilan): Sormadan default kullanilir
@@ -1871,7 +1871,7 @@ UDF              -> python md_to_udf.py <input.md>  (sadece nihai)
 | `docs/maskeleme-kilavuzu.md` | KVKK Seviye 2 maske.py kullanim ornekleri ve sorun giderme |
 | `arsiv/eski-notlar/BRAINSTORMING.md` | Uzun vadeli iyilestirme planlari (Seviye 3-4) |
 | `.mcp.json` | MCP sunucu konfigurasyonu |
-| `config/model-routing.json` | LLM model routing (Gemini 3.1 Pro Preview birincil) |
+| `config/motor-haritasi.json` | LLM model routing (Gemini 3.1 Pro Preview birincil) |
 | `config/masks/{dava-id}.json` | KVKK dict — yerel disk, git-disi |
 | `config/.env` | API anahtarlari (gizli) |
 | `ajanlar/*/SKILL.md` | Her ajanin detayli gorev talimati |
@@ -1883,7 +1883,7 @@ UDF              -> python md_to_udf.py <input.md>  (sadece nihai)
 | `AGENTS.md` | Antigravity sag panel devir bloklari, self-review, fallback kilavuzu |
 | `sablonlar/` | Rapor ve dilekce sablonlari |
 | `bilgi-tabani/` | Hesaplama dogrulama, QMD rehberi, haftalik ictihat |
-| `prompts/gemini/` | Antigravity'ye yapistirilacak prompt template'leri |
+| `prompts/muhakeme/` | Antigravity'ye yapistirilacak prompt template'leri |
 | `logs/model-events.jsonl` | Her LLM cagrisi kayit (fallback metrigi) |
 
 ---
@@ -1899,7 +1899,7 @@ UDF              -> python md_to_udf.py <input.md>  (sadece nihai)
 - [x] `scripts/maske.py` calistiriliyor (KVKK Seviye 2)
 - [x] `scripts/md_to_docx.py` calistiriliyor (DOCX zorunlu)
 - [x] `scripts/md_to_udf.py` calistiriliyor (UDF nihai dilekce)
-- [x] `config/model-routing.json` -> gemini-3.1-pro-preview default
+- [x] `config/motor-haritasi.json` -> gemini-3.1-pro-preview default
 - [ ] Ilk davayi `yeni dava: ...` ile ac ve akisi gozlemle
 - [ ] Briefing formunu doldurmayi dene
 - [ ] Sonuclardaki GUVEN NOTU'nu kontrol et

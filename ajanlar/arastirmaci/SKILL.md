@@ -13,7 +13,7 @@ cekirdek = 2B→2C sirali zincir + 2D async paralel kol; ana omurga Yargi-MCP-Pr
 
 ## Motor
 
-**TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/model-routing.json`'dan
+**TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/motor-haritasi.json`'dan
 okunur. Bu dosyada hardcoded model adi YOKTUR.
 
 - **arastirma_sentezi** task'i icin: `engine: claude` (2026-05-13 itibariyla
@@ -31,8 +31,8 @@ okunur. Bu dosyada hardcoded model adi YOKTUR.
 - **DEPRECATED Fallback chain:** `fallback.gemini_chain_deprecated` artik
   kullanilmiyor. Yeni fallback: Antigravity erisilemezse terminal Claude.
 - **Override:** Avukat "fallback claude" yazarak tek seferlik Claude'a cevirebilir
-- **Prompt sablonlari:** `prompts/gemini/arastirma_sentezi.md` (Claude
-  okuyacak ana sentez sablonu), `prompts/gemini/self_review.md` (Antigravity'ye
+- **Prompt sablonlari:** `prompts/muhakeme/arastirma_sentezi.md` (Claude
+  okuyacak ana sentez sablonu), `prompts/muhakeme/self_review.md` (Antigravity'ye
   yapistirilir)
 
 ---
@@ -197,11 +197,11 @@ KALDIRILDI.
 
 **Birincil arac:** Yargi-MCP-Pro (`mcp__yargi-mcp-pro__*`) — FAZ 2 entegrasyonu 2026-05-19
 **Fallback:** Yargi CLI (`yargi bedesten search/doc`) - sadece MCP fail durumunda
-**Thinking budget:** Engine + model `config/model-routing.json` -> ilgili task'tan okunur, MAX EFFORT thinking aktif
+**Thinking budget:** Engine + model `config/motor-haritasi.json` -> ilgili task'tan okunur, MAX EFFORT thinking aktif
 **Min sorgu sayilari (15, 6 faz, vb.) DEGISMEZ — sadece arac Pro MCP olur.**
 
 **Kanonik calistirici:** 2B dogrudan bu oturumda Claude Fable 5 tarafindan
-yurutulur (`config/model-routing.json -> tasks.yargi_mcp`, mod: derin —
+yurutulur (`config/motor-haritasi.json -> tasks.yargi_mcp`, mod: derin —
 min 15 sorgu / 5 tam metin). Ayri calistirici script YOKTUR. Claude
 `yargi-bulgulari.md` ve `atif-maddeleri.json` dosyalarini uretir; uretim
 sonrasi kalite kontrol listesi ayni oturumda uygulanir.
@@ -463,7 +463,7 @@ denetimi yapilir. `atif-maddeleri.json` olusmadan 2C BASLAYAMAZ.
 
 **Birincil arac:** Yargi-MCP-Pro (`mcp__yargi-mcp-pro__*`) — FAZ 2 entegrasyonu 2026-05-19
 **Fallback:** Mevzuat CLI (`mevzuat search/doc/article/tree/gerekce`) - sadece MCP fail durumunda
-**Thinking budget:** Engine + model `config/model-routing.json` -> ilgili task'tan okunur, MAX EFFORT thinking aktif
+**Thinking budget:** Engine + model `config/motor-haritasi.json` -> ilgili task'tan okunur, MAX EFFORT thinking aktif
 **Min sorgu sayilari (8 sorgu, 9 faz) DEGISMEZ — sadece arac Pro MCP olur.**
 
 **!! page_size ≤20 KURALI (ZORUNLU — Pro MCP'de de korunur)**
@@ -970,7 +970,7 @@ ASAMA 2 sentezi Claude'da birakildi. Cunku:
    - `02-Arastirma/arastirma-raporu.md` — terminal Claude doğrudan yazar
    - Format: ajanlar/perspektif/PROTOKOL.md "Cikti Format Kurallari" + Kalite Kapi 1
      gereksinimlerine birebir uyar
-   - Frontmatter: `engine: claude`, `model: {config/model-routing.json
+   - Frontmatter: `engine: claude`, `model: {config/motor-haritasi.json
      -> tasks.arastirma_sentezi.model}`, `status: TASLAK`
    - Yan dosyalar:
      - `02-Arastirma/atif-maddeleri.json` (2B → 2C zinciri girdisi)
@@ -1305,7 +1305,7 @@ Bu, arastirma-gorevi DEGILDIR. Yeni Yargitay karari taramasi YAPILMAZ
 
 ### Prompt
 
-`prompts/gemini/bilirkisi_analizi.md`
+`prompts/muhakeme/bilirkisi_analizi.md`
 
 ### Cikti
 
@@ -1376,7 +1376,7 @@ Standart arastirma raporundan farklı olarak, dava hakkinda:
 ### Kaynak Prompt
 
 Disaridan `C:\Users\user\Desktop\prompts\dava-strateji-analizi.md` adaptasyonu.
-Sistem iclerinde henuz Gemini promptu yok (opsiyonel gelecekte `prompts/gemini/swot_strateji.md`
+Sistem iclerinde henuz Gemini promptu yok (opsiyonel gelecekte `prompts/muhakeme/swot_strateji.md`
 olarak tasinabilir; su an ana prompt Arastirmaci'nin bu bolumunden okunur).
 
 ### Cikti
@@ -1506,7 +1506,7 @@ adim degildir.
 
 ### Prompt
 
-`prompts/gemini/sozlesme_inceleme.md`
+`prompts/muhakeme/sozlesme_inceleme.md`
 
 ### Cikti
 

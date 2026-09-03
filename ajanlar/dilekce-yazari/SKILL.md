@@ -7,13 +7,13 @@ Versiyon: 1.1
 
 ## Motor
 
-**TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/model-routing.json`'dan okunur.
+**TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/motor-haritasi.json`'dan okunur.
 
-- **dilekce_yazimi** task'i: `config/model-routing.json` -> `tasks.dilekce_yazimi.engine` (= `antigravity_manual`) ve `model`
+- **dilekce_yazimi** task'i: `config/motor-haritasi.json` -> `tasks.dilekce_yazimi.engine` (= `antigravity_manual`) ve `model`
 - **Antigravity (sag panel)** uretir; terminal Claude SADECE devir blogu basar
 - **Claude'da kalir:** hesaplama sonuclarinin dilekceye enjeksiyonu (devir blogunda), MCP cagrilari, UYAP/UDF formatina donusturme (`md_to_docx.py`, `md_to_udf.py`)
-- **Self-review:** Antigravity ayni sohbette `prompts/gemini/self_review.md`'yi uygular; ek olarak ASAMA 7 Revizyon Ajani 7 boyutta tekrar denetler
-- **Prompt sablonu:** `prompts/gemini/dilekce_yazimi.md` (Antigravity'ye yapistirilir)
+- **Self-review:** Antigravity ayni sohbette `prompts/muhakeme/self_review.md`'yi uygular; ek olarak ASAMA 7 Revizyon Ajani 7 boyutta tekrar denetler
+- **Prompt sablonu:** `prompts/muhakeme/dilekce_yazimi.md` (Antigravity'ye yapistirilir)
 - **Fallback:** Antigravity erisilemezse "fallback claude" → Claude uretir, `fallback_used: true`
 
 ---
@@ -106,8 +106,8 @@ Bu ajan icin pratik etki:
         ^ YAZIM REHBERI — ASAMA 4 sentez ciktisinin "Dilekce Yazim Rehberi"
           bolumunu birebir takip et (arguman sirasi, ton, atif kararlari)
 
-   Protokol: prompts/gemini/dilekce_yazimi.md
-   Ortak kurallar: prompts/gemini/_ortak-kurallar.md
+   Protokol: prompts/muhakeme/dilekce_yazimi.md
+   Ortak kurallar: prompts/muhakeme/_ortak-kurallar.md
    Dilekce yazim sablonu: dilekce-yazim-kurallari.md (proje kokunde)
 
    Cikti: G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\03-Sentez-ve-Dilekce\dilekce-v1.md
@@ -118,7 +118,7 @@ Bu ajan icin pratik etki:
    En az 2 Yargitay karari atif olmali (kunye + Bedesten documentId).
    "DOGRULANMAMIS" damgali kararlar dilekceye TASINAMAZ.
 
-   Cikti sonunda self-review yap (prompts/gemini/self_review.md):
+   Cikti sonunda self-review yap (prompts/muhakeme/self_review.md):
      - HARD FAIL: Dogrulanmamis atif >= 2
      - HARD FAIL: NotebookLM cevabini farkli davaya genelletirme
      - HARD FAIL: Uydurma Yargitay alintisi
@@ -151,7 +151,7 @@ Bu ajan icin pratik etki:
 ### Fallback
 
 Antigravity erisilemezse avukat "fallback claude" → terminal Claude
-`prompts/gemini/dilekce_yazimi.md` protokolune gore dilekce v1 uretir,
+`prompts/muhakeme/dilekce_yazimi.md` protokolune gore dilekce v1 uretir,
 frontmatter `engine: claude`, `fallback_used: true`,
 `reason: antigravity_unavailable`.
 
@@ -258,10 +258,10 @@ QMD sonuclari MemPalace ile BIRLESTIRILIR. QMD erisilemiyorsa adimi atla.
 
 ### Arguman Cercevesi Kontrolu (2026-08-07 — fallback modunda da gecerli)
 Stratejik analiz "Dilekce Yazim Rehberi"nde cerceve onerisi varsa
-`prompts/gemini/cerceveler/<cerceve>.md` okunur; HUKUKI DEGERLENDIRME ic
+`prompts/muhakeme/cerceveler/<cerceve>.md` okunur; HUKUKI DEGERLENDIRME ic
 iskeleti o cerceveyle kurulur. Cerceve adim adlari metne baslik olarak
 yazilmaz. Catisma: uslup-aykut.md > dilekce-yazim-kurallari.md > cerceve.
-Secim tablosu: prompts/gemini/cerceveler/_secim-rehberi.md
+Secim tablosu: prompts/muhakeme/cerceveler/_secim-rehberi.md
 
 1. **Girdi toplama:** Usul raporu + arastirma raporu + Advanced Briefing (varsa) oku.
 2. **Hafiza kontrolu:** MemPalace wake-up sonuclarini oku (ZORUNLU, yukaridaki bolum).
@@ -677,7 +677,7 @@ sonra bu alt-mode'u tetikler.
 
 ### Prompt
 
-`prompts/gemini/istinaf_temyiz.md`
+`prompts/muhakeme/istinaf_temyiz.md`
 
 ### Cikti
 
@@ -775,4 +775,4 @@ emsal arguman olarak kullanilir.
   belirlenip guclendirildi. Sistem iki asama revizyon yapabilir durumda.
 - 2026-04-21: Istinaf/Temyiz Modu alt-mode eklendi. Ilk derece dilekcesinden
   yapisal olarak farkli (usul once, esas sonra; olay anlatimi yok, karar
-  elestirisi var). prompts/gemini/istinaf_temyiz.md ile entegre.
+  elestirisi var). prompts/muhakeme/istinaf_temyiz.md ile entegre.

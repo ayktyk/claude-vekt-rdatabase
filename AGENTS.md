@@ -59,7 +59,7 @@ Yargitay 12. HD T.27.09.2016 E.2016/17416 K.2016/19934
 **Hata gecmisi (sistemik risk):**
 - 2026-05-05 Tugba 2026-89 davasi: NotebookLM 89/4 cevabini 89/3'e yanlis genellestirme + uydurma HGK alintisi. Avukat tarafindan yakalandi. Doktrin yazildi.
 - 2026-05-06 Seydi Ahmet Baskaya 2025/139 davasi: Hibrit motor (Claude+Gemini) ASAMA basi bildirim ve sonu self-review yapilmadan tum cikti tek elden Claude tarafindan uretildi. Avukat farketti, Gemini self-review devreye alindi: 35+ format/uslup ihlali ve 1 HARD FAIL bulundu. **Hibrit Motor Zorunluluk Doktrini yazildi.**
-- **2026-05-17 Sahte Icra Mesaji blog (THEMIS v1):** Hizir `ictihat_ara`'in dondurdugu 30,939 sonuc icinden ilk 6 Bedesten ID'yi alip karar metinlerini ACMADAN Gemini'ye devir bloguna gomdu. Tum karar tarihleri 2026-04 oldugu icin avukat suphelendi, "uydurma karar atfi" uyarisini verdi. Bedesten document API 502 oldugu icin doğrulama yapılamadi, atıflar "yerleski uygulama" formuluyle degistirildi. **Sistemik fix:** `ajanlar/blog-yazari/SKILL.md` §1.5 + `prompts/gemini/blog_yazimi.md`'ye **Document Fetch Verification Zorunlulugu** eklendi: search listesinde gorunmek = atif YAPMAK icin yetmez; her Bedesten ID `ictihat_getir` ile acilip konuyla ilgili oldugu teyit edilmeden Gemini'ye gonderilmez. `verified: true` flag'i olmayan karar Gemini protokolünde reddedilir. API down -> kunye verilmez, "yerlesik uygulama" formulu zorunlu.
+- **2026-05-17 Sahte Icra Mesaji blog (THEMIS v1):** Hizir `ictihat_ara`'in dondurdugu 30,939 sonuc icinden ilk 6 Bedesten ID'yi alip karar metinlerini ACMADAN Gemini'ye devir bloguna gomdu. Tum karar tarihleri 2026-04 oldugu icin avukat suphelendi, "uydurma karar atfi" uyarisini verdi. Bedesten document API 502 oldugu icin doğrulama yapılamadi, atıflar "yerleski uygulama" formuluyle degistirildi. **Sistemik fix:** `ajanlar/blog-yazari/SKILL.md` §1.5 + `prompts/muhakeme/blog_yazimi.md`'ye **Document Fetch Verification Zorunlulugu** eklendi: search listesinde gorunmek = atif YAPMAK icin yetmez; her Bedesten ID `ictihat_getir` ile acilip konuyla ilgili oldugu teyit edilmeden Gemini'ye gonderilmez. `verified: true` flag'i olmayan karar Gemini protokolünde reddedilir. API down -> kunye verilmez, "yerlesik uygulama" formulu zorunlu.
 
 ## Doktrin Zorunluluk Kapıları (Çalıştırılabilir — 2026-06-02)
 
@@ -191,7 +191,7 @@ degil karar vericiye terfi eder; govdeyi ancak gerektiginde okur.
 **Arguman guven etiketi (ZORUNLU — 2026-07-10):** Ileri surulen her
 hukuki arguman `[YERLESIK] / [GELISEN] / [ACIK SORU] / [ZORLAMA]`
 etiketlerinden birini tasir ([ZORLAMA] yalniz avukat acikca isterse).
-Detay: `prompts/gemini/_ortak-kurallar.md` madde 13-14 (Gemini) —
+Detay: `prompts/muhakeme/_ortak-kurallar.md` madde 13-14 (Gemini) —
 ayni kurallar terminal Claude ciktilari (arastirma sentezi, danisma
 cevabi) icin de gecerlidir.
 
@@ -378,7 +378,7 @@ Genis, konusuz arastirma yapma.
 
 **ONEMLI - Her Zaman Derin Mod:** Yargi MCP ve Mevzuat MCP her sorguda
 **iteratif derin protokol** ile calisir. 2B ve 2C TEK ELDEN Claude Fable 5
-tarafindan yurutulur (`config/model-routing.json` -> `tasks.yargi_mcp` /
+tarafindan yurutulur (`config/motor-haritasi.json` -> `tasks.yargi_mcp` /
 `tasks.mevzuat_mcp`, engine: claude; protokol: 6 Faz + Gap Check, min sorgu
 kurallari `modes` altinda). Tek-shot sorgu yasaktir. Yargi CLI / Mevzuat CLI
 yalniz MCP fail durumunda fallback olarak devreye girer.
@@ -758,14 +758,14 @@ Tum ciktilar "TASLAK" ibaresiyle kaydedilir.
 ### Antigravity Self-Review Kalite Gate Adimi
 
 Antigravity her hukuki cikti urettikten sonra **AYNI SOHBETTE**
-`prompts/gemini/self_review.md` protokolunu uygulayip kendi ciktisini denetler.
+`prompts/muhakeme/self_review.md` protokolunu uygulayip kendi ciktisini denetler.
 Bridge cagrisi yok, ek tool yok — sadece Antigravity sohbet icinde "simdi
 kendi ciktini self-review et" diye yonlendirilir (devir blogunun son
 satirinda yazar).
 
 Akis:
 1. Antigravity hukuki ciktiyi uretir (TASLAK)
-2. Ayni sohbette `prompts/gemini/self_review.md` protokolune gore
+2. Ayni sohbette `prompts/muhakeme/self_review.md` protokolune gore
    ciktiyi denetler:
    - Yargitay/HGK/IBK atiflari Bedesten documentId ile dogrulanmis mi?
    - Tirnak alintilari kaynaktan birebir mi?
@@ -780,7 +780,7 @@ Akis:
 4. Self-review sonucu (KIRMIZI/SARI/YESIL) ciktinin sonunda kisa bir
    blok olarak yazilir (frontmatter sonrasi).
 
-Prompt: `prompts/gemini/self_review.md`
+Prompt: `prompts/muhakeme/self_review.md`
 
 ---
 
@@ -788,7 +788,7 @@ Prompt: `prompts/gemini/self_review.md`
 
 Sistem haritasi (14 uzman ajan + Director) ve 7 ASAMA workflow'u DEGISMEZ.
 Her ajanin arkasinda hangi motorun (Claude terminal veya Antigravity sag
-panel) calisacagi `config/model-routing.json` dosyasindan okunur.
+panel) calisacagi `config/motor-haritasi.json` dosyasindan okunur.
 
 **7 ASAMA kullanici-kontrollu protokolunde** her asama basinda Director
 motor + model bilgisini bildirir. Avukat "motor degistir" diyerek tek
@@ -802,7 +802,7 @@ seferlik override yapabilir.
 | `ask` | Her tetikte avukata "Bu is icin Claude mu Antigravity mi?" diye sor |
 | `fixed` | Sadece belirtilen motoru kullan, fallback dahi yok |
 
-Global mod `config/model-routing.json` -> `mode` alanindadir.
+Global mod `config/motor-haritasi.json` -> `mode` alanindadir.
 Komut satirinda `fallback claude` (terminal Claude'a cevirme) ile
 tek seferlik override yapilabilir.
 
@@ -1425,7 +1425,7 @@ Context window %70'e ulastiginda otomatik state dump:
 | `stratejik analiz: [dava-id]` | 5 Ajan (4A Davaci + 4B Davali + 4C Bilirkisi + 4D Hakim + 4E Sentez) |
 | `dilekce v1: [dava-id]` | Belge Yazari (ilk taslak — ASAMA 5 esdegeri) |
 | `dilekce yaz` | Belge Yazari (v1 taslak — `dilekce v1:` ile ayni) |
-| `dilekce yaz [cerceve] ile` (orn. "Toulmin ile itiraz yaz") | Belge Yazari — cerceve override; Director `prompts/gemini/cerceveler/_secim-rehberi.md` uzerinden cerceve dosyasini baglar |
+| `dilekce yaz [cerceve] ile` (orn. "Toulmin ile itiraz yaz") | Belge Yazari — cerceve override; Director `prompts/muhakeme/cerceveler/_secim-rehberi.md` uzerinden cerceve dosyasini baglar |
 | `ihtarname yaz` | Belge Yazari |
 | `sozlesme yaz` | Belge Yazari |
 | `hesapla: giris:[tarih], cikis:[tarih], net:[TL], yemek:[TL], servis:[TL], fesih:[tur]` | Hesaplama modulu |
