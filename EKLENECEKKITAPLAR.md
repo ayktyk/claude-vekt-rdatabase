@@ -1,6 +1,6 @@
 # EKLENECEK KİTAPLAR — Temin Bekleyen Kaynaklar ve Entegrasyon Planı
 
-> Durum: BEKLEMEDE (kitaplar henüz temin edilmedi)
+> Durum: Polat Cilt I TEMİN EDİLDİ ve İŞLENDİ (2026-09-02) · Serozan BEKLEMEDE
 > Oluşturma: 2026-07-22 · Analiz: terminal Claude (Opus 4.8)
 > Amaç: Kitap eline geçtiğinde ne yapılacağı hazır dursun; analiz kaybolmasın.
 
@@ -120,6 +120,22 @@ muhakemesiyle doldurulacak boş şablon olarak konur.
 
 ---
 
+**Doğrulama tamamlandı (2026-09-02):** Polat Cilt I temin edildi, 306 sayfa OCR ile
+okundu (`bilgi-tabani/nosyon-okuma-notlari.md`). İÇİNDEKİLER teyidi:
+- Üç kısım doğru: Kavram (s. 21–32) · Uyuşmazlık çözümleme metodolojisi (s. 35–130) ·
+  Uygulamalı olay çözümlemeleri (s. 131–286). Metodoloji A'dan P'ye 16 adım.
+- **§2'deki "ASAMA 1→2→3 ile birebir eşleşme" tespiti DOĞRULANDI ve aşıldı:** A–N
+  adımları ASAMA 1'e, O adımı ASAMA 3+5'e oturuyor. Çıktı:
+  `ajanlar/director/olay-cozum-protokolu.md` (24 adım, 21'i sayfa referanslı).
+- **SAPMA — §4 Katman 2/3 varsayımı YANLIŞ:** "Lafzî → sistematik → amaçsal yorum
+  sırası, kıyas / argumentum a contrario, kanun boşluğu / bilinçli susma" kurallarının
+  Polat'ta bulunduğu varsayılmıştı. Bulunmadı: kitap bu konuları yalnız metodoloji
+  konu listesinde **sayar** (s. 38), kural vermez; mantık teknikleri listesi de
+  Serozan'dan aktarımdır (s. 37). Bu içerik **Serozan'ın kitabındadır.**
+- Sonuç: `bilgi-tabani/hukuki-yontem-kontrol-listesi.md` yazıldı ama §1–5 kuralları
+  `[SİSTEM EKİ]` etiketli; Serozan gelince sayfa referansına çevrilecek. **Serozan'ın
+  önceliği yükseldi** — doktrinin 9. clause'unun kaynak ayağı odur.
+
 ## 6. ÖNCELİK
 
 1. **Polat Cilt I** — önce. Akışımıza birebir oturuyor, pratik olay çözümleri var.
@@ -132,14 +148,14 @@ muhakemesiyle doldurulacak boş şablon olarak konur.
 
 ## 7. KİTAP GELDİĞİNDE YAPILACAKLAR (checklist)
 
-- [ ] İÇİNDEKİLER'den bu dosyadaki içerik başlıklarını teyit et, sapma varsa güncelle
-- [ ] `bilgi-tabani/hukuki-yontem-kontrol-listesi.md` üret (sayfa referanslı)
-- [ ] `ajanlar/arastirmaci/SKILL.md` → "Yorum Yöntemi Protokolü" bölümü ekle
+- [x] İÇİNDEKİLER'den bu dosyadaki içerik başlıklarını teyit et, sapma varsa güncelle (2026-09-02 — sapma bulundu, §5'e işlendi)
+- [x] `bilgi-tabani/hukuki-yontem-kontrol-listesi.md` üret — Polat çerçevesi sayfa referanslı, kurallar [SİSTEM EKİ] (Serozan bekleniyor)
+- [x] `ajanlar/arastirmaci/SKILL.md` → "Yorum Yöntemi Protokolü" bölümü ekle
 - [ ] `prompts/_doktrin-preamble.md` → 9. clause "Çıkarım geçerliliği"
 - [ ] `scripts/doktrin_contract.py` → clause token listesini 9'a çıkar
 - [ ] `python scripts/doktrin_lint.py` çalıştır — tüm prompt yüzeyleri PASS vermeli
 - [ ] 16 Gemini prompt + 5 perspektif ajanı + arastir/blog komutlarındaki inline preamble'ları
       yeni clause ile güncelle (doktrin_lint bunları yakalar)
-- [ ] `playbook/` şablonuna olay çözüm yol haritası iskeleti (opsiyonel)
+- [x] `playbook/` şablonuna olay çözüm yol haritası iskeleti (`playbook/_SABLON.md`)
 - [ ] MemPalace: `wing_buro_aykut/room_zero_halusinasyon` → yeni clause'un gerekçesi
       (Tuğba 2026-89 bağlantısı) drawer olarak yazılsın

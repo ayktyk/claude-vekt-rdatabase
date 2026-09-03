@@ -1059,6 +1059,40 @@ KAYNAK: LLM Web - {URL} - {Yayim tarihi}
 DOGRULAMA: [DOGRULANAMADI] - avukat manuel dogrulasin
 
 
+## Yorum Yöntemi Protokolü (2026-09-02)
+
+**Kaynak:** `bilgi-tabani/hukuki-yontem-kontrol-listesi.md`
+(Polat, *Hukuk Nosyonu Cilt I* çerçevesi `[s. 37–38]` + `[SİSTEM EKİ]` kurallar —
+Serozan gelince sayfa referanslanacak).
+
+Normlar Hiyerarşisi hangi normun **uygulanacağını** belirler; bu protokol o normdan
+**nasıl sonuç çıkarılacağını** denetler. İkisi birlikte çalışır.
+
+Araştırma raporunda ileri sürülen her hukuki sonuç için şu dört soru cevaplanır:
+
+1. **Hangi yorum yöntemiyle vardım?** Lafzî mi, sistematik mi, amaçsal mı, tarihsel mi?
+   Lafzî yorum yeterliyken amaçsal yoruma gitmek gerekçe ister (TMK m. 1 "sözüyle ve
+   özüyle" `[s. 38]`).
+2. **Kıyas mı yaptım, aksi-kavram yorumu mu gerekiyordu?** İstisnai, sınırlayıcı ve
+   hak düşürücü hükümlerde kıyas caiz değildir; *argumentum a contrario* gerekir.
+3. **Boşluk mu var, bilinçli susma mı?** Kanun koyucunun susması her zaman boşluk
+   değildir; bilinçli susma varsa boşluk doldurma yasaktır.
+4. **Genellemem meşru mu?** Bir fıkra/bent hakkındaki içtihat başka fıkraya
+   taşınamaz (Tuğba 2026-89 dersi). Taşınıyorsa gerekçe açıkça yazılır.
+   "Yerleşik uygulama" için eşik: HGK/İBK **veya** aynı dairenin farklı yıllarda
+   tutarlı en az 3 kararı; aksi hâlde `[GELİŞEN]`.
+
+**Raporda gösterim:** Her argümanın güven etiketinin
+(`[YERLEŞİK] / [GELİŞEN] / [AÇIK SORU] / [ZORLAMA]`) yanına yorum yöntemi yazılır:
+
+> `[YERLEŞİK]` — sistematik yorum; kıyas değil, doğrudan uygulama.
+
+**HARD FAIL koşulu:** Kaynak gerçek olsa dahi ondan çıkarılan sonuç geçersizse
+(bağlam kayması, meşru olmayan genelleme, caiz olmayan kıyas, bilinçli susmayı
+boşluk sayma) çıktı reddedilir. Bu, doktrinin 9. clause'udur; DENETCI denetim
+sırasının 4. adımında ölçülür.
+
+
 ## Yargi Kararlari + Mevzuat (Mulga Eleme Sonrasi - YENI)
 
 ### Gecerli Kararlar (rapora alinanlar)
