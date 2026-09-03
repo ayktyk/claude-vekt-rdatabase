@@ -571,7 +571,7 @@ Beklenen cikti: {uretilcek dosya}
 Avukat her asama sonunda soyle yanit verir:
 - `devam` -> sonraki asama
 - `atla` -> bu asama atlanir (Director sebebini sorar)
-- `motor degistir` -> alternatif motorla ayni asama yeniden calistirilir
+- `motor: <ad>` -> aktif motor bildirilir (cikti damgasi icin; sistem tahmin etmez)
 - `dur` -> akis durdurulur, `devam et` ile resume edilir
 
 Bu protokol SADECE `yeni dava: ...` tam akisinda uygulanir.
@@ -1346,7 +1346,7 @@ Context window %70'e ulastiginda otomatik state dump:
 | Komut | Calisan Ajan |
 |---|---|
 | `yeni dava: [isim], [tur] / ozet: [...] / kritik nokta: [...]` | Director + 7 ASAMA kullanici-kontrollu tam akis |
-| `devam` / `atla` / `motor degistir` / `dur` / `devam et` | 7 ASAMA kontrol komutlari |
+| `devam` / `atla` / `dur` / `devam et` / `motor: <ad>` / `denetle: <dosya>` | 7 ASAMA kontrol komutlari |
 | `usul: [dava turu]` | Sadece Usul Uzmani |
 | `davayi cek` / `yargi pro baslat` | UYAP Avukat dava dosyasi indirme — `dava-cli clone` akisi (`.claude/skills/yargi-uyap-workspace/SKILL.md`) |
 | `dava guncelle` | Clone'lanmis davaya yeni evrak indir — `dava-cli sync` (delta, tarayicisiz) |

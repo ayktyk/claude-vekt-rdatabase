@@ -17,13 +17,13 @@ dava-id: ornek-2026-001
 
 Director Agent akışı:
 
-## ASAMA 0 — MemPalace Wake-up (Terminal Claude)
+## ASAMA 0 — MemPalace Wake-up (ORKESTRATOR)
 
 1. `mempalace_status` + `mempalace_search wing_buro_aykut` (avukat tercihleri)
 2. `mempalace_search wing_{dava_turu}` (büro hafızası, gecmiş davalar)
 3. Bulgular Director context'ine enjekte edilir (MEMORY MATCH varsa raporla)
 
-## ASAMA 1 — Hazırlık + Briefing (Terminal Claude)
+## ASAMA 1 — Hazırlık + Olay Çözümü + Briefing (ORKESTRATOR)
 
 1. Dava parametrelerini parse et. Kritik nokta yoksa avukata sor.
 2. Drive klasörü aç: `G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\`
@@ -35,12 +35,16 @@ Director Agent akışı:
    - `05-Durusma-Notlari/`
 3. (KVKK maskeleme ERTELENDİ — 2026-07-09 avukat kararı; komut gerçek
    veriyle gelir, maske dict kontrolü YAPILMAZ. Yerel LLM'e geçişte geri gelir.)
-4. Kaynak sorgulamasını zorunlu yap (NotebookLM, Drive, yerel dosya).
-5. Advanced briefing topla (opsiyonel ama tavsiye edilen).
-6. Hukuki kritik noktaları belirle (birincil + ikincil + riskli).
-7. `00-Briefing.md` Drive'a kaydet.
+4. Kaynak sorgulamasını zorunlu yap (UYAP / NotebookLM / Drive / yerel dosya).
+5. `playbook/{dava-turu}.md` + `dersler/` oku.
+6. **Olay çözüm protokolünü uygula** — `ajanlar/director/olay-cozum-protokolu.md`
+   (24 adım; sıra bağlayıcı). Kritik nokta burada ÜRETİLİR (Adım 8) veya avukat
+   vermişse DOĞRULANIR. Cevabı bilinmeyen adım `EKSİK — müvekkilden sorulacak`
+   olarak Karar Noktaları'na taşınır.
+7. Advanced briefing (avukat tercihleri) — protokolün **Adım 24**'ü, en sonda.
+8. `00-Briefing.md` Drive'a kaydet.
 
-## ASAMA 2 — Derin Araştırma (Terminal Claude — sıralı zincir + async paralel kol)
+## ASAMA 2 — Derin Araştırma (ARASTIRMACI — sıralı zincir + async paralel kol)
 
 > **REVİZYON 2026-07-09:** 2A Süper Stajyer + Faz D Argüman.ai ARŞİVLENDİ
 > (`arsiv/README.md`). Çekirdek = 2B→2C sıralı zincir + 2D async paralel.
@@ -56,44 +60,39 @@ Director Agent akışı:
    atıf maddeleri çıkarılır → `atif-maddeleri.json`. 2C bunu bekler
    (min 8 sorgu / 9 faz) + mülga eleme + normlar hiyerarşisi.
 
-3. **Sentez:** terminal Claude konsolide raporu yazar (Antigravity'ye gitmez).
+3. **Sentez:** ARASTIRMACI konsolide raporu aynı oturumda yazar; **DENETCI** denetler.
    - Çıktı: `02-Arastirma/arastirma-raporu.md` + `atif-maddeleri.json` +
      `mulga-eleme.json`
 
-## ASAMA 2 SONUNDA — Antigravity 3 Batch Devir (2026-05-14 iyileştirme)
+## ASAMA 3–7 — Tek Motor, DENETCI Kapılı
 
-ASAMA 2 bittiğinde Director Agent **otomatik olarak BATCH 1 için Antigravity
-devir bloğu basar**. Toplam 3 batch ile dilekçe NİHAİ'ye ulaşılır:
+Elle devir bloğu, kopyala-yapıştır ve harici panel **yoktur**. ASAMA 2 bittiğinde
+Director aynı oturumda devam eder; her ASAMA başında motor bildirimi verir, avukat
+`devam` demeden geçmez:
 
 ```
-BATCH 1: ASAMA 3 (Usul Raporu) — tek
-   ↓ avukat: "ASAMA 3 bitti"
-   ↓ Claude: qmd update + diary + DOCX + BATCH 2 bloğu
-
-BATCH 2: ASAMA 4 (5-Ajan Stratejik Analiz) — tek
-   ↓ avukat: "ASAMA 4 bitti"
-   ↓ Claude: hipotez seçimi avukat onayı + diary + DOCX + BATCH 3 bloğu
-   ⚠ 4E sentez KIRMIZI çıkarsa BATCH 3 BLOKLENİR
-
-BATCH 3: ASAMA 5+6+7 (Dilekçe Ailesi) — TEK ANTIGRAVITY SOHBETİ
-   Antigravity sırayla: v1 → savunma sim → v2 NİHAİ (3 dosya Drive'a)
-   ↓ avukat: "Hepsi bitti"
-   ↓ Claude: 3 ajan diary + DOCX + UDF + MemPalace promotion + Pilot raporu
+ASAMA 3  Usul raporu (MUHAKEME)          → DENETCI → avukat "devam"
+ASAMA 4  5-ajan stratejik analiz          → DENETCI → hipotez seçimi AVUKAT ONAYI
+         ⚠ 4E sentez KIRMIZI çıkarsa ASAMA 5'e geçilmez
+ASAMA 5  Dilekçe v1                       → DENETCI ┐
+ASAMA 6  Savunma simülasyonu              → DENETCI ├ aynı oturumda ardışık
+ASAMA 7  Dilekçe v2 NİHAİ                 → DENETCI ┘ (yaz → eleştir → revize)
+         ↓ ORKESTRATOR: DOCX + UDF (yalnız v2) + 3 diary + MemPalace promotion
 ```
 
-**Mehmet Ali 2026-003 pilot dersi:** Önceki 5 ayrı devir blok yorucuydu.
-ASAMA 5-6-7 zaten doğal "yaz-eleştir-revize" döngüsü olduğu için tek
-sohbette birleştirildi. **5 yapıştırma → 3 yapıştırma** (%40 azalma).
+Her DENETCI çağrısı yalnızca `{çıktı yolu, dava-id}` alır (`AGENTS.md` → "DENETİM
+ÇAĞRI BLOĞU"); KIRMIZI'da çıktı Drive'a yazılmaz, en çok 3 tur.
+Her ASAMA sonunda ORKESTRATOR: `qmd update` + diary + `md_to_docx.py`.
 
-Detay: `AGENTS.md` > "3 BATCH DEVIR BLOGU ŞABLONLARI" bölümü.
+Detay: `AGENTS.md` > "Motor Mimarisi" ve "7 ASAMA Workflow"; ajan protokolleri
+`ajanlar/*/SKILL.md` > "Üretim Akışı (tek motor)".
 
 ## Kural
 
 - Kaynak cevabı gelmeden ASAMA 2 araştırmasını başlatma
 - NotebookLM seçildiyse notebook adını dava hafızasına kaydet
-- ASAMA 2 sentezi tamamlanmadan ASAMA 3 devir bloğu basma
+- ASAMA 2 sentezi DENETCI'den YEŞİL almadan ASAMA 3'e geçme
 - KVKK Seviye 2 maskeleme her ASAMA'da korunur — dilekçe v2 unmask
   + UYAP yüklemesi avukatın elinde, sistemin değil
-- Antigravity erişilemezse avukat "fallback claude" → terminal Claude
-  o ASAMA'yı `prompts/muhakeme/{task_type}.md` ile üretir
-- `gemini-bridge.sh` cagirma — DEPRECATED (exit 100)
+- Motor bildirilmemişse çıktı `engine: bildirilmedi` ile damgalanır (`motor: <ad>`)
+- Hesaplama ve UDF üretimi LLM'e yaptırılmaz — Python scriptleri (ORKESTRATOR)
