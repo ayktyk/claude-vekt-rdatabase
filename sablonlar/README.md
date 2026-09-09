@@ -19,3 +19,10 @@ Kalici hafiza referansi:
 Kalici ciktilar repo icine degil Google Drive altina yazilir:
 - Yeni dava: `G:\Drive'im\Hukuk Burosu\Aktif Davalar`
 - Sadece arastirma: `G:\Drive'im\Hukuk Burosu\Bekleyen Davalar`
+
+Muvekkil bilgi formlari (`muvekkil-formlari/`):
+- `iscilik-alacaklari-muvekkil-bilgi-formu.pdf` — doldurulabilir PDF (WhatsApp'tan gonderilir)
+- `iscilik-alacaklari-muvekkil-bilgi-formu.docx` — telefonda/Word'de yazilabilir surum
+- `...-whatsapp-mesaji.txt` — formla birlikte gonderilecek mesaj kalibi
+- Uretim: `python -m scripts.muvekkil_formu` (sema: `scripts/muvekkil_formu/schema.py`;
+  soru eklenince komut yeniden calistirilir, iki format da ayni semadan uretilir)
