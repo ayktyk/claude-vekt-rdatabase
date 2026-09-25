@@ -10,20 +10,22 @@ Versiyon: 2.0 (Derin iteratif protokol + temporal evolution)
 **TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/model-routing.json`'dan
 okunur. Bu dosyada hardcoded model adi YOKTUR.
 
-- **arastirma_sentezi** task'i icin engine + model: `config/model-routing.json` ->
-  `tasks.arastirma_sentezi.engine` ve `tasks.arastirma_sentezi.model`
+- **arastirma_sentezi** task'i icin: `engine: claude` (2026-05-13 itibariyla
+  terminal Claude'da kalir; MCP ciktilari ayni oturumda raporlanir, Antigravity'ye
+  copy-paste yorgunlugu olmasin diye)
 - **MCP/CLI cagrilari** (MemPalace, Drive, NotebookLM, Literatur, Yoktez,
-  Yargi MCP, Mevzuat MCP, ve CLI fallback'lari) icin engine: `config/model-routing.json` ->
-  `tasks.{yargi_mcp|mevzuat_mcp|notebooklm_mcp|akademik_mcp}.engine`
-- **arama_plani** task'i (sorgu terimi listesi uretmek): `config/model-routing.json` ->
-  `tasks.arama_plani.engine` ve `model`
-- **self_review** task'i (kalite gate, ciktinin kendi denetimi): `config/model-routing.json` ->
-  `tasks.self_review.engine` ve `model`
-- **Fallback chain:** `config/model-routing.json` -> `fallback.gemini_chain` ve
-  `fallback.final_fallback`
-- **Override:** `--model claude` veya `--model gemini` ile tek seferlik manuel
-  override (Director Agent komutu)
-- **Prompt sablonlari:** `prompts/gemini/arastirma_sentezi.md`, `prompts/gemini/self_review.md`
+  Yargi MCP, Mevzuat MCP, ve CLI fallback'lari) icin: `engine: claude`
+  (her zaman terminal Claude — MAX EFFORT thinking)
+- **arama_plani** task'i (sorgu terimi listesi uretmek): `engine: antigravity_manual`
+  (opsiyonel — Antigravity'ye copy-paste blok ile gonderilir; pas gecilebilir)
+- **self_review** task'i: `engine: antigravity_manual` (Antigravity ASAMA
+  ciktisini ayni sohbette kendi denetler; bridge cagrisi YOK)
+- **DEPRECATED Fallback chain:** `fallback.gemini_chain_deprecated` artik
+  kullanilmiyor. Yeni fallback: Antigravity erisilemezse terminal Claude.
+- **Override:** Avukat "fallback claude" yazarak tek seferlik Claude'a cevirebilir
+- **Prompt sablonlari:** `prompts/gemini/arastirma_sentezi.md` (Claude
+  okuyacak ana sentez sablonu), `prompts/gemini/self_review.md` (Antigravity'ye
+  yapistirilir)
 
 ---
 
@@ -160,6 +162,25 @@ QMD erisilemiyorsa: Adimi atla, MemPalace ile devam et.
 - **Kaynaksiz genel iddia yazma** ("Yargitay yerlesmistir" gibi)
 
 ---
+
+## Yargi PRO Kapilari (ZORUNLU — 2026-09-25)
+
+Harita: `ajanlar/yargipro-skill-haritasi.md` Bolum B. Her skill
+`mcp__claude_ai_YargiMCP__hukuk_skill skill:"<ad>"` ile is basinda cekilir,
+talimati asagidaki Derin Arama Protokolu ile BIRLIKTE uygulanir.
+
+| Bolum | Skill | Ne getirir |
+|---|---|---|
+| 2B baslangic | `11-1-emsal-karar-bulma` → `11-2-derin-emsal-taramasi` | Baglam (kol · evre · rol · ispatlanacak vakia · onerme) + her onerme icin **5 alt sorgu + 1 RED-TEAM sorgu**; semantik (`semantik_ictihat_ara`, dogal dil onerme) ve lexical (`ictihat_ara`, anahtar kelime) cift kanal; sorgu seti tablosu rapora yazilir |
+| 2B tam metin | `11-3-karar-tam-metni` → `11-10-emsal-karar-okumasi` | Kisa listedeki HER aday tam metin; ratio / obiter ayrimi; dosyayla ayirt edici noktalar |
+| 2C mevzuat | `11-5-kanun-maddesi-bulma` | Madde metni + yururluk etiketi; NOT-FOUND uydurulmaz |
+| 2C guncellik | `11-4-emsal-guncellik-denetimi` | Mulga eleme yerine **dort etiket**: DAYANAK GUNCEL / GUNCEL + guncel karsiligi m.X / DEGISMIS (ASILMIS OLABILIR) / MULGA + serh. Madde numarasi degisikligi MULGA DEGILDIR |
+| Kapi 1 (rapor sonu) | `11-8-atif-dogrulama` | Rapordaki her kunye icin varolus VE destek ekseni; kanit katmani (hukum gerekcesi / bozma ilami / alt derece / taraf beyani / karsi oy); snippet ile VERIFIED yazilamaz |
+| Kol ekleme | Dava turu HMK disiysa harita Bolum C (`3-2` icra, `1-2` ceza, `4-2` idare, `5-2` AYM, `6-2` AIHM) | Kol-ozel emsal sirasi (IBK → HGK → daire → BAM) |
+
+Red-team sorgusundan cikan aleyhe kararlar rapora "Celiskili Noktalar ve
+Sapma Uyarilari" bolumune **eksiksiz** yazilir; lehe olmadigi icin dusurulmez.
+Skill cekilemezse rapora `[YARGIPRO SKILL CEKILEMEDI]` notu, protokol manuel uygulanir.
 
 ## Derin Arama Protokolu (ZORUNLU - Yargi ve Mevzuat CLI)
 
@@ -980,40 +1001,44 @@ Bu, tek-shot aramada olmayan bir muhakeme katmanidir ve kalitenin temelidir.
 
 ---
 
-## Sentez Asamasi — ZORUNLU Gemini Bridge Cagrisi
+## Sentez Asamasi — Claude'da Kalir (2026-05-13)
 
 Tum kollar (2B+2C+2D+2E) tamamlandiktan sonra konsolide arastirma raporunu
-ben yazmiyorum, **Gemini'ye yaziyorum**. Claude (yani ben) MCP cagrilarini
-yapip ham bulgulari toplar; rapora cevirme islemi Gemini'de yapilir.
+**terminal Claude** yazar. MCP ciktilari zaten Claude oturumunda ham olarak
+mevcut — copy-paste yorgunlugu olusmasin ve butunluk korunsun diye sentez
+Antigravity'ye gitmez.
 
-### Akis
+**Karar gerekcesi (2026-05-13):** Diger ASAMA'lar Antigravity'ye tasinirken
+ASAMA 2 sentezi Claude'da birakildi. Cunku:
+- MCP ciktilari (kunye, ozet, tam metin) Claude oturumunda ham veri olarak
+  uretiliyor; baska panele tasimak gereksiz cevirme yapar
+- Sentez teknik bir derleme isi (yapilandirilmis rapora cevirme), hukuki
+  yaratici uretim degil
+- Antigravity'ye gitse 4 paralel kolun ciktisi tek dosyada toplanip
+  yapistirilmali — buyuk context, hata riski
 
-1. **Ham bulgulari topla (Claude path):**
-   - 2B Yargi MCP -> bulunan kararlar + atif maddeleri
-   - 2C Mevzuat MCP -> kanunlar + mulga eleme tablosu
-   - 2D NotebookLM -> 10 iteratif sorgu cevaplari
+**DEPRECATED:** Eski `scripts/gemini-bridge.sh arastirma_sentezi` cagrisi
+2026-05-13 itibariyla devre disi. Bridge cagrilirsa exit 100 doner.
+
+### Akis (Yeni)
+
+1. **Ham bulgulari topla (Claude path — paralel + sirali zincir):**
+   - 2B Yargi MCP -> bulunan kararlar + atif maddeleri + son 5 yil seyri
+   - 2C Mevzuat MCP -> kanunlar + mulga eleme tablosu + normlar hiyerarsisi
+   - 2D NotebookLM -> 10 iteratif sorgu cevaplari (6 irdeleme + 4 perspektif)
    - 2E Akademik -> makale + tez bulgulari + atif zinciri
-   - Hepsi tek context dosyasina yaz: `tmp/.gemini-input-{dava-id}-asama2.md`
 
-2. **Bridge cagir:**
-   ```bash
-   ASAMA=2 DAVA_ID="<dava-id>" \
-     bash scripts/gemini-bridge.sh arastirma_sentezi \
-       tmp/.gemini-input-{dava-id}-asama2.md \
-       tmp/.gemini-output-{dava-id}-asama2.md
-   ```
+2. **Konsolide raporu Claude yazar:**
+   - `02-Arastirma/arastirma-raporu.md` — terminal Claude doğrudan yazar
+   - Format: FIVEAGENTS.md "Cikti Format Kurallari" + Kalite Kapi 1
+     gereksinimlerine birebir uyar
+   - Frontmatter: `engine: claude`, `model: claude-opus-4-7`,
+     `status: TASLAK`
+   - Yan dosyalar:
+     - `02-Arastirma/atif-maddeleri.json` (2B → 2C zinciri girdisi)
+     - `02-Arastirma/mulga-eleme.json` (eleme tablosu)
 
-3. **Exit code kontrol:**
-
-   | Exit | Anlam | Davranis |
-   |------|-------|----------|
-   | 0 | Gemini basarili | Cikti oku, kalite kapisi uygula, raporu kaydet |
-   | 99 | engine=claude path | Claude ile sentez yaz |
-   | 1 | Hata: 2x fail | Fallback log + Claude ile yaz, `fallback_used: true` |
-   | 3 | gemini CLI yok | "npm install" oner, Claude ile devam |
-   | 4 | OAuth auth | "gemini /auth" oner, Claude ile devam |
-
-4. **Cikti dogrulama (Kalite Kapisi 1):**
+3. **Kalite Kapisi 1 (Claude self-check):**
    - [ ] 15 Yargi sorgu listesi (kunye + ozet) raporda var mi?
    - [ ] Min 5 karar tam metin kunye var mi?
    - [ ] `02-Arastirma/atif-maddeleri.json` doldu mu?
@@ -1022,18 +1047,27 @@ yapip ham bulgulari toplar; rapora cevirme islemi Gemini'de yapilir.
    - [ ] Celiskili kararlar bolumu var mi?
    - [ ] NotebookLM 10 sorgu cevabi raporda var mi?
    - [ ] 2E Akademik bulgular var mi?
-   - [ ] Engine: gemini frontmatter var mi?
+   - [ ] Mulga eleme sonrasi >= 5 GECERLI karar kaldi mi?
+   - [ ] DOGRULANMAMIS atif sayisi raporda yazildi mi?
+   - [ ] mcp_fallback_used flag'i (varsa) belirtildi mi?
 
-5. **Eksik varsa:** Sadece eksik mini-kolu (orn. NotebookLM 3 sorgu eksikse,
+4. **Eksik varsa:** Sadece eksik mini-kolu (orn. NotebookLM 3 sorgu eksikse,
    sadece o 3 sorguyu) tekrar calistir. Tum Faz 2'yi bastan baslatma.
+
+5. **Avukata sun:** Rapor hazir; bir sonraki ASAMA (ASAMA 3 Usul Raporu)
+   Antigravity'ye gidecek — devir blogu hazirla.
 
 ### Asla
 
-- Bridge'i atla ve dogrudan ben sentez yaz (config Gemini diyorsa)
-- KVKK ihlali: `tmp/.gemini-input-*` dosyasinda muvekkil HAM adi olmasin
-  (zaten Claude bunu maskeli context'le hazirliyor, ama ek kontrol)
-- Sentez ciktisinda atif maddesi denetimi atla (mulga eleme onceden 2C'de yapilir,
-  bu noktada zaten temiz set var)
+- `gemini-bridge.sh` cagirma — DEPRECATED (exit 100)
+- Sentez raporunu Antigravity'ye yaptir (MCP ciktilari Claude'da kaldi,
+  copy-paste yorgunlugu olmasin)
+- KVKK ihlali: rapora ham muvekkil verisi yazma (zaten Claude maskeli
+  context'le calisiyor, ama ek kontrol)
+- Sentez ciktisinda atif maddesi denetimi atla (mulga eleme onceden 2C'de
+  yapilmis, bu noktada zaten temiz set var)
+- 5 GECERLI karar altinda kalan raporu "yeterli" diye sun (geri don, 3
+  alternatif terimle yeniden 2B)
 
 ## Cikti Formati
 

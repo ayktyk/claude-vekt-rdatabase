@@ -1,8 +1,18 @@
 {
   "_comment": "Proje-level Claude Code ayarlari. Kullanici-specific permission'lar settings.local.json'da. Bu dosya gitlenir, ekibin tamami kullanir.",
-  "_doctrine": "Faz C: Model regresyon hook'u. Belge yazari uretim ajanlarinin ciktisi config/model-routing.json'a uyumlu mu kontrol eder.",
+  "_doctrine": "Faz C: Model regresyon hook'u. Belge yazari uretim ajanlarinin ciktisi config/model-routing.json'a uyumlu mu kontrol eder. 2026-09-25: Yargi PRO tetikleyici hook'u — hukuki istekte skill haritasini hatirlatir.",
 
   "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash hooks/yargipro-tetikleyici.sh"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write",

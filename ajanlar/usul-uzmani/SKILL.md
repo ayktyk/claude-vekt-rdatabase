@@ -9,11 +9,12 @@ Versiyon: 1.0
 
 **TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/model-routing.json`'dan okunur.
 
-- **usul_raporu** task'i: `config/model-routing.json` -> `tasks.usul_raporu.engine` ve `model`
-- **Claude'da kalir:** iscilik hesaplama modulu (matematiksel hesap), MCP cagrilari, Calendar ekleme — bunlar arac kullanimidir, hukuki uretim degildir
-- **Self-review:** `tasks.self_review.engine` (Gemini 2. cagri, kalite gate'te calisir)
-- **Prompt sablonu:** `prompts/gemini/usul_raporu.md`
-- **Override:** `--model claude` veya `--model gemini` ile tek seferlik manuel
+- **usul_raporu** task'i: `config/model-routing.json` -> `tasks.usul_raporu.engine` (= `antigravity_manual`) ve `model`
+- **Antigravity (sag panel)** uretir; terminal Claude SADECE devir blogu basar
+- **Claude'da kalir:** iscilik hesaplama modulu (matematiksel hesap), MCP cagrilari, Calendar ekleme, yetkili adliye WebSearch dogrulamasi — bunlar arac kullanimidir, Antigravity'ye gitmez
+- **Self-review:** Antigravity ayni sohbette `prompts/gemini/self_review.md`'yi uygular (bridge YOK)
+- **Prompt sablonu:** `prompts/gemini/usul_raporu.md` (Antigravity'ye yapistirilir)
+- **Fallback:** Antigravity erisilemezse avukat "fallback claude" der → Claude uretir, frontmatter `fallback_used: true`
 
 ---
 
@@ -33,58 +34,78 @@ Versiyon: 1.0
 
 ---
 
-## ZORUNLU ILK ADIM — Gemini Bridge Cagrisi
+## ZORUNLU ILK ADIM — Antigravity Devri (2026-05-13)
 
-Ben hukuki metin ureten bir ajanim. Dogrudan ben yazmiyorum, once Gemini'ye gidiyorum.
+Bu ASAMA hukuki uretimdir, Antigravity sag panelinde Gemini 3.1 Pro yapar.
+Terminal Claude burada SADECE devir blogu basar; usul raporunu dogrudan
+terminal Claude YAZMAZ.
 
 ### Akis
 
-1. **Hesaplamalar Claude'da kalir:** iscilik alacaklari hesaplama modulu Python ile
-   yapilir, sonuclar Gemini context'ine ekkenir. Avukatin Yetkili Mahkeme — Adliye
-   Esleme Protokolune ait WebSearch/WebFetch dogrulamasi da Claude'da kalir.
+1. **On-hazirlik (Claude'da kalir):**
+   - Iscilik alacaklari hesaplama modulu Python ile yapilir, sonuclar
+     Antigravity context'ine ekkenir (devir blogunda yol verilir)
+   - Yetkili Mahkeme — Adliye Esleme Protokolune ait WebSearch/WebFetch
+     dogrulamasi terminal Claude'da yapilir, sonuc `tmp/{dava-id}-adliye-dogrulama.md`
+     dosyasina yazilir
+   - Bu iki cikti devir blogunda Antigravity'nin okumasi gereken
+     dosyalar listesine eklenir
 
-2. **Context dosyasi hazirla:** `tmp/.gemini-input-{dava-id}-asama3.md`
-   Icerik: dava ozeti + kritik nokta + arastirma raporu (varsa) + briefing
-   (00-Briefing.md varsa) + Claude tarafindan yapilmis hesaplama sonuclari +
-   adliye dogrulama bulgulari (URL + tarih)
+2. **Antigravity devir blogu bas (avukata sun):**
 
-3. **Bridge cagir:**
-   ```bash
-   ASAMA=3 DAVA_ID="<dava-id>" \
-     bash scripts/gemini-bridge.sh usul_raporu \
-       tmp/.gemini-input-{dava-id}-asama3.md \
-       tmp/.gemini-output-{dava-id}-asama3.md
+   ```
+   ========== ANTIGRAVITY DEVIR BLOGU ==========
+   ASAMA: ASAMA 3 (Usul Raporu)
+   Dava-ID: {dava-id}
+
+   Sag panele yapistirilacak:
+   --------------------------------------------
+   Asagidaki dosyalari oku:
+     - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\00-Briefing.md
+     - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\02-Arastirma\arastirma-raporu.md
+     - tmp/{dava-id}-hesaplama.md   (Claude'un yaptigi iscilik hesabi)
+     - tmp/{dava-id}-adliye-dogrulama.md   (Claude'un yaptigi adliye dogrulama)
+
+   Protokol: prompts/gemini/usul_raporu.md  (bu dosyayi da oku)
+   Ortak kurallar: prompts/gemini/_ortak-kurallar.md
+
+   Cikti: G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\01-Usul\usul-raporu.md
+
+   KVKK: tum token'lar maskeli kalir ([MUVEKKIL_1], [TC_1], [ADRES_2] vs.)
+   Cikti sonunda self-review yap (prompts/gemini/self_review.md).
+   --------------------------------------------
+
+   Antigravity tamamlayinca buraya don ve "ASAMA 3 bitti" yaz.
+   =============================================
    ```
 
-4. **Exit code kontrol:**
+3. **Avukat onayini bekle:** Avukat "ASAMA 3 bitti" diyene kadar bir
+   sonraki ASAMA'ya gecme.
 
-   | Exit | Anlam | Davranis |
-   |------|-------|----------|
-   | 0 | Gemini basarili | Cikti oku, hesaplamalari/adliye'yi enjekte et, TASLAK sun |
-   | 99 | engine=claude path | Claude ile yazmaya devam et |
-   | 1 | Hata: prompt/context eksik veya 2x fail | Fallback log + Claude ile yaz, `fallback_used: true` |
-   | 3 | gemini CLI yok | "npm install -g @google/gemini-cli" oner, Claude ile devam |
-   | 4 | OAuth auth | "gemini /auth" oner, Claude ile devam |
-
-5. **Cikti dogrulama:**
-   - Yetkili mahkeme + dayanak HMK/TBK madde
-   - Vekaletname kontrol (ozel yetki gerekli mi?)
-   - Zamanasimi tablosu (gun/sure/son tarih/risk)
-   - Harc tahmini (Claude tarafindan yapilan hesabi enjekte et)
-   - Risk analizi (gol yenilebilecek alanlar)
-   - Adliye dogrulama (kaynak URL + tarih, dogrulanmadiysa RISK FLAG)
-
-6. **Kalite kapisi:** Cikti `01-Usul/usul-raporu.md` olarak Drive'a yazilmadan once:
-   - [ ] Adliye dogrulama yapildi mi?
-   - [ ] Hesaplamalar Claude'dan eksiksiz enjekte edildi mi?
-   - [ ] Engine frontmatter dogru mu?
+4. **Avukat onayi sonrasi (Director yapar):**
+   - `qmd update` calistir (yeni usul-raporu.md indexlenir)
+   - `mempalace_diary_write "usul_uzmani"` ile bu davadan ogrenilenleri
+     yaz (3 onemli ogrenme)
+   - `python scripts/md_to_docx.py {dava-klasoru}` calistir (DOCX zorunlu)
+   - ASAMA 4 (Stratejik Analiz) devir blogunu hazirla ve avukata sun
 
 ### Asla
 
-- Bridge'i atla ve dogrudan usul raporu yaz
-- Hesaplamayi Gemini'ye yaptir (yanlis cikabilir, hesaplama Claude/Python'da kalir)
-- Adliye dogrulamasini atla (Selin Uyar 2026-003 davasinda Zeytinburnu-Cağlayan
-  karisikligi yasanmasti)
+- Devir blogunu basmadan terminal Claude'da usul raporu yazma
+- `gemini-bridge.sh` cagirma — DEPRECATED (exit 100)
+- Hesaplamayi Antigravity'ye yaptir (yanlis cikabilir, hesaplama
+  Claude/Python'da kalir)
+- Adliye dogrulamasini atla (Selin Uyar 2026-003 davasinda
+  Zeytinburnu-Caglayan karisikligi yasanmasti — WebSearch zorunlu)
+- Antigravity ciktisini "kontrol etmek icin" terminal Claude'da yeniden
+  uretme — kalite kapisi zaten Antigravity self-review'da
+
+### Fallback
+
+Antigravity erisilemez veya cevap vermezse avukat "fallback claude"
+yazar → terminal Claude `prompts/gemini/usul_raporu.md` protokolune
+gore usul raporunu uretir; frontmatter'a `engine: claude`,
+`fallback_used: true`, `reason: antigravity_unavailable` yazar.
 
 ---
 
@@ -261,6 +282,24 @@ Dogrulama: [DOGRULANDI (en az 2 bagimsiz resmi kaynak) /
 ## Vekaletname Kontrolu
 Ozel Yetki Gerekli: [Evet/Hayir]
 Gerekli ise aciklama: [Vekaletnameye eklenmesi gereken ibare]
+
+## Yargi PRO Kapilari (ZORUNLU — 2026-09-25, Claude on-hazirligi)
+
+Bu ASAMA Antigravity'de uretilir; asagidaki kapilar **terminal Claude'da**,
+devir blogu basilmadan ONCE kosturulur ve sonuclari `tmp/` girdi dosyasina
+eklenir. Harita: `ajanlar/yargipro-skill-haritasi.md` Bolum B.
+
+| Rapor bolumu | Skill | Kural |
+|---|---|---|
+| Kritik Sureler | `12-2-tebligat-denetimi` → `12-1-sure-hesaplama` | Tebligat varsa once gecerlilik etiketi (GECERLI / USULSUZ Teb.K.32 / SUPHELI); SUPHELI'de tek tarih uretilmez. Son gun `npx -y yargi-skill sure_hesapla` ile; adli tatil etkisi HER sure icin "uzar / uzamaz / uygulanmaz" isaretlenir. Dayanak maddesi olmayan sure yazilmaz |
+| Zorunlu On Adimlar | `15-5-arabuluculuk-sarti-denetimi` | Talep bazinda kapsam; son tutanak yeterliligi; ceza uzlastirmasi ayri rejim |
+| Vekaletname Kontrolu | `15-3-vekalet-yetki-denetimi` | Ozel yetki gerektiren islemler (feragat, sulh, kabul, islah, tahkim, AYM) |
+| Harc Tahmini | `14-2-guncel-oran-teyidi` → `14-1-hukuki-hesaplama` | Oran/tarife once kaynakli teyit, sonra hesap |
+| Islah / talep artirimi varsa | `19-3-islah-rehberi` | HMK 176-183, 109/4; eski 107 dosyalari ayri |
+
+Script calismazsa skill'in manuel protokolu uygulanir, rapora
+`[YARGIPRO SCRIPT CALISMADI]` notu duser. Kritik Sureler tablosuna eklenen
+her satirin yaninda "kaynak: 12-1 / manuel" ibaresi bulunur.
 
 ## Zorunlu On Adimlar
 [ ] Arabuluculuk: [Zorunlu/Degil] - Dayanak: [Kanun maddesi]

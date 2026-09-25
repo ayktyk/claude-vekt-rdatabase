@@ -9,11 +9,12 @@ Versiyon: 1.0
 
 **TEK DOGRULUK KAYNAGI:** Motor secimi yalnizca `config/model-routing.json`'dan okunur.
 
-- **revizyon** task'i: `config/model-routing.json` -> `tasks.revizyon.engine` ve `model`
-- **Claude'da kalir:** MCP cagrilari, dilekce v1/v2 dosya yonetimi, UDF format uretimi (`scripts/md_to_udf.py`)
-- **Self-review:** Kendisi zaten denetci rolunde; self-review bu ajanda uygulanmaz
-- **Prompt sablonu:** `prompts/gemini/revizyon.md`
-- **Override:** `--model claude` veya `--model gemini` ile tek seferlik manuel
+- **revizyon** task'i: `config/model-routing.json` -> `tasks.revizyon.engine` (= `antigravity_manual`) ve `model`
+- **Antigravity (sag panel)** uretir; terminal Claude SADECE devir blogu basar + UDF/DOCX donusturur
+- **Claude'da kalir:** MCP cagrilari, dilekce v1/v2 dosya yonetimi, UDF format uretimi (`scripts/md_to_udf.py`), DOCX uretimi (`scripts/md_to_docx.py`)
+- **Self-review:** Revizyon Ajani zaten denetci rolunde — Antigravity bu sohbette ek self-review yapmasi opsiyonel, ama 7 boyutlu denetim mecburidir
+- **Prompt sablonu:** `prompts/gemini/revizyon.md` (Antigravity'ye yapistirilir)
+- **Fallback:** Antigravity erisilemezse "fallback claude" → Claude revize eder, `fallback_used: true`
 
 ---
 
@@ -48,56 +49,164 @@ Versiyon: 1.0
 5. **v2 NIHAI çıktısı sonunda Kaynak Doğrulama Tablosu zorunlu:**
    - v1'de doğrulama yapılmadıysa, v2'de tablo eklenir.
 
+## Yargi PRO Kapilari — Kapi 4 (ZORUNLU — 2026-09-25)
+
+Antigravity v2'yi yazdiktan sonra, UDF/DOCX donusumu ve Drive'a nihai yazim
+**oncesinde** terminal Claude asagidaki skill'leri sirayla ceker ve uygular.
+Harita: `ajanlar/yargipro-skill-haritasi.md` Bolum B.
+
+| Sira | Skill | Denetim | FAIL sonucu |
+|---|---|---|---|
+| 1 | `11-8-atif-dogrulama` | Her kunye tek tek: varolus (Bedesten documentId) VE destek (tam metin, pasaj, kanit katmani). Iz kaydi tablosu: Atif · Arac · documentId · Tarih · Sonuc (VERIFIED / NOT-FOUND / MISMATCH). Doktrin atfi VERIFIED degil KAYNAK-GOSTERILDI | Kunyesi dogrulanamayan karar metinden CIKAR; alinti birebir bulunamadiysa alinti SILINIR |
+| 2 | `11-4-emsal-guncellik-denetimi` | Her emsalin tasiyici maddesi bugunku metinle karsilastirilir; DEGISMIS / MULGA etiketli emsal gerekce paragrafi olmadan kalamaz | Etiketsiz emsal → gerekce eklenir veya cikar |
+| 3 | `10-6-vakia-tutarlilik-denetimi` | Replik, istinaf, ek beyan gibi ardil dilekcelerde: yeni metindeki vakia cumleleri onceki dilekce/beyan/zabitla eslestirilir; TUTARLI / CELISKI / YENI VAKIA. Tarih ve tutar farklari toleranssiz | CELISKI: metin duzeltilir veya aciklama stratejisi yazilir; sessiz duzeltme YASAK |
+| 4 | `15-6-dilekce-bicim-denetimi` | Merci, taraflar, talep sonucu, ekler, imza alani, `19-2-yazim-kurallari-rehberi` (TDK kesme isareti, kisaltma ekleri) | Eksik unsur tamamlanir |
+| 5 | `15-7-son-kontrol-denetimi` | Talep · dayanak · delil · sure · temsil · ek · bicim birlikte; HAZIR / DUZELTME GEREKLI | DUZELTME GEREKLI ise v2 Drive'a NIHAI olarak yazilmaz |
+
+Savunma Simulatoru'nden gelen Curutme Matrisi'ndeki RISK-BILDIRILDI satirlari
+v2'de ilgili govdeye islenmis mi (ayri baslik acmadan) ayrica kontrol edilir.
+Bes kapidan biri kosturulamadiysa "denetlenemedi" yazilir; kosmayan kapi
+gecmis sayilmaz (fail-closed).
+
 ---
 
-## ZORUNLU ILK ADIM — Gemini Bridge Cagrisi
+## ZORUNLU ILK ADIM — Antigravity Devri (2026-05-13 → 3 Batch 2026-05-14)
 
-Ben dilekce v1'i alip 7 boyutlu denetimden gecirip v2 NIHAI uretiyorum.
-Dogrudan ben yazmiyorum, once Gemini'ye gidiyorum.
+Bu ASAMA hukuki uretimdir (v1 → v2 revizyon), Antigravity sag panelinde
+Gemini 3.1 Pro yapar. Terminal Claude burada SADECE devir blogu basar +
+Antigravity v2'yi yazdiktan sonra UDF/DOCX donusumu yapar.
+
+**ÖNEMLI — BATCH 3'UN SON ADIMI (2026-05-14 pilot sonrasi):**
+ASAMA 7 artik tek basina devir blogu almaz; **BATCH 3** icinde **ADIM C**
+olarak Antigravity'nin tek sohbetinde uretilir (en kritik yer):
+
+> **BATCH 3 akisi:** ADIM A = dilekce v1 → ADIM B = savunma simulasyonu
+> → **ADIM C = bu ajan (v2 NIHAI revizyon).** ADIM C'de v1 ve savunma
+> simulasyonu sohbette taze hafizada oldugu icin 8 boyutlu denetim ve
+> 5 iyilestirme onerisinin uygulamasi daha tutarli olur.
+
+Bu ajan icin pratik etki:
+- **Bagimsiz devir blogu YOK:** Batch 3 master blogunun sonunda
+  "ADIM C" olarak konumlanir (`ANTIGRAVITY.md` > BATCH 3 sablonu)
+- **Girdi:** Sohbette taze duran v1 + savunma sim + briefing + usul +
+  stratejik analiz
+- **Cikti:** `03-Sentez-ve-Dilekce/dilekce-v2.md` (NIHAI)
+- **8 boyutlu denetim:** Künye / atif metin / dil / format / yapi /
+  dengeli pozisyon / iddia tutarlilik / kaynak audit
+- **5 iyilestirme onerisi tavizsiz uygulanir** (savunma sim ADIM B'den geldi)
+- **KAYNAK DOGRULAMA TABLOSU dilekce sonunda zorunlu**
+- **Avukat "Hepsi bitti" der → Terminal Claude:**
+  - md_to_docx.py (tum klasor — toplu DOCX)
+  - **md_to_udf.py** (sadece dilekce-v2.md icin — NIHAI UYAP-ready)
+  - 3 ajan diary'si yazilir (dilekce_yazari, savunma_simulatoru, revizyon)
+  - MemPalace promotion: wing_{dava_turu} → hall_argumanlar + hall_savunma_kaliplari
+  - PILOT-RAPORU.md (varsa)
 
 ### Akis
 
-1. **Context dosyasi hazirla:** `tmp/.gemini-input-{dava-id}-asama7.md`
-   Icerik: dilekce v1 (`03-Sentez-ve-Dilekce/dilekce-v1.md`) + savunma simulasyonu
-   raporu (`02-Arastirma/savunma-simulasyonu.md`) + araştırma raporu + 7 boyutlu
-   revizyon kontrol listesi
+1. **On-hazirlik:** Onceki ASAMA ciktilari Drive'da hazir olmali:
+   - 03-Sentez-ve-Dilekce/dilekce-v1.md (ASAMA 5)
+   - 02-Arastirma/savunma-simulasyonu.md (ASAMA 6)
+   - 02-Arastirma/arastirma-raporu.md (ASAMA 2 — kunye dogrulamasi icin)
+   - 02-Arastirma/stratejik-analiz.md (ASAMA 4)
 
-2. **Bridge cagir:**
-   ```bash
-   ASAMA=7 DAVA_ID="<dava-id>" \
-     bash scripts/gemini-bridge.sh revizyon \
-       tmp/.gemini-input-{dava-id}-asama7.md \
-       tmp/.gemini-output-{dava-id}-asama7.md
+2. **Antigravity devir blogu bas (avukata sun):**
+
+   ```
+   ========== ANTIGRAVITY DEVIR BLOGU ==========
+   ASAMA: ASAMA 7 (Dilekce v2 NIHAI — Revizyon)
+   Dava-ID: {dava-id}
+
+   Sag panele yapistirilacak:
+   --------------------------------------------
+   Asagidaki dosyalari oku:
+     - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\03-Sentez-ve-Dilekce\dilekce-v1.md
+     - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\02-Arastirma\savunma-simulasyonu.md
+     - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\02-Arastirma\arastirma-raporu.md
+     - G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\02-Arastirma\stratejik-analiz.md
+     - prompts/gemini/revizyon.md  (protokol — 7 boyutlu revizyon + 8. boyut KAYNAK AUDITI)
+     - prompts/gemini/_ortak-kurallar.md
+
+   Gorev: Dilekce v1'i 8 boyutlu denetimden gecir, v2 NIHAI uret:
+     1. Kunye dogrulamasi (her Yargitay kunyesi Bedesten documentId ile)
+     2. Atif metin dogrulamasi (tirnak alintilari karar metniyle birebir)
+     3. Dil ve uslup (Avukat Aykut profesyonel olculu tonu)
+     4. Format (dilekce-yazim-kurallari.md sablonu)
+     5. Yapi butunlugu (basliklar, paragraflar, bulletin yasaklari)
+     6. Dengeli pozisyon (savunma simulasyonundaki itirazlara on cevap)
+     7. Iddialarin tutarliligi (usul raporu + arastirma ile carpisma yok)
+     8. KAYNAK AUDITI (DOGRULANMAMIS atif >=2 ise HARD FAIL)
+        - Uydurma kunyeyi SIL veya "(varsayilan)" notu ekle
+        - Lehe yorum dürtüsünü reddet, gercek riskleri yaz
+        - NotebookLM cevabini farkli davaya tasima YASAK
+
+   Cikti formati:
+     - Dilekce v2 NIHAI metni
+     - Cikti sonunda Kaynak Dogrulama Tablosu (zorunlu)
+     - Frontmatter: status: TASLAK, model: gemini-3.1-pro-preview,
+       engine: antigravity_manual, fallback_used: false
+
+   Cikti: G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\03-Sentez-ve-Dilekce\dilekce-v2.md
+
+   KVKK: dilekce v2 de MASKELI uretilir; unmask + UDF/DOCX donusumu
+   terminal Claude'da yapilir (KVKK Seviye 2 protokolu).
+
+   Self-review zorunlu (prompts/gemini/self_review.md):
+     - HARD FAIL: dogrulanmamis atif >= 2 → Drive'a yazma, sohbette revize et
+     - HARD FAIL: ham muvekkil verisi (unmask siz icerik) tespit edilirse
+     - HARD FAIL: mulga karara atif tespiti
+   --------------------------------------------
+
+   Antigravity tamamlayinca buraya don ve "ASAMA 7 bitti" yaz.
+   =============================================
    ```
 
-3. **Exit code kontrol:**
+3. **Avukat onayini bekle:** Avukat "ASAMA 7 bitti" diyene kadar UDF/DOCX
+   donusumu yapma.
 
-   | Exit | Anlam | Davranis |
-   |------|-------|----------|
-   | 0 | Gemini basarili | Cikti oku, UDF/DOCX uret, TASLAK sun |
-   | 99 | engine=claude path | Claude ile revize et |
-   | 1 | Hata: 2x fail | Fallback log + Claude ile revize, `fallback_used: true` |
-   | 3 | gemini CLI yok | "npm install" oner, Claude ile devam |
-   | 4 | OAuth auth | "gemini /auth" oner, Claude ile devam |
+4. **Avukat onayi sonrasi (terminal Claude yapar — KRITIK):**
+   - **MD okuma kontrol:** `dilekce-v2.md` frontmatter ve Kaynak Dogrulama
+     Tablosu var mi? Yoksa avukata revize istek yap.
+   - **UDF uretimi (ZORUNLU NIHAI icin):**
+     ```powershell
+     python scripts/md_to_udf.py G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\03-Sentez-ve-Dilekce\dilekce-v2.md
+     ```
+     Cikti: ayni klasorde `dilekce-v2.udf`. UYAP icin `format_id=1.7`
+     zorunlu.
+   - **DOCX uretimi:**
+     ```powershell
+     python scripts/md_to_docx.py "G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}"
+     ```
+   - **Drive uclusu:** `dilekce-v2.{md,docx,udf}` hepsi Drive'da hazir.
+   - `qmd update` calistir
+   - `mempalace_diary_write "revizyon"` ile bu davadan ogrenilen
+     revizyon pattern'lerini yaz
+   - **MemPalace promotion:** v2'de KULLANILAN argumanlari
+     `wing_{dava_turu}/hall_argumanlar`'a olgun arguman olarak ekle
+     (FIVEAGENTS.md ASAMA 7 sonu bolumu).
 
-4. **Claude'un sorumlulugunda kalan adimlar (bridge sonrasi):**
-   - **UDF uretimi:** `scripts/md_to_udf.py dilekce-v2.md` (Selin Uyar 2026-003
-     uyumlu format) — Bunu Gemini yapamaz, Python script kalir
-   - **DOCX uretimi:** `scripts/md_to_docx.py dilekce-v2.md`
-   - Drive'a yazma: `03-Sentez-ve-Dilekce/dilekce-v2.{md,docx,udf}` uclusu
-
-5. **Kalite kapisi (UDF yazilmadan once):**
-   - [ ] 7 boyutlu denetim tamamlandi mi (kunye/atif/dil/format/yapı/dengeli/iddia)?
-   - [ ] Atif kararlari `02-Arastirma/atif-maddeleri.json` ile uyumlu mu?
-   - [ ] Mulga karar atifi var mi (varsa cikar)?
-   - [ ] Engine frontmatter dogru mu?
-   - [ ] Status TASLAK mi?
+5. **UYAP yuklemesi (avukatin elinde):**
+   ```powershell
+   python scripts/maske.py --dict {dava-id} unmask dilekce-v2.md dilekce-v2.final.md
+   python scripts/md_to_udf.py dilekce-v2.final.md
+   # Bu UDF UYAP'a yuklenir (gercek muvekkil verisiyle)
+   ```
 
 ### Asla
 
-- Bridge'i atla ve direkt v2 yaz
-- UDF'yi Gemini'ye yaptir (Python script Claude'da kalir)
-- v1'i unmask edilmemis halde Gemini'ye gonder (KVKK kuralina sadik kal)
+- Devir blogunu basmadan terminal Claude'da v2 yazma
+- `gemini-bridge.sh` cagirma — DEPRECATED (exit 100)
+- UDF'yi Antigravity'ye yaptir (Python script Claude'da kalir — deterministik)
+- v1'i unmask edilmis halde Antigravity'ye gonder (KVKK ihlali — Antigravity
+  ABD sunucusunda)
+- Antigravity ciktisindan UDF'yi atla — NIHAI uclu (MD+DOCX+UDF) zorunlu
+
+### Fallback
+
+Antigravity erisilemezse avukat "fallback claude" → terminal Claude
+`prompts/gemini/revizyon.md` protokolune gore v2'yi uretir, frontmatter
+`engine: claude`, `fallback_used: true`. UDF/DOCX donusumu yine
+terminal Claude'da yapilir.
 
 ---
 
