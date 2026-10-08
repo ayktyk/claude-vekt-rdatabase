@@ -21,8 +21,9 @@ Kalici ciktilar repo icine degil Google Drive altina yazilir:
 - Sadece arastirma: `G:\Drive'im\Hukuk Burosu\Bekleyen Davalar`
 
 Muvekkil bilgi formlari (`muvekkil-formlari/`):
-- `iscilik-alacaklari-muvekkil-bilgi-formu.pdf` — doldurulabilir PDF (WhatsApp'tan gonderilir)
-- `iscilik-alacaklari-muvekkil-bilgi-formu.docx` — telefonda/Word'de yazilabilir surum
+- `iscilik-alacaklari-muvekkil-bilgi-formu.pdf/.docx` — SADE form (3 sayfa + buro kutusu),
+  WhatsApp'tan gonderilen VARSAYILAN surum (2026-10: uzun surum muvekkillerce karisik bulundu)
+- `...-detayli.pdf/.docx` — ayrintili surum; yalniz gorusme oncesi hazirlikli muvekkil icin
 - `...-whatsapp-mesaji.txt` — formla birlikte gonderilecek mesaj kalibi
-- Uretim: `python -m scripts.muvekkil_formu` (sema: `scripts/muvekkil_formu/schema.py`;
-  soru eklenince komut yeniden calistirilir, iki format da ayni semadan uretilir)
+- Uretim: `python -m scripts.muvekkil_formu` (sade) / `--detayli`; semalar
+  `scripts/muvekkil_formu/schema.py` ve `schema_detayli.py`; iki format ayni semadan uretilir

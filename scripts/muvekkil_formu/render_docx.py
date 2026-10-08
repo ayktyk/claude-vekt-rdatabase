@@ -14,7 +14,8 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Cm, Pt, RGBColor
 
-from . import brand, schema
+from . import brand
+from . import schema as _default_schema
 
 BOX = "☐"  # ☐
 
@@ -150,7 +151,8 @@ def boxes(p, options, size=9.5):
 
 # ---- belge -----------------------------------------------------------------------
 class DocxForm:
-    def __init__(self):
+    def __init__(self, sch=_default_schema):
+        self.sch = sch
         self.doc = Document()
         self.buro = brand.buro()
         sec = self.doc.sections[0]
@@ -179,11 +181,11 @@ class DocxForm:
         p1 = tight(c.paragraphs[0])
         run(p1, brand.WORDMARK, 14, bold=True, color=CREAM, font="Georgia")
         run(p1, "	", 8)
-        run(p1, schema.META["baslik"], 8.5, bold=True, color=CREAM)
+        run(p1, self.sch.META["baslik"], 8.5, bold=True, color=CREAM)
         p2 = tight(c.add_paragraph())
         run(p2, "  ".join(brand.TAGLINE), 5.5, color=GOLD)
         run(p2, "	", 7)
-        run(p2, schema.META["alt_baslik"], 7.5, color=CREAM)
+        run(p2, self.sch.META["alt_baslik"], 7.5, color=CREAM)
         for p in (p1, p2):
             p.paragraph_format.tab_stops.add_tab_stop(self.width - Cm(0.5), WD_ALIGN_PARAGRAPH.RIGHT)
         hp._p.getparent().remove(hp._p)
@@ -202,7 +204,7 @@ class DocxForm:
         f3 = tight(sec.footer.add_paragraph())
         run(f3, f'{b["site"]}  ·  {b["eposta"]}  ·  {b["baro"]}', 6.5, color=MUTED)
         run(f3, "\t", 6.5)
-        run(f3, f'Form sürümü {schema.META["surum"]}', 6.5, color=MUTED)
+        run(f3, f'Form sürümü {self.sch.META["surum"]}', 6.5, color=MUTED)
         for p in (f2, f3):
             p.paragraph_format.tab_stops.add_tab_stop(self.width, WD_ALIGN_PARAGRAPH.RIGHT)
 
@@ -230,17 +232,17 @@ class DocxForm:
     # -- kapak
     def cover(self) -> None:
         c = self.one_cell(fill=brand.NAVY, pad=(220, 220, 320, 320))
-        run(tight(c.paragraphs[0]), schema.META["baslik"], 20, bold=True, color=CREAM, font="Georgia")
-        run(tight(c.add_paragraph(), before=2), schema.META["alt_baslik"], 13, color=GOLD, font="Georgia")
+        run(tight(c.paragraphs[0]), self.sch.META["baslik"], 20, bold=True, color=CREAM, font="Georgia")
+        run(tight(c.add_paragraph(), before=2), self.sch.META["alt_baslik"], 13, color=GOLD, font="Georgia")
         p = tight(c.add_paragraph(), before=4)
         p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-        run(p, f'Sürüm {schema.META["surum"]}', 7, color=GOLD)
+        run(p, f'Sürüm {self.sch.META["surum"]}', 7, color=GOLD)
         self.spacer(6)
-        run(tight(self.doc.add_paragraph(), after=6), schema.META["aciklama"], 9.5)
+        run(tight(self.doc.add_paragraph(), after=6), self.sch.META["aciklama"], 9.5)
 
         c = self.one_cell(fill=brand.CREAM)
         run(tight(c.paragraphs[0], after=3), "FORMU DOLDURMADAN ÖNCE", 8.5, bold=True, color=NAVY)
-        for i, t in enumerate(schema.TALIMATLAR, 1):
+        for i, t in enumerate(self.sch.TALIMATLAR, 1):
             p = tight(c.add_paragraph(), after=2)
             run(p, f"{i}.  ", 9, bold=True, color=NAVY)
             run(p, t, 9)
@@ -250,7 +252,7 @@ class DocxForm:
         run(p, " yapın veya yanına X yazın. Cevapları boş hücrelere yazın.", 8, color=MUTED)
         self.spacer(4)
 
-        su = schema.SURE_UYARISI
+        su = self.sch.SURE_UYARISI
         c = self.one_cell(fill="#FFFFFF", border=brand.GOLD, sz=12)
         run(tight(c.paragraphs[0], after=3), su["baslik"], 9, bold=True, color=NAVY)
         for t in su["maddeler"]:
@@ -333,7 +335,7 @@ class DocxForm:
 
     def f_table(self, label, cols, nrows) -> None:
         n = len(cols)
-        weights = [1.2, 1, 0.9, 1, 1.5] if n == 5 else ([0.8, 1, 1.6] if n == 3 else [1] * n)
+        weights = [1.2, 1, 0.9, 1, 1.5] if n == 5 else ([1.3, 1, 1] if n == 3 else [1] * n)
         tot = sum(weights)
         widths = [int(self.width * w / tot) for w in weights]
         p = tight(self.doc.add_paragraph(), after=3)
@@ -350,19 +352,21 @@ class DocxForm:
                 answer_cell(t.cell(r, i))
         self.spacer(4)
 
-    def f_docs(self, items) -> None:
-        w = [self.width - Cm(2.2) - Cm(3.0) - Cm(1.5), Cm(2.2), Cm(3.0), Cm(1.5)]
-        t = self._grid(len(items) + 1, 4, w)
-        for i, col in enumerate(("Belge", "Elimde var", "Temin edebilirim", "Yok")):
+    def f_docs(self, items, names=("Elimde var", "Temin edebilirim", "Yok")) -> None:
+        cw = {"Elimde var": Cm(2.2), "Temin edebilirim": Cm(3.0), "Yok": Cm(1.5)}
+        ws = [cw.get(n, Cm(2.5)) for n in names]
+        w = [self.width - sum(ws)] + ws
+        t = self._grid(len(items) + 1, len(w), w)
+        for i, col in enumerate(("Belge",) + tuple(names)):
             c = t.cell(0, i)
             shade(c, brand.NAVY)
             run(tight(c.paragraphs[0]), col, 8, bold=True, color=CREAM)
         for r, it in enumerate(items, 1):
             if r % 2 == 1:
-                for i in range(4):
+                for i in range(len(w)):
                     shade(t.cell(r, i), brand.CREAM)
             run(tight(t.cell(r, 0).paragraphs[0]), f"{r}. {it}", 8.5)
-            for i in (1, 2, 3):
+            for i in range(1, len(w)):
                 p = tight(t.cell(r, i).paragraphs[0])
                 p.alignment = WD_ALIGN_PARAGRAPH.CENTER
                 run(p, BOX, 11, color=NAVY, font="Segoe UI Symbol")
@@ -377,7 +381,7 @@ class DocxForm:
     def beyan(self) -> None:
         c = self.one_cell(fill="#FFFFFF", border=brand.NAVY, sz=8)
         run(tight(c.paragraphs[0], after=3), "BEYAN VE İMZA", 9, bold=True, color=NAVY)
-        run(tight(c.add_paragraph(), after=6), schema.BEYAN, 9)
+        run(tight(c.add_paragraph(), after=6), self.sch.BEYAN, 9)
         t = c.add_table(2, 3)
         borders(t)
         cell_margins(t)
@@ -390,7 +394,7 @@ class DocxForm:
         self.spacer(6)
 
     def buro_kutusu(self) -> None:
-        bk = schema.BURO_KUTUSU
+        bk = self.sch.BURO_KUTUSU
         c = self.one_cell(fill=brand.GREY_BG, border=brand.MUTED, sz=4)
         run(tight(c.paragraphs[0], after=4), bk["baslik"], 8.5, bold=True)
         t = c.add_table(len(bk["satirlar"]) * 2, 2)
@@ -412,7 +416,7 @@ class DocxForm:
     # -- ana akış
     def build(self, out: Path) -> None:
         self.cover()
-        for sec in schema.SECTIONS:
+        for sec in self.sch.SECTIONS:
             self.section(sec["kod"], sec["baslik"])
             for f in sec["alanlar"]:
                 kind = f[0]
@@ -431,7 +435,7 @@ class DocxForm:
                 elif kind == "table":
                     self.f_table(f[1], f[2], f[3])
                 elif kind == "docs":
-                    self.f_docs(f[1])
+                    self.f_docs(f[1], *f[2:])
                 elif kind == "note":
                     self.f_note(f[1])
                 else:
@@ -440,11 +444,11 @@ class DocxForm:
         self.beyan()
         self.buro_kutusu()
         cp = self.doc.core_properties
-        cp.title = f"{schema.META['baslik']} — {schema.META['alt_baslik']}"
+        cp.title = f"{self.sch.META['baslik']} — {self.sch.META['alt_baslik']}"
         cp.author = self.buro["avukat"]
         out.parent.mkdir(parents=True, exist_ok=True)
         self.doc.save(str(out))
 
 
-def render(out: Path) -> None:
-    DocxForm().build(out)
+def render(out: Path, sch=_default_schema) -> None:
+    DocxForm(sch).build(out)

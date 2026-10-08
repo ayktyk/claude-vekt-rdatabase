@@ -16,7 +16,8 @@ from reportlab.pdfbase.acroform import PDFFromString
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 
-from . import brand, schema
+from . import brand
+from . import schema as _default_schema
 
 W, H = A4
 ML = MR = 42
@@ -50,10 +51,11 @@ def _fonts() -> None:
 
 
 class PdfForm:
-    def __init__(self, target, total_pages: int | None = None):
+    def __init__(self, target, total_pages: int | None = None, sch=_default_schema):
+        self.sch = sch
         _fonts()
         self.c = canvas.Canvas(target, pagesize=A4)
-        self.c.setTitle(f"{schema.META['baslik']} — {schema.META['alt_baslik']} · {brand.WORDMARK}")
+        self.c.setTitle(f"{self.sch.META['baslik']} — {self.sch.META['alt_baslik']} · {brand.WORDMARK}")
         self.c.setAuthor(brand.buro()["avukat"])
         self.c.acroForm.extras["NeedAppearances"] = PDFFromString("true")
         self.total = total_pages
@@ -81,9 +83,9 @@ class PdfForm:
             x += pdfmetrics.stringWidth(ch, "Segoe", 6.3) + 1.6
         c.setFillColor(C_CREAM)
         c.setFont("Segoe-Semibold", 8.5)
-        c.drawRightString(W - MR, H - 24, schema.META["baslik"])
+        c.drawRightString(W - MR, H - 24, self.sch.META["baslik"])
         c.setFont("Segoe", 7.5)
-        c.drawRightString(W - MR, H - 36, schema.META["alt_baslik"])
+        c.drawRightString(W - MR, H - 36, self.sch.META["alt_baslik"])
 
     def _footer(self) -> None:
         c = self.c
@@ -101,7 +103,7 @@ class PdfForm:
         c.drawRightString(W - MR, Y_BOTTOM - 27, pg)
         c.setFont("Segoe", 6.5)
         c.setFillColor(C_MUTED)
-        c.drawRightString(W - MR, Y_BOTTOM - 36, f'Form sürümü {schema.META["surum"]}')
+        c.drawRightString(W - MR, Y_BOTTOM - 36, f'Form sürümü {self.sch.META["surum"]}')
 
     def new_page(self) -> None:
         self._footer()
@@ -176,16 +178,16 @@ class PdfForm:
         c.setStrokeColor(C_GOLD)
         c.setLineWidth(1)
         c.roundRect(ML + 8, self.y - h + 8, CW - 16, h - 16, 6, stroke=1, fill=0)
-        self.text(ML + 26, self.y - 42, schema.META["baslik"], "Georgia-Bold", 22, C_CREAM)
-        self.text(ML + 26, self.y - 66, schema.META["alt_baslik"], "Georgia", 14, C_GOLD)
-        self.text(W - MR - 26, self.y - 78, f'Sürüm {schema.META["surum"]}', "Segoe", 7, C_GOLD, right=True)
+        self.text(ML + 26, self.y - 42, self.sch.META["baslik"], "Georgia-Bold", 22, C_CREAM)
+        self.text(ML + 26, self.y - 66, self.sch.META["alt_baslik"], "Georgia", 14, C_GOLD)
+        self.text(W - MR - 26, self.y - 78, f'Sürüm {self.sch.META["surum"]}', "Segoe", 7, C_GOLD, right=True)
         self.y -= h + 12
-        self.y -= self.para(schema.META["aciklama"], ML, self.y, CW, "Segoe", 9.2, C_INK) + 10
+        self.y -= self.para(self.sch.META["aciklama"], ML, self.y, CW, "Segoe", 9.2, C_INK) + 10
 
         # Talimatlar
         lines_h = 0
         items = []
-        for i, t in enumerate(schema.TALIMATLAR, 1):
+        for i, t in enumerate(self.sch.TALIMATLAR, 1):
             ls = self.wrap(t, "Segoe", 8.4, CW - 40)
             items.append(ls)
             lines_h += len(ls) * 11.2 + 3
@@ -202,7 +204,7 @@ class PdfForm:
         self.y -= bh + 10
 
         # Süre uyarısı
-        su = schema.SURE_UYARISI
+        su = self.sch.SURE_UYARISI
         items = [self.wrap(t, "Segoe", 8.4, CW - 44) for t in su["maddeler"]]
         bh = sum(len(ls) * 11.2 + 3 for ls in items) + 44
         self.box(ML, self.y, CW, bh, fill=white, stroke=C_GOLD, lw=1.2)
@@ -322,7 +324,7 @@ class PdfForm:
 
     def f_table(self, label, cols, nrows) -> None:
         n = len(cols)
-        weights = [1.2, 1, 0.9, 1, 1.5] if n == 5 else ([0.8, 1, 1.6] if n == 3 else [1] * n)
+        weights = [1.2, 1, 0.9, 1, 1.5] if n == 5 else ([1.3, 1, 1] if n == 3 else [1] * n)
         tot = sum(weights)
         widths = [CW * w / tot for w in weights]
         hh, rh = 16, 18
@@ -350,8 +352,10 @@ class PdfForm:
             self.text(x + 4, self.y - 11, col, "Segoe-Semibold", 7.8, C_CREAM)
             x += w
 
-    def f_docs(self, items) -> None:
-        cols = [("Belge", CW - 60 - 88 - 44), ("Elimde var", 60), ("Temin edebilirim", 88), ("Yok", 44)]
+    def f_docs(self, items, names=("Elimde var", "Temin edebilirim", "Yok")) -> None:
+        widths = {"Elimde var": 60, "Temin edebilirim": 88, "Yok": 44}
+        cols = [(n, widths.get(n, 70)) for n in names]
+        cols = [("Belge", CW - sum(w for _, w in cols))] + cols
         hh, rh = 16, 16
         self.ensure(hh + rh * 2)
         self._docs_header(cols, hh)
@@ -394,7 +398,7 @@ class PdfForm:
 
     # ---- kapanış blokları ----------------------------------------------
     def beyan(self) -> None:
-        ls = self.wrap(schema.BEYAN, "Segoe", 8.4, CW - 24)
+        ls = self.wrap(self.sch.BEYAN, "Segoe", 8.4, CW - 24)
         bh = len(ls) * 11.2 + 24 + 70
         self.ensure(bh + 10)
         self.box(ML, self.y, CW, bh, fill=white, stroke=C_NAVY, lw=0.9)
@@ -415,7 +419,7 @@ class PdfForm:
         self.y -= bh + 12
 
     def buro_kutusu(self) -> None:
-        bk = schema.BURO_KUTUSU
+        bk = self.sch.BURO_KUTUSU
         rows = bk["satirlar"]
         bh = 26 + len(rows) * 30 + 14 + len(bk["kontrol"]) * 13 + 8
         self.ensure(bh + 6)
@@ -439,7 +443,7 @@ class PdfForm:
     # ---- ana akış ------------------------------------------------------
     def build(self) -> int:
         self.cover()
-        for sec in schema.SECTIONS:
+        for sec in self.sch.SECTIONS:
             self.section(sec["kod"], sec["baslik"])
             for f in sec["alanlar"]:
                 kind = f[0]
@@ -458,7 +462,7 @@ class PdfForm:
                 elif kind == "table":
                     self.f_table(f[1], f[2], f[3])
                 elif kind == "docs":
-                    self.f_docs(f[1])
+                    self.f_docs(f[1], *f[2:])
                 elif kind == "note":
                     self.f_note(f[1])
                 else:
@@ -469,9 +473,9 @@ class PdfForm:
         return self.finish()
 
 
-def render(out: Path) -> int:
+def render(out: Path, sch=_default_schema) -> int:
     """İki geçişli üretim; toplam sayfa sayısını döner."""
-    pages = PdfForm(io.BytesIO()).build()
+    pages = PdfForm(io.BytesIO(), sch=sch).build()
     out.parent.mkdir(parents=True, exist_ok=True)
-    PdfForm(str(out), total_pages=pages).build()
+    PdfForm(str(out), total_pages=pages, sch=sch).build()
     return pages
