@@ -5,7 +5,7 @@
 
 ## Kural (ZORUNLU — her iş kapanışında)
 
-Her dava akışı, tekil komut veya danışma araştırması KAPANIRKEN Claude
+Her dava akışı, tekil komut veya danışma araştırması KAPANIRKEN ORKESTRATOR
 avukata şu tek soruyu sorar:
 
 > **"Bu işte ben neyi kaçırdım / sen neyi düzelttin? (yoksa 'yok' de)"**
@@ -24,9 +24,9 @@ Cevap 2-3 satır olarak ilgili alan dosyasına eklenir. Format:
 Aynı yönde 2+ ders birikirse veya bir ders kritikse → ilgili kalıcı
 dosyaya TERFİ ettirilir:
 - Araştırma dersi → `ajanlar/arastirmaci/SKILL.md`
-- Dilekçe/üslup dersi → `dilekce-yazim-kurallari.md` veya ilgili Gemini protokolü
+- Dilekçe/üslup dersi → `dilekce-yazim-kurallari.md` veya ilgili MUHAKEME protokolü (`prompts/muhakeme/`)
 - Dava türü muhakemesi → `playbook/{dava-turu}.md`
-- Sistem/altyapı dersi → `CLAUDE.md` veya ilgili config
+- Sistem/altyapı dersi → `AGENTS.md` veya ilgili config
 Terfi eden ders, dosyadan silinmez; başına `[TERFİ → hedef-dosya]` yazılır.
 
 ## Dosyalar

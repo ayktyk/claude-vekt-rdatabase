@@ -13,8 +13,9 @@ yalnızca `config/motor-haritasi.json` → `tasks.dilekce_yazimi.rol`'dan okunur
 - **dilekce_yazimi** task'ı: rol **`MUHAKEME`**
 - **ORKESTRATOR'da kalan iş (deterministik / araç):** hesaplama sonuçlarının girdi olarak hazırlanması, MCP çağrıları, DOCX dönüşümü (`md_to_docx.py`)
 - **Prompt şablonu:** `prompts/muhakeme/dilekce_yazimi.md` + `prompts/muhakeme/_ortak-kurallar.md`
-- **Bağımsız denetim:** çıktı üretildikten sonra **DENETCI** (`ajanlar/denetci/SKILL.md`)
-  üretim bağlamını görmeden denetler; KIRMIZI kararda çıktı Drive'a yazılmaz.
+- **Denetim:** bu ASAMA'nın çıktısı ara çıktıdır (Denetim Politikası v2): yapısal kapı +
+  `havuz_kontrol.py`. Bağımsız **DENETCI** (`ajanlar/denetci/SKILL.md`) nihai belgede (K2) çalışır;
+  avukat isterse `denetle: <dosya>` ile bu çıktıyı da gönderir.
   Ek olarak ASAMA 7 Revizyon Ajanı 8 boyutta tekrar denetler.
 - **Motor damgası:** frontmatter `engine:` alanı `python scripts/motor.py damga dilekce_yazimi` ile
   doldurulur; avukat motoru bildirmemişse `engine: bildirilmedi` yazılır.
@@ -62,15 +63,21 @@ yalnızca `config/motor-haritasi.json` → `tasks.dilekce_yazimi.rol`'dan okunur
 ## Üretim Akışı (tek motor — ASAMA 5)
 
 Elle devir bloğu, kopyala-yapıştır ve harici panel **yoktur**. Aynı oturumda:
-ORKESTRATOR hazırlar → MUHAKEME üretir → DENETCI bağımsız denetler → avukat onaylar.
+ORKESTRATOR hazırlar → MUHAKEME üretir → yapısal kapı + `havuz_kontrol.py` → avukat onaylar
+(bağımsız DENETCI denetimi nihai belgede, K2).
 
 > **ASAMA 5-6-7 aynı oturumda ardışık yürür** (yaz → eleştir → revize doğal döngüsü).
-> Her çıktı ayrı dosyaya yazılır ve her biri ayrı DENETCI denetiminden geçer.
+> Her çıktı ayrı dosyaya yazılır. ASAMA 5 ve 6 ara çıktıdır (yapısal kapı + `havuz_kontrol.py`);
+> bağımsız DENETCI denetimi ASAMA 7 çıktısında (K2, belge + eşlik çifti) yapılır.
 
 ### Akış
 
 1. **Ön-hazırlık (ORKESTRATOR — deterministik / araç işi):**
    - Önceki ASAMA çıktıları Drive'da hazır olmalı: briefing (1), araştırma raporu (2), usul raporu (3), stratejik analiz (4 — yazım rehberi)
+   - **HIZLI modda** usul raporu, stratejik analiz ve savunma simülasyonu yoktur: girdi briefing +
+     evrak + (çalıştıysa) hafif araştırma raporudur; yazım rehberi yerine `dilekce-yazim-kurallari.md`
+     ve uygun çerçeve kullanılır. ASAMA 2 hiç çalışmadıysa havuz yoktur: belge karar künyesi taşımaz;
+     künye gerekirse ARASTIRMACI `kunye-havuzu-ek.md` açar ve havuz kapısı bu eke göre çalışır (HIZLI'da EK ayrıca çağrılmaz; ek künyeler K2'de denetlenir).
    - Stratejik analizdeki çerçeve önerisi (`prompts/muhakeme/cerceveler/`) belirlenir
 
 2. **Üretim (MUHAKEME):** Protokol `prompts/muhakeme/dilekce_yazimi.md` + `prompts/muhakeme/_ortak-kurallar.md`.
@@ -82,14 +89,19 @@ ORKESTRATOR hazırlar → MUHAKEME üretir → DENETCI bağımsız denetler → 
      - `dilekce-yazim-kurallari.md` (proje kökü)
    Çıktı: `{dava-klasoru}/03-Sentez-ve-Dilekce/dilekce-v1.md`
    - Hesaplama tutarları usul raporundan birebir alınır (kendi hesabını yapma)
-   - En az 2 Yargıtay kararı atfı (künye + Bedesten documentId); "DOĞRULANMAMIŞ" damgalı karar dilekçeye taşınamaz
+   - En az 2 Yargıtay kararı atfı (künye + Bedesten documentId) — TAM moddaki esas belgede; HIZLI moddaki usul/ara belgede atıf zorunlu değildir. "DOĞRULANMAMIŞ" damgalı karar dilekçeye taşınamaz
    - HARD FAIL: doğrulanmamış atıf ≥ 2 · NotebookLM cevabını farklı davaya genelleme · uydurma Yargıtay alıntısı
 
-3. **Bağımsız denetim (DENETCI):** Girdi yalnızca `{çıktı yolu, dava-id}`; üretim
-   bağlamı verilmez. Deterministik kapılar → künye içerik teyidi (her documentId
-   MCP'den yeniden çekilir) → doktrin clause sayımı → çıkarım denetimi → aleyhe beyanı.
-   Karar KIRMIZI / SARI / YEŞİL. YEŞİL değilse MUHAKEME revize eder; en çok 3 tur.
-   **YEŞİL olmadan çıktı Drive'a yazılmaz.**
+3. **Ara çıktı kapısı (Denetim Politikası v2 — 2026-10-09):** Bu ASAMA'nın çıktısı DENETCI'ye
+   gönderilmez. İki deterministik kapı çalışır:
+   `python scripts/cikti_dogrula.py <çıktı>` ve
+   `python scripts/havuz_kontrol.py <çıktı> --havuz "<dava-klasoru>/02-Arastirma/arastirma-raporu.md" [--havuz "<dava-klasoru>/02-Arastirma/kunye-havuzu-ek.md"]`.
+   Atıflar yalnız K1'den geçmiş araştırma raporunun Kaynak Doğrulama tablosundan (künye havuzu)
+   alınır. Havuz dışı künye gerekiyorsa ARASTIRMACI tam metin + birebir alıntıyla doğrulayıp
+   `02-Arastirma/kunye-havuzu-ek.md`'ye ekler; ek, TAM akışta kullanılmadan önce EK denetiminden geçer (HIZLI'da K2 kapsar).
+   Doğrulanamayan künye `[HAVUZ DIŞI — DOĞRULANMAMIŞ]` damgası alır. TASLAK satırının altına
+   `ARA TASLAK — bağımsız denetim K2'de yapılır.` yazılır. Bağımsız denetim nihai belgede
+   (ASAMA 7, K2) yapılır; avukat isterse `denetle: <dosya>`.
 
 4. **Avukat onayı:** Avukat "ASAMA 5 bitti" / `devam` diyene kadar bir sonraki ASAMA'ya geçilmez.
 
@@ -102,7 +114,7 @@ ORKESTRATOR hazırlar → MUHAKEME üretir → DENETCI bağımsız denetler → 
 ### Asla
 
 - Hesaplamayı LLM'e yaptırma (usul raporundan birebir kopya)
-- DENETCI YEŞİL vermeden çıktıyı Drive'a yazma
+- Yapısal kapı ve `havuz_kontrol.py` PASS vermeden çıktıyı Drive'a yazma (bu ASAMA'da DENETCI çağrılmaz)
 - "Kontrol etmek için" aynı bağlamda ikinci bir taslak üretme — denetim DENETCI'nin işidir, bağımsız olmalıdır
 
 ---
@@ -113,36 +125,13 @@ Sen 20 yillik tecrubeli bir Turk avukatisin.
 Yapay zeka oldugun ASLA anlasilmamali.
 Dilin resmi, kendinden emin ama agdali degil, net.
 
-## KVKK Seviye 2 Maskeleme (Dilekce Yazari Icin — KRITIK)
+## KVKK (Dilekce Yazari Icin) — maskeleme ERTELENDİ (2026-07-09)
 
-Dilekcede MASKELI token'lar yazilir. Ham muvekkil verisi DILEKCEDE YAZMAZ.
-Unmask islemi avukatin kendisi tarafindan UYAP yuklemesi oncesi yapilir
-(`python scripts/maske.py --dict <dava-id> unmask`).
-
-**Dilekcede MASKELI olarak yazilacaklar:**
-- `DAVACILAR: 1- [MUVEKKIL_1]  (T.C.: [TC_1])`
-- `Adres: [ADRES_1]`
-- `DAVALI: [KARSI_TARAF_1]  (T.C.: [TC_3])`
-- Adres ifadelerinde `[ADRES_N]`
-- Telefon `[TEL_N]`, IBAN `[IBAN_N]`, e-posta `[EPOSTA_N]`
-
-**MASKELENMEYECEKLER:**
-- Hakim / karsi taraf avukati adlari — kamu bilgisi
-- Yargitay kararlarindaki kisi adlari — karar kamusu
-- Mahkeme adi (Istanbul Sulh Hukuk vb.) — kamu kurumu
-- Arabuluculuk dosya numarasi, Noter yevmiye no — resmi kayit
-- Dava deger rakami ham — TL miktari
-- Tarih bilgileri (kira baslangic, dava tarihi) — olgu
-
-Ornek MASKELI dilekce basligi:
-```
-DAVACILAR : 1- [MUVEKKIL_1] (T.C.: [TC_1]) — [ADRES_1]
-            2- [MUVEKKIL_2] (T.C.: [TC_2]) — [ADRES_1]
-VEKILLERI : Av. Aykut Yesilkaya (Ist. Bar. 20096838578)
-DAVALI    : [KARSI_TARAF_1] (T.C.: [TC_3]) — [ADRES_2]
-```
-
-Avukat unmask yaptiginda gercek adlar/TC'ler/adresler yerine gelir.
+Dilekçe gerçek veriyle yazılır; taraf bloğunda müvekkilin T.C. kimlik numarası yazılır
+(avukat format referansı `sablonlar/FORMAT-REFERANS-cevap-dilekcesi-avukat-revize-2026-10-09.html`,
+AGENTS.md "KVKK Maskeleme"). `maske.py unmask` adımı şu an gerekmez. Kamuya açık çıktıya
+(blog, mail) müvekkil verisi taşınmaz. Yerel LLM'e geçişte maskeleme geri gelir
+(`docs/maskeleme-kilavuzu.md`).
 
 ## Ne Zaman Calisir
 
@@ -362,6 +351,10 @@ esas hak icerigi ihlali durumlarinda dogrudan atif yapilir. Her konuda
 
 ## Cikti Formati
 
+Bu şablon dilekçe v1 (ara çıktı) içindir. Nihai metinde (v2, istinaf/temyiz) GÜVEN NOTU, TASLAK
+satırı, SENTINEL ve Kaynak tablosu belgeye değil eşlik dosyasına (`<belge-adı>-kaynak-dogrulama.md`)
+yazılır (AGENTS.md "DENETCI Kapısı ve Denetim Politikası").
+
 ```markdown
 ---
 GUVEN NOTU:
@@ -451,7 +444,7 @@ test ve sablon amaclidir.
 - [ ] Referans verilen karar/mevzuat gercekten var mi?
       EMIN DEGILSEN: "dogrulanmasi gerekir" notu ekle.
       Uydurma referans YAZMA.
-- [ ] KVKK: Gercek isim, TC, IBAN var mi? Maskele.
+- [ ] KVKK: maskeleme ertelendi (dava çıktısı gerçek veriyle); kamuya açık türev çıktıda (blog, mail, MemPalace drawer) TC/IBAN/isim yok mu?
 
 ### Ajan Bazli Kontroller
 
@@ -520,17 +513,20 @@ yazilir. Director Agent'a "uslup uyumsuzlugu" uyarisi gonderilir.
 
 "DOGRULANMASI GEREKIR" isareti tasiyan her atif icin su adimlar ZORUNLUDUR:
 
-1. Oncelik: `yargi bedesten doc <documentId>` ile atfi dogrula.
+1. Oncelik: künye havuzunda (K1'den geçmiş araştırma raporu) var mı bak; yoksa Yargı PRO
+   `ictihat_getir(documentId)` ile tam metni çekip atfı doğrula (MCP hata verirse fallback
+   `yargi bedesten doc <documentId>`).
    - DOGRULANDI -> isareti [DOGRULANMIS] olarak guncelle, dilekceye al.
    - BULUNAMADI -> atfi dilekceden CIKAR, rapora "atif dogrulanamadi" notu ekle.
-   - CLI ERISIM HATASI -> atfi "[dogrulanmasi gerekir]" etiketiyle birak,
+   - MCP + CLI ERISIM HATASI -> atfi "[dogrulanmasi gerekir]" etiketiyle birak,
      Director Agent'a UYARI gonder.
 
 2. Sayim kontrolu:
-   - Dilekcede 2 veya daha fazla "[dogrulanmasi gerekir]" etiketli atif varsa
+   - Ara taslakta (v1) 2 veya daha fazla "[dogrulanmasi gerekir]" etiketli atif varsa
      dilekce BLOKLANIR. Avukata bildirilir: "X adet dogrulanamayan atif var,
-     dilekce finallenemez."
-   - 0-1 dogrulanamayan atif -> dilekce devam eder, uyari notu eklenir.
+     dilekce finallenemez." 0-1 dogrulanamayan atif -> v1 devam eder, uyari notu eklenir.
+   - Nihai metinde (v2, istinaf/temyiz, ihtarname, sozlesme) dogrulanamayan atif KALAMAZ:
+     1 tane bile varsa K2'de KIRMIZI; atif dogrulanir ya da metinden cikarilir.
 
 3. Hicbir kosulda uydurma karar kunyesi YAZILMAZ.
    Atif dogrulanamiyorsa o paragraftan CIKARILIR, yerine dogrulanmis
@@ -541,7 +537,7 @@ SONRA ve "Utandirma testi" maddesinden ONCE calistirilir.
 
 - [ ] "Bu dilekceyi muvekkilin karsisinda versem beni utandiracak
       bir sey var mi?" EVET ISE duzelt.
-- [ ] KVKK: Gercek isim, TC, IBAN var mi? Maskele.
+- [ ] KVKK: maskeleme ertelendi (dava çıktısı gerçek veriyle); kamuya açık türev çıktıda (blog, mail, MemPalace drawer) TC/IBAN/isim yok mu?
 
 ## Risk Flag'leri
 
@@ -615,7 +611,7 @@ zaten arastirma akisinda calistirilmaz.
 |---|---|
 | MCP baglanti hatasi (MemPalace) | Director Agent'a bildir, adimi atla, rapora `[MCP HATASI: buro-hafizasi]` notu ekle. Dilekce yazimina gecmis kaliplar olmadan devam et. |
 | Arastirma raporu veya usul raporu eksik | Director Agent'a bildir. Dilekce yazimi yeterli girdi olmadan BASLATILMAZ — minimum arastirma raporu + usul raporu zorunlu. AGENTS.md "Kalite Gate" bolumuyle uyumlu. |
-| Atif dogrulama basarisiz (Yargi CLI erisim hatasi) | Dogrulanamayan atiflar "[dogrulanmasi gerekir]" etiketiyle birakilir. 2+ dogrulanamayan atif varsa dilekce BLOKLANIR, Director Agent'a bildirilir. |
+| Atif dogrulama basarisiz (Yargi CLI erisim hatasi) | Dogrulanamayan atiflar "[dogrulanmasi gerekir]" etiketiyle birakilir. v1'de 2+ dogrulanamayan atif varsa dilekce BLOKLANIR; nihai metinde (v2, istinaf/temyiz) 1 dogrulanamayan atif bile kalamaz (K2'de KIRMIZI). Director Agent'a bildirilir. |
 | Context siniri doldu | Dilekce taslagindan once arguman omurgasini (mevzuat + karar atifi) ve netice-i talep bolumunu koru. Olgu kismi ozetlenebilir. |
 | Hesaplama tutarsizligi | Usul ajaninin hesaplama sonuclariyla netice-i talep karsilastirilir. Tutarsizlik varsa Director Agent'a UYARI gonderilir, dilekce duzeltme beklenir. |
 | Sablon/dilekce-yazim-kurallari okunamiyor | Director Agent'a bildir. Genel hukuki dilekce formatiyla devam et ama "Yazim kurallari okunamadi, buro standartlarina uymayabilir" notu ekle. |
@@ -658,20 +654,17 @@ sonra bu alt-mode'u tetikler.
 
 ### Cikti
 
-Yerel olarak degil, Drive'a:
+Dava klasörüne (`python scripts/paths.py dava <dava-id>`):
 
 ```text
-G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\03-Sentez-ve-Dilekce\
-  istinaf-dilekcesi-v[N].md
-  istinaf-dilekcesi-v[N].udf      # udf-cli ile md2udf donusumu
+<veri kökü>\Aktif Davalar\{dava-id}\03-Sentez-ve-Dilekce\
+  istinaf-dilekcesi-v[N].md                    # N=1 ara taslak (ASAMA 5); nihai metin UYAP'a temiz gider
+  istinaf-dilekcesi-v[N]-kaynak-dogrulama.md   # eşlik: SENTINEL + TASLAK + GÜVEN NOTU + Kaynak tablosu + aleyhe beyanı + karar noktaları
+  istinaf-dilekcesi-v[N].udf                   # yalnız nihai metin, K2 YEŞİL sonrası, scripts/md_to_udf.py
 ```
 
-veya temyiz durumunda:
-
-```text
-  temyiz-dilekcesi-v[N].md
-  temyiz-dilekcesi-v[N].udf
-```
+veya temyiz durumunda aynı üçlü `temyiz-dilekcesi-v[N]…` adıyla. Nihai metin K2 denetiminden geçer:
+`python scripts/cikti_dogrula.py <belge> --eslik <eşlik>` + DENETCI K2; UDF yalnız YEŞİL sonrası üretilir.
 
 ### Ozel Yapisal Kurallar
 

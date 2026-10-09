@@ -1,3 +1,6 @@
+---
+description: "Aktif motoru bildirir (çıktı frontmatter damgası için; sistem motoru tahmin etmez)"
+---
 # /motor-degistir — Aktif Motoru Bildir (tek motor)
 
 Sistem **tek motorla** çalışır: oturumu hangi LLM ile açtıysanız o. Alternatif
@@ -25,8 +28,9 @@ dürüst beyandır.
 
 ## Çıktıdan memnun değilseniz
 
-Aynı ASAMA yeniden üretilir ve **DENETCI** (`ajanlar/denetci/SKILL.md`) sıfır bağlamla
-yeniden denetler. "Başka motora ver" seçeneği tek motorlu mimaride yoktur; farklı bir
+Aynı ASAMA yeniden üretilir. Çıktı bir denetim noktasıysa (K1, KS, K2) **DENETCI**
+(`ajanlar/denetci/SKILL.md`) sıfır bağlamla yeniden denetler; ara çıktıda yapısal kapı +
+`havuz_kontrol.py` çalışır, avukat isterse `denetle: <dosya>` ile DENETCI'ye gönderir. "Başka motora ver" seçeneği tek motorlu mimaride yoktur; farklı bir
 LLM ile çalışmak istiyorsanız oturumu o araçla açıp `motor: <ad>` bildirirsiniz —
 `AGENTS.md` hangi araçtan okunursa okunsun aynıdır.
 

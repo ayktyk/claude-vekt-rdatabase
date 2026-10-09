@@ -55,15 +55,29 @@ CALISMA_ANI_CIKTILARI = {
     "blog.cms.md",
     "blog.mail.md",
     "model-events.jsonl",
+    # dava-cli (Yargı PRO) klon klasöründe çalışma anında oluşan dosyalar (2026-10-09)
+    "uyap-project.json",
+    "dava-analiz.md",
+    "dosyalarim.json",
+    ".akis.json",  # scripts/akis.py durum dosyası (dava klasöründe)
+    # Denetim Politikası v2 (2026-10-09) çalışma anı dosyaları
+    "kunye-havuzu-ek.md",   # 02-Arastirma altında, havuza sonradan giren künyeler (EK denetimi)
+    "denetim-sonucu.md",    # blog klasöründe DENETCI sonucu
+    "self-review.md",       # blog klasöründe yazarın kendi kontrolü (DENETCI sonucu değil)
 }
 
 # Çalışma anı çıktılarının ad desenleri (liste sonsuza uzamasın diye)
 CIKTI_DESENLERI = (
     "-raporu.md",       # revizyon-raporu.md, bilirkisi-denetim-raporu.md
     "-dilekcesi.md",    # istinaf-dilekcesi.md, temyiz-dilekcesi.md
+    "istinaf-dilekcesi-v",  # istinaf-dilekcesi-v2.md (desenler önek/sonek olarak eşleşir)
+    "temyiz-dilekcesi-v",   # temyiz-dilekcesi-vN.md
     "-notlari.md",      # kontrol-notlari.md
     "dilekce-v",        # dilekce-v2.final.md, dilekce-v1.claude-v1.md
     "usul-raporu.",     # usul-raporu.antigravity-v1.md
+    "-kaynak-dogrulama.md",  # dışarı giden belgenin eşlik dosyası (dilekce-v2-kaynak-dogrulama.md …)
+    "sozlesme-v",       # sozlesme-v1.md
+    "ihtarname-v",      # ihtarname-v1.md
 )
 
 # İleriye dönük dokümanlar: henüz var olmayan dosyaları tasarım gereği anarlar

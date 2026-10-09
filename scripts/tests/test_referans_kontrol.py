@@ -103,3 +103,18 @@ def test_ciplak_uzanti_yoksayilir(tmp_path):
     kaynak.write_text("Dosya `.md` uzantili olmali", encoding="utf-8")
 
     assert rk.kirik_referanslar(kaynak, tmp_path) == []
+
+
+def test_dava_cli_klon_dosyalari_repo_referansi_sayilmaz():
+    import referans_kontrol as rk
+    for ad in ("uyap-project.json", "dava-analiz.md", "dosyalarim.json"):
+        assert not rk._aday_mi(ad), ad
+
+
+def test_denetim_politikasi_calisma_ani_dosyalari_yoksayilir():
+    import referans_kontrol as rk
+    for ad in ("kunye-havuzu-ek.md", "denetim-sonucu.md", "dilekce-v2-kaynak-dogrulama.md",
+               "sozlesme-v1.md", "sozlesme-v1-kaynak-dogrulama.md", "ihtarname-v1.md",
+               "istinaf-dilekcesi-v2.md"):
+        assert not rk._aday_mi(ad), ad
+    assert rk._aday_mi("scripts/olmayan-betik.py")

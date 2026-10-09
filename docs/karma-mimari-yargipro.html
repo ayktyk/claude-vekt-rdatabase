@@ -1,0 +1,893 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Karma Sistem Haritası</title>
+<meta name="description" content="Büronun 7 aşamalı ajan sistemi ile Yargı PRO araçları ve beceri kütüphanesinin birlikte çalışma düzeni.">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f5f3ee;
+  --surface: #ffffff;
+  --surface-2: #faf8f4;
+  --ink: #1b2230;
+  --muted: #5a6373;
+  --line: #e2ddd2;
+  --brand: #1f3a5f;
+  --brand-soft: #e7eef7;
+  --accent: #9a6b1f;
+  --accent-soft: #f6ecd9;
+  --k1: #1d5fd1;
+  --k1-soft: #e3ecfb;
+  --ks: #6b3fc4;
+  --ks-soft: #eee6fb;
+  --k2: #b42a3a;
+  --k2-soft: #fbe5e8;
+  --ek: #0f7d72;
+  --ek-soft: #dff3f0;
+  --ok: #1f7a43;
+  --ok-soft: #e1f2e7;
+  --warn: #9a6b00;
+  --warn-soft: #fbf0d4;
+  --stop: #b42a3a;
+  --stop-soft: #fbe5e8;
+  --chip-bg: #eef1f5;
+  --chip-ink: #24324a;
+  --shadow: 0 1px 2px rgba(20, 28, 45, .06), 0 4px 14px rgba(20, 28, 45, .05);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #11151c;
+    --surface: #181e28;
+    --surface-2: #1d2430;
+    --ink: #e6e9ef;
+    --muted: #9aa4b5;
+    --line: #2b3342;
+    --brand: #9cbcea;
+    --brand-soft: #1e2b40;
+    --accent: #e2b45f;
+    --accent-soft: #33291a;
+    --k1: #7fa9f2;
+    --k1-soft: #1c2a44;
+    --ks: #b799f0;
+    --ks-soft: #2a2140;
+    --k2: #f08a97;
+    --k2-soft: #3a1f25;
+    --ek: #5fd0c2;
+    --ek-soft: #173430;
+    --ok: #6fd093;
+    --ok-soft: #173323;
+    --warn: #e6c060;
+    --warn-soft: #352c14;
+    --stop: #f08a97;
+    --stop-soft: #3a1f25;
+    --chip-bg: #232c3a;
+    --chip-ink: #d5dcea;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 14px rgba(0, 0, 0, .25);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #11151c;
+  --surface: #181e28;
+  --surface-2: #1d2430;
+  --ink: #e6e9ef;
+  --muted: #9aa4b5;
+  --line: #2b3342;
+  --brand: #9cbcea;
+  --brand-soft: #1e2b40;
+  --accent: #e2b45f;
+  --accent-soft: #33291a;
+  --k1: #7fa9f2;
+  --k1-soft: #1c2a44;
+  --ks: #b799f0;
+  --ks-soft: #2a2140;
+  --k2: #f08a97;
+  --k2-soft: #3a1f25;
+  --ek: #5fd0c2;
+  --ek-soft: #173430;
+  --ok: #6fd093;
+  --ok-soft: #173323;
+  --warn: #e6c060;
+  --warn-soft: #352c14;
+  --stop: #f08a97;
+  --stop-soft: #3a1f25;
+  --chip-bg: #232c3a;
+  --chip-ink: #d5dcea;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 14px rgba(0, 0, 0, .25);
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  overflow-x: hidden;
+}
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+h1, h2, h3 { font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; line-height: 1.25; }
+h2 { font-size: 1.55rem; margin: 0 0 .4rem; }
+h3 { font-size: 1.12rem; margin: 0; }
+p { margin: .5rem 0; }
+a { color: var(--brand); }
+code, .mono { font-family: ui-monospace, "Cascadia Code", Consolas, "SF Mono", Menlo, monospace; font-size: .86em; }
+code { background: var(--chip-bg); color: var(--chip-ink); padding: .08em .35em; border-radius: 4px; overflow-wrap: anywhere; }
+
+/* başlık */
+.hero { padding: 40px 0 26px; border-bottom: 1px solid var(--line); background: linear-gradient(180deg, var(--surface-2), var(--bg)); }
+.eyebrow { text-transform: uppercase; letter-spacing: .12em; font-size: .74rem; color: var(--accent); font-weight: 700; }
+.hero h1 { font-size: clamp(1.8rem, 4.6vw, 2.7rem); margin: .35rem 0 .6rem; color: var(--brand); }
+.lead { font-size: 1.08rem; color: var(--ink); max-width: 760px; }
+.meta { margin-top: .9rem; font-size: .86rem; color: var(--muted); }
+
+/* gezinme */
+nav.toc { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
+nav.toc .wrap { display: flex; gap: 6px; overflow-x: auto; padding-top: 8px; padding-bottom: 8px; scrollbar-width: thin; }
+nav.toc a { white-space: nowrap; text-decoration: none; font-size: .84rem; color: var(--muted); padding: 4px 10px; border-radius: 999px; border: 1px solid transparent; }
+nav.toc a:hover { color: var(--brand); border-color: var(--line); background: var(--surface); }
+
+section { padding: 34px 0 6px; }
+.sub { color: var(--muted); margin-top: 0; }
+
+/* kartlar ve ızgaralar */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+@media (max-width: 820px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 18px 14px; box-shadow: var(--shadow); min-width: 0; }
+.card h3 { margin-bottom: .4rem; }
+.layer-top { border-top: 4px solid var(--brand); }
+.layer-bottom { border-top: 4px solid var(--accent); }
+.card ul { margin: .4rem 0 .2rem; padding-left: 1.15rem; }
+.card li { margin: .22rem 0; }
+.bridge { margin: 14px 0 0; padding: 12px 16px; border-radius: 10px; background: var(--brand-soft); color: var(--ink); font-size: .96rem; border: 1px solid var(--line); }
+
+/* öncelik merdiveni */
+.ladder { list-style: none; margin: 0; padding: 0; counter-reset: ladder; }
+.ladder li { counter-increment: ladder; display: grid; grid-template-columns: 38px 1fr; gap: 12px; align-items: start; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin: 8px 0; }
+.ladder li::before { content: counter(ladder); display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--brand); color: var(--surface); font-weight: 700; font-family: Georgia, serif; }
+.ladder small { color: var(--muted); display: block; }
+
+/* aşama zaman çizelgesi */
+.timeline { position: relative; margin: 10px 0 0; padding-left: 0; list-style: none; }
+.stage { position: relative; display: grid; grid-template-columns: 56px 1fr; gap: 14px; margin: 0 0 16px; }
+.stage::before { content: ""; position: absolute; left: 27px; top: 54px; bottom: -18px; width: 2px; background: var(--line); }
+.stage:last-child::before { display: none; }
+.num { width: 54px; height: 54px; border-radius: 14px; display: grid; place-items: center; background: var(--brand); color: var(--surface); font: 700 1.3rem/1 Georgia, serif; box-shadow: var(--shadow); }
+.num small { display: block; font: 600 .56rem/1 -apple-system, "Segoe UI", sans-serif; letter-spacing: .08em; text-transform: uppercase; opacity: .85; margin-bottom: 2px; }
+.num-inner { text-align: center; }
+.stage .card { padding-bottom: 10px; }
+.stage-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 12px; }
+.owner { font-size: .86rem; color: var(--muted); }
+.rows { display: grid; grid-template-columns: 150px 1fr; gap: 6px 14px; margin-top: 10px; font-size: .94rem; }
+.rows dt { color: var(--muted); font-size: .84rem; padding-top: 2px; }
+.rows dd { margin: 0; min-width: 0; }
+@media (max-width: 640px) { .rows { grid-template-columns: 1fr; } .rows dt { padding-top: 6px; } }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-block; font-family: ui-monospace, "Cascadia Code", Consolas, Menlo, monospace; font-size: .78rem; background: var(--chip-bg); color: var(--chip-ink); padding: 3px 8px; border-radius: 6px; border: 1px solid var(--line); overflow-wrap: anywhere; }
+.chip.tool { background: var(--accent-soft); color: var(--ink); }
+.chip.ofis { background: var(--brand-soft); color: var(--ink); }
+
+.badge { display: inline-block; font-weight: 700; font-size: .76rem; letter-spacing: .03em; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+.b-k1 { background: var(--k1-soft); color: var(--k1); }
+.b-ks { background: var(--ks-soft); color: var(--ks); }
+.b-k2 { background: var(--k2-soft); color: var(--k2); }
+.b-ek { background: var(--ek-soft); color: var(--ek); }
+.b-yap { background: var(--chip-bg); color: var(--muted); }
+.b-ok { background: var(--ok-soft); color: var(--ok); }
+.b-warn { background: var(--warn-soft); color: var(--warn); }
+.b-hat { background: var(--brand-soft); color: var(--brand); }
+.h3-ara { margin: 20px 0 8px; }
+.b-stop { background: var(--stop-soft); color: var(--stop); }
+
+details { margin-top: 10px; border-top: 1px dashed var(--line); padding-top: 8px; }
+summary { cursor: pointer; color: var(--brand); font-size: .88rem; font-weight: 600; }
+details ul { margin: .5rem 0 .2rem; padding-left: 1.1rem; font-size: .9rem; color: var(--ink); }
+details li { margin: .25rem 0; }
+
+/* perspektif katmanı */
+.persona { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 12px; }
+@media (max-width: 900px) { .persona { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .persona { grid-template-columns: 1fr; } }
+.p { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--surface-2); min-width: 0; }
+.p b { display: block; font-size: .95rem; }
+.p .role { font-size: .8rem; color: var(--muted); }
+.p .src { margin-top: 6px; }
+.p.ozgun { border-style: dashed; }
+.note { margin-top: 12px; padding: 10px 14px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 0 8px 8px 0; font-size: .93rem; }
+
+/* tablolar */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: var(--shadow); }
+table { width: 100%; border-collapse: collapse; font-size: .93rem; }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+th { font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); background: var(--surface-2); }
+tr:last-child td { border-bottom: 0; }
+
+/* denetim akışı */
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 12px 0 4px; }
+.flow .step { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; font-size: .9rem; box-shadow: var(--shadow); }
+.flow .sep { color: var(--muted); font-weight: 700; }
+
+/* belge çifti */
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; }
+@media (max-width: 720px) { .pair { grid-template-columns: 1fr; } }
+.doc { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; background: var(--surface); box-shadow: var(--shadow); min-width: 0; }
+.doc h3 { font-size: 1rem; }
+.doc .fname { font-family: ui-monospace, Consolas, Menlo, monospace; font-size: .82rem; color: var(--muted); overflow-wrap: anywhere; }
+.doc.clean { border-top: 4px solid var(--ok); }
+.doc.companion { border-top: 4px solid var(--k2); }
+
+/* beceri bulutu */
+.cloud h3 { font-size: 1rem; margin: 0 0 .5rem; }
+.cloud .card { padding-bottom: 12px; }
+
+footer { margin: 34px 0 0; padding: 22px 0 34px; border-top: 1px solid var(--line); color: var(--muted); font-size: .86rem; }
+footer ul { padding-left: 1.1rem; margin: .4rem 0; }
+
+/* sözlük süzgeci */
+.filters { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: end; margin: 6px 0 12px; }
+.filters label { display: grid; gap: 4px; font-size: .8rem; color: var(--muted); }
+.filters .f-ara { flex: 1 1 260px; }
+.filters input, .filters select { font: inherit; font-size: .92rem; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; min-width: 0; width: 100%; }
+.filters select { width: auto; }
+.sayac { font-size: .86rem; color: var(--muted); padding-bottom: 8px; }
+#sozluk td:first-child { white-space: nowrap; }
+@media (max-width: 640px) { #sozluk td:first-child { white-space: normal; } }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Büro sistem haritası · 9 Ekim 2026</div>
+    <h1>7 aşamalı ajan sistemi ve Yargı PRO</h1>
+    <p class="lead">Büronun dava süreci <strong>ne</strong> yapılacağını ve <strong>hangi sırayla</strong> yapılacağını belirler. Yargı PRO ise bir adımın <strong>nasıl</strong> yapılacağını sağlar: araştırma araçları, yöntem becerileri ve süre, yazım, UDF gibi işleri yapan deterministik betikler.</p>
+    <p class="meta">Kaynak: proje anayasası <code>AGENTS.md</code> içindeki "Karma Mimari", "Beceri Haritası ve Büro İş Hatları", "Çalışma Modları" ve "DENETCI Kapısı ve Denetim Politikası" bölümleri. Beceri adları Yargı PRO beceri kütüphanesinin canlı listesinden doğrulandı: içerik sürümü 3ce05e48 (23.09.2026), 107 beceri.</p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Bölümler">
+  <div class="wrap">
+    <a href="#katmanlar">İki katman</a>
+    <a href="#oncelik">Öncelik sırası</a>
+    <a href="#asamalar">Aşama aşama</a>
+    <a href="#denetim">Denetim</a>
+    <a href="#modlar">Çalışma modları</a>
+    <a href="#calismayan">Yerine geçen bileşenler</a>
+    <a href="#hatlar">Büro iş hatları</a>
+    <a href="#sozluk">107 beceri sözlüğü</a>
+    <a href="#komutlar">Komutlar ve kayıt</a>
+    <a href="#uyap">UYAP klonu</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<section id="katmanlar">
+  <h2>İki katman</h2>
+  <p class="sub">Sistem tek motorla çalışır; ayrım görev ayrımıdır. Üst katman karar verir, alt katman uygular.</p>
+  <div class="grid2">
+    <div class="card layer-top">
+      <h3>Üst katman: büronun dava süreci</h3>
+      <ul>
+        <li>Aşama 0'dan 7'ye ilerleyen akış ve her aşama sonunda avukat onayı (<code>devam</code>).</li>
+        <li>Davacı vekili, davalı vekili, bilirkişi, hakim ve sentez perspektifleri (4A-4E).</li>
+        <li>Dilekçe v1, savunma simülasyonu ve nihai dilekçe v2 zinciri.</li>
+        <li>Sıfır bağlamlı bağımsız denetçi (DENETCI) ve sabit denetim noktaları.</li>
+        <li>Her dava klasöründe akış kaydı <code>00-AKIS.md</code>; çalışma modları TAM ve HIZLI.</li>
+      </ul>
+    </div>
+    <div class="card layer-bottom">
+      <h3>Alt katman: Yargı PRO</h3>
+      <ul>
+        <li><strong>Araştırma araçları:</strong> içtihat arama ve tam metin, anlamsal içtihat araması, mevzuat arama ve madde getirme, AYM, AİHM, 18 kurumun kararları, Resmî Gazete.</li>
+        <li><strong>Yöntem kütüphanesi:</strong> 107 hukuk becerisi; her biri bir işin nasıl yapılacağını anlatır.</li>
+        <li><strong>dava-cli:</strong> UYAP dosyasındaki tüm evrakı yerel klasöre çeker.</li>
+        <li><strong>Deterministik betikler:</strong> süre hesabı (<code>sure_hesapla</code>), yazım denetimi (<code>tdk_denetim</code>), UDF okuma ve yazma.</li>
+        <li><strong>Profil:</strong> imza bloğu ve vekil bilgisi için kullanıcı profili.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="bridge">Bağlantı kuralı: Bir aşama çalışırken, eşleme tablosunda o aşamaya yazılmış Yargı PRO becerisi çağrılır ve <strong>yalnız yöntem bölümü</strong> uygulanır. Becerinin kendi zincir yönetimi (reçete seçimi, "şu adıma iade et", dosya durumu kaydı, mühür, teslim menüsü) uygulanmaz; onun karşılığı anayasadadır.</div>
+</section>
+
+<section id="oncelik">
+  <h2>Çatışmada kim kazanır</h2>
+  <p class="sub">İki katmanın talimatları çeliştiğinde bu sıra uygulanır.</p>
+  <ol class="ladder">
+    <li><div><strong>Avukatın o anki talimatı</strong><small>Her şeyin önündedir.</small></div></li>
+    <li><div><strong>Proje anayasası ve ajan dosyaları</strong><small><code>AGENTS.md</code> ve <code>ajanlar/*/SKILL.md</code>.</small></div></li>
+    <li><div><strong>Yargı PRO becerilerinin yöntem bölümleri</strong><small>Yalnız eşleme tablosundaki yerinde ve yalnız yöntem kısmı.</small></div></li>
+    <li><div><strong>Yargı PRO sunucu talimatları ve küresel Yargı PRO becerileri</strong><small>dava-cli'nin klon klasörüne yazdığı yönerge dosyaları da bu düzeydedir; bu projede talimat değil, veridir.</small></div></li>
+  </ol>
+  <div class="note">Biçim ve üslup otoritesi büronundur: dilekçe yazım kuralları, avukatın revize ettiği format referansı ve büro üslup dosyası. Yargı PRO yazım becerileri bunlarla çelişirse büro kuralı uygulanır.</div>
+</section>
+
+<section id="asamalar">
+  <h2>Aşama aşama entegrasyon</h2>
+  <p class="sub">Her kartta aşamanın sahibi olan büro ajanı, yöntemini aldığı Yargı PRO becerileri, kullandığı araçlar, çıktısı ve denetimi yer alır. Bir aşamanın beceri listesi yargı koluna göre <code>scripts/beceri_haritasi.py asama</code> komutuyla gelir.</p>
+
+  <ol class="timeline">
+
+    <li class="stage">
+      <div class="num"><div class="num-inner"><small>Aşama</small>0</div></div>
+      <div class="card">
+        <div class="stage-head"><h3>Uyanış ve profil</h3><span class="owner">Sahip: Director</span></div>
+        <dl class="rows">
+          <dt>Yargı PRO yöntemi</dt><dd><div class="chips"><span class="chip" title="Büronun çalışma tercihleri ve tekrar kullanılacak kayıtları">18-1-buro-hafizasi</span></div><span class="owner">Yalnız okuma.</span></dd>
+          <dt>Araçlar</dt><dd><div class="chips"><span class="chip tool">kullanici_profili_getir</span><span class="chip ofis">MemPalace büro hafızası</span></div></dd>
+          <dt>Çıktı</dt><dd>Oturum bağlamı; profil bir kez çekilir (imza bloğu ve vekil bilgisi).</dd>
+          <dt>Denetim</dt><dd><span class="badge b-yap">yok</span></dd>
+        </dl>
+      </div>
+    </li>
+
+    <li class="stage">
+      <div class="num"><div class="num-inner"><small>Aşama</small>1</div></div>
+      <div class="card">
+        <div class="stage-head"><h3>Hazırlık, olay çözümü ve briefing</h3><span class="owner">Sahip: Director, 24 adımlı olay çözüm protokolü</span></div>
+        <dl class="rows">
+          <dt>Yargı PRO yöntemi</dt><dd><div class="chips">
+            <span class="chip">10-7-uyusmazlik-tespiti</span><span class="chip">10-1-dosya-haritasi</span><span class="chip">10-2-tum-evrak-incelemesi</span><span class="chip">12-2-tebligat-denetimi</span><span class="chip">12-1-sure-hesaplama</span><span class="chip">19-1-evrak-okuma-yazma</span><span class="chip">12-3-ogrenme-tarihi-denetimi</span><span class="chip">13-1-hedef-belirleme-gorusmesi</span></div>
+            <div class="chips" style="margin-top:6px"><span class="chip">yeni davada önce dosya kabul hattı: 15-4 · 17-2 · 15-3 · 15-2</span></div></dd>
+          <dt>Araçlar</dt><dd><div class="chips"><span class="chip tool">yargi-skill sure_hesapla</span><span class="chip ofis">sure_kalkani.py</span><span class="chip tool">dava-cli</span><span class="chip tool">udf-cli</span></div></dd>
+          <dt>Çıktı</dt><dd><code>00-Briefing.md</code>; süre satırları <code>00-Sure-Kalkani.json</code>; yargı kolu akış kaydında.</dd>
+          <dt>Denetim</dt><dd><span class="badge b-yap">yapısal kapı</span> Briefing'e karar künyesi yazılmaz; künye 2. aşamada doğar.</dd>
+        </dl>
+        <details><summary>Becerilerin bu aşamadaki işi</summary>
+          <ul>
+            <li><code>10-7</code> İşin başında uyuşmazlığı, yargı kolunu, aşamayı, rolü ve ihtiyacı adım adım belirler.</li>
+            <li><code>10-1</code> Dosyanın tarafsız haritası: iddia, cevap ve delil matrisi, eksik delil satırları.</li>
+            <li><code>10-2</code> Çok evraklı dosyada bütün evrakı metne çevirip sayfa atlamadan okur.</li>
+            <li><code>12-2</code> Tebliğin usule uygunluğunu denetler ve sürenin başlangıcını bağlar.</li>
+            <li><code>12-1</code> Yasal süreyi ve son günü çıkarır; hesap betikle yapılır, sonuç Süre Kalkanı'na işlenir.</li>
+            <li><code>19-1</code> UYAP evrakını kaynak ve sayfa kaydıyla okur.</li>
+            <li><code>12-3</code> AYM, AİHM ve öğrenmeye bağlı sürelerde başlangıcı öğrenme tarihinden bağlar.</li>
+            <li><code>13-1</code> Hedef belirsizse seçenekleri sonuç ve riskleriyle avukata sunar.</li>
+            <li>10-7 yargı kolunu da belirler. Kol akış kaydına yazılır; sonraki aşamaların beceri listesi kola göre gelir.</li>
+            <li>Kritik nokta verilmemişse protokolün 8. adımı aday üretir ve avukata tek soruyla onaylatılır.</li>
+          </ul>
+        </details>
+      </div>
+    </li>
+
+    <li class="stage">
+      <div class="num"><div class="num-inner"><small>Aşama</small>2</div></div>
+      <div class="card">
+        <div class="stage-head"><h3>Derin araştırma</h3><span class="owner">Sahip: Araştırmacı · yargı ve mevzuat sıralı, NotebookLM paralel</span></div>
+        <dl class="rows">
+          <dt>Yargı PRO yöntemi</dt><dd><div class="chips">
+            <span class="chip">11-2-derin-emsal-taramasi</span><span class="chip">11-3-karar-tam-metni</span><span class="chip">11-10-emsal-karar-okumasi</span><span class="chip">11-4-emsal-guncellik-denetimi</span><span class="chip">11-5-kanun-maddesi-bulma</span><span class="chip">11-8-atif-dogrulama</span><span class="chip">11-6-guncel-kaynak-arama</span></div>
+            <div class="chips" style="margin-top:6px"><span class="chip">kol emsal ailesi: 2-2 · 3-2 · 1-2 · 4-2 · 5-2 · 6-2</span><span class="chip">çok kollu soruda 11-7-kapsamli-arastirma</span></div></dd>
+          <dt>Araçlar</dt><dd><div class="chips"><span class="chip tool">ictihat_ara · ictihat_getir</span><span class="chip tool">semantik_ictihat_ara</span><span class="chip tool">mevzuat_ara · mevzuat_getir · mevzuat_icinde_ara</span><span class="chip tool">aym_ictihat_ara</span><span class="chip tool">aihm_ictihat_ara</span><span class="chip tool">resmi_gazete_fihrist · getir</span><span class="chip ofis">NotebookLM</span></div></dd>
+          <dt>Çıktı</dt><dd><code>02-Arastirma/arastirma-raporu.md</code>, atıf maddeleri ve mülga eleme listeleri.</dd>
+          <dt>Denetim</dt><dd><span class="badge b-k1">K1</span> Künye havuzu burada doğar; sonraki aşamalar yalnız bu havuzdaki künyelere atıf yapar.</dd>
+        </dl>
+        <details><summary>Becerilerin bu aşamadaki işi</summary>
+          <ul>
+            <li><code>11-2</code> Bir emsal ihtiyacını en az beş sorguya çevirip anlamsal ve kelime kanalında tarar.</li>
+            <li><code>11-3</code> Künyesi belli kararın tam metnini bütün sayfalarıyla getirir.</li>
+            <li><code>11-10</code> Kararın olayını, hükmünü ve taşıyıcı gerekçesini çıkarır, dosyayla ayırt edici noktaları yazar.</li>
+            <li><code>11-4</code> Karar ve olay tarihindeki mevzuatı ve geçiş hükümlerini denetler.</li>
+            <li><code>11-5</code> Madde metnini ve yürürlük durumunu bulur; numara uydurmaz.</li>
+            <li><code>11-8</code> Her künye ve madde atfını doğrular.</li>
+            <li><code>11-6</code> Araçların ulaşamadığı güncel kaynağı arar; kaynak adresi ve tarih yazılır.</li>
+            <li><code>11-7</code> Birden çok kolu ilgilendiren soruda kapsamlı araştırma planı kurar.</li>
+            <li>Kol emsal aileleri HMK, İİK, CMK, İYUK, AYM ve AİHM için ayrı arama yöntemleridir.</li>
+            <li>Mevzuat aramasında operatör yoktur; gerekçe seçeneği de yoktur.</li>
+          </ul>
+        </details>
+      </div>
+    </li>
+
+    <li class="stage">
+      <div class="num"><div class="num-inner"><small>Aşama</small>3</div></div>
+      <div class="card">
+        <div class="stage-head"><h3>Usul raporu</h3><span class="owner">Sahip: Usul Uzmanı</span></div>
+        <dl class="rows">
+          <dt>Yargı PRO yöntemi</dt><dd><div class="chips">
+            <span class="chip">kolun analiz ailesi: 2-1 · 3-1 · 1-1 · 4-1 · 5-1 · 6-1</span><span class="chip">15-5-arabuluculuk-sarti-denetimi</span><span class="chip">15-3-vekalet-yetki-denetimi</span><span class="chip">12-1-sure-hesaplama</span><span class="chip">14-2-guncel-oran-teyidi</span><span class="chip">14-1-hukuki-hesaplama</span><span class="chip">19-3-islah-rehberi</span><span class="chip">11-6-guncel-kaynak-arama</span></div></dd>
+          <dt>Araçlar</dt><dd><div class="chips"><span class="chip tool">sure_hesapla</span><span class="chip ofis">büro işçilik hesap modülü</span></div></dd>
+          <dt>Çıktı</dt><dd><code>01-Usul/usul-raporu.md</code></dd>
+          <dt>Denetim</dt><dd><span class="badge b-yap">yapısal kapı + havuz kontrolü</span></dd>
+        </dl>
+        <details><summary>Becerilerin bu aşamadaki işi</summary>
+          <ul>
+            <li><code>2-1 …</code> Kolun analiz becerisi: hukukta dava şartları, sıfat, zamanaşımı ve ispat; ceza, icra, idare, AYM ve AİHM dosyasında kendi kolunun analizi.</li>
+            <li><code>15-5</code> Arabuluculuk zorunluluğunu ve son tutanağın yeterliliğini denetler.</li>
+            <li><code>15-3</code> Temel vekâlet denetimi dosya kabulünde yapılır; burada işleme özel yetki denetlenir: ıslah, feragat, sulh.</li>
+            <li><code>14-2</code> Oran, tavan ve tarifeyi kaynaklı olarak teyit eder.</li>
+            <li><code>14-1</code> Hesabı mevzuat ve dönem kanıtına dayandırır, aritmetiği betik yapar.</li>
+            <li><code>19-3</code> Islah ve HMK 109/4 talep artırımında yöntem kaynağıdır.</li>
+            <li>Süre ve hesap modele yaptırılmaz.</li>
+          </ul>
+        </details>
+      </div>
+    </li>
+
+    <li class="stage">
+      <div class="num"><div class="num-inner"><small>Aşama</small>4</div></div>
+      <div class="card">
+        <div class="stage-head"><h3>Beş ajanlı stratejik analiz</h3><span class="owner">4A-4D paralel, 4E sentez sıralı</span></div>
+        <div class="persona">
+          <div class="p ozgun"><b>4A Davacı vekili</b><span class="role">Müvekkil lehine en güçlü argümanlar</span><div class="src"><span class="badge b-yap">büronun özgün katmanı</span></div></div>
+          <div class="p"><b>4B Davalı vekili</b><span class="role">Karşı taraf lehine; zayıf yönlerimiz</span><div class="src chips"><span class="chip">10-5-zayif-nokta-analizi</span></div></div>
+          <div class="p"><b>4C Bilirkişi</b><span class="role">Nesnel teknik tespit ve hesap</span><div class="src chips"><span class="chip">16-5-ispat-delil-rehberi</span><span class="chip">14-1-hukuki-hesaplama</span></div></div>
+          <div class="p ozgun"><b>4D Hakim</b><span class="role">Yargılama mantığıyla tartı</span><div class="src"><span class="badge b-yap">büronun özgün katmanı</span></div></div>
+          <div class="p"><b>4E Sentez</b><span class="role">KIRMIZI / YEŞİL / ŞARTLI karar ve dilekçe yazım rehberi</span><div class="src chips"><span class="chip">13-2-dava-stratejisi</span></div></div>
+        </div>
+        <dl class="rows">
+          <dt>Çıktı</dt><dd><code>02-Arastirma/stratejik-analiz.md</code> ve dört perspektif dosyası.</dd>
+          <dt>Denetim</dt><dd><span class="badge b-yap">4A-4D: yapısal + havuz</span> <span class="badge b-ks">KS</span> 4E sentezi bağımsız denetimden geçmeden 5. aşamaya geçilmez.</dd>
+        </dl>
+        <div class="note">Davacı, davalı, bilirkişi ve hakim katmanının Yargı PRO'da karşılığı yoktur; bu büronun kendi katmanıdır. Yargı PRO burada yalnız destek yöntemi verir: 4B'de zayıf nokta analizi kendi dosyamıza yöneltilir.</div>
+      </div>
+    </li>
+
+    <li class="stage">
+      <div class="num"><div class="num-inner"><small>Aşama</small>5</div></div>
+      <div class="card">
+        <div class="stage-head"><h3>Dilekçe v1</h3><span class="owner">Sahip: Belge Yazarı</span></div>
+        <dl class="rows">
+          <dt>Yargı PRO yöntemi</dt><dd><div class="chips">
+            <span class="chip">13-3-dilekce-turu-secimi</span><span class="chip">13-4-dilekce-iskeleti</span><span class="chip">13-5-dilekce-paragraf-plani</span><span class="chip">kolun dilekçe ailesi: 2-3 · 2-6 · 3-4 · 4-3 …</span><span class="chip">10-6-vakia-tutarlilik-denetimi</span><span class="chip">19-3-islah-rehberi</span></div>
+            <div class="chips" style="margin-top:6px"><span class="chip">HIZLI usul belgesinde kolun usul ailesi: 2-7 · 3-9 · 1-8 · 4-6 · 5-4 · 6-4</span></div></dd>
+          <dt>Araçlar</dt><dd><div class="chips"><span class="chip ofis">büro örnek dilekçe kütüphanesi</span><span class="chip ofis">büro argüman çerçeveleri</span></div></dd>
+          <dt>Çıktı</dt><dd><code>03-Sentez-ve-Dilekce/dilekce-v1.md</code> ve DOCX. UDF üretilmez.</dd>
+          <dt>Denetim</dt><dd><span class="badge b-yap">yapısal kapı + havuz kontrolü</span></dd>
+        </dl>
+        <details><summary>Becerilerin bu aşamadaki işi</summary>
+          <ul>
+            <li><code>13-3</code> Dilekçe türünü ve 12 argümantasyon şemasından uygun olanı seçer; büro çerçeveleriyle eşleşir.</li>
+            <li><code>13-4</code> Bölüm iskeletini kurar.</li>
+            <li><code>13-5</code> Paragraf düzeyinde plan çıkarır: hangi paragrafta hangi vakıa ve hangi doğrulanmış dayanak.</li>
+            <li><code>10-6</code> Yeni metnin önceki beyan ve belgelerle çelişip çelişmediğini denetler.</li>
+            <li>Usul ve ara belgede HIZLI modda kolun usul ailesi yöntem kaynağıdır; beceri listesi betikten kola göre gelir.</li>
+            <li>Yargı PRO'nun tek atımlık dilekçe motoru burada çalışmaz; yerine 5, 6 ve 7. aşama zinciri vardır.</li>
+          </ul>
+        </details>
+      </div>
+    </li>
+
+    <li class="stage">
+      <div class="num"><div class="num-inner"><small>Aşama</small>6</div></div>
+      <div class="card">
+        <div class="stage-head"><h3>Savunma simülasyonu</h3><span class="owner">Sahip: Savunma Simülatörü</span></div>
+        <dl class="rows">
+          <dt>Yargı PRO yöntemi</dt><dd><div class="chips"><span class="chip">10-5-zayif-nokta-analizi</span><span class="chip">10-10-karsi-arguman-dongusu</span></div></dd>
+          <dt>Çıktı</dt><dd><code>02-Arastirma/savunma-simulasyonu.md</code></dd>
+          <dt>Denetim</dt><dd><span class="badge b-yap">yapısal kapı + havuz kontrolü</span></dd>
+        </dl>
+        <details><summary>Becerilerin bu aşamadaki işi</summary>
+          <ul>
+            <li><code>10-5</code> Bu kez karşı tarafın gözüyle v1'in zayıf noktalarını bulur.</li>
+            <li><code>10-10</code> Her aleyhe husus için hedefli araştırma yapar ve çürütmeyi geri besler.</li>
+          </ul>
+        </details>
+      </div>
+    </li>
+
+    <li class="stage">
+      <div class="num"><div class="num-inner"><small>Aşama</small>7</div></div>
+      <div class="card">
+        <div class="stage-head"><h3>Dilekçe v2 nihai</h3><span class="owner">Sahip: Revizyon Ajanı</span></div>
+        <dl class="rows">
+          <dt>Yargı PRO yöntemi</dt><dd><div class="chips"><span class="chip">15-6-dilekce-bicim-denetimi</span><span class="chip">19-2-yazim-kurallari-rehberi</span><span class="chip">10-9-revizyon-fark-analizi</span></div></dd>
+          <dt>Araçlar</dt><dd><div class="chips"><span class="chip tool">yargi-skill tdk_denetim</span><span class="chip ofis">md_to_udf.py</span></div></dd>
+          <dt>Çıktı</dt><dd>Temiz <code>dilekce-v2.md</code>, eşlik dosyası <code>dilekce-v2-kaynak-dogrulama.md</code>, DOCX ve UDF.</dd>
+          <dt>Denetim</dt><dd><span class="badge b-k2">K2</span> UDF yalnız denetçi onayından sonra üretilir.</dd>
+        </dl>
+        <details><summary>Becerilerin bu aşamadaki işi</summary>
+          <ul>
+            <li><code>15-6</code> Zorunlu unsurları, merciyi, tarafları, talep sonucunu, ekleri ve imza alanını denetler.</li>
+            <li><code>19-2</code> TDK yazım kurallarını uygular.</li>
+            <li><code>10-9</code> Avukat taslağı elle düzelttiyse farkı çözümler ve yeniden denetim kapsamını belirler.</li>
+            <li>Biçim otoritesi büronun format referansıdır.</li>
+          </ul>
+        </details>
+      </div>
+    </li>
+
+    <li class="stage">
+      <div class="num"><div class="num-inner"><small>Son</small>✓</div></div>
+      <div class="card">
+        <div class="stage-head"><h3>Kapanış</h3><span class="owner">Sahip: Director</span></div>
+        <dl class="rows">
+          <dt>Yargı PRO yöntemi</dt><dd><div class="chips"><span class="chip">18-4-dosya-dersleri</span><span class="chip">12-4-sure-takvimi</span><span class="chip">17-1-muvekkil-bilgilendirme</span><span class="chip">10-3-canli-dosya-ozeti</span><span class="chip">18-5-dosya-portfoyu</span></div></dd>
+          <dt>Büro karşılığı</dt><dd>Dersler klasörü; Süre Kalkanı <code>00-Sure-Kalkani.json</code>, kesin satır avukat onayıyla Google Takvim'e; dava özeti <code>00-Dava-Ozeti.md</code>; portföy <code>00-PORTFOY.md</code>; müvekkil bilgilendirme notu ve akış kaydının kapatılması.</dd>
+        </dl>
+      </div>
+    </li>
+  </ol>
+</section>
+
+<section id="denetim">
+  <h2>Denetim: tek kapı, sabit noktalar</h2>
+  <p class="sub">Bağımsız denetçi Yargı PRO'nun parçası değildir; Yargı PRO araçlarını doğrulama kaynağı olarak kullanır. Künye teyidinde Yargı PRO'nun <code>11-8-atif-dogrulama</code> yöntemini uygular: kararın varlığı, alıntının birebir desteği ve pasajın kimin gerekçesi olduğu. Yargı PRO'nun kendi son kontrol ve zorunlu adım denetimleri (<code>15-7</code>, <code>15-8</code>) ayrıca çalıştırılmaz; çift denetim yapılmaz.</p>
+
+  <div class="flow" aria-label="Tam akışta denetim sırası">
+    <span class="step">Aşama 2 araştırma</span><span class="sep">›</span><span class="badge b-k1">K1</span><span class="sep">›</span>
+    <span class="step">Aşama 3 usul</span><span class="sep">›</span>
+    <span class="step">Aşama 4 strateji</span><span class="sep">›</span><span class="badge b-ks">KS</span><span class="sep">›</span>
+    <span class="step">Aşama 5 v1 ve 6 savunma</span><span class="sep">›</span>
+    <span class="step">Aşama 7 v2</span><span class="sep">›</span><span class="badge b-k2">K2</span><span class="sep">›</span>
+    <span class="step">DOCX ve UDF</span>
+  </div>
+
+  <div class="table-wrap" style="margin-top:12px">
+    <table>
+      <thead><tr><th>Nokta</th><th>Denetlenen</th><th>Ne zaman</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge b-k1">K1</span></td><td>Araştırma raporu</td><td>2. aşama sonu</td></tr>
+        <tr><td><span class="badge b-ks">KS</span></td><td>Stratejik analiz ve dilekçe yazım rehberi</td><td>4. aşama sonu</td></tr>
+        <tr><td><span class="badge b-k2">K2</span></td><td>Dışarı giden belge ve eşlik dosyası: dilekçe v2, istinaf ve temyiz, ihtarname, sözleşme, müvekkil bilgilendirme</td><td>7. aşama sonu, UDF'den önce</td></tr>
+        <tr><td><span class="badge b-ek">EK</span></td><td>Künye havuzuna sonradan eklenen künyeler</td><td>Yalnız tam akışta, ilk kullanımdan önce</td></tr>
+        <tr><td><span class="badge b-yap">Tek denetim</span></td><td>Danışma cevabı ve blog</td><td>Sentez sonu</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="grid3" style="margin-top:16px">
+    <div class="card">
+      <h3>Ara çıktılar</h3>
+      <p>Usul raporu, 4A-4D, dilekçe v1 ve savunma simülasyonu denetçiye gitmez. Yapısal kapıdan ve künye havuzu kapısından geçer: kaynak tablosundaki her karar kimliği ve her alıntı havuzda olmalıdır.</p>
+    </div>
+    <div class="card">
+      <h3>Karar</h3>
+      <p><span class="badge b-stop">KIRMIZI</span> <span class="badge b-warn">SARI</span> <span class="badge b-ok">YEŞİL</span></p>
+      <p>Kırmızı ve sarı kararda sonraki aşamaya geçilmez. En çok üç tur; sonra avukata gelir. Yargı PRO'ya erişilemezse komut satırı yedeği kullanılır, o da yoksa karar "denetlenemedi" olarak kırmızıdır.</p>
+    </div>
+    <div class="card">
+      <h3>Kodla zorlanan kurallar</h3>
+      <p>Akış kaydı, onay olmadan bir sonraki aşamayı vermez. Denetim noktası çıktısı onay almadan DOCX'e çevrilmez ve UDF'si üretilmez. UYAP'a gidecek metinde doktrin izi varsa UDF reddedilir.</p>
+    </div>
+  </div>
+
+  <h3 style="margin-top:22px">Dışarı giden belge iki dosyadır</h3>
+  <div class="pair">
+    <div class="doc clean">
+      <h3>UYAP'a giden temiz metin</h3>
+      <div class="fname">dilekce-v2.md · .docx · .udf</div>
+      <p>Büro format referansına uyar: başlık bloğu, T.C. kimlik numarası, numaralı paragraflar. Taslak satırı, güven notu, kaynak tablosu ve denetim notu içermez.</p>
+    </div>
+    <div class="doc companion">
+      <h3>Eşlik eden doğrulama dosyası</h3>
+      <div class="fname">dilekce-v2-kaynak-dogrulama.md · ihtarnamede kontrol-notlari.md</div>
+      <p>Doktrin işareti, kaynak doğrulama tablosu, aleyhe içtihat beyanı, avukatın karar noktaları ve denetim sonucu burada durur.</p>
+    </div>
+  </div>
+</section>
+
+<section id="modlar">
+  <h2>Çalışma modları</h2>
+  <p class="sub">Yargı PRO'nun çalışma derinliği seçimi yerine büronun iki modu çalışır. Her işin başında tek satırlık mod bildirimi yazılır.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Mod</th><th>Ne zaman</th><th>Çalışan aşamalar</th><th>Denetim</th></tr></thead>
+      <tbody>
+        <tr><td><strong>TAM</strong></td><td>Yeni dava; tam akış komutu; mevcut davaya esas belge talebi ve son güne yediden fazla gün</td><td>0 · 1 · 2 · 3 · 4 · 5 · 6 · 7</td><td><span class="badge b-k1">K1</span> <span class="badge b-ks">KS</span> <span class="badge b-k2">K2</span></td></tr>
+        <tr><td><strong>HIZLI</strong></td><td>Usul ve ara belgeler; son güne yedi gün veya daha az kalan esas belge</td><td>0 · 1 kısa · 2 gerekirse hafif · 5 · 7</td><td><span class="badge b-k2">K2</span> Belge atıf içermiyorsa "uygulanmaz" kaydı</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">Esas belge: dava, cevap, replik ve düplik, istinaf ve temyiz başvurusu veya cevabı, esaslı beyan, bilirkişi raporuna esaslı itiraz, ıslah ve talep artırımı. Avukat modu her an <code>mod: tam</code> veya <code>mod: hızlı</code> ile değiştirir.</div>
+</section>
+
+<section id="calismayan">
+  <h2>Yargı PRO'da olup yerine büronun karşılığı çalışanlar</h2>
+  <p class="sub">Bu bileşenler kurulu kalır ama 7 aşamalı akışın yerine geçmez.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Yargı PRO bileşeni</th><th>Bu sistemdeki karşılığı</th></tr></thead>
+      <tbody>
+        <tr><td><code>0-1-is-yonlendirici</code></td><td>Director, çalışma modları ve akış kaydı; süre eşiği bildirimleri günlük panoda</td></tr>
+        <tr><td><code>0-2-calisma-derinligi-secimi</code></td><td>TAM ve HIZLI modlar</td></tr>
+        <tr><td><code>15-7-son-kontrol-denetimi</code>, <code>15-8-zorunlu-adim-denetimi</code></td><td>Bağımsız denetçi: K1, KS, K2</td></tr>
+        <tr><td><code>13-6-dilekce-yazimi</code> (tek atımlık belge motoru)</td><td>Aşama 5, 6 ve 7 zinciri</td></tr>
+        <tr><td><code>11-1-emsal-karar-bulma</code> (emsal sarmalayıcısı)</td><td>2. aşamada 11-2, 11-3 ve 11-10 zinciri doğrudan çalışır</td></tr>
+        <tr><td><code>18-7-paralel-calisma-rehberi</code></td><td>4. aşamadaki paralel çalıştırma kuralı</td></tr>
+        <tr><td><code>15-9-gonderim-onayi</code></td><td>Avukat; sistem gönderim yapmaz</td></tr>
+        <tr><td>Küresel Yargı PRO becerileri: dilekçe yazma, emsal bulma, kırmızı takım, çıktı revizyonu, dava özeti</td><td>7 aşamanın yerine çalışmaz. "Dilekçe yaz" talebi proje komutu <code>/dilekce</code> ile, mod seçimiyle yürür.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="hatlar">
+  <h2>Kararlarımız ve büro iş hatları</h2>
+  <p class="sub">9 Ekim 2026'da birlikte verilen dört karar 107 becerinin her birine sistemde bir yer verdi. Yedi aşamanın dışındaki işler dokuz büro hattıyla yürür. Hat yedi aşamayı başlatmaz; çıktısını dava klasörüne yazar ve akış kaydına olay olarak işler.</p>
+  <div class="grid2">
+    <div class="card"><h3>1. Tekil işler büro hatlarıyla</h3><p>Duruşma, zabıt, karar, müzakere, vekâlet sonu ve takip gibi işler kendi hattında yürür. Dışarı giden her metin yine belge ve eşlik dosyasıyla K2 denetiminden geçer.</p></div>
+    <div class="card"><h3>2. Yargı kolu otomatik</h3><p>1. aşamada 10-7 kolu belirler: HMK, İİK, CMK, İYUK, AYM veya AİHM. Kol akış kaydına yazılır; emsal, analiz, dilekçe ve usul aileleri kola göre aşamalara bağlanır. Avukat kolu her an düzeltebilir.</p></div>
+    <div class="card"><h3>3. Dosya kabul paketi standart</h3><p>Yeni dava ve yeni müvekkilde çıkar çatışması 15-4, iş kabul değerlendirmesi 17-2, vekâlet denetimi 15-3 ve karşı taraf evrakının güvenlik taraması 15-2 çalışır. Aydınlatılmış onam formu yalnız istenince hazırlanır.</p></div>
+    <div class="card"><h3>4. Takip araçları benimsendi</h3><p>Süre Kalkanı, canlı dava özeti, portföy ve günlük pano büronun dosya düzenine yerleşti. Veri Yargı PRO masaüstü aracından ve süre deposundan gelir; pano yalnız görünümdür.</p></div>
+  </div>
+
+  <h3 class="h3-ara">Dokuz büro hattı</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Hat</th><th>Komut</th><th>Yargı PRO yöntemi</th><th>Çıktı</th><th>Denetim</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Dosya kabul</strong></td><td><code>/dosya-kabul</code></td><td>15-4 · 17-2 · 15-3 · 15-2</td><td>00-Kabul.md</td><td>yapısal kapı</td></tr>
+        <tr><td><strong>Evrak girişi</strong></td><td><code>/davayi-cek</code></td><td>15-2 · 19-1 · 12-2 · 12-1 · 12-4 · 10-3</td><td>00-Dava-Ozeti.md ve 00-Sure-Kalkani.json</td><td>yapısal kapı</td></tr>
+        <tr><td><strong>Duruşma hazırlığı</strong></td><td><code>/durusma</code></td><td>16-1 · 16-3 · 16-4</td><td>05-Durusma-Notlari/celse-karti-&lt;tarih&gt;.md; 05-Durusma-Notlari/delil-tedarik.md</td><td>yapısal kapı + havuz kontrolü</td></tr>
+        <tr><td><strong>Zabıt denetimi</strong></td><td><code>/durusma zabit</code></td><td>16-2 · 12-1 · 12-4 · 10-3</td><td>05-Durusma-Notlari/zabit-denetimi-&lt;tarih&gt;.md; Süre Kalkanı satırı</td><td>yapısal kapı</td></tr>
+        <tr><td><strong>Karar geldi</strong></td><td><code>/karar-geldi</code></td><td>10-4 · 12-2 · 12-3 · 12-1 · 12-4 · 12-5 · kolun karar sonrası ailesi · 17-1 · 10-3</td><td>05-Durusma-Notlari/karar-cozumlemesi-&lt;tarih&gt;.md; Süre Kalkanı satırı; kanun yoluna gidilecekse TAM akış</td><td>yapısal kapı; müvekkile gidecek not K2</td></tr>
+        <tr><td><strong>Sulh ve müzakere</strong></td><td><code>/muzakere</code></td><td>13-1 · 17-3 · 15-5</td><td>03-Sentez-ve-Dilekce/muzakere-plani.md</td><td>yapısal kapı; karşı tarafa gidecek teklif metni K2</td></tr>
+        <tr><td><strong>Vekâletin sonlanması</strong></td><td><code>/vekalet-sonlandir</code></td><td>17-4 · 12-1 · 18-5</td><td>04-Muvekkil-Belgeleri/vekalet-sonlandirma-plani.md</td><td>yapısal kapı; mahkemeye veya müvekkile gidecek bildirim K2</td></tr>
+        <tr><td><strong>Dava dışı belge</strong></td><td><code>/ihtarname-yaz</code> · <code>/sozlesme-yaz</code></td><td>13-7</td><td>komutun kendi çıktısı; büro standardı önceliklidir</td><td>K2 (belge + eşlik)</td></tr>
+        <tr><td><strong>Takip ve pano</strong></td><td><code>/pano</code></td><td>18-6 · 18-5 · 12-4 · 10-3 · 10-8 · 11-9</td><td>Aktif Davalar/00-PORTFOY.md; pano sohbette (türev görünüm)</td><td>yapısal kapı</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 class="h3-ara">Takip araçları ve dosya yerleri</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Araç</th><th>Beceri</th><th>Dosya</th><th>Kural</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Süre Kalkanı</strong></td><td>12-4; hesap 12-1, başlangıç 12-2 ve 12-3</td><td><code>00-Sure-Kalkani.json</code> dava klasöründe</td><td>Yalnız <code>scripts/sure_kalkani.py</code> ile yazılır. Satır silinmez. Kesin son gün, koşullu hesap ve büro tedbir hedefi ayrı alandır; kalan gün ve eşik yalnız kesin son günden hesaplanır.</td></tr>
+        <tr><td><strong>Canlı dava özeti</strong></td><td>10-3</td><td><code>00-Dava-Ozeti.md</code> dava klasöründe</td><td>Kaynak UYAP klonu ve büro dosyaları. Klon yoksa başına "UYAP manifesti yok" yazılır. Süre tarihi yeniden yazılmaz, Kalkan satırına atıf yapılır.</td></tr>
+        <tr><td><strong>Dosya portföyü</strong></td><td>18-5</td><td><code>Aktif Davalar/00-PORTFOY.md</code></td><td>Büro geneli tablo; süre sütunu Kalkan'dan türetilir.</td></tr>
+        <tr><td><strong>Günlük pano</strong></td><td>18-6</td><td>Dosya yok, sohbette görünüm</td><td>Masaüstü araç okuma komutları, Kalkan listesi ve portföyden kurulur. Araç çalışmadıysa "yeni evrak yok" denmez.</td></tr>
+        <tr><td><strong>Dosyalar arası arama ve mevzuat değişikliği</strong></td><td>10-8 · 11-9</td><td>Sohbette; istenirse dosyaya</td><td>Değişiklik metni Mevzuat aracından çekilir; etkilenen davalar tek tek yazılır.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="grid2" style="margin-top:16px">
+    <div class="card">
+      <h3>Yargı PRO masaüstü komut satırı</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kullanım</th><th>Komutlar</th><th>Kural</th></tr></thead>
+          <tbody>
+            <tr><td>Okuma</td><td><code>durum</code> · <code>dosyalarim</code> · <code>hareketler</code> · <code>gelen-evraklar</code> · <code>durusmalar</code> · <code>icra</code> · <code>evraklar</code> · <code>safahat</code> · <code>yol</code> · <code>isler</code> · <code>sorunlar</code></td><td>Serbest; canlı UYAP okuması günde bir kez</td></tr>
+            <tr><td>UYAP taraması</td><td><code>supur</code></td><td>Günlük pano komutunda oturumda bir kez ya da avukatın açık eşitleme komutuyla</td></tr>
+            <tr><td>İndirme ve eşitleme</td><td><code>klonla</code> · <code>esitle</code> · <code>evrak-getir</code></td><td>Yalnız avukatın açık komutuyla; eşitleme önce kuru çalışma; toplu işte tek dosya, 10-15 dakika arayla, günde en çok 8 dosya; her hatada durur, UYAP doğrulama isterse avukat onayına kadar kilitlenir</td></tr>
+            <tr><td>Kuyruk ve sorun</td><td><code>kuyruk-duraklat</code> · <code>iptal</code> · <code>sorun-yoksay</code></td><td>Sistem kendiliğinden çalıştırmaz</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="owner" style="margin-top:8px">Uygulamadaki komut satırı erişimi Tam erişim olarak açık kalır; indirme ve eşitleme bunu gerektirir. Erişim anahtarı uygulamanın kendi ayar dosyasındadır ve hiçbir çıktıya yazılmaz. Veri değiştiren komutlar deneme amacıyla çağrılmaz.</p>
+    </div>
+    <div class="card">
+      <h3>Beceri metinlerinin büro uyarlamaları</h3>
+      <ul>
+        <li>Kişisel veri maskeleme şartı dava çıktısında aranmaz; kamuya açık çıktıda müvekkil verisi yasağı sürer.</li>
+        <li>Beceri metinlerindeki içtihat künyeleri doğrulanmamış sayılır; büro belgesine yalnız doğrulanıp havuza girerse taşınır.</li>
+        <li>Yapay zekâ kullanım bildirimi maddesi kendiliğinden eklenmez; karar avukatındır.</li>
+        <li>Güvenlik taraması metin dosyasında yapılır; metin karşılığı olmayan PDF ve görsel önce metne çevrilir, çevrilemezse "denetlenemedi" diye kaydedilir.</li>
+        <li>Tanık için yalnız soru hazırlanır, beyan yazılmaz. Celse kartında tutanağa geçirilecek kalemler zorunludur.</li>
+        <li>Alt-ajan oturum modelini devralır; beceri metnindeki hafif model önerisi uygulanmaz.</li>
+      </ul>
+      <h3 style="margin-top:12px">Yalnız istenince çalışanlar</h3>
+      <div class="chips"><span class="chip" title="Bağlam belirsizse istenir; 1. aşamadaki uyuşmazlık tespiti kolu ve rolü zaten çıkarır.">0-3-dosya-baglami-tanima</span><span class="chip" title="Avukat isterse; dosya kabulünden sonra ücret sözleşmesi için.">13-8-avukatlik-sozlesmesi</span><span class="chip" title="Avukat kararı 2026-10-09: standart değil, yalnız istenince. Formda yapay zekâ kullanım bildirimi vardır.">13-9-aydinlatilmis-onam</span><span class="chip" title="Dava çıktısında maskeleme ertelendi; kamuya açık çıktıda büro kuralı ve blog denetimi geçerli.">15-1-kisisel-veri-maskeleme</span><span class="chip" title="Avukat isterse; kaynaklı kurum notu büro hafızasına yazılır.">18-2-kurum-hafizasi</span><span class="chip" title="Avukat isterse; örneklem ve karşı örnekle sınırlı gözlem, kişisel hakim profili üretmez.">18-3-mahkeme-egilim-notlari</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="sozluk">
+  <h2>107 becerinin tek cümlelik sözlüğü</h2>
+  <p class="sub">Yargı PRO'nun bütün becerileri, sistemdeki yerleriyle: 36 beceri doğrudan bir aşamada, 40 beceri yargı kolunun ailesi olarak, 17 beceri büro hatlarında çalışır; 8 becerinin yerine büronun karşılığı çalışır, 6 beceri yalnız istenince kullanılır. Eşlemede yeri olmayan beceri kalmadı. Veri kaynağı: <code>config/beceri-haritasi.json</code>.</p>
+  <div class="filters">
+    <label class="f-ara"><span>Ara</span><input type="search" id="sz-q" placeholder="Beceri adı veya konu, örneğin istinaf" autocomplete="off"></label>
+    <label><span>Kol</span><select id="sz-kol"><option value="">Tümü</option><option value="ortak">Ortak</option><option value="hmk">HMK</option><option value="iik">İİK</option><option value="cmk">CMK</option><option value="iyuk">İYUK</option><option value="aym">AYM</option><option value="aihm">AİHM</option></select></label>
+    <label><span>Sistemdeki yeri</span><select id="sz-yer"><option value="">Tümü</option><option value="asama">Aşamada</option><option value="kol-ailesi">Kol ailesi</option><option value="hat">Büro hattı</option><option value="karsilik">Yerine büro karşılığı</option><option value="istege-bagli">Yalnız istenince</option></select></label>
+    <span class="sayac" id="sz-sayac" aria-live="polite">107 beceri</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Beceri</th><th>Kol</th><th>Ne yapar</th><th>Sistemdeki yeri</th></tr></thead>
+      <tbody>
+        <tr data-kol="ortak" data-yer="karsilik"><td><code>0-1-is-yonlendirici</code></td><td>Ortak</td><td>Gelen her işi uygun zincire dağıtan, reçete seçip adımları yürüten Yargı PRO orkestrasyon çekirdeğidir.</td><td><span class="badge b-warn">Yerine: Director, çalışma modları ve akış kaydı</span></td></tr>
+        <tr data-kol="ortak" data-yer="karsilik"><td><code>0-2-calisma-derinligi-secimi</code></td><td>Ortak</td><td>İşin hacmine ve talimata göre hızlı, standart veya derin çalışma düzeyini seçer.</td><td><span class="badge b-warn">Yerine: TAM ve HIZLI modlar</span></td></tr>
+        <tr data-kol="ortak" data-yer="istege-bagli"><td><code>0-3-dosya-baglami-tanima</code></td><td>Ortak</td><td>Oturum açılışında avukatın ve dosyanın kim, hangi rol, hangi mahkeme ve hangi aşama bağlamını her seferinde yeniden çıkarır.</td><td><span class="badge b-yap" title="Bağlam belirsizse istenir; 1. aşamadaki uyuşmazlık tespiti kolu ve rolü zaten çıkarır.">Yalnız istenince</span></td></tr>
+        <tr data-kol="cmk" data-yer="kol-ailesi"><td><code>1-1-ceza-dosya-analizi</code></td><td>CMK</td><td>Ceza dosyasını evre, iddianame, suç unsuru ile delil ve zamanaşımı eksenlerinde çözüp analiz raporu üretir.</td><td><span class="badge b-ek">Kol ailesi, dosya analizi · Aşama 3</span></td></tr>
+        <tr data-kol="cmk" data-yer="kol-ailesi"><td><code>1-2-ceza-emsal-bulma</code></td><td>CMK</td><td>Ceza Genel Kurulu ve ceza dairesi içtihadını lehe ve aleyhe hatlarıyla birlikte arar.</td><td><span class="badge b-ek">Kol ailesi, emsal · Aşama 2</span></td></tr>
+        <tr data-kol="cmk" data-yer="kol-ailesi"><td><code>1-3-sorusturma-dilekceleri</code></td><td>CMK</td><td>Şikâyet, suç duyurusu, gözaltı ve kısıtlama itirazı, takipsizliğe itiraz gibi soruşturma evresi dilekçelerini hazırlar.</td><td><span class="badge b-ek">Kol ailesi, dilekçe · Aşama 5</span></td></tr>
+        <tr data-kol="cmk" data-yer="kol-ailesi"><td><code>1-4-kovusturma-dilekceleri</code></td><td>CMK</td><td>İddianameye karşı beyan, katılma, delil talebi ve esas hakkında savunma gibi kovuşturma evresi dilekçelerini hazırlar.</td><td><span class="badge b-ek">Kol ailesi, dilekçe · Aşama 5</span></td></tr>
+        <tr data-kol="cmk" data-yer="kol-ailesi"><td><code>1-5-tutuklama-tedbir-dilekceleri</code></td><td>CMK</td><td>Tutuklamaya itiraz, tahliye talebi ve adli kontrol gibi süresi kritik koruma tedbiri dilekçelerini hazırlar.</td><td><span class="badge b-ek">Kol ailesi, dilekçe · Aşama 5</span></td></tr>
+        <tr data-kol="cmk" data-yer="kol-ailesi"><td><code>1-6-ceza-istinaf-temyiz</code></td><td>CMK</td><td>Ceza yargısında karar itirazı, istinaf, temyiz, kanun yararına bozma ve yargılamanın yenilenmesi metinlerini hazırlar.</td><td><span class="badge b-ek">Kol ailesi, dilekçe · Aşama 5</span></td></tr>
+        <tr data-kol="cmk" data-yer="kol-ailesi"><td><code>1-7-ceza-karar-sonrasi</code></td><td>CMK</td><td>İnfaz hesabı, lehe kanun uyarlaması, haksız tutuklama tazminatı ve adli sicil silme gibi karar sonrası işleri yürütür.</td><td><span class="badge b-ek">Kol ailesi, karar sonrası · Hat: Karar geldi</span></td></tr>
+        <tr data-kol="cmk" data-yer="kol-ailesi"><td><code>1-8-ceza-usul-islemleri</code></td><td>CMK</td><td>Uzlaştırma, seri muhakeme, basit yargılama, mazeret ve dosya örneği gibi dilekçe dışı ceza usul işlerini yürütür.</td><td><span class="badge b-ek">Kol ailesi, usul işlemleri · Aşama 5 HIZLI</span></td></tr>
+        <tr data-kol="hmk" data-yer="kol-ailesi"><td><code>2-1-hukuk-dosya-analizi</code></td><td>HMK</td><td>Hukuk davasını dava şartları, sıfat, zamanaşımı ve ispat bakımından inceleyip analiz raporu üretir.</td><td><span class="badge b-ek">Kol ailesi, dosya analizi · Aşama 3</span></td></tr>
+        <tr data-kol="hmk" data-yer="kol-ailesi"><td><code>2-2-hukuk-emsal-bulma</code></td><td>HMK</td><td>Hukuk uyuşmazlığı için Yargıtay ve bölge adliye emsalini tam metin, güncellik ve aleyhe karar incelemesiyle arar.</td><td><span class="badge b-ek">Kol ailesi, emsal · Aşama 2</span></td></tr>
+        <tr data-kol="hmk" data-yer="kol-ailesi"><td><code>2-3-dava-cevap-dilekceleri</code></td><td>HMK</td><td>Dava, cevap, karşı dava, cevaba cevap ve ikinci cevap dilekçelerini hazırlar.</td><td><span class="badge b-ek">Kol ailesi, dilekçe · Aşama 5</span></td></tr>
+        <tr data-kol="hmk" data-yer="kol-ailesi"><td><code>2-4-ara-talep-dilekceleri</code></td><td>HMK</td><td>İhtiyati tedbir ve haciz, delil tespiti, adli yardım, müdahale ve belge celbi gibi ara talepleri hazırlar.</td><td><span class="badge b-ek">Kol ailesi, dilekçe · Aşama 5</span></td></tr>
+        <tr data-kol="hmk" data-yer="kol-ailesi"><td><code>2-5-beyan-dilekceleri</code></td><td>HMK</td><td>Beyan, tanık ve delil listesi, bilirkişi raporuna itiraz ve feragat, kabul ya da sulh taslaklarını hazırlar.</td><td><span class="badge b-ek">Kol ailesi, dilekçe · Aşama 5</span></td></tr>
+        <tr data-kol="hmk" data-yer="kol-ailesi"><td><code>2-6-hukuk-istinaf-temyiz</code></td><td>HMK</td><td>Hukuk yargısında istinaf, temyiz ve cevapları, tedbir itirazı, hakimin reddi ve yargılamanın iadesi metinlerini hazırlar.</td><td><span class="badge b-ek">Kol ailesi, dilekçe · Aşama 5</span></td></tr>
+        <tr data-kol="hmk" data-yer="kol-ailesi"><td><code>2-7-hukuk-usul-islemleri</code></td><td>HMK</td><td>Gönderme, ıslah ve talep artırımı, harç, mazeret, süre uzatımı ve ilam hazırlığı gibi usul işlemlerini planlar.</td><td><span class="badge b-ek">Kol ailesi, usul işlemleri · Aşama 5 HIZLI</span></td></tr>
+        <tr data-kol="iik" data-yer="kol-ailesi"><td><code>3-1-icra-dosya-analizi</code></td><td>İİK</td><td>İcra dosyasında takip türünü, tebliği, kesinleşmeyi, itiraz rejimini ve işleyen süreleri çıkarır.</td><td><span class="badge b-ek">Kol ailesi, dosya analizi · Aşama 3</span></td></tr>
+        <tr data-kol="iik" data-yer="kol-ailesi"><td><code>3-2-icra-emsal-bulma</code></td><td>İİK</td><td>İcra ve iflas emsalini İBK, HGK, 12. Hukuk Dairesi ve bölge adliye sırasıyla, aleyhe tur zorunlu olarak arar.</td><td><span class="badge b-ek">Kol ailesi, emsal · Aşama 2</span></td></tr>
+        <tr data-kol="iik" data-yer="kol-ailesi"><td><code>3-3-takip-baslatma-dilekceleri</code></td><td>İİK</td><td>İlamsız, ilamlı, kambiyo, rehin, tahliye ve nafaka takibi başlatma taleplerini hazırlar.</td><td><span class="badge b-ek">Kol ailesi, dilekçe · Aşama 5</span></td></tr>
+        <tr data-kol="iik" data-yer="kol-ailesi"><td><code>3-4-takibe-itiraz-dilekceleri</code></td><td>İİK</td><td>Ödeme emrine borca, imzaya ve yetkiye itiraz, kambiyo şikâyeti, gecikmiş itiraz ve itirazın kaldırılması metinlerini hazırlar.</td><td><span class="badge b-ek">Kol ailesi, dilekçe · Aşama 5</span></td></tr>
+        <tr data-kol="iik" data-yer="kol-ailesi"><td><code>3-5-haciz-satis-dilekceleri</code></td><td>İİK</td><td>Haciz talebi, haciz ihbarnamesi, satış, kıymet takdirine itiraz ve ihalenin feshi metinlerini hazırlar.</td><td><span class="badge b-ek">Kol ailesi, dilekçe · Aşama 5</span></td></tr>
+        <tr data-kol="iik" data-yer="kol-ailesi"><td><code>3-6-icra-mahkemesi-dilekceleri</code></td><td>İİK</td><td>Memur işlemini şikâyet, haczedilmezlik, istihkak iddiası ve sıraya itiraz şikâyetlerini hazırlar.</td><td><span class="badge b-ek">Kol ailesi, dilekçe · Aşama 5</span></td></tr>
+        <tr data-kol="iik" data-yer="kol-ailesi"><td><code>3-7-icra-bagli-davalar</code></td><td>İİK</td><td>İtirazın iptali, menfi tespit, istirdat, istihkak, tasarrufun iptali ve sıra cetveline itiraz davalarını hazırlar.</td><td><span class="badge b-ek">Kol ailesi, dilekçe · Aşama 5</span></td></tr>
+        <tr data-kol="iik" data-yer="kol-ailesi"><td><code>3-8-icra-ceza-dilekceleri</code></td><td>İİK</td><td>Taahhüdü ihlal, mal beyanında bulunmama ve nafaka hükmüne uymama gibi icra ceza şikâyet ve savunmalarını hazırlar.</td><td><span class="badge b-ek">Kol ailesi, dilekçe · Aşama 5</span></td></tr>
+        <tr data-kol="iik" data-yer="kol-ailesi"><td><code>3-9-icra-usul-islemleri</code></td><td>İİK</td><td>Mehil, tehir-i icra, taahhüt, dosya hesabı, yenileme ve dosya kapatma gibi icra usul işlerini yürütür.</td><td><span class="badge b-ek">Kol ailesi, usul işlemleri · Aşama 5 HIZLI</span></td></tr>
+        <tr data-kol="iyuk" data-yer="kol-ailesi"><td><code>4-1-idare-dosya-analizi</code></td><td>İYUK</td><td>İdari dava dosyasında süreyi, dava türünü ve işlemin yetki, şekil, sebep, konu ve maksat unsurlarını çözer.</td><td><span class="badge b-ek">Kol ailesi, dosya analizi · Aşama 3</span></td></tr>
+        <tr data-kol="iyuk" data-yer="kol-ailesi"><td><code>4-2-idare-emsal-bulma</code></td><td>İYUK</td><td>Danıştay ve bölge idare içtihadını İDDK ve VDDK ilke kararlarından başlayarak arar.</td><td><span class="badge b-ek">Kol ailesi, emsal · Aşama 2</span></td></tr>
+        <tr data-kol="iyuk" data-yer="kol-ailesi"><td><code>4-3-iptal-tam-yargi-dilekceleri</code></td><td>İYUK</td><td>İptal, tam yargı ve vergi davası dilekçeleriyle idare savunması, cevap ve ek beyanları hazırlar.</td><td><span class="badge b-ek">Kol ailesi, dilekçe · Aşama 5</span></td></tr>
+        <tr data-kol="iyuk" data-yer="kol-ailesi"><td><code>4-4-yurutme-durdurma-talepleri</code></td><td>İYUK</td><td>Yürütmenin durdurulması ve itirazı, duruşma, adli yardım ve bilirkişi gibi idari yargı taleplerini hazırlar.</td><td><span class="badge b-ek">Kol ailesi, dilekçe · Aşama 5</span></td></tr>
+        <tr data-kol="iyuk" data-yer="kol-ailesi"><td><code>4-5-idare-istinaf-temyiz</code></td><td>İYUK</td><td>İdari yargıda istinaf, temyiz, bozma sonrası işlemler, yargılamanın yenilenmesi ve kanun yararına temyiz metinlerini hazırlar.</td><td><span class="badge b-ek">Kol ailesi, dilekçe · Aşama 5</span></td></tr>
+        <tr data-kol="iyuk" data-yer="kol-ailesi"><td><code>4-6-idare-usul-islemleri</code></td><td>İYUK</td><td>İdareye başvuru, üst makama başvuru, kararın uygulanmasının takibi ve harç gibi dava öncesi ve usul işlerini yürütür.</td><td><span class="badge b-ek">Kol ailesi, usul işlemleri · Aşama 5 HIZLI</span></td></tr>
+        <tr data-kol="aym" data-yer="kol-ailesi"><td><code>5-1-aym-dosya-analizi</code></td><td>AYM</td><td>Bireysel başvuru öncesi kabul edilebilirliği ve ihlal nitelemesini değerlendirip gidilir, riskli ya da gidilmez raporu üretir.</td><td><span class="badge b-ek">Kol ailesi, dosya analizi · Aşama 3</span></td></tr>
+        <tr data-kol="aym" data-yer="kol-ailesi"><td><code>5-2-aym-emsal-bulma</code></td><td>AYM</td><td>Anayasa Mahkemesi içtihadını Genel Kurul ve pilot kararlardan başlayıp paralel AİHM içtihadıyla birlikte arar.</td><td><span class="badge b-ek">Kol ailesi, emsal · Aşama 2</span></td></tr>
+        <tr data-kol="aym" data-yer="kol-ailesi"><td><code>5-3-aym-basvuru-formu</code></td><td>AYM</td><td>Bireysel başvuru formunu ve tedbir, eksiklik tamamlama, Bakanlık görüşüne cevap gibi sonraki metinleri hazırlar.</td><td><span class="badge b-ek">Kol ailesi, dilekçe · Aşama 5</span></td></tr>
+        <tr data-kol="aym" data-yer="kol-ailesi"><td><code>5-4-aym-usul-islemleri</code></td><td>AYM</td><td>Vekâletname, harç, adli yardım, eksiklik giderme, kimlik gizliliği ve başvurunun geri çekilmesi gibi AYM usul işlerini yürütür.</td><td><span class="badge b-ek">Kol ailesi, usul işlemleri · Aşama 5 HIZLI</span></td></tr>
+        <tr data-kol="aym" data-yer="kol-ailesi"><td><code>5-5-aym-karar-sonrasi</code></td><td>AYM</td><td>AYM ihlal kararının infazını, kabul edilemezlik sonrası AİHM&#x27;e geçişi ve tazminat takibini yürütür.</td><td><span class="badge b-ek">Kol ailesi, karar sonrası · Hat: Karar geldi</span></td></tr>
+        <tr data-kol="aihm" data-yer="kol-ailesi"><td><code>6-1-aihm-dosya-analizi</code></td><td>AİHM</td><td>Strazburg&#x27;a başvurmadan önce kabul edilebilirlik eşiklerini ölçüp gidilir, riskli ya da gidilmez raporu üretir.</td><td><span class="badge b-ek">Kol ailesi, dosya analizi · Aşama 3</span></td></tr>
+        <tr data-kol="aihm" data-yer="kol-ailesi"><td><code>6-2-aihm-emsal-bulma</code></td><td>AİHM</td><td>AİHM içtihadını Büyük Daire ilke kararlarından Türkiye uygulamasına uzanan zincirle arar.</td><td><span class="badge b-ek">Kol ailesi, emsal · Aşama 2</span></td></tr>
+        <tr data-kol="aihm" data-yer="kol-ailesi"><td><code>6-3-aihm-basvuru-formu</code></td><td>AİHM</td><td>Başvuru formu, geçici tedbir, görüş, adil tazmin ve dostane çözüm metinlerini hazırlar.</td><td><span class="badge b-ek">Kol ailesi, dilekçe · Aşama 5</span></td></tr>
+        <tr data-kol="aihm" data-yer="kol-ailesi"><td><code>6-4-aihm-usul-islemleri</code></td><td>AİHM</td><td>Temsil yetkisi, dil rejimi, süre uzatımı, anonimlik ve yazışma gibi AİHM usul işlerini yürütür.</td><td><span class="badge b-ek">Kol ailesi, usul işlemleri · Aşama 5 HIZLI</span></td></tr>
+        <tr data-kol="aihm" data-yer="kol-ailesi"><td><code>6-5-aihm-karar-sonrasi</code></td><td>AİHM</td><td>Büyük Daire&#x27;ye gönderme, yorum ve düzeltme talepleri ile kararın infaz izlemesini yürütür.</td><td><span class="badge b-ek">Kol ailesi, karar sonrası · Hat: Karar geldi</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>10-1-dosya-haritasi</code></td><td>Ortak</td><td>Dosyanın tarafsız haritasını, iddia, cevap ve delil matrisini ve eksik delilleri tek sayfada çıkarır.</td><td><span class="badge b-ok">Aşama 1</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>10-2-tum-evrak-incelemesi</code></td><td>Ortak</td><td>Dosyadaki bütün evrakı metne çevirip hiçbir sayfayı atlamadan okuyan derin analizdir.</td><td><span class="badge b-ok">Aşama 1</span></td></tr>
+        <tr data-kol="ortak" data-yer="hat"><td><code>10-3-canli-dosya-ozeti</code></td><td>Ortak</td><td>Her dava klasöründe kalıcı bir dava özeti tutar ve yeni evrak geldikçe artımlı olarak günceller.</td><td><span class="badge b-hat">Kapanış · Hat: Evrak girişi · Zabıt denetimi · Karar geldi · Takip ve pano</span></td></tr>
+        <tr data-kol="ortak" data-yer="hat"><td><code>10-4-karar-cozumlemesi</code></td><td>Ortak</td><td>Tebliğ edilen kararı satır satır çözümler, neye dayandığını ve kanun yolunda hangi gerekçenin hedef alınabileceğini gösterir.</td><td><span class="badge b-hat">Hat: Karar geldi</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>10-5-zayif-nokta-analizi</code></td><td>Ortak</td><td>Kendi dosyamızın aleyhe yönlerini ya da karşı dilekçe ve bilirkişi raporundaki hata ve çelişkileri bulur.</td><td><span class="badge b-ok">Aşama 4 · 6</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>10-6-vakia-tutarlilik-denetimi</code></td><td>Ortak</td><td>Yeni metindeki vakıa anlatımının dosyadaki önceki beyan ve belgelerle çelişip çelişmediğini denetler.</td><td><span class="badge b-ok">Aşama 5</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>10-7-uyusmazlik-tespiti</code></td><td>Ortak</td><td>İşin başında uyuşmazlığı, yargı kolunu, aşamayı, rolü ve ihtiyacı adım adım belirler.</td><td><span class="badge b-ok">Aşama 1</span></td></tr>
+        <tr data-kol="ortak" data-yer="hat"><td><code>10-8-dosyalar-arasi-arastirma</code></td><td>Ortak</td><td>Bütün dava özetlerinden yola çıkarak aynı müvekkilin ya da benzer konunun dosyalarını birlikte inceler.</td><td><span class="badge b-hat">Hat: Takip ve pano</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>10-9-revizyon-fark-analizi</code></td><td>Ortak</td><td>Avukatın elle düzelttiği taslakla sistem sürümü arasındaki farkları ve yeniden denetim kapsamını çıkarır.</td><td><span class="badge b-ok">Aşama 7</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>10-10-karsi-arguman-dongusu</code></td><td>Ortak</td><td>Her aleyhe husus için hedefli araştırma yapıp çürütme üretir ve stratejiye geri besler.</td><td><span class="badge b-ok">Aşama 6</span></td></tr>
+        <tr data-kol="ortak" data-yer="karsilik"><td><code>11-1-emsal-karar-bulma</code></td><td>Ortak</td><td>Emsal ihtiyacının bağlamını kurar, aramayı derin taramaya devreder ve kararların tam metnini okutur.</td><td><span class="badge b-warn">Yerine: Aşama 2&#x27;de 11-2, 11-3 ve 11-10 zinciri doğrudan çalışır</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>11-2-derin-emsal-taramasi</code></td><td>Ortak</td><td>Bir emsal ihtiyacını en az beş sorguya çevirip anlamsal ve kelime kanalında tarar.</td><td><span class="badge b-ok">Aşama 2</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>11-3-karar-tam-metni</code></td><td>Ortak</td><td>Künyesi belli bir kararın tam metnini bütün sayfalarıyla getirir.</td><td><span class="badge b-ok">Aşama 2</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>11-4-emsal-guncellik-denetimi</code></td><td>Ortak</td><td>Karar ve olay tarihindeki mevzuatı ve geçiş hükümlerini denetleyip emsalin uygulanabilirliğini ölçer.</td><td><span class="badge b-ok">Aşama 2</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>11-5-kanun-maddesi-bulma</code></td><td>Ortak</td><td>Kanun ve alt mevzuatta madde metnini bulur, yürürlük durumunu işaretler ve numara uydurmaz.</td><td><span class="badge b-ok">Aşama 2</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>11-6-guncel-kaynak-arama</code></td><td>Ortak</td><td>Güncellik, doktrin görüşü ya da resmi kaynak teyidi gerektiğinde koşullu web araması yapar.</td><td><span class="badge b-ok" title="Araçların ulaşamadığı güncel kaynak ve oran, tarife güncelliği; çıktıda kaynak adresi ve tarih zorunlu.">Aşama 2 · 3</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>11-7-kapsamli-arastirma</code></td><td>Ortak</td><td>Yeni ya da istikrarsız bir soruyu alt sorulara bölüp mevzuat, emsal ve güncel kaynağı çapraz doğrular.</td><td><span class="badge b-ok">Aşama 2</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>11-8-atif-dogrulama</code></td><td>Ortak</td><td>Çıktıdaki her künye ve madde atfının gerçek olduğunu ve iddiayı desteklediğini doğrulayan halüsinasyon kalkanıdır.</td><td><span class="badge b-ok">Aşama 2 · Denetçi</span></td></tr>
+        <tr data-kol="ortak" data-yer="hat"><td><code>11-9-mevzuat-degisiklik-taramasi</code></td><td>Ortak</td><td>Bir kanun veya yönetmelik değiştiğinde portföydeki hangi dosyaların etkilendiğini tarar.</td><td><span class="badge b-hat">Hat: Takip ve pano</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>11-10-emsal-karar-okumasi</code></td><td>Ortak</td><td>Tam metni gelen kararın olayını, hükmünü ve taşıyıcı gerekçesini çıkarıp dosyamızla ayırt edici noktaları yazar.</td><td><span class="badge b-ok">Aşama 2</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>12-1-sure-hesaplama</code></td><td>Ortak</td><td>Tebligattan yasal süreyi ve son günü çıkarır ve Süre Kalkanı tablosunu kurar.</td><td><span class="badge b-ok">Aşama 1 · 3 · Hat: Evrak girişi · Zabıt denetimi · Karar geldi · Vekâletin sonlanması</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>12-2-tebligat-denetimi</code></td><td>Ortak</td><td>Tebliğin usule uygunluğunu denetleyip sürenin başlangıç tarihini bağlar.</td><td><span class="badge b-ok">Aşama 1 · Hat: Evrak girişi · Karar geldi</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>12-3-ogrenme-tarihi-denetimi</code></td><td>Ortak</td><td>Tebliğ, tefhim ve öğrenme olaylarından başvuru rejimine uygun süre başlangıcını belirler.</td><td><span class="badge b-ok" title="AYM, AİHM ve öğrenmeye bağlı sürelerde.">Aşama 1 · Hat: Karar geldi</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>12-4-sure-takvimi</code></td><td>Ortak</td><td>Süre kayıtlarını izler, kesin son günü, koşullu hesabı ve büro hedef tarihini ayırır.</td><td><span class="badge b-ok">Kapanış · Hat: Evrak girişi · Zabıt denetimi · Karar geldi · Takip ve pano</span></td></tr>
+        <tr data-kol="ortak" data-yer="hat"><td><code>12-5-yargi-yolu-devri</code></td><td>Ortak</td><td>AYM ve AİHM geçişinde etkili başvuru yollarını, süreyi ve mazereti denetler.</td><td><span class="badge b-hat">Hat: Karar geldi</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>13-1-hedef-belirleme-gorusmesi</code></td><td>Ortak</td><td>Dava veya belge hedefindeki önemli belirsizliği seçenekleri ve riskleriyle karşılaştırarak giderir.</td><td><span class="badge b-ok" title="Hedef belirsizse seçenekler avukata sunulur; açık talimat yeniden onaya bağlanmaz.">Aşama 1 · Hat: Sulh ve müzakere</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>13-2-dava-stratejisi</code></td><td>Ortak</td><td>Analiz ve zayıf nokta çıktılarını talep sırası, delil planı ve risklerle uygulanabilir bir yol haritasına çevirir.</td><td><span class="badge b-ok">Aşama 4</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>13-3-dilekce-turu-secimi</code></td><td>Ortak</td><td>Olaya ve talebe göre doğru dilekçe türünü ve 12 argümantasyon şemasından uygun olanı belirler.</td><td><span class="badge b-ok">Aşama 5</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>13-4-dilekce-iskeleti</code></td><td>Ortak</td><td>Dilekçenin bölüm iskeletini, sırasını ve her bölümün zorunlu içeriğini kurar.</td><td><span class="badge b-ok">Aşama 5</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>13-5-dilekce-paragraf-plani</code></td><td>Ortak</td><td>Her paragrafta hangi vakıanın, hangi doğrulanmış dayanağın ve hangi çürütmenin yer alacağını planlar.</td><td><span class="badge b-ok">Aşama 5</span></td></tr>
+        <tr data-kol="ortak" data-yer="karsilik"><td><code>13-6-dilekce-yazimi</code></td><td>Ortak</td><td>Her yargı kolu ve rol için dilekçe üreten tek atımlık Yargı PRO belge motorudur.</td><td><span class="badge b-warn">Yerine: Aşama 5, 6 ve 7 zinciri</span></td></tr>
+        <tr data-kol="ortak" data-yer="hat"><td><code>13-7-dava-disi-belge-yazimi</code></td><td>Ortak</td><td>Sözleşme, mütalaa, protokol ve ihtarname gibi dava dışı belgeleri üretir veya inceler.</td><td><span class="badge b-hat">Hat: Dava dışı belge</span></td></tr>
+        <tr data-kol="ortak" data-yer="istege-bagli"><td><code>13-8-avukatlik-sozlesmesi</code></td><td>Ortak</td><td>Avukatlık ücret sözleşmesini, danışmanlık sözleşmesini ve kapsam ekini hazırlar veya inceler.</td><td><span class="badge b-yap" title="Avukat isterse; dosya kabulünden sonra ücret sözleşmesi için.">Yalnız istenince</span></td></tr>
+        <tr data-kol="ortak" data-yer="istege-bagli"><td><code>13-9-aydinlatilmis-onam</code></td><td>Ortak</td><td>Müvekkilin imzalayacağı, risk tablosu, yapay zekâ kullanımı bildirimi, KVKK aydınlatması ve başarı garantisi verilmediği beyanını içeren onam formunu üretir.</td><td><span class="badge b-yap" title="Avukat kararı 2026-10-09: standart değil, yalnız istenince. Formda yapay zekâ kullanım bildirimi vardır.">Yalnız istenince</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>14-1-hukuki-hesaplama</code></td><td>Ortak</td><td>Faiz, işçilik, miras, harç, kira ve mal rejimi gibi hesapları kanıta dayandırıp aritmetiği betikle yapar.</td><td><span class="badge b-ok">Aşama 3 · 4</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>14-2-guncel-oran-teyidi</code></td><td>Ortak</td><td>Her hesaptan önce dönemin oran, tavan ve tarifesini kaynaklı olarak teyit eder.</td><td><span class="badge b-ok">Aşama 3</span></td></tr>
+        <tr data-kol="ortak" data-yer="istege-bagli"><td><code>15-1-kisisel-veri-maskeleme</code></td><td>Ortak</td><td>Dış sorgu veya paylaşılacak belgede gereksiz kimlik, iletişim ve hassas bilgileri ayıklar.</td><td><span class="badge b-yap" title="Dava çıktısında maskeleme ertelendi; kamuya açık çıktıda büro kuralı ve blog denetimi geçerli.">Yalnız istenince</span></td></tr>
+        <tr data-kol="ortak" data-yer="hat"><td><code>15-2-belge-guvenlik-taramasi</code></td><td>Ortak</td><td>Gelen belgeyi okutmadan önce gizli talimat, görünmez metin ve sahte katman yönünden tarar; büroda dosya kabulünde ve evrak girişinde avukatın sürekli talimatıyla standart çalışır.</td><td><span class="badge b-hat" title="Avukatın sürekli talimatı 2026-10-09: karşı taraf dilekçe ve ekleri okunmadan önce taranır.">Hat: Dosya kabul · Evrak girişi</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>15-3-vekalet-yetki-denetimi</code></td><td>Ortak</td><td>Vekâletnamenin kapsamını, işlem için gereken özel yetkiyi ve temsil zincirini denetler.</td><td><span class="badge b-ok" title="Avukat kararı 2026-10-09: temel denetim dosya açılışında; 3. aşamada işleme özel yetki yeniden bakılır.">Aşama 3 · Hat: Dosya kabul</span></td></tr>
+        <tr data-kol="ortak" data-yer="hat"><td><code>15-4-cikar-catismasi-kontrolu</code></td><td>Ortak</td><td>Yeni iş kabulünde veya taraf değişiminde menfaat çatışmasını inceler.</td><td><span class="badge b-hat">Hat: Dosya kabul</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>15-5-arabuluculuk-sarti-denetimi</code></td><td>Ortak</td><td>Arabuluculuğun zorunlu olup olmadığını ve son tutanağın dava açmaya yeterli olup olmadığını denetler.</td><td><span class="badge b-ok">Aşama 3 · Hat: Sulh ve müzakere</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>15-6-dilekce-bicim-denetimi</code></td><td>Ortak</td><td>Dilekçenin zorunlu unsurlarını, merciini, taraflarını, talep sonucunu, eklerini ve imza alanını denetler.</td><td><span class="badge b-ok">Aşama 7</span></td></tr>
+        <tr data-kol="ortak" data-yer="karsilik"><td><code>15-7-son-kontrol-denetimi</code></td><td>Ortak</td><td>Teslim öncesinde talep, dayanak, delil, süre, temsil ve biçimi birlikte denetleyen Yargı PRO son kontrolüdür.</td><td><span class="badge b-warn">Yerine: Bağımsız denetçi (K1, KS, K2)</span></td></tr>
+        <tr data-kol="ortak" data-yer="karsilik"><td><code>15-8-zorunlu-adim-denetimi</code></td><td>Ortak</td><td>Bir çıktı hazır işaretlenmeden önce zorunlu adımları denetleyen Yargı PRO kapı bekçisidir.</td><td><span class="badge b-warn">Yerine: Bağımsız denetçi (K1, KS, K2)</span></td></tr>
+        <tr data-kol="ortak" data-yer="karsilik"><td><code>15-9-gonderim-onayi</code></td><td>Ortak</td><td>Son belgeyi gerçek alıcıya göndermeden önce yetki, sürüm ve ekleri kontrol eder; yalnız açık istekle çalışır.</td><td><span class="badge b-warn">Yerine: Avukat; sistem gönderim yapmaz</span></td></tr>
+        <tr data-kol="ortak" data-yer="hat"><td><code>16-1-durusma-hazirligi</code></td><td>Ortak</td><td>Duruşma öncesi gündem, riskler, celse hedefi ve B planını içeren celse kartı hazırlar.</td><td><span class="badge b-hat">Hat: Duruşma hazırlığı</span></td></tr>
+        <tr data-kol="ortak" data-yer="hat"><td><code>16-2-durusma-zapti-denetimi</code></td><td>Ortak</td><td>Duruşma zaptını celse kartıyla karşılaştırıp beyan ve taleplerin doğru geçip geçmediğini ve süre doğuran ara kararları denetler.</td><td><span class="badge b-hat">Hat: Zabıt denetimi</span></td></tr>
+        <tr data-kol="ortak" data-yer="hat"><td><code>16-3-tanik-sorulari</code></td><td>Ortak</td><td>Tanığa ve bilirkişiye sorulacak soruları ve beyanların çelişki matrisini hazırlar.</td><td><span class="badge b-hat">Hat: Duruşma hazırlığı</span></td></tr>
+        <tr data-kol="ortak" data-yer="hat"><td><code>16-4-delil-toplama-plani</code></td><td>Ortak</td><td>Analizde çıkan eksik delilleri kim, nereden ve hangi taleple toplayacak diye eyleme çevirir.</td><td><span class="badge b-hat">Hat: Duruşma hazırlığı</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>16-5-ispat-delil-rehberi</code></td><td>Ortak</td><td>Vakıa bazında ispat yükünü, kanuni karineleri ve delil kurallarını gösterir.</td><td><span class="badge b-ok">Aşama 4</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>17-1-muvekkil-bilgilendirme</code></td><td>Ortak</td><td>Müvekkile durum, karar ve seçenekleri açıklayan bilgilendirme notu üretir.</td><td><span class="badge b-ok">Kapanış · Hat: Karar geldi</span></td></tr>
+        <tr data-kol="ortak" data-yer="hat"><td><code>17-2-is-kabul-degerlendirme</code></td><td>Ortak</td><td>Yeni bir işin alınıp alınmayacağını kapsam, çatışma, süre, kaynak ve ücret yönünden değerlendirir.</td><td><span class="badge b-hat">Hat: Dosya kabul</span></td></tr>
+        <tr data-kol="ortak" data-yer="hat"><td><code>17-3-muzakere-plani</code></td><td>Ortak</td><td>Sulh teklifi veya arabuluculuk masası için tercih, alternatif ve sınırları planlar.</td><td><span class="badge b-hat">Hat: Sulh ve müzakere</span></td></tr>
+        <tr data-kol="ortak" data-yer="hat"><td><code>17-4-vekalet-sonlandirma</code></td><td>Ortak</td><td>İstifa, azil veya dosya devrinde bildirim, açık süreler, ücret ve teslimi planlar.</td><td><span class="badge b-hat">Hat: Vekâletin sonlanması</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>18-1-buro-hafizasi</code></td><td>Ortak</td><td>Büronun çalışma tercihlerini ve tekrar kullanılacak kayıtlarını kaynak ve sürümle saklar.</td><td><span class="badge b-ok">Aşama 0</span></td></tr>
+        <tr data-kol="ortak" data-yer="istege-bagli"><td><code>18-2-kurum-hafizasi</code></td><td>Ortak</td><td>Mahkeme, icra dairesi ve kurumların doğrulanabilir işleyiş notlarını kaynak ve tarihle tutar.</td><td><span class="badge b-yap" title="Avukat isterse; kaynaklı kurum notu büro hafızasına yazılır.">Yalnız istenince</span></td></tr>
+        <tr data-kol="ortak" data-yer="istege-bagli"><td><code>18-3-mahkeme-egilim-notlari</code></td><td>Ortak</td><td>Karar örneklerinden mahkeme uygulamasına dair sınırlı ve kaynaklı gözlem çıkarır.</td><td><span class="badge b-yap" title="Avukat isterse; örneklem ve karşı örnekle sınırlı gözlem, kişisel hakim profili üretmez.">Yalnız istenince</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>18-4-dosya-dersleri</code></td><td>Ortak</td><td>Tamamlanan dosyadan süreç derslerini çıkarıp anonim olarak kaydeder.</td><td><span class="badge b-ok">Kapanış</span></td></tr>
+        <tr data-kol="ortak" data-yer="hat"><td><code>18-5-dosya-portfoyu</code></td><td>Ortak</td><td>Büronun bütün dosyalarını aşama, sorumlu, bekleyen iş ve süre kaydıyla birlikte gösterir.</td><td><span class="badge b-hat">Kapanış · Hat: Vekâletin sonlanması · Takip ve pano</span></td></tr>
+        <tr data-kol="ortak" data-yer="hat"><td><code>18-6-gunluk-pano</code></td><td>Ortak</td><td>Bugün ve bu hafta yapılacak işleri portföy, süre ve bekleyen evrak kayıtlarından derler.</td><td><span class="badge b-hat">Hat: Takip ve pano</span></td></tr>
+        <tr data-kol="ortak" data-yer="karsilik"><td><code>18-7-paralel-calisma-rehberi</code></td><td>Ortak</td><td>Birden çok işin aynı anda yürütülmesini düzenleyen Yargı PRO rehberidir.</td><td><span class="badge b-warn">Yerine: Aşama 4 paralel çalıştırma kuralı</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>19-1-evrak-okuma-yazma</code></td><td>Ortak</td><td>UYAP evrakını kaynak ve sayfa kaydıyla okur ve belgeye dönüştürür.</td><td><span class="badge b-ok">Aşama 1 · Hat: Evrak girişi</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>19-2-yazim-kurallari-rehberi</code></td><td>Ortak</td><td>TDK yazım kurallarını tek kaynakta toplayan ve belge üretiminde uygulanan rehberdir.</td><td><span class="badge b-ok">Aşama 7</span></td></tr>
+        <tr data-kol="ortak" data-yer="asama"><td><code>19-3-islah-rehberi</code></td><td>Ortak</td><td>Islah, HMK 109/4 talep artırımı, harç, faiz ve zamanaşımı ayrımında danışılan bilgi modülüdür.</td><td><span class="badge b-ok" title="Islah ve HMK 109/4 talep artırımı işlerinde.">Aşama 3 · 5</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="komutlar">
+  <h2>Komutlar ve akış kaydı</h2>
+  <p class="sub">Her dava klasöründeki <code>00-AKIS.md</code>, hangi aşamanın yapıldığını, denetimin ne dediğini ve evrakın nereden geldiğini gösterir. Bu dosya betikle üretilir, elle düzenlenmez.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Komut</th><th>Ne yapar</th></tr></thead>
+      <tbody>
+        <tr><td><code>/yeni-dava</code></td><td>Yeni dava için tam akışı başlatır.</td></tr>
+        <tr><td><code>/dilekce</code></td><td>Mevcut davaya belge yazımı; önce modu seçer, mevcut aşama çıktılarını yeniden kullanır.</td></tr>
+        <tr><td><code>devam</code> · <code>devam 5-7</code></td><td>Sıradaki aşamaya geçer; 5, 6 ve 7. aşamaları tek onayla ardışık yürütür. Denetim engeli varsa geçmez.</td></tr>
+        <tr><td><code>atla</code> · <code>dur</code> · <code>devam et</code></td><td>Aşamayı sebebiyle atlar, akışı durdurur ya da kaldığı yerden sürdürür.</td></tr>
+        <tr><td><code>mod: tam</code> · <code>mod: hızlı</code></td><td>Çalışma modunu değiştirir.</td></tr>
+        <tr><td><code>denetle: &lt;dosya&gt;</code></td><td>Herhangi bir dosyayı bağımsız denetçiye gönderir; kaydedilir ama geçişi durdurmaz.</td></tr>
+        <tr><td><code>/akis</code></td><td>Akış durumunu özetler.</td></tr>
+        <tr><td><code>/davayi-cek</code></td><td>Evrak girişi hattı: UYAP evrakını masaüstü araçla, araç kapalıysa dava-cli ile çeker; güvenlik taraması, süre kaydı ve dava özeti. Aşama çalıştırmaz.</td></tr>
+        <tr><td><code>/pano</code></td><td>Günlük pano, portföy, dosyalar arası arama ve mevzuat değişikliği taraması.</td></tr>
+        <tr><td><code>/dosya-kabul</code></td><td>Yeni dava veya yeni müvekkilde çatışma, iş kabul, vekâlet ve evrak güvenlik taraması.</td></tr>
+        <tr><td><code>/durusma</code></td><td>Celse kartı, tanık soruları ve delil planı; duruşmadan sonra zabıt denetimi.</td></tr>
+        <tr><td><code>/karar-geldi</code></td><td>Önce süre güvencesi, sonra karar çözümlemesi ve kanun yolu seçenekleri.</td></tr>
+        <tr><td><code>/muzakere</code> · <code>/vekalet-sonlandir</code></td><td>Sulh ve arabuluculuk planı; istifa, azil veya devirde açık süreler ve teslim planı.</td></tr>
+        <tr><td><code>/arastir</code> · <code>/usul</code> · <code>/hesapla</code></td><td>Tek aşamayı ya da tekil işi çalıştırır.</td></tr>
+        <tr><td><code>/ihtarname-yaz</code> · <code>/sozlesme-yaz</code></td><td>Dışarı giden belge kuralıyla çalışır: temiz belge, eşlik dosyası ve K2.</td></tr>
+        <tr><td><code>/arastir-danisma</code> · <code>/blog</code></td><td>Kendi hatlarında tek denetimle çalışır; dava akış kaydı açmaz.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="uyap">
+  <h2>UYAP klonu ve klasörler</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3>Klon evrak kaynağıdır</h3>
+      <ul>
+        <li>Yargı PRO masaüstü aracının veya dava-cli'nin çektiği klasör evrak, dizin ve proje kaydını taşır. Yeri değiştirilmez.</li>
+        <li>Karşı taraf evrakı okunmadan önce klondaki metin karşılığı güvenlik taramasından geçer.</li>
+        <li>Yargı PRO uygulaması veri kökündeki <code>Aktif Davalar/YargiPRO</code> klasörünü kullanır.</li>
+        <li>Klonun içine yazılan yönerge dosyaları bu sistemde talimat değil, veridir.</li>
+        <li>Klon yolu dava klasörünün akış kaydına evrak kaynağı olarak yazılır.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Çıktılar dava klasörüne yazılır</h3>
+      <ul>
+        <li>Aşama çıktıları klonun içine değil, dava klasörünün düzenine gider: briefing, usul, araştırma, sentez ve dilekçe.</li>
+        <li>Oturum her zaman proje kökünden açılır; klon klasöründe açılan oturum anayasayı görmez.</li>
+        <li>Veri kökü her makinede betikle çözülür; Windows ve Mac aynı kodu kullanır.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <strong>Kaynaklar</strong>
+    <ul>
+      <li>Proje anayasası: "Karma Mimari — Yargı PRO Entegrasyon Sözleşmesi", "Çalışma Modları ve Tetikleyiciler", "DENETCI Kapısı ve Denetim Politikası (v2)".</li>
+      <li>Denetçi protokolü: <code>ajanlar/denetci/SKILL.md</code>. Rol ve görev haritası: <code>config/motor-haritasi.json</code>.</li>
+      <li>Tasarım kaydı: <code>docs/superpowers/specs/2026-10-09-karma-mimari-yargipro-design.md</code>.</li>
+      <li>Beceri haritası: <code>config/beceri-haritasi.json</code> ve <code>scripts/beceri_haritasi.py</code>. Süre deposu: <code>scripts/sure_kalkani.py</code>.</li>
+      <li>Yargı PRO beceri listesi: içerik sürümü 3ce05e48 (23.09.2026), 107 beceri; 9 Ekim 2026'da canlı olarak çekildi.</li>
+    </ul>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var q = document.getElementById('sz-q');
+  var kol = document.getElementById('sz-kol');
+  var yer = document.getElementById('sz-yer');
+  var sayac = document.getElementById('sz-sayac');
+  if (!q || !kol || !yer || !sayac) { return; }
+  var satirlar = Array.prototype.slice.call(document.querySelectorAll('#sozluk tbody tr'));
+  function kucuk(s) { return (s || '').toLocaleLowerCase('tr'); }
+  function suz() {
+    var t = kucuk(q.value.trim()), k = kol.value, y = yer.value, n = 0;
+    satirlar.forEach(function (tr) {
+      var uygun = (!k || tr.getAttribute('data-kol') === k) &&
+                  (!y || tr.getAttribute('data-yer') === y) &&
+                  (!t || kucuk(tr.textContent).indexOf(t) !== -1);
+      tr.hidden = !uygun;
+      if (uygun) { n += 1; }
+    });
+    sayac.textContent = n + ' beceri';
+  }
+  q.addEventListener('input', suz);
+  kol.addEventListener('change', suz);
+  yer.addEventListener('change', suz);
+  suz();
+})();
+</script>
+</body>
+</html>

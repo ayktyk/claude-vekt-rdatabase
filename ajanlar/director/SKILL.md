@@ -1,7 +1,7 @@
 # Director Agent -- Skill Dosyasi
 
-Son guncelleme: 2026-04-11
-Versiyon: 1.0
+Son guncelleme: 2026-10-09 (karma mimari: Çalışma Modları, Denetim Politikası v2, akış kaydı)
+Versiyon: 2.0
 
 ---
 
@@ -16,8 +16,10 @@ Sistem **tek motorla** çalışır. Director = **ORKESTRATOR** rolü
   ASAMA 1 olay çözüm protokolü Adım 8 bunu **üretir** veya avukat vermişse **doğrular**
 - **Alt ajanları çağırırken** her ajanın rolünü `config/motor-haritasi.json`'dan okur;
   hepsi aynı motorda çalışır — ayrım görev ayrımıdır
-- **Her hukuki çıktıdan sonra DENETCI'yi çağırır** (`ajanlar/denetci/SKILL.md`): yalnızca
-  çıktı yolu + dava-id verilir; KIRMIZI'da çıktı Drive'a yazılmaz, en çok 3 tur
+- **DENETCI'yi yalnız denetim noktalarında çağırır** (`ajanlar/denetci/SKILL.md`): TAM akışta
+  K1 (araştırma raporu) + KS (stratejik analiz) + K2 (dışarı giden belge + eşlik dosyası), havuz
+  eki açıldıysa EK; HIZLI'da yalnız K2. Yalnızca DENETİM ÇAĞRI BLOĞU verilir; KIRMIZI/SARI'da
+  sonraki ASAMA'ya geçilmez, çıktı Drive'a yazılmaz, en çok 3 tur
 - **Motor damgası:** `python scripts/motor.py damga <task_type>`; avukat `motor: <ad>` ile bildirir
 
 ---
@@ -41,15 +43,26 @@ Her komutta. Hicbir ajan Director Agent'in siniflandirmasi olmadan baslamaz.
 
 | Komut | Calistirilacak Adimlar ve Ajanlar |
 |---|---|
-| `yeni dava: [isim], [tur]` | ADIM -1 + ADIM 0 + ADIM 0B + ADIM 0C + Ajan 2 (arastirma) + Ajan 1 (usul) |
+| `yeni dava: [isim], [tur]` | TAM mod: ASAMA 0 → 7 (AGENTS.md "7 ASAMA Workflow"); `akis.py baslat --mod tam` |
+| `tam akış: [dava-id]` | TAM mod, `00-AKIS.md`'den kaldığı yerden; mevcut ASAMA çıktıları `mevcut` işaretlenir |
+| `mod: tam` / `mod: hızlı` | `akis.py mod` — çalışma modu değişir, olay kaydı düşer |
+| `akış durumu: [dava-id]` | `akis.py goster` |
+| `davayi cek` / `dava guncelle` | Evrak girişi hattı: Yargı PRO masaüstü aracı açıksa `klonla` / `esitle` (önce kuru çalışma; toplu işte yavaş mod), değilse `dava-cli clone` / `sync` (`.claude/skills/yargi-uyap-workspace/SKILL.md`); karşı taraf evrakı okunmadan önce 15-2 taraması; süre doğuran evrak Süre Kalkanı'na, özet `00-Dava-Ozeti.md`'ye; klon yolu `akis.py evrak` ile kaydedilir (`/davayi-cek`) |
+| `yeni muvekkil: [ad]` | Dosya kabul hattı (15-4, 17-2, 15-3, 15-2) → `00-Kabul.md`; yeni davada 1. aşamadan önce otomatik |
+| `durusma hazirla: [dava-id] [tarih]` · `zabit geldi: [dava-id]` | Duruşma hattı (16-1, 16-3, 16-4) · zabıt hattı (16-2 + süre + dava özeti) |
+| `karar geldi: [dava-id]` | Karar hattı (10-4, 12-2, 12-3, 12-1, 12-4, 12-5, kolun karar sonrası ailesi); kanun yoluna gidilecekse TAM akış |
+| `sulh teklifi: [dava-id]` · `muzakere: [dava-id]` | Müzakere hattı (13-1, 17-3, 15-5) |
+| `vekalet sonlandir: [dava-id]` | Vekâletin sonlanması hattı (17-4, 12-1, 18-5) |
+| `sure ekle: [dava-id] [işlem] [başlangıç]` | Süre Kalkanı: `sure_hesapla` → `sure_kalkani.py girdi/kaydet`; Google Takvim yalnız kesin satır ve avukat onayıyla |
+| `bugun` · `portfoy` · `portfoy ara: [konu]` · `mevzuat degisti: [kanun]` | `/pano` takip hattı (18-6, 18-5, 12-4, 10-3, 10-8, 11-9); veri masaüstü aracının okuma komutlarından ve Süre Kalkanı'ndan (`sure_kalkani.py liste`) |
 | `usul: [dava turu]` | ADIM -1 + yalnizca Ajan 1 |
-| `arastir: [kritik nokta]` | ADIM -1 + 2A (yorunge — opsiyonel) + 2D paralel + 2B→2C sirali zincir (mulga eleme dahil) |
-| `arastir stajyer: [dava-id]` | ADIM -1 + 2A Suer Stajyer (CDP otomasyon, scripts/superstajyer.py) |
-| `2A cevap al: [dava-id]` | 2A manuel fallback (Get-Clipboard, CDP fail durumunda) |
-| `arastir yargi: [...]` | ADIM -1 + Ajan 2B (Yargi MCP, CLI fallback; 2A varsa teyit modunda) |
+| `arastir: [kritik nokta]` | ADIM -1 + 2D paralel + 2B→2C sirali zincir (mulga eleme dahil) + DENETCI (dava akışında K1; dava dışında tek denetim, akış kaydı yok) |
+| `arastir stajyer:` / `2A cevap al:` | ARŞİVLENDİ (2026-07-09) — akış çalıştırılmaz; avukata `arsiv/README.md` bildirilir |
+| `arastir yargi: [...]` | ADIM -1 + Ajan 2B (Yargi MCP, CLI fallback) |
 | `arastir mevzuat: [...]` | ADIM -1 + Ajan 2C (Mevzuat MCP, CLI fallback) |
 | `arastir notebook: [...]` | ADIM -1 + Ajan 2D (NotebookLM/Drive) |
-| `dilekce yaz` / `ihtarname yaz` / `sozlesme yaz` | ADIM -1 + gerekli usul/esas ciktilari var mi kontrol + Ajan 3 |
+| `ihtarname yaz` / `sozlesme yaz` | Dava dışı belge hattı (`/ihtarname-yaz`, `/sozlesme-yaz`; 13-7 yöntemi, büro standardı önceliklidir); yedi aşama başlamaz; K2 (belge + eşlik; ihtarnamede `kontrol-notlari.md`) |
+| `dilekce yaz` / `cevap yaz` | **Çalışma Modu seçimi** (aşağıda): esas belge + son güne > 7 gün → TAM (mevcut çıktılar yeniden kullanılır); usul/ara belge veya ≤ 7 gün → HIZLI (0→1→2→5→7); nihai metin K2 DENETCI (belge + eşlik çifti; atıf yoksa UYGULANMAZ kaydı) |
 | `hesapla: [parametreler]` | ADIM -1 + Hesaplama modulu |
 | `savunma simule et: [dava-id]` | ADIM -1 + Savunma Simulatoru |
 | `revize et: [dava-id]` | ADIM -1 + Revizyon Ajani |
@@ -61,14 +74,39 @@ Her komutta. Hicbir ajan Director Agent'in siniflandirmasi olmadan baslamaz.
 | `arastir bilirkisi: [dava-id] [rapor-dosyasi]` | ADIM -1 + Arastirmaci (Bilirkisi Denetleme alt-modu) |
 | `swot arastir: [dava-id]` | ADIM -1 + Arastirmaci (SWOT Strateji alt-modu, banner'li) |
 | `sozlesme incele: [dosya-yolu]` | ADIM -1 + Arastirmaci (Sozlesme Inceleme alt-modu) |
-| `istinaf yaz: [dava-id]` | ADIM -1 + Dilekce Yazari (Istinaf/Temyiz alt-modu) |
-| `temyiz yaz: [dava-id]` | ADIM -1 + Dilekce Yazari (Istinaf/Temyiz alt-modu) |
+| `istinaf yaz: [dava-id]` | Dilekce Yazari (Istinaf/Temyiz alt-modu) — Çalışma Modu: TAM varsayılan; nihai metin K2 |
+| `temyiz yaz: [dava-id]` | Dilekce Yazari (Istinaf/Temyiz alt-modu) — Çalışma Modu: TAM varsayılan; nihai metin K2 |
 | `muvekkil bilgilendir: [dava-id]` | ADIM -1 + Director (muvekkil_bilgilendirme — MUHAKEME rolu) |
 | `strateji degerlendir: [dava-id]` | ADIM -1 + Director (strateji_degerlendirme — MUHAKEME rolu) |
 
+### Çalışma Modu Seçimi (2026-10-09)
+
+Her işin başında, ajan çalıştırmadan önce (AGENTS.md → "Çalışma Modları ve Tetikleyiciler"):
+
+1. **Talep türü ve yargı kolu:** esas belge (dava, cevap, replik/düplik, istinaf/temyiz, esaslı beyan,
+   bilirkişi raporuna esaslı itiraz, ıslah / 109/4) · usul/ara belge · büro iş hattı (duruşma, karar,
+   müzakere, vekâletin sonlanması, takip) · danışma · dava dışı araştırma. Yargı kolu 10-7 ile belirlenir
+   (HMK, İİK, CMK, İYUK, AYM, AİHM); kolun aileleri `python scripts/beceri_haritasi.py asama <n> --kol <kol>`
+   ile alınır (AGENTS.md "Beceri Haritası ve Büro İş Hatları"). Yeni davada önce dosya kabul hattı çalışır.
+2. **Süre:** son güne kaç gün? Süre Kalkanı (`python scripts/sure_kalkani.py liste --dava "<dava-klasoru>"`) veya
+   `npx -y yargi-skill sure_hesapla --kol <hmk|cmk|iyuk|iik|aym|aihm> --islem <kod> --teblig <YYYY-AA-GG> --tebligat-turu <tür> --adli-tatile-tabi <evet|hayir> --json`.
+   Çıktıda `takvime_aktarilabilir: false`, `baslangic_durumu: TEYIT-BEKLIYOR` veya `guven` alanı
+   `yuksek` dışında ise sonuç kesin son gün sayılmaz; mod seçimi en erken makul tarihe göre yapılır
+   ve `uyarilar` avukata bildirilir. Esas belgede ≤ 7 gün → HIZLI + `süre kritik`.
+3. **Bildirim + kayıt (önce bu):** tek satırlık `[MOD: …]` bildirimi kol bilgisiyle yazılır;
+   `python scripts/akis.py baslat "<dava-klasoru>" --mod tam|hizli --is "<iş>" --kol <kol>` (yeni iş önceki işin
+   kaydını arşivler).
+4. **Mevcut çıktılar:** dava klasöründe `00-Briefing.md`, `02-Arastirma/arastirma-raporu.md`,
+   `01-Usul/usul-raporu.md` … varsa ve sonradan yeni evrak yoksa ilgili ASAMA
+   `akis.py asama … <N> --durum mevcut --cikti <göreli yol>` ile işaretlenir. Mevcut ASAMA 2 / 4 çıktısı
+   daha önce K1 / KS'den geçmemişse `akis.py sonraki` ENGEL verir; çıktı bu iş için denetlenir.
+5. **Evrak kaynağı:** dava-cli klonu varsa `python scripts/akis.py evrak "<dava-klasoru>" --kaynak "<klon>"`.
+
+Avukat modu her an `mod: tam` / `mod: hızlı` ile değiştirir; Director tahminini dayatmaz.
+
 ## Zorunlu Girdiler
 
-- Avukat komutu (tetikleyici) — **MASKELI FORMATTA olmali** (KVKK Seviye 2)
+- Avukat komutu (tetikleyici) — gerçek veriyle gelir (KVKK maskeleme ERTELENDİ, 2026-07-09)
 - MemPalace wake-up sonuclari (ADIM -1 ciktisi)
 - Kaynak durumu (ADIM 0B ciktisi, yeni dava veya arastirma akisinda)
 
@@ -76,14 +114,12 @@ Opsiyonel ama etkili girdiler:
 - Advanced Briefing verisi (ADIM 0C)
 - Hakim / karsi taraf avukati bilgisi (aktor profilleri icin)
 
-## KVKK Seviye 2 Maskeleme Kontrolu (ZORUNLU - Her Yeni Dava)
+## KVKK Maskeleme — ERTELENDİ (2026-07-09)
 
-`yeni dava` komutunda 3 kontrol (ADIM -1 ile paralel):
-1. Komut maskeli mi? (`[MUVEKKIL_1]` token kullanildi mi) — degilse UYARI ver, `python scripts/maske.py add ...` hatirlat
-2. Dava-ID var mi? (`xxx-yyy-2026-nnn` formati) — yoksa sor
-3. `config/masks/<dava-id>.json` var mi? — yoksa avukati maske.py add'e yonlendir
-
-Detay protokol: `docs/maskeleme-kilavuzu.md`, `ajanlar/perspektif/PROTOKOL.md` § KVKK Seviye 2.
+AGENTS.md "KVKK Maskeleme" bölümü geçerlidir: dava komutları ve ASAMA çıktıları gerçek veriyle
+çalışır; maske dict kontrolü yapılmaz. Kamuya açık çıktılarda (blog, mail, MemPalace drawer)
+müvekkil verisi yasaktır (`cikti_dogrula.py --kamu`, `blog_validator.py`). Yerel LLM'e geçişte
+bu bölüm geri gelir (`docs/maskeleme-kilavuzu.md`).
 
 ## Hafiza Kontrolu (ZORUNLU - Her Komutta)
 
@@ -149,7 +185,8 @@ drawer'lar otomatik kabul edilmez (TASLAK isareti).
 ### ADIM 0 / 0B / 0C: Drive + Kaynak + Briefing
 
 **ADIM 0 — Drive klasoru:**
-- Yeni dava: `G:\Drive'im\Hukuk Burosu\Aktif Davalar\[YIL]-[SIRA] [Muvekkil] - [Tur]\`
+- Yeni dava: `<veri kökü>\Aktif Davalar\[YIL]-[SIRA] [Muvekkil] - [Tur]\` (kök `python scripts/paths.py data-root`
+  ile çözülür; bu Windows kurulumunda `G:\Drive'ım\1Hukuk Bürosu`)
   + 5 alt klasor (01-Usul, 02-Arastirma, 03-Sentez-ve-Dilekce, 04-Muvekkil-Belgeleri, 05-Durusma-Notlari)
 - Sadece arastirma: `Bekleyen Davalar\[YIL]-[SIRA] [Konu] - Arastirma\` + 2 alt (01-Arastirma, 02-Notlar)
 
@@ -169,13 +206,24 @@ Veri Ajan 1 (usul ton/risk), Ajan 2 (arama odagi), Ajan 3 (ton + talepler) icin 
 
 ### Ajan Calistirma Sirasi
 
-Yeni dava akisi:
+Yeni dava / TAM akış (AGENTS.md "7 ASAMA Workflow"):
 ```text
-ADIM -1 (MemPalace) -> ADIM 0 (Drive) -> ADIM 0B (Kaynak) -> ADIM 0C (Briefing)
--> Ajan 2 (Arastirma) -> Kalite Gate 1
--> Ajan 1 (Usul) -> Kalite Gate 2
--> Ajan 3 (Dilekce) -> Kalite Gate 3
--> [Opsiyonel: Savunma Simulatoru -> Revizyon Ajani]
+[MOD bildirimi] -> akis.py baslat --mod tam
+ASAMA 0 (MemPalace + kullanici_profili_getir)
+-> ASAMA 1 (Drive + Kaynak + Olay Çözüm Protokolü + Briefing)
+-> ASAMA 2 (Arastirma) -> Kalite Gate 1 + DENETCI K1
+-> ASAMA 3 (Usul) -> Kalite Gate 2 (yapısal + havuz_kontrol)
+-> ASAMA 4 (4A-4D paralel + 4E sentez) -> Kalite Gate 3 + DENETCI KS
+-> ASAMA 5 (Dilekce v1) -> ASAMA 6 (Savunma Simulasyonu) -> ASAMA 7 (Dilekce v2 NIHAI)
+-> Kalite Gate 4 + DENETCI K2 (dilekce-v2.md + dilekce-v2-kaynak-dogrulama.md) -> DOCX + UDF -> Kapanış
+(Her geçişte: python scripts/akis.py asama ...)
+```
+
+HIZLI akış (usul/ara belge veya süre kritik):
+```text
+[MOD bildirimi] -> akis.py baslat --mod hizli
+ASAMA 0 -> ASAMA 1 (kısa: uyuşmazlık + süre) -> ASAMA 2 (gerekirse; hafif 6/3)
+-> ASAMA 5 (belge) -> ASAMA 7 biçim adımları -> DENETCI K2 (belge + eşlik; atıf yoksa UYGULANMAZ kaydı) -> DOCX/UDF
 ```
 
 Arastirma-talebi akisi:
@@ -192,8 +240,8 @@ ADIM -1 (MemPalace + kanibalizasyon kontrolu)
 -> Cikti klasoru olustur (Blog\{tarih}-{slug}\ veya {dava-id}\06-Blog\)
 -> author.json sameAs okuma + (serbest modda) hizli Yargi/Mevzuat MCP tarama
 -> THEMIS girdi paketi hazirla (ORKESTRATOR)
--> MUHAKEME uretir + kapak gorseli -> DENETCI -> 4 dosya Drive'a yazilir
--> Self-review (KIRMIZI = yeniden uret)
+-> MUHAKEME uretir + kapak gorseli -> DENETCI tek denetim (KIRMIZI/SARI = yeniden uret, en cok 3 tur;
+   sonuc blog klasorunde `denetim-sonucu.md`) -> YESIL ise 4 dosya hazir bildirilir
 -> Avukat "Blog bitti" der -> Director: validator + Gmail draft
    + MemPalace diary + hall_blog_konulari drawer (kanibalizasyon kayit)
 ```
@@ -207,31 +255,41 @@ Director Agent dogrudan hukuki rapor URETMEZ. Ciktisi uc sekildir:
 
 ### Kalite Gate Matrisi
 
-#### Gate 1: Post-Arastirma (Ajan 2)
+#### Gate 1: Post-Arastirma (ASAMA 2) — + DENETCI K1
 **PASS:** >=15 Yargi + >=8 Mevzuat sorgu, >=2 HGK/IBK, >=5 tam metin, 5-yil temporal,
 >=2 celiski/bozma, 0 dogrulanmamis atif, GUVEN NOTU mevcut.
 **FAIL:** Ajan 2'ye spesifik eksik talimati. Risk flag varsa -> avukata bildir.
 
-#### Gate 2: Post-Usul (Ajan 1)
+#### Gate 2: Post-Usul (ASAMA 3) — yapısal kapı + `havuz_kontrol.py`
 **PASS:** Gorevli/yetkili mahkeme + kanun maddesi, yetkili adliye eslemesi
 (HSK/adalet.gov.tr URL+tarih VEYA `RISK FLAG: Yetkili Adliye dogrulanamadi`),
 dava sarti kontrol, zamanasimi/hak dusurucu tarihli, harc guncellik notu,
 eksik evrak analizi, >=15 checklist (iscilik), GUVEN NOTU.
-**FAIL:** Ajan 1'e spesifik eksik. Yetkili adliye RISK FLAG'li -> avukata sor, Ajan 3'e gonderme.
+**FAIL:** Usul Uzmanı'na spesifik eksik. Yetkili adliye RISK FLAG'li -> avukata sor, ASAMA 4'e geçme.
 
-#### Gate 3: Post-Dilekce (Ajan 3)
-**PASS:** Utandirma testi (muvekkil karsisi utanma) HAYIR, >=2 Yargitay atif,
-hesaplama-usul tutarliligi, zamanasimi savunma pozisyonu, arabuluculuk tutanagi atfi,
-0 dogrulanmamis atif, "Ozetle/Sonuc olarak" YOK, GUVEN NOTU.
-**FAIL:** Ajan 3'e spesifik sorun. Risk flag -> savunma simulasyonu oner.
+#### Gate 3: Post-Stratejik Analiz (ASAMA 4) — yapısal kapı + `havuz_kontrol.py` + DENETCI KS
+**PASS:** 4 perspektif dosyası + 4E sentez mevcut, karar net (KIRMIZI / YEŞİL / ŞARTLI), DÜŞÜK GÜVEN
+flag avukata gösterildi, 4A-4E yalnız künye havuzundaki künyelere atıf yaptı (`havuz_kontrol.py`
+PASS; havuz dışı künye `[HAVUZ DIŞI — DOĞRULANMAMIŞ]` damgalı ve yazım rehberine taşınmamış),
+`stratejik-analiz.md` için DENETCI KS YEŞİL.
+**FAIL:** Eksik perspektif yeniden spawn edilir. KS YEŞİL değilse `akis.py sonraki` ENGEL verir;
+4E stratejik kararı KIRMIZI ise Director geçişi kendisi durdurur ve `akis.py asama … 4 --not "4E KIRMIZI"`
+ile kaydeder. İki durumda da ASAMA 5'e geçilmez, avukata sunulur.
 
-#### Gate 4: Post-Nihai Dilekce (Revizyon Ajani v2 + UDF)
+**Dilekçe v1 kontrol listesi (ASAMA 5 — kapı değil, Revizyon girdisi):** Utandırma testi (müvekkil
+karşısında utanma) HAYIR, >=2 Yargıtay atfı (künye havuzundan; TAM esas belgede, HIZLI usul/ara belgede
+zorunlu değil), hesaplama-usul tutarlılığı, zamanaşımı
+savunma pozisyonu, arabuluculuk tutanağı atfı, "Özetle/Sonuç olarak" YOK, GÜVEN NOTU.
+
+#### Gate 4: Post-Nihai Dilekce (ASAMA 7) — DENETCI K2 + UDF yapısal kontrol
 v2/istinaf/temyiz icin ek kapi (v1'de calismaz). Format avukat onayli (Selin Uyar 2026-003, 2026-04-22).
-**PASS:** `dilekce-v2.{md,docx,udf}` Drive'da mevcut, UDF >1KB, zipfile valid,
+**PASS:** `dilekce-v2.{md,docx,udf}` + `dilekce-v2-kaynak-dogrulama.md` Drive'da mevcut,
+`cikti_dogrula.py dilekce-v2.md --eslik dilekce-v2-kaynak-dogrulama.md` PASS, UDF >1KB, zipfile valid,
 format_id="1.7", leftMargin="70.87", content.xml CDATA YAML-free, en az 1
 Alignment="1" (baslik) + Numbered="true" + bold/underline (section).
 Uretim: `python scripts/md_to_udf.py "<drive-yolu>/dilekce-v2.md"`
-**PASS aksiyonu:** "NIHAI paket hazir (MD+DOCX+UDF), UYAP oncesi `maske.py unmask` calistir."
+**Sıra:** DENETCI K2 YEŞİL (atıf yoksa UYGULANMAZ kaydı) → UDF üretimi → yapısal UDF kontrolü (bu kayıt olmadan UDF üretilmez).
+**PASS aksiyonu:** "NIHAI paket hazir (MD+DOCX+UDF)" + `akis.py asama … 7 --durum bitti`.
 **FAIL:** Revizyon Ajani UDF tekrar uretir; sustained failure -> avukata manuel UYAP Editor yolu.
 
 Tum ciktilar "TASLAK" — hicbiri "final" isaretlenmez.
@@ -247,7 +305,7 @@ Tum ciktilar "TASLAK" — hicbiri "final" isaretlenmez.
 - [ ] Referans verilen karar/mevzuat gercekten var mi?
       EMIN DEGILSEN: "dogrulanmasi gerekir" notu ekle.
       Uydurma referans YAZMA.
-- [ ] KVKK: Gercek isim, TC, IBAN var mi? Maskele.
+- [ ] KVKK: maskeleme ertelendi (dava çıktısı gerçek veriyle); kamuya açık türev çıktıda (blog, mail, MemPalace drawer) TC/IBAN/isim yok mu?
 
 ### Director-Ozel Kontroller
 
@@ -323,19 +381,22 @@ muvekkil bilgilendir: [dava-id]
 
 `prompts/muhakeme/muvekkil_bilgilendirme.md`
 
-Rol: MUHAKEME; cikti DENETCI denetiminden gecer. Cikti dili muvekkile yoneliktir:
+Rol: MUHAKEME; çıktı müvekkile gider → K2 kuralı (atıf içeriyorsa DENETCI; kaynak tablosu eşlik dosyasında). Cikti dili muvekkile yoneliktir:
 jargon parantez icinde kisa aciklama ile sadelestirilir, kesin vaat
 yasaktir ("kesinlikle kazaniriz" / "kaybedebiliriz" YOK).
 
 ### Cikti
 
 ```text
-G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\04-Muvekkil-Belgeleri\
-  muvekkil-bilgilendirme-{tarih}.md
+<veri kökü>\Aktif Davalar\{dava-id}\04-Muvekkil-Belgeleri\
+  muvekkil-bilgilendirme-{tarih}.md                    # müvekkile gidecek temiz metin
+  muvekkil-bilgilendirme-{tarih}-kaynak-dogrulama.md   # eşlik: AVUKAT İÇİN NOTLAR + doktrin blokları
 ```
 
-Cikti iki bolumdur: (1) MUVEKKILE ILETILECEK METIN (5 paragrafli)
-(2) AVUKAT ICIN NOTLAR (hassas noktalar, risk uyarilari, takip islemleri).
+Cikti iki dosyadir: (1) MUVEKKILE ILETILECEK METIN (5 paragrafli; TASLAK satiri, GUVEN NOTU ve avukat
+notu YOK) (2) eslik dosyasi: AVUKAT ICIN NOTLAR (hassas noktalar, risk uyarilari, takip islemleri) +
+SENTINEL + Kaynak Dogrulama tablosu + aleyhe beyani. Metin atif iceriyorsa K2 DENETCI; icermiyorsa
+`akis.py denetim … --nokta K2 --karar UYGULANMAZ --not "atif yok"`.
 
 ### Ozel Kalite Kontrol
 
@@ -344,7 +405,7 @@ Cikti iki bolumdur: (1) MUVEKKILE ILETILECEK METIN (5 paragrafli)
 - [ ] Tum tarihler / sureler net belirtilmis mi?
 - [ ] Muvekkile sorumluluk yukluyorsa kibar ama net mi?
 - [ ] "Sayin [Muvekkil Adi]" formati kullanilmis mi?
-- [ ] TASLAK ibaresi ust basta var mi?
+- [ ] Müvekkil metninde TASLAK ibaresi, GÜVEN NOTU ve avukat notu YOK mu (hepsi eşlik dosyasında mı)?
 
 ---
 
@@ -375,9 +436,9 @@ strateji degerlendir: [dava-id]
 `prompts/muhakeme/strateji_degerlendirme.md`
 
 Bu prompt **MUHAKEME** rolunde calisir. Config:
-`config/motor-haritasi.json -> strateji_degerlendirme`. 2 denemede
-Cikti DENETCI denetiminden gecer; KIRMIZI'da revize edilir.
-metadata'si ciktida isaretlenir.
+`config/motor-haritasi.json -> strateji_degerlendirme`. Çıktı ara çıktıdır: yapısal kapı +
+`havuz_kontrol.py` uygulanır; avukat isterse `denetle: <dosya>` ile DENETCI'ye gönderilir.
+Motor damgası çıktı frontmatter'ında işaretlenir.
 
 ### Cikti
 
@@ -446,6 +507,10 @@ Her komut isleminin basinda Director `tmp/current-asama.txt` ve
 script'leri (`hooks/mcp-timing-pre.sh`, `hooks/mcp-timing-post.sh`)
 tarafindan okunur, MCP timing log'una eklenir.
 
+> **2026-10-09 notu:** Bu iki hook `.claude/settings.local.json`'da eski bir masaüstü yoluna
+> bağlıydı ve çalışmıyordu; kayıtları kaldırıldı. Betikler `hooks/` altında duruyor. Yeniden
+> bağlanmadıkça `mcp-timings.jsonl` yazılmaz; `tmp/current-*.txt` dosyaları yalnız bilgi amaçlıdır.
+
 ```bash
 mkdir -p tmp
 echo "ASAMA_NO" > tmp/current-asama.txt   # Ornek: "ASAMA 2 - Arastirma"
@@ -475,29 +540,36 @@ asama_end_ns: {date +%s%N degeri}
 asama_sure_sn: {hesaplama}
 ```
 
-Bu satirlar opsiyoneldir; deterministik timing zaten hooks tarafindan
-yakalanir. LLM emit unutursa sistem bozulmaz.
+Bu satirlar opsiyoneldir. MCP timing hook'lari 2026-10-09'dan beri bagli degildir (yukaridaki
+not); LLM emit unutursa sistem bozulmaz.
 
-### 3. Hukuki Cikti Sonrasi DENETCI Cagrisi (tek motor)
+### 3. DENETCI Çağrısı (Denetim Politikası v2 — 2026-10-09)
 
-Elle devir blogu YOKTUR. Her ASAMA ciktisi ayni oturumda uretilir; Director
-uretimden hemen sonra DENETCI'yi **yalnizca** su blokla cagirir (`AGENTS.md` ->
-"DENETIM CAGRI BLOGU"):
+Elle devir blogu YOKTUR. Director DENETCI'yi yalnız **denetim noktalarında** çağırır: K1 (ASAMA 2
+araştırma raporu), KS (ASAMA 4 `stratejik-analiz.md`), K2 (dışarı giden nihai belge + eşlik dosyası
+— ASAMA 7, istinaf/temyiz, ihtarname, sözleşme, müvekkil bilgilendirme), EK (`kunye-havuzu-ek.md`,
+ilk kullanımdan önce), danışma cevabı ve blog (tek denetim), avukatın `denetle: <dosya>` dediği
+dosya. Çağrı yalnızca şu
+bloktur (`AGENTS.md` -> "DENETIM CAGRI BLOGU"):
 
 ```
 DENETİM TALEBİ
 Dava-ID: {dava-id}
+Denetim noktası: {K1 | KS | K2 | EK | tek | istek}
 Denetlenecek dosya: {mutlak yol}
+Eşlik dosyası: {mutlak yol — yalnız K2}
 Protokol: ajanlar/denetci/SKILL.md
 ```
 
-Uretim baglami, taslak surumleri ve gerekceler DENETCI'ye VERILMEZ — bagimsizlik
-buradan gelir. Karar KIRMIZI ise cikti Drive'a yazilmaz, uretici rol revize eder;
-en cok 3 tur, sonra avukata escalate. YESIL ise Drive'a yazilir, avukat "ASAMA N bitti"
-/ `devam` der; Director `qmd update` + diary + DOCX/UDF yapar.
+Uretim baglami, taslak surumleri ve gerekceler DENETCI'ye VERILMEZ — bagimsizlik buradan gelir.
+Karar KIRMIZI ise cikti Drive'a yazilmaz, uretici rol revize eder; en cok 3 tur, sonra avukata
+escalate (4. tur yalnız avukat talimatıyla). Her tur sonucu `python scripts/akis.py denetim …` ile
+`00-AKIS.md`'ye yazılır; denetim bloğu dilekçe/UDF'ye değil eşlik dosyasına girer.
 
-ASAMA 5-6-7 (yaz -> elestir -> revize) ayni oturumda ardisik yurur; her cikti ayri
-dosyaya yazilir ve her biri ayri DENETCI denetiminden gecer.
+Ara çıktılar (ASAMA 1, 3, 4A-4D, 5, 6) DENETCI'ye gitmez: `cikti_dogrula.py` + `havuz_kontrol.py`.
+Kayıtlı `denetci` alt-ajanı MCP'ye erişemezse (`MCP ERİŞİMİ: YOK`) aynı blok genel amaçlı sıfır
+bağlamlı alt-ajanla yeniden çalıştırılır.
+ASAMA 5-6-7 avukatın `devam 5-7` onayıyla ardışık yürüyebilir; her çıktı ayrı dosyaya yazılır.
 
 ### Profiling kapatma (rollback)
 
@@ -611,7 +683,7 @@ Sonraki adim: Yargi temporal_2025
 
 - `tmp/current-asama.txt` ve `tmp/current-dava-id.txt` (Faz 1) DEGISMEZ
 - Yeni `tmp/current-run-id.txt` ve `.faz2-progress.jsonl` (Faz B) eklenir
-- MCP timing hook'lari (eski, Faz 1) `mcp-timings.jsonl`'a yazmaya devam eder
+- MCP timing hook'lari (eski, Faz 1) 2026-10-09'dan beri bagli degildir; `mcp-timings.jsonl` guncellenmez
 - `.faz2-progress.jsonl` ek detay (query_label, result_count vb.) icin
 
 ### Asla
@@ -662,7 +734,7 @@ Agent(subagent_type="sentez-strateji", description="ASAMA 4E sentez",
       prompt=research_package + 4_perspektif_ciktilari)
 ```
 
-5E sentez ardi sira yapilir cunku 4 perspektifin ciktisina ihtiyaci var.
+4E sentez ardi sira yapilir cunku 4 perspektifin ciktisina ihtiyaci var.
 
 ### Hata Toleransi (Promise.allSettled)
 
@@ -698,8 +770,9 @@ bash scripts/progress_helper.sh log 4A complete '{"agent":"davaci-avukat","statu
 
 ### KVKK
 
-Sub-agent prompt'larinda HAM muvekkil verisi YASAK. Research package zaten maskeli
-context icerir. Sub-agent ciktilarinda da `[Muvekkil]`, `[TC_NO]` formatinda kalir.
+KVKK maskeleme ertelendi (2026-07-09): research package gerçek veriyle gelir; sub-agent çıktısı
+kamuya açık değildir. MemPalace'a yazılacak drawer'da müvekkil verisi maskelenir
+(`cikti_dogrula.py --kamu`).
 
 ### Kalite Kapisi (ASAMA 4 Sonu)
 
@@ -707,7 +780,8 @@ context icerir. Sub-agent ciktilarinda da `[Muvekkil]`, `[TC_NO]` formatinda kal
 - [ ] 4E sentez dosyasi var mi (4'unun ozeti + dilekce yazim rehberi)?
 - [ ] Sentez karari belirlenmis mi (KIRMIZI / YESIL / SARTLI)?
 - [ ] DUSUK GUVEN flag varsa avukata gosterildi mi?
-- [ ] Tum dosyalar Drive'a yazildi mi?
+- [ ] 4A-4E yalnız künye havuzundaki künyelere mi atıf yaptı? Havuz dışı künye `[HAVUZ DIŞI — DOĞRULANMAMIŞ]` damgalı mı?
+- [ ] Tum dosyalar Drive'a yazildi mi? `akis.py asama … 4 --durum bitti` işlendi mi?
 
 Eksik varsa: SADECE eksik perspektifi yeniden spawn et (4'unun hepsini degil).
 

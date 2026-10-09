@@ -34,7 +34,10 @@ python scripts/protokol_kontrol.py ajanlar/director/olay-cozum-protokolu.md
 
 ## Çıktı kuralı
 
-Her adımın cevabı `00-Briefing.md` içindeki karşılık gelen başlığa yazılır.
+Her adımın cevabı `00-Briefing.md` içindeki karşılık gelen başlığa yazılır. Briefing'in ilk
+satırı SENTINEL `<!-- DOKTRIN-PREAMBLE v1 -->`'dir; briefing'e karar künyesi yazılmaz (künye ASAMA 2'de
+doğar). Sonunda künyesiz KAYNAK DOĞRULAMA tablosu (evrak ve mevzuat dayanakları, documentId `—`) ve
+`Aleyhe içtihat: ARANMADI (araştırma ASAMA 2'de)` satırı bulunur; yapısal kapı `cikti_dogrula.py`.
 Cevabı bilinmeyen adım **boş bırakılmaz**: `EKSİK — müvekkilden sorulacak` yazılır
 ve ASAMA 1 çıktısının **"Avukatın Karar Noktaları"** bloğuna taşınır.
 

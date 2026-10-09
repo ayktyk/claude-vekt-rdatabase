@@ -69,6 +69,24 @@ def data_root() -> Path:
     )
 
 
+def yargipro_cli() -> Path:
+    """Yargı PRO masaüstü komut satırı aracı (yargipro.cmd / yargipro) yolunu çözer.
+
+    Öncelik: YARGIPRO_CLI ortam değişkeni > config/paths.json 'yargipro_cli.<platform>'.
+    Araç yalnız uygulama açıkken çalışır; yol tanımsızsa RuntimeError.
+    """
+    env = os.environ.get("YARGIPRO_CLI")
+    if env:
+        return Path(env).expanduser()
+    yol = _load_cfg().get("yargipro_cli", {}).get(_platform_key())
+    if yol:
+        return Path(yol).expanduser()
+    raise RuntimeError(
+        "Yargı PRO komut satırı yolu tanımsız. Uygulamada Ayarlar > Komut satırı ekranındaki yolu "
+        f"{_CONFIG} içine 'yargipro_cli.{_platform_key()}' olarak yazın ya da YARGIPRO_CLI ayarlayın."
+    )
+
+
 def _sub(name: str, default: str) -> Path:
     subs = _load_cfg().get("subdirs", {})
     return data_root() / subs.get(name, default)
@@ -95,8 +113,27 @@ def research_root() -> Path:
 
 
 def dava_dir(dava_id: str) -> Path:
-    """Aktif Davalar/<dava-id> — bir davanin kok klasoru."""
-    return aktif_davalar() / dava_id
+    """Aktif Davalar altindaki dava klasoru.
+
+    Gercek klasor adlari "2026-016 Ibrahim Sasmaz Kaza" bicimindedir. Sira:
+      1) Tam ad olarak varsa o klasor.
+      2) Yoksa adi dava_id ile baslayan (ardindan rakam gelmeyen) TEK klasor.
+      3) Eslesme yoksa birlesik yol (yeni dava klasoru icin) — klasor OLUSTURULMAZ.
+    Birden cok eslesmede ValueError (belirsiz dava-id; tam ad verilmeli).
+    """
+    kok = aktif_davalar()
+    tam = kok / dava_id
+    if tam.is_dir() or not kok.is_dir():
+        return tam
+    adaylar = sorted(
+        p for p in kok.iterdir()
+        if p.is_dir() and p.name.startswith(dava_id)
+        and (len(p.name) == len(dava_id) or not p.name[len(dava_id)].isdigit())
+    )
+    if len(adaylar) > 1:
+        adlar = ", ".join(p.name for p in adaylar)
+        raise ValueError(f"'{dava_id}' birden cok dava klasoruyle eslesiyor: {adlar} — tam adi verin")
+    return adaylar[0] if adaylar else tam
 
 
 def _main(argv):
@@ -122,7 +159,17 @@ def _main(argv):
             if len(argv) < 2:
                 print("Kullanim: python scripts/paths.py dava <dava-id>", file=sys.stderr)
                 return 2
-            print(dava_dir(argv[1]))
+            klasor = dava_dir(argv[1])
+            print(klasor)
+            if not klasor.is_dir():
+                print(f"[YOK] Bu klasor henuz yok (yeni dava icin olusturulacak yol): {klasor}",
+                      file=sys.stderr)
+        elif cmd == "yargipro-cli":
+            arac = yargipro_cli()
+            print(arac)
+            if not arac.exists():
+                print(f"[YOK] Araç bu yolda bulunamadı: {arac}", file=sys.stderr)
+                return 1
         elif cmd == "check":
             print(f"platform      : {sys.platform} -> '{_platform_key()}'")
             print(f"env override  : {os.environ.get('HUKUK_BUROSU_ROOT') or '(yok)'}")
@@ -140,7 +187,7 @@ def _main(argv):
             print(f"Bilinmeyen komut: {cmd}\n", file=sys.stderr)
             print(__doc__, file=sys.stderr)
             return 2
-    except RuntimeError as e:
+    except (RuntimeError, ValueError) as e:
         print(f"[HATA] {e}", file=sys.stderr)
         return 1
     return 0

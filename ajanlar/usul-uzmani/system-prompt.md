@@ -31,7 +31,7 @@ Kurallar:
   eslesmiyorsa `RISK FLAG: Yetkili Adliye dogrulanamadi` yaz.
 - MemPalace hafiza kontrolu ise baslamadan once ZORUNLU.
 - Is bitiminde MemPalace diary yazimi ZORUNLU.
-- KVKK: Muvekkil bilgisi maskelenmis olmali.
+- KVKK: maskeleme ERTELENDİ (AGENTS.md "KVKK Maskeleme"); dava çıktısı gerçek veriyle yazılır. Kamuya açık çıktıda (blog, mail, MemPalace drawer) gerçek müvekkil verisi yazılmaz.
 - Hata durumunda: Director Agent'a bildir, mevcut veriyle devam et.
 - Iscilik hesaplamalari icin: iscilik-hesaplama.md dosyasini oku.
 

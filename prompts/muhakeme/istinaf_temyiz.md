@@ -77,6 +77,10 @@ Senden istenen:
 
 ## Cikti Formati
 
+Nihai istinaf/temyiz dilekcesi disari giden belgedir: asagidaki TASLAK satiri ve GUVEN NOTU, ara
+taslakta (v1) dosyanin basinda durur; nihai metinde (`istinaf-dilekcesi-vN.md`) belgeye degil eslik
+dosyasina (`istinaf-dilekcesi-vN-kaynak-dogrulama.md`) yazilir. Nihai metin K2 denetiminden gecer.
+
 ```markdown
 TASLAK - Avukat onayina tabidir
 

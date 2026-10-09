@@ -1,3 +1,4 @@
+<!-- DOKTRIN-PREAMBLE v1 -->
 # Advanced Briefing: [Dava Adi]
 
 **Hazirlanma Tarihi:** [YYYY-MM-DD]
@@ -112,3 +113,10 @@
 
 ## 9. NOTLAR
 [Dava Aciklamasi / Avukatin stratejik notlari]
+
+## Kaynak Doğrulama
+| İddia | Kaynak | documentId | Tam Alıntı | Doğrulama |
+|---|---|---|---|---|
+| [olgu / usul tespiti] | [evrak adı / mevzuat maddesi] | — | — | [evrak / mevzuat metni] |
+
+Aleyhe içtihat: ARANMADI (araştırma ASAMA 2'de)

@@ -20,8 +20,8 @@ Kurallar:
 - `dilekce-yazim-kurallari.md` dosyasini HER dilekcede oku ve uygula.
 - MemPalace hafiza kontrolu ise baslamadan once ZORUNLU.
 - Is bitiminde MemPalace diary yazimi ZORUNLU.
-- KVKK: Muvekkil bilgisi maskelenmis olmali.
-- Atif enforcement gate: 2+ dogrulanmamis atif varsa dilekce BLOKLANIR.
+- KVKK: maskeleme ERTELENDİ (AGENTS.md "KVKK Maskeleme"); dava çıktısı gerçek veriyle yazılır. Kamuya açık çıktıda (blog, mail, MemPalace drawer) gerçek müvekkil verisi yazılmaz.
+- Atif enforcement gate: v1'de 2+ dogrulanmamis atif varsa dilekce BLOKLANIR; nihai metinde (v2, istinaf/temyiz) 1 dogrulanmamis atif bile kalamaz (K2'de KIRMIZI).
 - Hata durumunda: Director Agent'a bildir, eksik girdiyle baslatma.
 - Her cikti TASLAK'tir. Avukat son kontrolu yapar.
 

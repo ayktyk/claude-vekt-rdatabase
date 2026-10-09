@@ -57,3 +57,27 @@ def test_bos_dosya_cokmez(tmp_path):
 def test_bos_string_bildirilmedi_sayilir(tmp_path):
     yol = _harita_yaz(tmp_path, aktif="   ")
     assert motor.aktif_motor(yol) == "bildirilmedi"
+
+
+def test_repo_motor_haritasi_gecerli_json():
+    # 2026-09-03'te _history satırlarına HTML yorumu eklenmiş, dosya geçersiz JSON olmuştu
+    json.loads(motor.VARSAYILAN_HARITA.read_text(encoding="utf-8"))
+
+
+def test_gecersiz_json_ayarla_ile_ezilmez(tmp_path):
+    yol = tmp_path / "motor-haritasi.json"
+    bozuk = '{"roller": {"A": 1}, "x": 1, <!-- yorum -->}'
+    yol.write_text(bozuk, encoding="utf-8")
+    import pytest
+    with pytest.raises(ValueError):
+        motor.motor_ayarla("deneme", yol)
+    assert yol.read_text(encoding="utf-8") == bozuk
+
+
+def test_cli_ayarla_bozuk_haritada_hata_kodu_doner(tmp_path, monkeypatch, capsys):
+    yol = tmp_path / "motor-haritasi.json"
+    bozuk = '{"roller": {}, <!-- yorum -->}'
+    yol.write_text(bozuk, encoding="utf-8")
+    monkeypatch.setattr(motor, "VARSAYILAN_HARITA", yol)
+    assert motor.main(["ayarla", "deneme"]) == 1
+    assert yol.read_text(encoding="utf-8") == bozuk

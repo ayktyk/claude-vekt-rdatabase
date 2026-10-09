@@ -1,3 +1,6 @@
+---
+description: "ASAMA 2C mevzuat derin protokolü (Yargı PRO mevzuat araçları, mülga eleme, normlar hiyerarşisi)"
+---
 <!-- DOKTRIN-PREAMBLE v1 -->
 > **0-HALÜSİNASYON + ANTI-SYCOPHANCY (zorunlu — tam metin: `prompts/_doktrin-preamble.md`):**
 > - UYDURMA YARGITAY/HGK/İBK kararı atfı YASAK — her künye Bedesten documentId ile doğrulanır; doğrulanmayan "DOĞRULANMAMIŞ" damgalanır.
@@ -18,17 +21,20 @@ zorunlu uygular.
 **FAZ 2 (2026-05-19):** Eski 9 spesifik mevzuat tool'u (`search_kanun`,
 `search_khk`, `search_tuzuk`, ...) **tek `mevzuat_ara` + `mevzuat_tur_list[]`**
 altında birleşti. 3 ayrı fetch tool (`get_mevzuat_content` / `_madde_tree` /
-`_gerekce`) **tek `mevzuat_getir` + `id_type` enum**'a indirgendi.
+`_gerekce`) **tek `mevzuat_getir` + `id_type` enum**'a indirgendi. Rehber 2026-09-06 itibarıyla
+`mevzuat_getir`'in gerekçe seçeneği **yoktur** (kaynak gerekçe yayımlamıyor) ve `mevzuat_ara`
+**hiçbir operatör kabul etmez**.
 
 ## Zorunlu Referans Dokümanlar
-- `.claude/skills/yargi-legal-research-guide/SKILL.md` — **sorgu lehçeleri + tuzaklar (BİRİNCİL referans, sürüm 2026-07-08b)**
+- `.claude/skills/yargi-legal-research-guide/SKILL.md` — **sorgu lehçeleri + tuzaklar (BİRİNCİL referans, sürüm 2026-09-06)**
 - `ajanlar/perspektif/PROTOKOL.md` → ASAMA 2C + Normlar Hiyerarşisi
 - `ajanlar/arastirmaci/SKILL.md` → Bölüm 2 (Mevzuat MCP Derin Protokolü, 9 Faz + Mülga) + Bölüm 2.5 (Mülga Eleme)
 
 ## Aktif Tool'lar (Yargı-MCP-Pro)
 - `mcp__yargi-mcp-pro__mevzuat_ara` — 12 mevzuat tipi global arama
 - `mcp__yargi-mcp-pro__mevzuat_icinde_ara` — tek kanun içi local boolean (AND/OR/NOT UPPERCASE)
-- `mcp__yargi-mcp-pro__mevzuat_getir` — polimorfik fetch (`id_type=mevzuat/madde/gerekce/outline`)
+- `mcp__yargi-mcp-pro__mevzuat_getir` — polimorfik fetch (`id_type=mevzuat/madde/outline`; gerekçe seçeneği YOK; `madde_no` kısayolu)
+- `mcp__yargi-mcp-pro__resmi_gazete_fihrist` + `resmi_gazete_getir` — değiştiren kanun / yürürlük tarihi teyidi
 
 ## Mevzuat Tip Enum (`mevzuat_tur_list[]`)
 - `KANUN` — Kanunlar
@@ -51,13 +57,14 @@ altında birleşti. 3 ayrı fetch tool (`get_mevzuat_content` / `_madde_tree` /
 
 ### Faz 1 — Ana Kanun Maddesi (Query 1-3)
 - `mevzuat_ara(phrase="<kanun adı veya konu>", page_size=20)` — **page_size her zaman ≤ 20 (upstream cap)**
-  - **Mevzuat Solr dialect:** `+`, `-`, `"exact"`, `wildcard*`, `fuzzy~`, `"a b"~5` (proximity), `^N` (boost). **AND/OR/NOT LİTERAL parser'ı BOZAR** — sadece bitişik kelimeler default AND.
+  - **`phrase` operatör kabul etmez (rehber 2026-09-06):** tırnak, `+`, `-`, joker ve AND/OR/NOT birebir metin olarak aranır; önce tam öbek denenir, sonuç yoksa kelimeler AND'lenir. 2-5 anahtar kelime yaz. Sıralama Resmî Gazete tarihine göredir (alâka sıralaması yok) → hedefi `mevzuat_adi` / `mevzuat_no` ile öne çıkar.
 - Kanun no biliniyorsa direkt: `mevzuat_ara(mevzuat_no="6098", mevzuat_tur_list=["KANUN"])` — TBK örneği
 - `mevzuat_getir(id="<mevzuat_id>", id_type="outline")` — kanun başına 1 kez (cache'lenir)
 - `mevzuat_getir(id="<madde_id>", id_type="madde")` — outline'dan gelen madde_id
 
 ### Faz 2 — Madde Değişiklik Geçmişi (Query 4-5)
-- `mevzuat_getir(id="<gerekce_id>", id_type="gerekce")` — yasama gerekçesi (her mevzuat'ta yok)
+- Madde metnindeki değişiklik notları + `resmi_gazete_fihrist` / `resmi_gazete_getir` ile değiştiren kanunun Resmî Gazete metni
+- Yasama gerekçesi MCP'de YOK: gerekiyorsa TBMM kaynağı (`KAYNAK: LLM Web - [URL] - [Tarih]`) veya `mevzuat gerekce <id>` CLI'ı (fallback)
 - Olay tarihine göre doğru versiyon tespiti (`resmi_gazete_tarihi_start/end` filtreleri)
 
 ### Faz 3 — İlgili Madde Zinciri (Query 6-9)
@@ -125,12 +132,13 @@ Aynı kanun ikinci sorguda cache'ten okunur:
 - `02-Arastirma/mevzuat-bulgulari.md` — kanunlar + maddeler + hiyerarşi
 - `02-Arastirma/mulga-eleme.json` — eleme tablosu (geçerli/elenen)
 
-## Sentez Aşaması — Terminal Claude
-2C Mevzuat bulgularının raporu **terminal Claude** tarafından yazılır;
-MCP çıktıları zaten Claude oturumunda.
+## Sentez Aşaması — ARASTIRMACI (aynı oturum)
+2C Mevzuat bulgularının raporu aynı oturumda ARASTIRMACI rolüyle yazılır;
+MCP çıktıları zaten oturumdadır. Yeni yayımlanan düzenleme ve yürürlük tarihi için
+`resmi_gazete_fihrist` / `resmi_gazete_getir` kullanılabilir.
 
 Çıktı: `02-Arastirma/mevzuat-bulgulari.md` + `02-Arastirma/mulga-eleme.json`.
-Frontmatter: `engine: claude`, `mcp: yargi-mcp-pro`, `status: TASLAK`.
+Frontmatter: `python scripts/motor.py damga mevzuat_mcp` + `mcp: yargi-mcp-pro`, `status: TASLAK`.
 
 ## Kalite Kapısı
 - [ ] `atif-maddeleri.json` (2B çıkışı) okundu mu?
@@ -141,4 +149,4 @@ Frontmatter: `engine: claude`, `mcp: yargi-mcp-pro`, `status: TASLAK`.
 - [ ] Geçerli karar ≥ 5 mi (yoksa 2B'ye geri dön)?
 - [ ] Normlar Hiyerarşisi etiketleri var mı (mevzuat_tur → seviye mapping)?
 - [ ] Çatışma analizi (Lex Superior/Specialis/Posterior) yapıldı mı?
-- [ ] Engine frontmatter `engine: claude`, `mcp: yargi-mcp-pro` mi?
+- [ ] Frontmatter motor damgası (`motor.py damga`) + `mcp: yargi-mcp-pro` mi?

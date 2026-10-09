@@ -1,3 +1,6 @@
+---
+description: "ASAMA 2D NotebookLM / Drive dahili kaynak sorgusu (paralel kol)"
+---
 <!-- DOKTRIN-PREAMBLE v1 -->
 > **0-HALÜSİNASYON + ANTI-SYCOPHANCY (zorunlu — tam metin: `prompts/_doktrin-preamble.md`):**
 > - UYDURMA YARGITAY/HGK/İBK kararı atfı YASAK — her künye Bedesten documentId ile doğrulanır; doğrulanmayan "DOĞRULANMAMIŞ" damgalanır.

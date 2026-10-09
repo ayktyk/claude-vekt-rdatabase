@@ -25,6 +25,9 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import akis as _akis  # noqa: E402  denetim noktası çıktısı YEŞİL almadan DOCX üretilmez
+
 
 def strip_frontmatter(text: str) -> str:
     """YAML frontmatter bloğunu (--- ... ---) kaldır."""
@@ -204,6 +207,10 @@ def convert_folder(src: Path, dst: Path = None):
     for md_path in md_files:
         rel = md_path.relative_to(src)
         docx_path = dst / rel.with_suffix('.docx')
+        engel = _akis.denetim_engeli(md_path)
+        if engel:
+            print(f'  ATLANDI {rel}: {engel}')
+            continue
         try:
             md_to_docx(md_path, docx_path)
             print(f'  OK  {rel} -> {rel.with_suffix(".docx")}')

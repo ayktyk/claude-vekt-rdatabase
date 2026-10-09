@@ -13,8 +13,9 @@ yalnızca `config/motor-haritasi.json` → `tasks.savunma_simulasyonu.rol`'dan o
 - **savunma_simulasyonu** task'ı: rol **`MUHAKEME`**
 - **ORKESTRATOR'da kalan iş (deterministik / araç):** MCP çağrıları (karşı-argüman ön-sorgu: `ictihat_ara` / `ictihat_getir`), dosya yönetimi
 - **Prompt şablonu:** `prompts/muhakeme/savunma_simulasyonu.md` + `prompts/muhakeme/_ortak-kurallar.md`
-- **Bağımsız denetim:** çıktı üretildikten sonra **DENETCI** (`ajanlar/denetci/SKILL.md`)
-  üretim bağlamını görmeden denetler; KIRMIZI kararda çıktı Drive'a yazılmaz.
+- **Denetim:** bu ASAMA'nın çıktısı ara çıktıdır (Denetim Politikası v2): yapısal kapı +
+  `havuz_kontrol.py`. Bağımsız **DENETCI** (`ajanlar/denetci/SKILL.md`) nihai belgede (K2) çalışır;
+  avukat isterse `denetle: <dosya>` ile bu çıktıyı da gönderir.
 - **Motor damgası:** frontmatter `engine:` alanı `python scripts/motor.py damga savunma_simulasyonu` ile
   doldurulur; avukat motoru bildirmemişse `engine: bildirilmedi` yazılır.
 
@@ -34,7 +35,8 @@ yalnızca `config/motor-haritasi.json` → `tasks.savunma_simulasyonu.rol`'dan o
 ## Üretim Akışı (tek motor — ASAMA 6)
 
 Elle devir bloğu, kopyala-yapıştır ve harici panel **yoktur**. Aynı oturumda:
-ORKESTRATOR hazırlar → MUHAKEME üretir → DENETCI bağımsız denetler → avukat onaylar.
+ORKESTRATOR hazırlar → MUHAKEME üretir → yapısal kapı + `havuz_kontrol.py` → avukat onaylar
+(bağımsız DENETCI denetimi nihai belgede, K2).
 
 > **Olay çözüm protokolü Adım 17 ile ilişki:** ASAMA 1'deki "karşı tarafın muhtemel hamleleri"
 > dava açılmadan alınacak önlemleri (ihtiyati haciz/tedbir) yakalar; bu ASAMA ise yazılmış
@@ -61,11 +63,16 @@ ORKESTRATOR hazırlar → MUHAKEME üretir → DENETCI bağımsız denetler → 
    - Risk flag 0 çıkarsa "analiz yetersiz" — ek sorgu yapılır. Lehe yorum dürtüsü TERS YÖNDE de geçerli: gerçek riskler küçümsenemez
    - Karşı taraf adına atıf yapılan her künye DOĞRULANMIŞ olmalı; doğrulanmamışsa "(varsayılan)" notu zorunlu
 
-3. **Bağımsız denetim (DENETCI):** Girdi yalnızca `{çıktı yolu, dava-id}`; üretim
-   bağlamı verilmez. Deterministik kapılar → künye içerik teyidi (her documentId
-   MCP'den yeniden çekilir) → doktrin clause sayımı → çıkarım denetimi → aleyhe beyanı.
-   Karar KIRMIZI / SARI / YEŞİL. YEŞİL değilse MUHAKEME revize eder; en çok 3 tur.
-   **YEŞİL olmadan çıktı Drive'a yazılmaz.**
+3. **Ara çıktı kapısı (Denetim Politikası v2 — 2026-10-09):** Bu ASAMA'nın çıktısı DENETCI'ye
+   gönderilmez. İki deterministik kapı çalışır:
+   `python scripts/cikti_dogrula.py <çıktı>` ve
+   `python scripts/havuz_kontrol.py <çıktı> --havuz "<dava-klasoru>/02-Arastirma/arastirma-raporu.md" [--havuz "<dava-klasoru>/02-Arastirma/kunye-havuzu-ek.md"]`.
+   Atıflar yalnız K1'den geçmiş araştırma raporunun Kaynak Doğrulama tablosundan (künye havuzu)
+   alınır. Havuz dışı künye gerekiyorsa ARASTIRMACI tam metin + birebir alıntıyla doğrulayıp
+   `02-Arastirma/kunye-havuzu-ek.md`'ye ekler; ek, TAM akışta kullanılmadan önce EK denetiminden geçer (HIZLI'da K2 kapsar).
+   Doğrulanamayan künye `[HAVUZ DIŞI — DOĞRULANMAMIŞ]` damgası alır. TASLAK satırının altına
+   `ARA TASLAK — bağımsız denetim K2'de yapılır.` yazılır. Bağımsız denetim nihai belgede
+   (ASAMA 7, K2) yapılır; avukat isterse `denetle: <dosya>`.
 
 4. **Avukat onayı:** Avukat "ASAMA 6 bitti" / `devam` diyene kadar bir sonraki ASAMA'ya geçilmez.
 
@@ -80,7 +87,7 @@ ORKESTRATOR hazırlar → MUHAKEME üretir → DENETCI bağımsız denetler → 
 - Karşı taraf adına sadece taslak savunma yazma (asıl amaç risk tespiti)
 - Risk flag üretmeden çıktı tamamlama (her çıktıda KIRMIZI/SARI/YEŞİL zorunlu)
 - Karşı taraf "şu Yargıtay kararını ileri sürebilir" derken kararın varlığı doğrulanmamışsa "(varsayılan)" notu eklemeden yazma
-- DENETCI YEŞİL vermeden çıktıyı Drive'a yazma
+- Yapısal kapı ve `havuz_kontrol.py` PASS vermeden çıktıyı Drive'a yazma (bu ASAMA'da DENETCI çağrılmaz)
 
 ---
 
@@ -89,15 +96,11 @@ ORKESTRATOR hazırlar → MUHAKEME üretir → DENETCI bağımsız denetler → 
 Sen karsi tarafin avukatisin. Amacin, acilan davada mumkun olan
 en guclu savunmayi kurmak. Bu simuldir -- gercek davali degilsin.
 
-## KVKK Seviye 2 Maskeleme (Savunma Simulatoru Icin)
+## KVKK (Savunma Simulatoru Icin) — maskeleme ERTELENDİ (2026-07-09)
 
-- Girdi dilekce taslagi MASKELI gelir — sen de maskeli calisirsin
-- Savunmalarda "davali [KARSI_TARAF_1] sunu iddia edebilir..." gibi
-  token'larla yazarsin
-- Karsi taraf avukatinin adi veya baro sicil numarasi biliniyorsa
-  MASKELENMEZ (kamu bilgisi — baro sicili ac ik)
-- Hiyerarsi saldiri vektorlerinde ham PII kullanma, yalniz hukuki referanslar
-- Savunma-simulasyonu.md ciktisi MASKELI olarak uretilir
+Girdi ve çıktı gerçek veriyle çalışır (AGENTS.md "KVKK Maskeleme"). Karşı-argüman ön-sorgusunda
+Yargı PRO aramalarına kimlik verisi (ad, TC, IBAN) yazılmaz; hukuki tez jenerik doktrinal
+terimlerle kurulur.
 
 ## Ne Zaman Calisir
 
@@ -251,7 +254,7 @@ Dilekceye Eklenmeli: [onerilen paragraf ozeti]
 - [ ] Referans verilen karar/mevzuat gercekten var mi?
       EMIN DEGILSEN: "dogrulanmasi gerekir" notu ekle.
       Uydurma referans YAZMA.
-- [ ] KVKK: Gercek isim, TC, IBAN var mi? Maskele.
+- [ ] KVKK: maskeleme ertelendi (dava çıktısı gerçek veriyle); kamuya açık türev çıktıda (blog, mail, MemPalace drawer) TC/IBAN/isim yok mu?
 
 ### Ajan Bazli Kontroller
 

@@ -1,3 +1,6 @@
+---
+description: "NotebookLM entegrasyon denemesi"
+---
 # /notebooklm-dene - NotebookLM Entegrasyon Denemesi
 
 Amaç: NotebookLM entegrasyonunun gerçekten çalışıp çalışmadığını kısa bir prova ile görmek.

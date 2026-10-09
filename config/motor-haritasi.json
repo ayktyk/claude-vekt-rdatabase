@@ -4,15 +4,16 @@
   "_spec": "docs/superpowers/specs/2026-09-02-tek-motor-agnostik-toparlama-design.md",
   "_history": {
     "2026-05-04": "Hibrit motor (Claude+Gemini bridge) onaylandi",
-    "2026-05-13": "Antigravity hibrit mimarisine gecildi. Bridge DEPRECATED.", <!-- vendor-ok: tarihçe kaydı -->
+    "2026-05-13": "Antigravity hibrit mimarisine gecildi. Bridge DEPRECATED.",
     "2026-05-19": "FAZ 2: Yargi-MCP-Pro entegrasyonu (Senaryo B - ayri toollar). Eski mcp__claude_ai_Yarg_MCP__* + mcp__claude_ai_Mevuzat_MCP__* yerine mcp__yargi-mcp-pro__* aktif. yargi_mcp + mevzuat_mcp task'lari AYRI kalir (siraili zincir 2B->2C korunur). 9 spesifik mevzuat toolu (search_kanun/search_khk/...) tek search_mevzuat + mevzuat_tur_list[] altinda birlesti. Rate-limit 3sn protokolu gevsetildi (zorunluluk degil, fallback). 2E Akademik decommissioned (Faz 1, 2026-05-19).",
     "2026-07-09": "ARASTIRMA REVIZYONU (avukat karari): 2A Super Stajyer (stajyer_prompt_uret) + Faz D Arguman.ai (arguman_ai) task'lari KALDIRILDI, dosyalar arsiv/ altinda. KVKK maskeleme ERTELENDI (yerel LLM'e gecise kadar). ASAMA 2 cekirdegi = 2B->2C sirali zincir + 2D async paralel. Ana omurga Yargi-MCP-Pro (UYAP entegrasyonu dahil - envanter cikarilinca tools[] guncellenecek).",
     "2026-07-13": "YARGI COK MODELLI ROUTING: 2B sirasi Sol -> Terra -> Luna -> Claude kisa QA. (2026-07-19'da kaldirildi)",
-    "2026-07-18": "CLAUDESUZ REVIZYON: orkestrator Codex/Sol (AGENTS.md), 2B Sol->Terra->Sol->Terra, Claude tum rollerden cikarildi. (2026-07-19'da geri alindi)", <!-- vendor-ok: tarihçe kaydı -->
-    "2026-07-19": "CLAUDE+GEMINI DONUSU (avukat karari): Codex TAMAMEN kaldirildi (arsiv/codex-motor/). Orkestra sefi + tum tool kullanimi claude-fable-5; limit dolarsa claude-opus-4-8 (avukat /model ile gecer, cikti frontmatter + ASAMA bildirimi damgalar). 2B tek elden Claude iteratif derin protokol (derin 15/5, hafif 6/3). Antigravity task'lari degismedi. MemPalace/Gmail/Takvim/NotebookLM MCP'leri yeniden aktif.", <!-- vendor-ok: tarihçe kaydı -->
-    "2026-09-02": "TEK MOTOR + ROL DILI (avukat karari): model adlari kaldirildi, dort rol tanimlandi (ORKESTRATOR/ARASTIRMACI/MUHAKEME/DENETCI). Iki motorlu elle devir mimarisi kalkti; bagimsizlik sifir-baglamli DENETCI alt-ajanindan geliyor. Dosya adi motor-haritasi.json -> motor-haritasi.json. self_review task'i DENETCI roluna baglandi."
+    "2026-07-18": "CLAUDESUZ REVIZYON: orkestrator Codex/Sol (AGENTS.md), 2B Sol->Terra->Sol->Terra, Claude tum rollerden cikarildi. (2026-07-19'da geri alindi)",
+    "2026-07-19": "CLAUDE+GEMINI DONUSU (avukat karari): Codex TAMAMEN kaldirildi (arsiv/codex-motor/). Orkestra sefi + tum tool kullanimi claude-fable-5; limit dolarsa claude-opus-4-8 (avukat /model ile gecer, cikti frontmatter + ASAMA bildirimi damgalar). 2B tek elden Claude iteratif derin protokol (derin 15/5, hafif 6/3). Antigravity task'lari degismedi. MemPalace/Gmail/Takvim/NotebookLM MCP'leri yeniden aktif.",
+    "2026-09-02": "TEK MOTOR + ROL DILI (avukat karari): model adlari kaldirildi, dort rol tanimlandi (ORKESTRATOR/ARASTIRMACI/MUHAKEME/DENETCI). Iki motorlu elle devir mimarisi kalkti; bagimsizlik sifir-baglamli DENETCI alt-ajanindan geliyor. Dosya adi motor-haritasi.json -> motor-haritasi.json. self_review task'i DENETCI roluna baglandi.",
+    "2026-10-09": "KARMA MIMARI (avukat talimati): ust katman = buro dava sureci (7 ASAMA, 4A-4E, v1->savunma->v2), alt katman = Yargi PRO (MCP araclari + hukuk_skill yontem kutuphanesi + dava-cli/udf-cli/yargi-skill). Oncelik AGENTS.md > hukuk_skill yontem bolumu > sunucu/global skill talimatlari. DENETCI politikasi v2: K1 (ASAMA 2 arastirma raporu) + KS (ASAMA 4 stratejik analiz) + K2 (disari giden nihai belge + eslik dosyasi) + EK (kunye havuzu eki); ara ciktilar cikti_dogrula + havuz_kontrol. Calisma modlari TAM/HIZLI; akis kaydi 00-AKIS.md (scripts/akis.py). Bu dosya HTML yorumu nedeniyle gecersiz JSON idi (2026-09-03), duzeltildi."
   },
-  "_last_updated": "2026-09-02",
+  "_last_updated": "2026-10-09",
   "aktif_motor": "",
   "aktif_motor_guncelleme": "",
   "roller": {
@@ -47,6 +48,7 @@
         "ictihat_getir",
         "semantik_ictihat_ara",
         "aym_ictihat_ara",
+        "aihm_ictihat_ara",
         "kurum_karari_ara",
         "kurum_karari_getir"
       ],
@@ -71,10 +73,12 @@
       "tools": [
         "mevzuat_ara",
         "mevzuat_getir",
-        "mevzuat_icinde_ara"
+        "mevzuat_icinde_ara",
+        "resmi_gazete_fihrist",
+        "resmi_gazete_getir"
       ],
       "skill": ".claude/skills/yargi-legal-research-guide/SKILL.md",
-      "aciklama": "Yargi-MCP-Pro Mevzuat sorgulari (FAZ 6 2026-07-09 — yeni Turkce tool seti; 12 tip: KANUN/KHK/TUZUK/YONETMELIK/CB_*/KKY/UY/TEBLIGLER/MULGA). ASAMA 2C esas: mevzuat_ara (phrase Mevzuat Solr — bosluk=AND, AND/OR/NOT literal BOZAR, wildcard*/fuzzy~ calisir; mevzuat_no en kesin; page_size max 20), mevzuat_icinde_ara (tek mevzuat ici YEREL boolean — BUYUK harf AND/OR/NOT, kelime koku), mevzuat_getir (id_type=mevzuat/madde/gerekce/outline; madde_no kisayolu ile tek cagri; 50KB chunk). id_type = kimligin geldigi ALAN ADI. Detay: yargi-legal-research-guide skill."
+      "aciklama": "Yargi-MCP-Pro Mevzuat sorgulari (FAZ 6 2026-07-09 — yeni Turkce tool seti; 12 tip: KANUN/KHK/TUZUK/YONETMELIK/CB_*/KKY/UY/TEBLIGLER/MULGA). ASAMA 2C esas: mevzuat_ara (phrase HICBIR operator kabul etmez — tirnak, +, -, joker ve AND/OR/NOT birebir metin aranir; once tam obek, sonuc yoksa kelimeler AND'lenir; siralama Resmi Gazete tarihine gore; mevzuat_no en kesin; page_size max 20), mevzuat_icinde_ara (tek mevzuat ici YEREL boolean — BUYUK harf AND/OR/NOT, kelime koku), mevzuat_getir (id_type=mevzuat/madde/outline — gerekce secenegi YOK, kaynak gerekce yayimlamiyor; madde_no kisayolu ile tek cagri; 50KB chunk). id_type = kimligin geldigi ALAN ADI. Detay: yargi-legal-research-guide skill."
     },
     "uyap_workspace": {
       "rol": "ORKESTRATOR",
@@ -134,7 +138,21 @@
     "self_review": {
       "rol": "DENETCI",
       "prompt_template": "prompts/muhakeme/self_review.md",
-      "aciklama": "Kalite gate: DENETCI sifir baglamli bagimsiz denetim (her uretim sonrasi, uretim baglamini gormeden)."
+      "aciklama": "Kalite gate: DENETCI sifir baglamli bagimsiz denetim. Politika v2 (2026-10-09): K1 = ASAMA 2 arastirma raporu, KS = ASAMA 4 stratejik-analiz.md, K2 = disari giden nihai belge + eslik dosyasi (<belge>-kaynak-dogrulama.md), EK = kunye-havuzu-ek.md (ilk kullanimdan once); ara ciktilar DENETCI'ye gitmez (cikti_dogrula + havuz_kontrol). TAM akista 3 cagri, her biri en cok 3 tur; MCP yoksa yargi/mevzuat CLI fallback (mcp_fallback_used: true), o da yoksa KIRMIZI - DENETLENEMEDI."
+    },
+    "yargipro_skill": {
+      "rol": "ARASTIRMACI",
+      "mcp_server": "yargi-mcp-pro",
+      "tool_prefix": "mcp__yargi-mcp-pro__",
+      "tools": [
+        "hukuk_skill"
+      ],
+      "aciklama": "Yargi PRO yontem kutuphanesi (107 skill). Hangi ASAMA'da hangi skill'in yontem bolumunun uygulanacagi AGENTS.md 'Karma Mimari' esleme tablosundadir. Skill'in kendi zincir yonetimi (recete, iade, case-state, muhur) UYGULANMAZ; orkestrasyon Director'dadir."
+    },
+    "akis_kaydi": {
+      "rol": "ORKESTRATOR",
+      "script": "scripts/akis.py",
+      "aciklama": "Dava klasorunde 00-AKIS.md: mod (TAM/HIZLI), ASAMA durumlari, denetim kaydi (K1/KS/K2/EK/ISTEK; K1/KS/K2/EK'te KIRMIZI ve SARI 'sonraki' komutunda ENGEL, ISTEK gecisi durdurmaz), evrak kaynaklari. /devam /atla /dur buradan okur."
     }
   }
 }

@@ -470,8 +470,9 @@ Pro MCP arac listesi (3 esas tool — FAZ 2 2026-05-19):
 - `mcp__yargi-mcp-pro__mevzuat_ara` — 12 mevzuat tipi global arama. Tipleri:
   KANUN, KHK, TUZUK, YONETMELIK, CB_KARARNAME, CB_YONETMELIK, CB_KARAR (PDF/OCR),
   CB_GENELGE (PDF/OCR), KKY (kurum yonetmelik), UY (universite yonetmelik), TEBLIGLER, MULGA.
-  Parametreler: `mevzuat_adi` (title plain), `phrase` (Mevzuat Solr — +/-/"exact"/wildcard*/fuzzy~/"a b"~5/boost^N;
-  **AND/OR/NOT literal BREAK eder**), `mevzuat_no` (direkt kanun no), `mevzuat_tur_list[]`,
+  Parametreler: `mevzuat_adi` (title plain), `phrase` (mevzuat.gov.tr — **HİÇBİR operatör kabul etmez**:
+  tırnak, +, -, joker ve AND/OR/NOT birebir metin aranır; önce tam öbek, sonuç yoksa kelimeler
+  AND'lenir; sıralama Resmî Gazete tarihine göre — rehber 2026-09-06), `mevzuat_no` (direkt kanun no), `mevzuat_tur_list[]`,
   `resmi_gazete_tarihi_start/end`, `page`, `page_size` (max 20).
 - `mcp__yargi-mcp-pro__mevzuat_icinde_ara` — tek mevzuat ici local boolean
   (Solr DEGIL — `AND`/`OR`/`NOT` UPPERCASE calisir + adjacent words implicit AND).
@@ -479,7 +480,8 @@ Pro MCP arac listesi (3 esas tool — FAZ 2 2026-05-19):
   `page_size` (1-50, default 25).
 - `mcp__yargi-mcp-pro__mevzuat_getir` — polimorfik fetch:
   `id_type="mevzuat"` → tam metin (auto-chunk >50KB), `id_type="madde"` → tek madde,
-  `id_type="gerekce"` → yasama gerekcesi, `id_type="outline"` → bolum/madde tree (`madde_id` listesi).
+  `id_type="outline"` → bolum/madde tree (`madde_id` listesi). Gerekçe seçeneği YOK (rehber
+  2026-09-06: kaynak gerekçe yayımlamıyor; gerekiyorsa TBMM kaynağı, `KAYNAK: LLM Web` etiketiyle).
   PDF tipleri (`CB_KARAR`, `CB_GENELGE`) Mistral OCR'lı.
 
 NOT: Eski 9 tip-bazli search tool (`search_kanun`, `search_khk`, `search_tuzuk`,
@@ -494,7 +496,7 @@ NOT: Eski 9 tip-bazli search tool (`search_kanun`, `search_khk`, `search_tuzuk`,
 - `search_kanun(kanun_no=N)` → `mevzuat_ara(mevzuat_no="N", mevzuat_tur_list=["KANUN"])`
 - `mevzuat tree <id>` veya `get_mevzuat_madde_tree(mevzuat_id="<id>")` → `mevzuat_getir(id="<id>", id_type="outline")`
 - `mevzuat article <id>` veya `get_mevzuat_content(madde_id="<id>")` → `mevzuat_getir(id="<id>", id_type="madde")`
-- `mevzuat gerekce <id>` veya `get_mevzuat_gerekce(mevzuat_id="<id>")` → `mevzuat_getir(id="<id>", id_type="gerekce")`
+- `mevzuat gerekce <id>` veya `get_mevzuat_gerekce(mevzuat_id="<id>")` → MCP karşılığı YOK (2026-09-06); gerekçe TBMM kaynağından
 
 Mevzuat MCP de derin mod. Kanun maddesini cekip birakmak YASAK.
 Gerekce + degisiklik tarihcesi + ilgili yonetmelik hep toplanir.
@@ -674,7 +676,7 @@ Fallback kullanildiginda raporda "Kullanilan Kaynaklar" bolumune
 
 #### Mevzuat Gap Check (Hiyerarsi Dahil)
 
-- [ ] Ana madde + gerekce cekildi mi?
+- [ ] Ana madde cekildi mi? (Gerekce MCP'de yok; gerekiyorsa TBMM kaynagi + LLM Web etiketi)
 - [ ] Degisiklik tarihcesi kontrol edildi mi?
 - [ ] Olay tarihine gore dogru versiyon mu kullaniliyor?
 - [ ] Ilgili yonetmelik/teblig cekildi mi?
@@ -723,7 +725,7 @@ icin, kararin atif yaptigi mevzuat maddeleri **cikarilir** ve liste olarak
 - `mevzuat_ara(phrase="<kanun adi>", page_size=20)` veya `mevzuat_ara(mevzuat_no="<no>", mevzuat_tur_list=["KANUN"])` → mevzuat_id
 - `mevzuat_getir(id="<mevzuat_id>", id_type="outline")` → madde agaci + madde_id listesi
 - `mevzuat_getir(id="<madde_id>", id_type="madde")` → bugunkü guncel metin
-- `mevzuat_getir(id="<gerekce_id veya mevzuat_id>", id_type="gerekce")` → gerekce (varsa)
+- Gerekçe: MCP'de yok (2026-09-06); gerekiyorsa TBMM kaynağı, `KAYNAK: LLM Web - [URL] - [Tarih]`
 
 #### Adim 3 — Mulga / Guncel Denetimi (her madde icin ZORUNLU)
 
@@ -982,7 +984,16 @@ ASAMA 2 sentezi ORKESTRATOR'da birakildi. Cunku:
 4. **Eksik varsa:** Sadece eksik mini-kolu (orn. NotebookLM 3 sorgu eksikse,
    sadece o 3 sorguyu) tekrar calistir. Tum Faz 2'yi bastan baslatma.
 
-5. **Avukata sun:** Rapor hazir; bir sonraki ASAMA (ASAMA 3 Usul Raporu)
+5. **K1 — bağımsız denetim (DENETCI):** Rapor yalnız DENETİM ÇAĞRI BLOĞU ile (dava-id, nokta K1,
+   dosya yolu) DENETCI'ye gider (AGENTS.md; `quality_gate.py asama2` dahil). Sonradan havuza künye
+   eklenirse `02-Arastirma/kunye-havuzu-ek.md` kullanılmadan önce aynı blokla EK denetiminden geçer. YEŞİL olmadan rapor
+   Drive'a yazılmaz ve ASAMA 3'e geçilmez; en çok 3 tur. Sonuç `python scripts/akis.py denetim …
+   --nokta K1` ile `00-AKIS.md`'ye yazılır. YEŞİL alan raporun Kaynak Doğrulama tablosu sonraki
+   ASAMA'ların **künye havuzudur**. HIZLI moddaki hafif rapor (6 sorgu / 3 tam metin) K1'e girmez,
+   künyeleri K2'de denetlenir; EK de ayrıca çağrılmaz. Dava dışı `arastir:` raporunda tek denetim
+   yapılır, akış kaydı açılmaz.
+
+6. **Avukata sun:** Rapor hazir; bir sonraki ASAMA (ASAMA 3 Usul Raporu)
    MUHAKEME rolune gecilir (ASAMA 3).
 
 ### Asla
@@ -990,8 +1001,8 @@ ASAMA 2 sentezi ORKESTRATOR'da birakildi. Cunku:
 - `gemini-bridge.sh` cagirma — DEPRECATED (exit 100) <!-- vendor-ok: tarihçe kaydı -->
 - Sentez raporunu baska bir motora/panele yaptir (MCP ciktilari bu oturumda,
   copy-paste yorgunlugu olmasin)
-- KVKK ihlali: rapora ham muvekkil verisi yazma (zaten motor maskeli
-  context'le calisiyor, ama ek kontrol)
+- KVKK ihlali: kamuya açık türev çıktıya (blog, mail, MemPalace drawer) ham müvekkil verisi
+  taşıma (dava raporu gerçek veriyle yazılır — maskeleme ertelendi)
 - Sentez ciktisinda atif maddesi denetimi atla (mulga eleme onceden 2C'de
   yapilmis, bu noktada zaten temiz set var)
 - 5 GECERLI karar altinda kalan raporu "yeterli" diye sun (geri don, 3
@@ -1184,7 +1195,7 @@ Kayit yolu:
 - [ ] Referans verilen karar/mevzuat gercekten var mi?
       EMIN DEGILSEN: "dogrulanmasi gerekir" notu ekle.
       Uydurma referans YAZMA.
-- [ ] KVKK: Gercek isim, TC, IBAN var mi? Maskele.
+- [ ] KVKK: maskeleme ertelendi (dava çıktısı gerçek veriyle); kamuya açık türev çıktıda TC/IBAN/isim yok mu?
 
 ### Ajan Bazli Kontroller (Derin Protokol Minimumu)
 
@@ -1343,7 +1354,7 @@ Drive'a: `02-Arastirma/bilirkisi-denetim-raporu.md`
 - Hesaplama dogrulamasi icin Usul Ajani'ndan iscilik hesabi gelmisse kullan,
   yoksa "TAHMINI" isaretle, somut sayi UYDURMA
 - Raporda OLMAYAN kalemi "varmis gibi" elestirme; sadece "eksik" olarak belirt
-- KVKK: rapordaki [TC_NO_*], [MUVEKKIL_*], [IBAN_*] tokenlari aynen korunur
+- KVKK: maskeleme ertelendi; rapor gerçek veriyle okunur, varsa maskeli token aynen korunur
 
 ### Kalite Kontrol (Bilirkisi Moduna Ozel)
 
@@ -1547,7 +1558,7 @@ Drive'a: `02-Arastirma/sozlesme-inceleme-raporu.md`
   revizyonlar yapilmadan imzalanmasi muvekkil icin risk tasimaktadir."
 - Cezai sart orantililigi icin emsal Yargitay uygulamasi lazımsa **ana
   arastirma akisina flag dus**, atif yaparken kunye **dogrulanmis** olmali.
-- KVKK: sozlesmedeki PII tokenlari aynen korunur, demask Director'un isi.
+- KVKK: maskeleme ertelendi; sözleşme gerçek veriyle incelenir, kamuya açık türev çıktıda müvekkil verisi kullanılmaz.
 - Sozlesme 50+ sayfa ise **once kritik bolumleri** (yukumlulukler, fesih,
   cezai sart, uyusmazlik cozumu) tara, sonra digerleri icin **checklist
   bazli** inceleme yap.

@@ -28,7 +28,11 @@ sinanmis bir belge haline gelir.
 
 ---
 
-## KVKK Seviye 2 Maskeleme — ZORUNLU PROTOKOL (Her Davada)
+## KVKK Seviye 2 Maskeleme — ERTELENDİ (2026-07-09; yerel LLM'e geçişte geri gelir)
+
+> **ERTELENDİ:** Avukat kararıyla (2026-07-09) bulut LLM'lerle çalışırken maskeleme uygulanmaz;
+> dava çıktıları gerçek veriyle üretilir. Aşağıdaki protokol, yerel LLM'e geçişte geri gelecek
+> düzen olarak korunur. Güncel kural: AGENTS.md "KVKK Maskeleme".
 
 Muvekkil verisi LLM'e (bulut LLM saglayicisi (ABD), NotebookLM / Google ABD)
 gitmeden ONCE yerel `scripts/maske.py` scripti uzerinden MASKELENIR. Motor
@@ -161,11 +165,14 @@ ayrımı değil **görev ayrımıdır** (`config/motor-haritasi.json` → `rolle
   Drive/MemPalace yazımı, `qmd update` / `md_to_docx.py` / `md_to_udf.py`
 - **ARASTIRMACI:** Yargı / Mevzuat / NotebookLM derin araştırması, araştırma sentezi
 - **MUHAKEME:** usul raporu, 5-ajan stratejik analiz, dilekçe, savunma simülasyonu, revizyon
-- **DENETCI:** her hukuki çıktı sonrası sıfır bağlamlı bağımsız denetim
-  (`ajanlar/denetci/SKILL.md`); KIRMIZI'da çıktı Drive'a yazılmaz
+- **DENETCI:** sabit denetim noktalarında sıfır bağlamlı bağımsız denetim — K1 araştırma raporu,
+  KS stratejik analiz, K2 dışarı giden belge + eşlik dosyası, EK künye havuzu eki
+  (`ajanlar/denetci/SKILL.md`; AGENTS.md "DENETCI Kapısı ve Denetim Politikası"); KIRMIZI/SARI'da
+  çıktı Drive'a yazılmaz
 
 Elle devir bloğu, kopyala-yapıştır ve harici panel yoktur; ASAMA 0-7 aynı oturumda akar.
-ASAMA 5-6-7 (yaz → eleştir → revize) ardışık yürür, her çıktı ayrı denetimden geçer.
+ASAMA 5-6-7 (yaz → eleştir → revize) ardışık yürür; ASAMA 5 ve 6 ara çıktıdır (yapısal kapı +
+`havuz_kontrol.py`), bağımsız denetim ASAMA 7 çıktısında (K2, belge + eşlik çifti) yapılır.
 Tarihçe (iki motorlu dönem): `arsiv/eski-notlar/ANTIGRAVITY.md`. <!-- vendor-ok: tarihçe kaydı -->
 
 
@@ -183,30 +190,33 @@ ama duzenleme ve yazdirma icin DOCX gerekir; UYAP'a yukleme icin UDF gerekir.
 | `02-Arastirma/stratejik-analiz.md` | ZORUNLU | ZORUNLU | - | 5 Ajan + `md_to_docx.py` |
 | `02-Arastirma/savunma-simulasyonu.md` | ZORUNLU | ZORUNLU | - | Savunma Simulatoru + `md_to_docx.py` |
 | `dilekce-v1.md` | ZORUNLU | ZORUNLU | - | Belge Yazari + `md_to_docx.py` |
-| `dilekce-v2.md` (NIHAI) | ZORUNLU | ZORUNLU | **ZORUNLU** | Revizyon + `md_to_docx.py` + `md_to_udf.py` |
-| `istinaf-dilekcesi.md` | ZORUNLU | ZORUNLU | **ZORUNLU** | Belge Yazari (alt-mod) + her iki script |
-| `temyiz-dilekcesi.md` | ZORUNLU | ZORUNLU | **ZORUNLU** | Belge Yazari (alt-mod) + her iki script |
+| `dilekce-v2.md` (NIHAI) | ZORUNLU | ZORUNLU | **ZORUNLU** | Revizyon + `md_to_docx.py` + `md_to_udf.py` (K2 YESIL sonrasi) |
+| `dilekce-v2-kaynak-dogrulama.md` (K2 eslik) | ZORUNLU | - | - | Revizyon (SENTINEL + Kaynak tablosu + aleyhe beyani + karar noktalari + DENETIM SONUCU) |
+| `istinaf-dilekcesi.md` | ZORUNLU | ZORUNLU | **ZORUNLU** | Belge Yazari (alt-mod) + eslik `…-kaynak-dogrulama.md` + K2 YESIL sonrasi her iki script |
+| `temyiz-dilekcesi.md` | ZORUNLU | ZORUNLU | **ZORUNLU** | Belge Yazari (alt-mod) + eslik `…-kaynak-dogrulama.md` + K2 YESIL sonrasi her iki script |
 | `revizyon-raporu.md` | ZORUNLU | ZORUNLU | - | Revizyon + `md_to_docx.py` |
 | `bilirkisi-denetim-raporu.md` | ZORUNLU | ZORUNLU | - | Arastirmaci (alt-mod) + `md_to_docx.py` |
-| `muvekkil-bilgilendirme-{tarih}.md` | ZORUNLU | ZORUNLU | - | Director (alt-mod) + `md_to_docx.py` |
+| `muvekkil-bilgilendirme-{tarih}.md` | ZORUNLU | ZORUNLU | - | Director (alt-mod) + eslik (avukat notlari, Kaynak tablosu) + `md_to_docx.py` |
 | `strateji-degerlendirme-{tarih}.md` | ZORUNLU | ZORUNLU | - | Director (alt-mod) + `md_to_docx.py` |
 
 **Tetikleme:** Director Agent her ASAMA bitiminde **otomatik olarak**
 `python scripts/md_to_docx.py {dava-klasoru}` calistirir. Klasordeki tum
-yeni .md dosyalari .docx'e cevrilir (mevcut .docx'ler uzerine yazilir).
+yeni .md dosyalari .docx'e cevrilir (mevcut .docx'ler uzerine yazilir). Denetim noktasi
+ciktisi (arastirma raporu, stratejik analiz, dilekce v2 ve K2 kaydi olan belge) son karari YESIL
+olmadikca betik tarafindan ATLANIR (`scripts/akis.py` -> `denetim_engeli`); `md_to_udf.py` de ayni
+kontrolle UDF uretmez.
 Avukat manuel olarak da calistirabilir.
 
 **UDF tetikleme:** Sadece ASAMA 7 (dilekce-v2) ve istinaf/temyiz alt-modu.
 Revizyon Ajani veya Belge Yazari (istinaf/temyiz) kendi cikti tetiklemesinde
-`python scripts/md_to_udf.py <input.md>` calistirir. UDF UYAP icin
+`python scripts/md_to_udf.py <input.md>` calistirir — yalniz K2 YESIL (atif yoksa UYGULANMAZ
+kaydi) sonrasi; `md_to_udf.py` denetim izi tasiyan metinden UDF uretmez. UDF UYAP icin
 "format_id=1.7" zorunlu, scripts/md_to_udf.py structure-aware generator
 (detay: `ajanlar/revizyon-ajani/SKILL.md` -> "UDF Uretimi" bolumu).
 
-**KVKK + DOCX/UDF sirasi:** Maskeli MD -> DOCX uretilir (avukat editleyebilir
-ama maskeli kalir). UYAP'a yuklenecek nihai DOCX/UDF icin avukat once
-`python scripts/maske.py unmask` ile gercek veriye cevirir, **sonra**
-`md_to_docx.py` veya `md_to_udf.py` calistirir. Maskeli arsivler Drive'da
-kalir, gercek veri sadece UYAP'a giden son belgede olusur.
+**KVKK + DOCX/UDF sirasi:** Maskeleme ERTELENDI (AGENTS.md "KVKK Maskeleme", 2026-07-09):
+MD gercek veriyle yazilir, `unmask` adimi yoktur; DOCX/UDF dogrudan bu MD'den uretilir. Yerel
+LLM'e geciste maskeli akis geri gelir (`docs/maskeleme-kilavuzu.md`).
 
 ---
 
@@ -475,7 +485,7 @@ AVUKAT
 
 ### ASAMA 1: Hazirlik
 
-> **Rol:** MUHAKEME | **Routing:** `kritik_nokta_tespiti` + `arama_plani` | **Denetim:** DENETCI (`ajanlar/denetci/SKILL.md`)
+> **Rol:** MUHAKEME | **Routing:** `kritik_nokta_tespiti` + `arama_plani` | **Denetim:** yapısal kapı (briefing'e künye yazılmaz; DENETCI çağrılmaz)
 > Not: Drive klasor olusturma ve kaynak sorgulama MCP cagrilari ORKESTRATOR'da kalir.
 
 Bu asamada hic hukuki arastirma yapilmaz. Sadece olgusal
@@ -606,10 +616,12 @@ BASLATICI: Director Agent
   |                  (mevzuat_tur_list[]: 12 tip — KANUN/KHK/TUZUK/YONETMELIK/CB_KARARNAME/
   |                   CB_YONETMELIK/CB_KARAR/CB_GENELGE/KKY/UY/TEBLIGLER/MULGA;
   |                   mevzuat_no ile direkt kanun no lookup;
-  |                   phrase Mevzuat Solr dialect — +/-/"exact"/wildcard*/fuzzy~,
-  |                   AND/OR/NOT literal BREAK eder)
+  |                   phrase: HICBIR operator kabul edilmez — tirnak, +, -, joker ve
+  |                   AND/OR/NOT birebir metin aranir; once tam obek, sonuc yoksa
+  |                   kelimeler AND'lenir — rehber surum 2026-09-06)
   |                  + mcp__yargi-mcp-pro__mevzuat_icinde_ara (tek kanun ici boolean — AND/OR/NOT UPPERCASE)
-  |                  + mcp__yargi-mcp-pro__mevzuat_getir (id_type=mevzuat/madde/gerekce/outline polimorfik)
+  |                  + mcp__yargi-mcp-pro__mevzuat_getir (id_type=mevzuat/madde/outline; gerekce secenegi YOK;
+  |                    madde_no kisayolu)
   |        NOT: Eski 9 tip-bazli search tool tek mevzuat_ara'a konsolide; 3 fetch tool
   |              tek mevzuat_getir'e indirgendi.
   |        Fallback: mevzuat CLI (mevzuat search/doc/article/tree) - sadece MCP fail
@@ -618,7 +630,8 @@ BASLATICI: Director Agent
   |        Minimum: 8 sorgu / 4 faz + mulga denetim
   |
   |        Faz 1: Ana kanun - mevzuat_ara + mevzuat_getir(id_type=outline) + (id_type=madde)
-  |        Faz 2: Degisiklik gecmisi - mevzuat_getir(id_type=gerekce) + history
+  |        Faz 2: Degisiklik gecmisi - madde metnindeki degisiklik notlari + resmi_gazete_fihrist/getir
+  |               (gerekce MCP'de yok; gerekirse TBMM kaynagi veya mevzuat CLI `gerekce`)
   |               (olay tarihine gore dogru versiyon tespiti)
   |        Faz 3: Ilgili madde zinciri - onceki/sonraki madde +
   |               atif yapilan maddeler
@@ -629,7 +642,7 @@ BASLATICI: Director Agent
   |        Faz 8: Zimni ilga taramasi
   |        Faz 9: LLM Web fallback (CLI ulasamayan hukum icin)
   |
-  |        Cikti: mevzuat tam metni + gerekce + degisiklik
+  |        Cikti: mevzuat tam metni + (varsa) gerekce + degisiklik
   |               tarihcesi + yonetmelik/teblig + atif zinciri + hiyerarsi
   |
   v   (mulga eleme protokolu - 2C ciktisi uzerinde)
@@ -691,7 +704,7 @@ TUM KOLLAR + SIRALI ZINCIR TAMAMLANDIKTAN SONRA KONSOLIDE RAPOR
   `-- 02-Arastirma/arastirma-raporu.md
       Icerik (BAGLAYICILIK MERDIVENI sirasiyla):
       - Kullanilan kaynaklar (her kolun listesi + mcp_fallback_used flag)
-      - Ilgili mevzuat (+ gerekce + degisiklik gecmisi + hiyerarsi etiketi)
+      - Ilgili mevzuat (+ varsa gerekce + degisiklik gecmisi + hiyerarsi etiketi)
       - **Yargi Kararlari + Mevzuat (Mulga Eleme Sonrasi)** - YENI
         * Gecerli Kararlar tablosu (atif maddeleri yururlukte + uyumlu)
         * Elenen Kararlar tablosu (mulga atif / eski norm + sebep)
@@ -768,8 +781,9 @@ denetim de yapar. Bu denetim ASAMA 2 Kalite Kapi 1'de zorunludur.
 
 **Mevzuat CLI vs LLM Web Arastirmasi:**
 
-- **A. MEVZUAT CLI (Birincil):** Kanun, yonetmelik, CBK, teblig, IBK.
-  `mevzuat search/doc/article/tree/gerekce`. Bedesten API + mevzuat.gov.tr.
+- **A. YARGI PRO MCP (Birincil):** Kanun, yonetmelik, CBK, teblig, IBK — `mevzuat_ara` /
+  `mevzuat_getir` / `mevzuat_icinde_ara`. Mevzuat CLI (`mevzuat search/doc/article/tree/gerekce`)
+  yalniz MCP fail durumunda fallback'tir (`mcp_fallback_used: true`).
 - **B. LLM WEB (Fallback):** Cok yeni mevzuat, ozel kurum yonetmelikleri,
   milletlerarasi antlasmalar, AYM norm denetimi kararlari, Resmi Gazete
   yeni yayimlari. Fallback ciktisinda kaynak URL ve yayim tarihi ZORUNLU.
@@ -813,7 +827,7 @@ GECEMEZSE: Arastirma tekrar calistirilir veya eksik kisim tamamlanir.
 
 ### ASAMA 3: Usul Raporu
 
-> **Rol:** MUHAKEME | **Routing:** `usul_raporu` | **Denetim:** DENETCI (`ajanlar/denetci/SKILL.md`)
+> **Rol:** MUHAKEME | **Routing:** `usul_raporu` | **Denetim:** ara çıktı — yapısal kapı + `havuz_kontrol.py` (bağımsız DENETCI K2'de)
 > Hesaplama modulu (deterministik formul) ORKESTRATOR'da kalir.
 
 ```
@@ -843,7 +857,7 @@ Usul cercevesini cikar:
 
 ### ASAMA 4: 5 Ajanli Stratejik Analiz (Tum Dosya Uzerinden)
 
-> **Rol:** MUHAKEME | **Routing:** 4A-4D default routing, 4E `savunma_simulasyonu` | **Denetim:** DENETCI (`ajanlar/denetci/SKILL.md`)
+> **Rol:** MUHAKEME | **Routing:** 4A-4D default routing, 4E `stratejik_analiz` | **Denetim:** 4A-4D ara çıktı (yapısal kapı + `havuz_kontrol.py`) · 4E `stratejik-analiz.md` → **DENETCI KS**
 > Promise.allSettled ile hata toleransi: 4/4 tam, 3/4 uyarili, 2/4 sinirli, <2/4 DURDUR.
 
 Bu asamada henuz dilekce YAZILMAMISTIR. 5 ajanli sistem;
@@ -971,7 +985,10 @@ SENTEZ & STRATEJI AJANI
 02-Arastirma/stratejik-analiz.md kaydet
   |
   v
-MEMPALACE DIARY WRITE (Zorunlu - 5 ajan icin)
+DENETCI KS (sifir baglam; YESIL olmadan ASAMA 5'e ve diary'ye gecilmez)
+  |
+  v
+MEMPALACE DIARY WRITE (Zorunlu - 5 ajan icin; KS YESIL sonrasi)
   |
   |-- mempalace_diary_write "davaci" "{en onemli 3 ogrenme}"
   |-- mempalace_diary_write "davali" "{en onemli 3 ogrenme}"
@@ -989,7 +1006,7 @@ belge yazari ajanin rehberi olarak kullanilir.
 
 ### ASAMA 5: Dilekce v1 (Stratejik Analiz Rehberligi)
 
-> **Rol:** MUHAKEME | **Routing:** `dilekce_yazimi` | **Denetim:** DENETCI (`ajanlar/denetci/SKILL.md`)
+> **Rol:** MUHAKEME | **Routing:** `dilekce_yazimi` | **Denetim:** ara çıktı — yapısal kapı + `havuz_kontrol.py` (bağımsız DENETCI K2'de)
 
 ```
 BELGE YAZARI
@@ -1029,7 +1046,7 @@ Kalite kontrol:
 
 ### ASAMA 6: Savunma Simulasyonu
 
-> **Rol:** MUHAKEME | **Routing:** `savunma_simulasyonu` | **Denetim:** DENETCI (`ajanlar/denetci/SKILL.md`)
+> **Rol:** MUHAKEME | **Routing:** `savunma_simulasyonu` | **Denetim:** ara çıktı — yapısal kapı + `havuz_kontrol.py` (bağımsız DENETCI K2'de)
 
 ```
 SAVUNMA SIMULATORU
@@ -1059,7 +1076,7 @@ Karsi tarafin gozuyle incele:
 
 ### ASAMA 7: Nihai Dilekce v2
 
-> **Rol:** MUHAKEME | **Routing:** `revizyon` | **Denetim:** DENETCI (`ajanlar/denetci/SKILL.md`)
+> **Rol:** MUHAKEME | **Routing:** `revizyon` | **Denetim:** **DENETCI K2** — `dilekce-v2.md` + `dilekce-v2-kaynak-dogrulama.md` çifti (`ajanlar/denetci/SKILL.md`)
 > UDF uretimi (`scripts/md_to_udf.py`) deterministik, LLM kullanmaz.
 
 ```
@@ -1332,7 +1349,7 @@ Ne yapiyorsun?
 | `savunma simule et: [dava-id]` | Savunma Simulatoru (Asama 6) | `savunma-simulasyonu.md + .docx` |
 | `revize et: [dava-id]` | Revizyon Ajani (Asama 7) | `dilekce-v2.md + .docx + .udf` (NIHAI) |
 | `ictihat tara` | Otonom Dongu | `bilgi-tabani/haftalik-ictihat-{tarih}.md` |
-| `sure ekle: [tarih, tur]` | Calendar MCP | Calendar event |
+| `sure ekle: [dava-id] [işlem] [başlangıç]` | Süre Kalkanı (`sure_kalkani.py`); Google Takvim yalnız kesin satır ve avukat onayıyla | Kalkan satırı (+ onaylı takvim etkinliği) |
 | `blog yap: [konu]` | Pazarlama Ajani (bagimsiz) | `blog-icerikleri/{tarih}/` |
 
 ### Alt-Mod Komutlari (2026-04 eklendi)
@@ -1346,17 +1363,18 @@ cikti formati kullanir.
 | `arastir bilirkisi: [dava-id] [rapor]` | Arastirmaci | Bilirkisi Denetleme | `bilirkisi-denetim-raporu.md + .docx` | Bilirkisi raporu geldiginde, itiraz suresi dolmadan |
 | `swot arastir: [dava-id]` | Arastirmaci | SWOT Strateji (banner'li) | `strateji-swot-raporu.md + .docx` | Dava stratejisini netlestirmek icin, briefing sonrasi |
 | `sozlesme incele: [dosya-yolu]` | Arastirmaci | Sozlesme Inceleme | Mevcut->Onerilen->Gerekce raporu | Sozlesme imzalanmadan once risk analizi |
-| `istinaf yaz: [dava-id]` | Belge Yazari | Istinaf Layihasi | `istinaf-dilekcesi-v1.md + .docx + .udf` | Yerel mahkeme karari aleyhine, sure icinde |
-| `temyiz yaz: [dava-id]` | Belge Yazari | Temyiz Layihasi | `temyiz-dilekcesi-v1.md + .docx + .udf` | Istinaf karari aleyhine, sure icinde |
-| `muvekkil bilgilendir: [dava-id]` | Director | Muvekkil Bilgilendirme | `muvekkil-bilgilendirme-{tarih}.md + .docx` | Onemli gelisme sonrasi |
+| `istinaf yaz: [dava-id]` | Belge Yazari | Istinaf Layihasi | `istinaf-dilekcesi-vN.md + eslik -kaynak-dogrulama.md + .docx + .udf (K2 YESIL sonrasi)` | Yerel mahkeme karari aleyhine, sure icinde |
+| `temyiz yaz: [dava-id]` | Belge Yazari | Temyiz Layihasi | `temyiz-dilekcesi-vN.md + eslik -kaynak-dogrulama.md + .docx + .udf (K2 YESIL sonrasi)` | Istinaf karari aleyhine, sure icinde |
+| `muvekkil bilgilendir: [dava-id]` | Director | Muvekkil Bilgilendirme | `muvekkil-bilgilendirme-{tarih}.md + eslik -kaynak-dogrulama.md + .docx` | Onemli gelisme sonrasi |
 | `strateji degerlendir: [dava-id]` | Director | Strateji Degerlendirme (MUHAKEME) | `strateji-degerlendirme-{tarih}.md + .docx` | Dava-uzlasma karar matrisi |
 
 **SWOT banner notu:** `swot arastir:` komutu tetiklendiginde ekrana
 "SWOT MODU AKTIF" banner'i duser. Sebep: avukat "yoksa unuturum" dedi,
 sistem her seferinde hatirlatir. Banner gormezse komut tetiklenmemis demektir.
 
-**Strateji degerlendirme:** Bu alt-mod MUHAKEME rolunde uretilir, DENETCI
-denetler. Diger Director alt-modlari ORKESTRATOR'da kalir.
+**Strateji degerlendirme:** Bu alt-mod MUHAKEME rolunde uretilir; ara ciktidir (yapisal kapi +
+`havuz_kontrol.py`), avukat isterse `denetle: <dosya>` ile DENETCI'ye gonderilir. Diger Director
+alt-modlari ORKESTRATOR'da kalir.
 Oyun teorisi yaklasimiyla iki senaryo modeller (dava vs uzlasma).
 
 ### Ictihat Tarama (Haftalik Otonom)
@@ -1400,8 +1418,8 @@ okunur. Avukat manuel olarak guncelleyebilir. Modlar:
 Motor bildirimi: avukat `motor: <ad>` der (`python scripts/motor.py ayarla <ad>`).
 tek seferlik motor degisikligi yapar.
 
-Model atamalarinin ASAMA bazli haritasi icin yukaridaki
-"Hangi ASAMA Hangi Modelle Calisiyor (Hibrit Motor Haritasi)" tablosuna bak.
+Rol ve görev eşlemesi için `config/motor-haritasi.json`'a, ASAMA ↔ Yargı PRO yöntem
+eşlemesi için AGENTS.md "Karma Mimari — Yargı PRO Entegrasyon Sözleşmesi" bölümüne bak.
 
 Ayrintili kurallar (DENETCI kapisi, cikti frontmatter, MemPalace
 tercih kaydi vs.): `AGENTS.md` -> "Motor Mimarisi" ve "Cikti Frontmatter" bolumleri.
@@ -1479,9 +1497,10 @@ GECEMEZSE veya KIRMIZI ciktiysa: ASAMA 5 BLOKLENIR, avukata onay sorulur.
 
 #### Kapi 4: Dilekce Tamamlandiginda (ASAMA 7 / v2 sonrasi)
 
-- En az 2 Yargitay kararına atif var mi?
+- En az 2 Yargitay kararına atif var mi? (TAM esas belgede; HIZLI usul/ara belgede zorunlu degil)
 - Hesaplamalar usul raporuyla tutarli mi?
-- "Dogrulanmasi gerekir" etiketli 2+ atif varsa -> DILEKCE BLOKLENIR
+- Dogrulanamayan 1+ atif v2'de kalamaz (K2'de KIRMIZI) -> DILEKCE BLOKLENIR
+- `cikti_dogrula.py <v2> --eslik <v2-kaynak-dogrulama>` PASS ve DENETCI K2 YESIL mi?
 - Utandirma testi yapildi mi? (yapay zeka dili, duygusal ifade)
 - Stratejik analizdeki SARTLI kosullari yansitildi mi (varsa)?
 - Savunma simulasyonundaki proaktif karsi pozisyonlar yer aldi mi?
@@ -1492,7 +1511,8 @@ GECEMEZSE: Sorun duzeltilir, avukata bildirilir.
 
 ### GUVEN NOTU (Her Ciktida Bulunur)
 
-Her rapor ve dilekce basinda su tablo zorunludur:
+Her rapor ve dilekce basinda su tablo zorunludur (disari giden belgede eslik dosyasinin basinda;
+UYAP'a gidecek metinde GUVEN NOTU bulunmaz):
 
 ```
 GUVEN NOTU:
@@ -1750,16 +1770,16 @@ STRATEJI (G+C)   -> strateji degerlendir: [dava-id]
 
 ALT KOMUTLAR (Hedefli arastirma)
 ----------------------------------------------------------------------
-arastir yargi: [konu]     (sadece Yargi CLI)
-arastir mevzuat: [konu]   (sadece Mevzuat CLI)
+arastir yargi: [konu]     (Yargi PRO MCP; yargi CLI yalniz yedek)
+arastir mevzuat: [konu]   (Yargi PRO MCP; mevzuat CLI yalniz yedek)
 arastir notebook: [konu]  (sadece NotebookLM)
 
-KVKK (yerel terminalde, scripts/ klasorunde)
+KVKK (ERTELENDI 2026-07-09 — DICT KUR / UNMASK yalniz yerel LLM'e geciste)
 ----------------------------------------------------------------------
 DICT KUR         -> python maske.py --dict <dava-id> add --muvekkil ... --karsi-taraf ...
 UNMASK           -> python maske.py --dict <dava-id> unmask <input.md> <output.md>
 DOCX             -> python md_to_docx.py <dava-klasoru>
-UDF              -> python md_to_udf.py <input.md>  (sadece nihai)
+UDF              -> python md_to_udf.py <input.md>  (sadece nihai, K2 YESIL sonrasi)
 ```
 
 ---
@@ -1800,7 +1820,7 @@ UDF              -> python md_to_udf.py <input.md>  (sadece nihai)
 - [x] MemPalace aktif (`buro-hafizasi` MCP)
 - [x] QMD kurulu ve indexli (310 dosya, 1411 chunk)
 - [x] NotebookLM bagli (`notebooklm` MCP)
-- [x] `scripts/maske.py` calistiriliyor (KVKK Seviye 2)
+- [x] `scripts/maske.py` repoda hazir; maskeleme ERTELENDI (2026-07-09), yalniz `cikti_dogrula.py` TC denetimi kullaniyor
 - [x] `scripts/md_to_docx.py` calistiriliyor (DOCX zorunlu)
 - [x] `scripts/md_to_udf.py` calistiriliyor (UDF nihai dilekce)
 - [x] `config/motor-haritasi.json` -> roller ve task->rol eslemesi

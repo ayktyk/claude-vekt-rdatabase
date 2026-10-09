@@ -1,45 +1,16 @@
-# /dur — Workflow'u Durdur, State'i Kaydet
+---
+description: "Akışı durdurur ve kaldığı yeri 00-AKIS.md kaydına yazar"
+---
+# /dur — Akışı Durdur, Kaldığı Yeri Kaydet
 
-Avukat aktif 7 ASAMA workflow'unu durdurmak istiyor. Director Agent
-state'i diske yazar, sonra `/devam-et` ile aynı yerden başlanır.
+## Director davranışı
 
-## Director Agent Davranışı
-
-1. **Mevcut çalışan task varsa nazikçe bekle:**
-   - Aktif MCP çağrısı varsa, çağrı tamamlanana kadar bekle (max 30 sn)
-   - Aktif Bash komutu varsa, "process bitsin mi yoksa kill mi edeyim?" sor
-2. **State dump:** `tmp/workflow-state-{dava-id}.json`
-   ```json
-   {
-     "dava_id": "ahmet-2026-007",
-     "current_asama": 3,
-     "asama_durumu": "paused",
-     "kaldigi_yer": "ASAMA 3 Usul Uzmani çalışıyordu, harç hesabı tamamlandı, zamanaşımı analizi başlamamıştı",
-     "tamamlanan_asamalar": [0, 1, 2],
-     "yarim_kalan_dosyalar": [
-       "01-Usul/usul-raporu.md (yarım, harç bölümü dolu)"
-     ],
-     "son_komut": "dur",
-     "ts": "<UTC ISO>",
-     "resume_hint": "/devam-et komutu ile ASAMA 3 zamanaşımı analizinden devam eder"
-   }
-   ```
-3. **Avukata özet ver:**
-   ```
-   "Workflow duruldu. Şu anda:
-   - Tamamlanan ASAMA'lar: 0, 1, 2
-   - Yarım kalan: ASAMA 3 (Usul Uzmanı, harç tamam, zamanaşımı eksik)
-   - Yazılan dosya: 01-Usul/usul-raporu.md (yarım)
-
-   Devam etmek için: /devam-et
-   Yeniden başlatmak için: /yeni-dava ..."
-   ```
-4. **MemPalace'e checkpoint:**
-   `wing_buro_aykut/hall_aktif_workflow` drawer'ına state özet yaz
-   (cross-session devam için).
-
-## Kullanım
-
-```
-/dur
-```
+1. **Çalışan iş varsa:** aktif MCP çağrısının bitmesini bekle (en çok 30 sn); aktif Bash komutu
+   varsa "bitsin mi, durdurayım mı?" diye sor.
+2. **Kaldığı yeri kaydet:** `basladi` durumundaki ASAMA için
+   `python scripts/akis.py asama "<dava-klasoru>" <N> --durum basladi --not "DURDURULDU: <kaldığı yer>"`
+   (ör. "harç hesabı bitti, zamanaşımı analizi başlamadı"). Yarım dosya yolu `--cikti` ile yazılır.
+3. **Avukata özet:** tamamlanan ASAMA'lar, yarım ASAMA ve kaldığı yer, yazılan dosyalar.
+   "Devam etmek için: `/devam-et <dava-id>`".
+4. **İsteğe bağlı:** oturumlar arası hatırlatma için MemPalace `wing_buro_aykut`'a kısa not
+   (müvekkil verisi maskelenir).

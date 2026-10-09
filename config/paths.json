@@ -1,18 +1,22 @@
 {
   "_comment": "Platform-bagimsiz yol cozumleme. 'Hukuk Burosu' veri kokunun her makinedeki gercek yolu. Cozumleme onceligi (scripts/paths.py): 1) env HUKUK_BUROSU_ROOT  2) bu dosyada mevcut platform anahtari. Yeni makine eklerken buraya anahtar ekle veya env degiskeni ayarla.",
   "_kullanim": "python scripts/paths.py data-root   (mevcut platformun cozumlenen kokunu yazar)",
-  "_son_guncelleme": "2026-07-09",
-
+  "_son_guncelleme": "2026-10-09",
+  "_not_2026_10_09": "Drive veri koku 1Hukuk Bürosu olarak yeniden adlandirilmis (tum dava klasorleri orada). Eski Hukuk Bürosu klasorunde yalniz Yargi PRO uygulamasinin dosyalarim.json kaydi var. macOS yolu Drive senkronuna gore guncellendi, Mac uzerinde dogrulanmadi.",
   "data_root": {
-    "darwin": "/Users/busrayesilkaya/Library/CloudStorage/GoogleDrive-aykutyesilkaya75@gmail.com/Drive'ım/Hukuk Bürosu",
-    "windows": "G:\\Drive'ım\\Hukuk Bürosu"
+    "darwin": "/Users/busrayesilkaya/Library/CloudStorage/GoogleDrive-aykutyesilkaya75@gmail.com/Drive'ım/1Hukuk Bürosu",
+    "windows": "G:\\Drive'ım\\1Hukuk Bürosu"
   },
-
   "subdirs": {
     "aktif_davalar": "Aktif Davalar",
     "bekleyen_davalar": "Bekleyen Davalar",
     "biten_davalar": "Biten Davalar",
     "blog": "Blog",
     "research": "Research"
-  }
+  },
+  "yargipro_cli": {
+    "darwin": "",
+    "windows": "C:\\Users\\user\\AppData\\Local\\Programs\\dava-desktop-app\\resources\\bin\\yargipro.cmd"
+  },
+  "_not_yargipro_cli": "Yargı PRO masaüstü uygulamasının komut satırı aracı (Ayarlar > Komut satırı). Yalnız uygulama açıkken çalışır. Mac yolu uygulamanın aynı ekranından kopyalanıp 'darwin' anahtarına yazılır. Ortam değişkeni YARGIPRO_CLI bu dosyanın önündedir."
 }

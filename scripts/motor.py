@@ -23,10 +23,16 @@ VARSAYILAN_HARITA = ROOT / "config" / "motor-haritasi.json"
 BILDIRILMEDI = "bildirilmedi"
 
 
-def _yukle(yol: Path) -> dict:
+def _yukle(yol: Path, kati: bool = False) -> dict:
+    """Haritayı okur. Dosya yoksa {}; bozuksa okumada uyarır, yazmada (kati) durur."""
     try:
         return json.loads(yol.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+    except FileNotFoundError:
+        return {}
+    except (OSError, json.JSONDecodeError) as hata:
+        if kati:
+            raise ValueError(f"{yol} okunamadı / geçersiz JSON — ezilmedi: {hata}") from hata
+        print(f"UYARI: {yol} okunamadı / geçersiz JSON: {hata}", file=sys.stderr)
         return {}
 
 
@@ -40,7 +46,7 @@ def aktif_motor(yol: Path | None = None) -> str:
 def motor_ayarla(ad: str, yol: Path | None = None) -> str:
     """Aktif motoru kaydeder; diğer alanlara dokunmaz."""
     hedef = yol or VARSAYILAN_HARITA
-    veri = _yukle(hedef)
+    veri = _yukle(hedef, kati=True)
     veri["aktif_motor"] = ad.strip()
     veri["aktif_motor_guncelleme"] = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     hedef.write_text(json.dumps(veri, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -67,7 +73,11 @@ def main(argv: list[str]) -> int:
         if len(argv) < 2:
             print("kullanim: python scripts/motor.py ayarla <motor-adi>", file=sys.stderr)
             return 2
-        print(motor_ayarla(argv[1]))
+        try:
+            print(motor_ayarla(argv[1]))
+        except ValueError as hata:
+            print(f"HATA: {hata}", file=sys.stderr)
+            return 1
         return 0
     if argv[0] == "damga":
         if len(argv) < 2:

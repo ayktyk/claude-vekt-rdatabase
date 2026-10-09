@@ -1,40 +1,29 @@
-# /atla — Mevcut ASAMA'yı Atla (Sebep Sorgulanır)
+---
+description: "Sıradaki ASAMA'yı sebebi sorularak atlar ve 00-AKIS.md kaydına işler"
+---
+# /atla — Mevcut ASAMA'yı Atla (Sebep Kaydedilir)
 
-Avukat mevcut ASAMA'nın atlanması gerektiğini düşünüyorsa `/atla` der.
-Director Agent atlamadan ÖNCE sebebi sorar ve loglar (sonradan
-"neden bu ASAMA atlanmıştı?" sorusu için).
+Director atlamadan ÖNCE sebebi sorar ve akış kaydına yazar (sonradan "bu aşama neden
+atlanmıştı?" sorusunun cevabı `00-AKIS.md`'de kalır).
 
-## Director Agent Davranışı
+## Director davranışı
 
-1. **Aktif workflow state'i oku:** `tmp/workflow-state-{dava-id}.json`
-2. **Avukata sor:**
+1. **Kaydı oku:** `python scripts/akis.py goster "<dava-klasoru>"`; atlanacak ASAMA sıradaki
+   veya `basladi` durumundaki ASAMA'dır.
+2. **Sebep sor:**
    ```
-   "ASAMA {N} ({ad}) atlanacak.
-   Sebep nedir?
-   - [a] Bu ASAMA bu dava için gereksiz (ör: arabuluculuk gerektirmeyen dava)
-   - [b] Çıktıyı zaten elimde var (manuel hazırladım)
-   - [c] Şimdilik atla, sonra dön (state'e 'deferred' olarak kayıtla)
-   - [d] Diğer (yazın)"
+   ASAMA {N} ({ad}) atlanacak. Sebep?
+   [a] Bu dava için gereksiz   [b] Çıktısı zaten elimde (manuel hazırladım)
+   [c] Şimdilik atla, sonra dön   [d] Diğer (yazın)
    ```
-3. **State güncelle:**
-   ```json
-   {
-     "current_asama": <N+1>,
-     "asama_durumu": "in_progress",
-     "atlanan_asamalar": [
-       {"asama": <N>, "sebep": "<a/b/c/d>", "aciklama": "<avukat girdisi>", "ts": "..."}
-     ],
-     "son_komut": "atla"
-   }
-   ```
-4. **Atlama sebebi araştırma raporu / dilekçe sürecini etkiliyorsa uyarı:**
-   - ASAMA 2 (Araştırma) atlanırsa: "Dilekçe v1 araştırma bulguları olmadan yazılacak. Onaylıyor musunuz?"
-   - ASAMA 6 (Savunma Simülasyonu) atlanırsa: "Dilekçe v2 NIHAI savunma testinden geçmemiş olur. Onaylıyor musunuz?"
-   - Sadece ASAMA 4 (Stratejik Analiz) ve ASAMA 6 (Savunma Sim) atlanması "kaliteden ödün" sayılmaz; diğerleri uyarı gerektirir.
-5. **Logla:** MemPalace `wing_buro_aykut/hall_workflow_atlamalari` drawer'ına yaz (gelecek davalarda Director "bu durumda da atlamak ister misiniz?" diye sorabilsin).
-
-## Kullanım
-
-```
-/atla
-```
+   [b] seçilirse dosya yolu alınır ve `--durum mevcut --cikti <yol>` işlenir.
+3. **Etki uyarısı (atlamadan önce):**
+   - ASAMA 2 atlanırsa künye havuzu oluşmaz; sonraki ASAMA'lar atıf yapamaz, K2 tüm künyeleri
+     sıfırdan denetler. Avukatın açık onayı gerekir.
+   - ASAMA 4 atlanırsa dilekçe yazım rehberi (4E) ve KS denetimi olmaz; v1 araştırma + usul raporundan
+     yazılır, stratejik çıkarımlar ancak K2'de denetlenir.
+   - ASAMA 6 atlanırsa v2 savunma testinden geçmemiş olur.
+   - ASAMA 7 atlanırsa nihai belge K2 denetiminden geçmez ve dışarı gönderilemez; yalnız avukatın
+     açık onayıyla ve "denetlenmedi" notuyla.
+4. **Kaydet:** `python scripts/akis.py asama "<dava-klasoru>" <N> --durum atlandi --not "<sebep>"`.
+5. **İsteğe bağlı:** sebep tekrarlanan bir kalıpsa `dersler/sistem.md`'ye kural adayı olarak yazılır.

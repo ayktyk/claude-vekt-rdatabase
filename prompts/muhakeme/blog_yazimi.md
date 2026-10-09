@@ -629,9 +629,11 @@ Yazi tamamlandiktan sonra **ayni sohbette** asagidaki kontrolleri yap:
 Tum KIRMIZI sifir + sari'lar duzeltildiyse:
 - Dort dosyayi belirtilen yola yaz (`blog.md`, `blog.cms.md`,
   `blog.mail.md`, `kapak.png`)
-- Self-review sonucunu yazinin sonuna kisa blok olarak ekle
+- Self-review sonucunu blog govdesine EKLEME; blog klasorunde ayri `self-review.md` dosyasina yaz.
+  Bagimsiz DENETCI karari ayrica `denetim-sonucu.md` dosyasina yazilir (AGENTS.md "DENETCI Kapısı ve
+  Denetim Politikası"); iki dosya birbirinin yerine gecmez.
 
-### Self-Review Cikti Formati
+### Self-Review Cikti Formati (`self-review.md` icerigi)
 
 ```markdown
 ---

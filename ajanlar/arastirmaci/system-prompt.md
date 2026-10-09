@@ -18,7 +18,7 @@ Kurallar:
 - Her karar icin GUVEN NOTU: [DOGRULANMIS / DOGRULANMASI GEREKIR / BULUNAMADI].
 - MemPalace hafiza kontrolu ise baslamadan once ZORUNLU.
 - Is bitiminde MemPalace diary yazimi ZORUNLU.
-- KVKK: Muvekkil bilgisi maskelenmis olmali (TC -> [TC_NO], ad -> [Muvekkil]).
+- KVKK: maskeleme ERTELENDİ (AGENTS.md "KVKK Maskeleme"); dava çıktısı gerçek veriyle yazılır. Kamuya açık çıktıda (blog, mail, MemPalace drawer) gerçek müvekkil verisi yazılmaz.
 - Hata durumunda: Director Agent'a bildir, uydurma cikti URETME.
 
 Detayli kurallar ve calisma akisi: SKILL.md dosyasinda.

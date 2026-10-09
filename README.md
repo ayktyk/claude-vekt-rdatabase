@@ -14,6 +14,12 @@ Her çıktı **TASLAK**'tır. Son kontrol avukattadır.
 | Ne arıyorsanız | Dosya |
 |---|---|
 | Sistemin tüm kuralları, 7 ASAMA akışı, doktrin, kalite kapıları | `AGENTS.md` |
+| Yargı PRO ile karma mimari, çalışma modları (TAM/HIZLI), denetim politikası (K1 + KS + K2, belge + eşlik çifti) | `AGENTS.md` → "Karma Mimari", "Çalışma Modları", "DENETCI Kapısı ve Denetim Politikası" |
+| Bir davanın akış durumu (hangi ASAMA, denetim ne dedi) | `00-AKIS.md` (dava klasöründe) · `python scripts/akis.py goster <dava-klasoru>` |
+| Yargı PRO'nun 107 becerisi, büro iş hatları (duruşma, karar, müzakere, takip …) | `AGENTS.md` → "Beceri Haritası ve Büro İş Hatları" · `config/beceri-haritasi.json` · görsel harita `docs/karma-mimari-yargipro.html` |
+| Bir davanın süreleri (Süre Kalkanı) ve günlük pano | `00-Sure-Kalkani.json` (dava klasöründe) · `python scripts/sure_kalkani.py liste` · `/pano` |
+| UYAP takibi (Yargı PRO uygulaması), büyük eşitleme, icra özeti ve iş takip Excel'i | `python scripts/uyap_takip.py oku/rapor` · `python scripts/uyap_esitle.py plan/calistir/devam` · `python scripts/icra_ozet.py` · `python scripts/excel_takip.py guncelle` |
+| Projenin son durumu (araştırma ve iş takibi, 9 Ekim 2026) | `docs/proje-son-durum.html` |
 | Büronun kendi kuralları ve tercihleri | `legal.local.md` |
 | Dilekçe biçim ve üslup standardı | `dilekce-yazim-kurallari.md` |
 | İlk dava incelemesi metodolojisi | `ajanlar/director/olay-cozum-protokolu.md` |
@@ -51,14 +57,16 @@ python scripts/paths.py check         # Drive yolları çözümleniyor mu
 python -m pytest scripts/tests -q     # tüm testler
 ```
 
-Bir hukuki çıktı üretildikten sonra denetim, `ajanlar/denetci/SKILL.md`
-protokolüyle yapılır: künyeler kaynaktan yeniden çekilir, alıntılar birebir
-kıyaslanır. **KIRMIZI kararda çıktı Drive'a yazılmaz.**
+Bağımsız denetim iki sabit noktada, `ajanlar/denetci/SKILL.md` protokolüyle
+yapılır: K1 araştırma raporu, K2 dışarı giden nihai belge. Künyeler kaynaktan
+yeniden çekilir, alıntılar birebir kıyaslanır, sonuç `00-AKIS.md`'ye yazılır.
+Ara çıktılar yapısal kapı ve künye havuzu kuralıyla ilerler.
+**KIRMIZI kararda çıktı Drive'a yazılmaz.**
 
 ## Veri nerede
 
 Kalıcı dava ve araştırma çıktısı repoda değil Google Drive'dadır
-(`Hukuk Bürosu/Aktif Davalar/...`). Yol çözümlemesi platforma göre
+(`1Hukuk Bürosu/Aktif Davalar/...` — klasör 2026-10'da bu adla yeniden adlandırıldı). Yol çözümlemesi platforma göre
 `config/paths.json` + `scripts/paths.py` üzerinden yapılır:
 
 ```bash

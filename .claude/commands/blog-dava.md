@@ -1,3 +1,6 @@
+---
+description: "Dava araştırmasından anonim blog yazısı (THEMIS dava modu); DENETCI tek denetim"
+---
 <!-- DOKTRIN-PREAMBLE v1 -->
 > **0-HALÜSİNASYON + ANTI-SYCOPHANCY (zorunlu — tam metin: `prompts/_doktrin-preamble.md`):**
 > - UYDURMA YARGITAY/HGK/İBK kararı atfı YASAK — her künye Bedesten documentId ile doğrulanır; doğrulanmayan "DOĞRULANMAMIŞ" damgalanır.
@@ -19,7 +22,7 @@ Muvekkil verisi blog'a TASINMAZ — sadece hukuki tezler / icithat / mevzuat.
 ## Zorunlu Referans Dokumanlar
 
 - `ajanlar/blog-yazari/SKILL.md` — tam protokol
-- `prompts/muhakeme/blog_yazimi.md` — Antigravity'ye yapistirilan prompt
+- `prompts/muhakeme/blog_yazimi.md` — MUHAKEME üretim protokolü (aynı oturum)
 - `ajanlar/blog-yazari/THEMIS.md` — proje kokunde tam THEMIS referansi
 - `config/author.json` — Aykut sameAs URL'leri
 - `config/motor-haritasi.json` -> `tasks.blog_yazimi`
@@ -151,78 +154,29 @@ mempalace_search "{primary_keyword}" --wing wing_buro_aykut/hall_blog_konulari -
 Ayni keyword baska URL'de varsa avukati uyar (`blog.md`'deki ADIM 0B
 ile ayni mekanizma).
 
-### ADIM 4: Antigravity Devir Blogu Bas
+### ADIM 4: Üretim (tek motor — aynı oturum)
 
-```
-========== ANTIGRAVITY DEVIR BLOGU ==========
-ASAMA: Blog Yazimi (THEMIS) — DAVA MODU
-Dava-ID: {dava-id}
+Elle devir bloğu, kopyala-yapıştır ve harici panel YOKTUR. Akış:
+`ajanlar/blog-yazari/SKILL.md` → "Üretim Akışı (tek motor — Blog / THEMIS)".
 
-Sag panele yapistirilacak:
---------------------------------------------
-Asagidaki girdi paketini alip THEMIS protokolune gore SEO uyumlu hukuki
-blog yazisi uret. Cikti: 4 dosya (blog.md, blog.cms.md, blog.mail.md,
-kapak.png).
+1. ORKESTRATOR THEMIS girdi paketini hazırlar: `mod: dava`, primary_keyword,
+   secondary_keywords, intent (I|C|T), kategori, sayfa_tipi, hedef_kelime 1500-2500,
+   `verified: true` emsal kararlar (3-5), mevzuat (2+), saha_ornek, entity_graph, author_sameAs.
+2. MUHAKEME `prompts/muhakeme/blog_yazimi.md` protokolüyle dört dosyayı üretir:
+   `blog.md` + `blog.cms.md` + `blog.mail.md` + `kapak.png` → `{dava-id}/06-Blog/`
+   (dava klasörü `python scripts/paths.py dava <dava-id>`). KVKK extra sert: müvekkil, karşı taraf,
+   mahkeme esas no ve olay ayrıntısı anonimleştirilir.
+3. DENETCI tek denetim yapar (AGENTS.md "Denetim Politikası"): `blog_validator.py` + künye
+   içerik teyidi. KIRMIZI veya SARI'da yeniden üretilir (en çok 3 tur); YEŞİL olmadan Gmail taslağı ve MemPalace kaydı açılmaz. Sonuç blog klasöründe
+   ayrı `denetim-sonucu.md` dosyasına yazılır; blog gövdesine, CMS ve mail sürümlerine girmez. Blog
+   hattı dava akış kaydı açmaz.
 
-Protokol: prompts/muhakeme/blog_yazimi.md (ayni workspace'de acik)
-Ortak kurallar: prompts/muhakeme/_ortak-kurallar.md
-
-Cikti yolu: G:\Drive'im\Hukuk Burosu\Aktif Davalar\{dava-id}\06-Blog\
-
---- GIRDI PAKETI ---
-
-mod: dava
-dava_id: "{dava-id}"
-primary_keyword: "{...}"
-secondary_keywords:
-  - "{...}"
-intent: {I|C|T}
-kategori: "{...}"
-sayfa_tipi: blog
-hedef_kelime: 1500-2500
-
-emsal_kararlar:
-  {arastirma raporundan cikan Bedesten ID'li kararlar}
-
-mevzuat:
-  {arastirma raporundan cikan maddeler}
-
-saha_ornek: |
-  {AVUKAT ONAYLI anonim senaryo veya BOS}
-
-entity_graph:
-  pillar: "/{kategori}"
-  clusters: [...]
-  tools: [...]
-  dis_otorite: "https://www.mevzuat.gov.tr/..."
-
-author_sameAs:
-  {config/author.json sameAs listesi}
-
---- KVKK NOTU (CRITICAL) ---
-Bu DAVA modudur. Muvekkil verisi blog'a tasinmaz. Sahanik ornegi varsa
-"Akif B." veya "tekstil sektoru calisani" gibi tamamen anonim formatta yaz.
-Davanin spesifik olgulari (firma adi, tarih, miktar, mahkeme no) blog'a
-GIRMEZ — sadece HUKUKI TEZLER ve KAMUYA AIT KARARLAR.
-
---- KURALLAR (kisa hatirlatma) ---
-1. 6 katman OLAY-KOSAR-DERIN-SAHA-ETIK-AKSIYO zorunlu
-2. Min 1500 kelime, min 3 Bedesten ID atfi, min 5 FAQ
-3. KVKK: tam isim/TC/IBAN/sokak YASAK (dava modunda EXTRA sert)
-4. TBB: "en iyi/garantili/%100/kesin basari" YASAK
-5. Kapak gorseli Imagen ile uret (insan yuzu/logo/yazi YASAK)
-6. Self-review yap; KIRMIZI = Drive'a YAZMA, yeniden uret
-
-Drive'a 4 dosyayi yaz:
-  - blog.md          (frontmatter + tam icerik)
-  - blog.cms.md      (CMS panel formati)
-  - blog.mail.md     (Gmail draft formati + self-check 12)
-  - kapak.png        (Imagen kapak gorseli)
---------------------------------------------
-
-Antigravity tamamlayinca buraya don ve "Blog bitti" yaz.
-=============================================
-```
+KURALLAR (kısa hatırlatma):
+  - 6 katman OLAY-KOSAR-DERIN-SAHA-ETIK-AKSIYON zorunlu
+  - Min 1500 kelime, min 3 verified Bedesten ID atfı, min 5 FAQ
+  - KVKK: tam isim/TC/IBAN/sokak YASAK
+  - TBB: "en iyi/garantili/%100/kesin basari" YASAK
+  - Kapak: "VEGA Kapak Tarz Formülü" (insan yüzü/logo/yazı YASAK)
 
 ### ADIM 5: Avukat Onayini Bekle
 
@@ -242,7 +196,7 @@ Avukat "Blog bitti" diyene kadar bekle.
    ```
    mempalace_diary_write "blog_yazari" \
      "konu={...}, primary_keyword={...}, kelime={N}, bedesten_atif={N},
-      self_review=YESIL|SARI, mod=dava, dava_id={dava-id}"
+      denetim=YESIL, mod=dava, dava_id={dava-id}"
    ```
 4. `hall_blog_konulari`'na drawer (kanibalizasyon icin)
 5. **EK ADIM (dava modunda):** `hall_dava_blog_eslesmesi`'ne baglanti:
@@ -279,7 +233,7 @@ Avukat "Blog bitti" diyene kadar bekle.
 ## Fallback
 
 `blog.md` komutuyla ayni:
-- Antigravity erisilemez → "fallback claude" → terminal Claude uretir
+- Görsel üretim aracı yoksa kapak `blog.md` fallback'indeki yolla üretilir
 - Imagen tool erisilemez → metin tamamlanir, kapak gorseli avukat elle uretir
 
 ---

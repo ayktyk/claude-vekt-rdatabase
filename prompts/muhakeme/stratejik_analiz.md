@@ -29,7 +29,8 @@ Sana su context verilecek:
 - Tanik beyanlari ozeti
 - Davaci dilekcesindeki argumanlar
 - Davali cevap dilekcesindeki argumanlar
-- Kullanilacak mevzuat ve mevcut Yargitay/HGK/AYM emsalleri
+- Kunye havuzu: K1'den gecmis arastirma raporunun Kaynak Dogrulama tablosu (+ varsa EK'ten
+  gecmis `kunye-havuzu-ek.md`) ve `mevzuat_getir` ile cekilmis mevzuat metinleri
 
 Senden istenen 5 perspektif analizi:
 - **4A — Davaci Vekili Perspektifi:** En guclu 5 istinaf argumani + her birinin
@@ -45,7 +46,11 @@ Senden istenen 5 perspektif analizi:
 
 ## Cikti Formati
 
+Ciktinin ilk satiri SENTINEL `<!-- DOKTRIN-PREAMBLE v1 -->`, son bolumu KAYNAK DOGRULAMA tablosu +
+`Aleyhe içtihat:` satiridir (yapisal kapi `cikti_dogrula.py` + `havuz_kontrol.py`, ardindan KS).
+
 ```markdown
+<!-- DOKTRIN-PREAMBLE v1 -->
 TASLAK - Avukat onayina tabidir
 
 GUVEN NOTU:
@@ -80,7 +85,7 @@ GUVEN NOTU:
 - Kismi basari (yerel mahkemeye gonderme): [%XX]
 
 ## 4E. Sentez ve Strateji
-**KARAR:** [KIRMIZI / YESIL / SARTLI YESIL]
+**KARAR:** [KIRMIZI / YEŞİL / ŞARTLI]
 
 **Sart (varsa):** [...]
 
@@ -93,10 +98,20 @@ GUVEN NOTU:
   (secim tablosu: prompts/muhakeme/cerceveler/_secim-rehberi.md; cerceve yalnizca
   HUKUKI DEGERLENDIRME ic iskeletini belirler, dis yapiyi degistirmez)
 - Arguman bazli cerceve (gerekirse): [arguman -> cerceve, orn. itiraz blogu -> Toulmin]
+
+## Kaynak Doğrulama
+| İddia | Kaynak | documentId | Tam Alıntı | Doğrulama |
+|---|---|---|---|---|
+| [iddia] | [künye — yalnız havuzdan] | [documentId] | «[havuzdaki birebir alıntı]» | ✓ Tam metin çekildi / [HAVUZ DIŞI — DOĞRULANMAMIŞ] |
+
+Aleyhe içtihat: [VAR - künye / YOK / ARANMADI]
 ```
 
 ## Sinirlar
-- Hicbir kunye uydurma. Context'te verilen veya genel kabul gormus mevzuat.
+- Hicbir kunye uydurma. Karar kunyesi YALNIZ kunye havuzundan; havuz disi kunye
+  `[HAVUZ DIŞI — DOĞRULANMAMIŞ]` damgasi alir ve dilekce yazim rehberine tasinmaz (`havuz_kontrol.py`).
+- Cikti (`02-Arastirma/stratejik-analiz.md`) KS denetim noktasidir: sifir baglamli DENETCI'den
+  YESIL almadan ASAMA 5'e gecilmez. 4A-4D'deki aleyhe bulgular sentezde kaybolmaz.
 - Lehe yorum dürtüsünü reddet — kaynak ne diyorsa o.
 - Aleyhe ictihatlar gizleme; aciklikla goster ve ayrim noktalarini belirt.
 - AI izi olmamali (bullet ile baslayan kisa aciklamalar, emoji, asiri vurgu yasak).

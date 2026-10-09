@@ -55,6 +55,13 @@ Sana research package iletilir (tek prompt icinde). Icerik:
 
 ## Cikti Formati (TEK MARKDOWN BLOK — Director'a return)
 
+**Dosya ve kapı (Denetim Politikası v2):** Çıktı `02-Arastirma/stratejik-analiz-4A-davaci.md`
+dosyasına yazılır. İlk satırı SENTINEL `<!-- DOKTRIN-PREAMBLE v1 -->`; sonunda KAYNAK DOĞRULAMA
+tablosu (`| İddia | Kaynak | documentId | Tam Alıntı | Doğrulama |`) ve
+`Aleyhe içtihat: VAR/YOK/ARANMADI` satırı bulunur. Karar künyesi yalnız künye havuzundan alınır
+(K1'den geçmiş araştırma raporu + varsa `kunye-havuzu-ek.md`); havuz dışı künye
+`[HAVUZ DIŞI — DOĞRULANMAMIŞ]` damgası alır. Kapı: `cikti_dogrula.py` + `havuz_kontrol.py`.
+
 ```markdown
 ---
 GUVEN NOTU:
@@ -94,8 +101,8 @@ GUVEN NOTU:
 - [ ] Her arguman somut olguya dayaniyor mu (soyut iddia yok)?
 - [ ] Atif yapilan karar gercekten arastirma raporunda var mi?
 - [ ] Uydurma karar/madde/tarih YOK mu?
-- [ ] Emin degilsen: `[DOGRULANMASI GEREKIR]` notu eklendi mi?
-- [ ] KVKK: Gercek muvekkil adi/TC/IBAN VAR mi? Maskele.
+- [ ] Havuz dışı künye `[HAVUZ DIŞI — DOĞRULANMAMIŞ]` damgalı mı; emin olunmayan iddiada `[DOGRULANMASI GEREKIR]` notu var mı?
+- [ ] KVKK: maskeleme ertelendi (dava çıktısı gerçek veriyle); kamuya açık türev çıktıda (blog, mail, MemPalace drawer) TC/IBAN/isim yok mu?
 - [ ] Yapay zeka uslubundan kacildi mi (Ozetle, Sonuc olarak vb.)?
 - [ ] En az 2 Yargitay karari atif var mi?
 - [ ] Risk tablosu somut mu (yoksa "olabilir, belki" gibi belirsiz)?
@@ -108,8 +115,7 @@ GUVEN NOTU:
 
 ## KVKK
 
-Cikti raporunda gercek isim/TC/IBAN/adres YOK. Maskeli token kullan: `[Muvekkil]`, `[TC_NO]`,
-`[KARSI_TARAF]`. Yargitay karari metnindeki kisi adlari kamu bilgisidir, aynen kalir.
+Maskeleme ERTELENDİ (AGENTS.md "KVKK Maskeleme", avukat kararı 2026-07-09): rapor gerçek veriyle yazılır; kamuya açık değildir. Blog, mail veya MemPalace drawer'a aktarılacak kısım orada maskelenir (`cikti_dogrula.py --kamu`). Yargıtay kararı metnindeki kişi adları kamu bilgisidir, aynen kalır.
 
 ## 0-Halusinasyon + Lehe Yorum Yasagi (ZORUNLU)
 

@@ -126,7 +126,7 @@ def test_cikti_banned_phrase_fail():
 def test_cikti_kvkk_gecerli_tc_fail():
     # 10000000078 checksum-geçerli bir TC'dir → leak sayılmalı
     metin = _temiz_cikti() + "\nMüvekkil TC: 10000000078\n"
-    fails = cikti_dogrula.validate_text(metin, denylist=[])
+    fails = cikti_dogrula.validate_text(metin, denylist=[], kamu=True)
     assert any("TC" in f for f in fails)
 
 
@@ -143,6 +143,32 @@ def test_cikti_kamuya_acik_esas_no_flaglenmez():
     metin = _temiz_cikti() + "\nDava E.2026/12345, talep 50000 TL.\n"
     fails = cikti_dogrula.validate_text(metin, denylist=[])
     assert not any("TC" in f or "IBAN" in f for f in fails), f"kamuya açık sayı flag'lendi: {fails}"
+
+
+# --- KVKK kapsamı (2026-10-09): maskeleme ertelendi; dava çıktısında TC/IBAN FAIL değil, kamuya açıkta FAIL ---
+
+def test_dava_kapsaminda_tc_fail_degil():
+    metin = _temiz_cikti() + "\nMüvekkil TC: 10000000078\n"
+    fails = cikti_dogrula.validate_text(metin, denylist=[], kamu=False)
+    assert not any("TC" in f for f in fails), f"dava çıktısında TC FAIL sayıldı: {fails}"
+
+
+def test_dava_kapsaminda_kvkk_bilgi_olarak_raporlanir():
+    metin = _temiz_cikti() + "\nMüvekkil TC: 10000000078\n"
+    bilgi = cikti_dogrula.kvkk_bulgulari(metin, denylist=[])
+    assert any("TC" in b for b in bilgi)
+
+
+def test_cli_varsayilan_dava_kapsami_tc_ile_pass(tmp_path):
+    f = tmp_path / "dilekce-v2.md"
+    f.write_text(_temiz_cikti() + "\nMüvekkil TC: 10000000078\n", encoding="utf-8")
+    assert cikti_dogrula.main([str(f)]) == 0
+
+
+def test_cli_kamu_kapsami_tc_ile_fail(tmp_path):
+    f = tmp_path / "blog.md"
+    f.write_text(_temiz_cikti() + "\nMüvekkil TC: 10000000078\n", encoding="utf-8")
+    assert cikti_dogrula.main([str(f), "--kamu"]) == 1
 
 
 # --- 9. clause: çıkarım geçerliliği (2026-09-02) ---
@@ -166,3 +192,9 @@ def test_dokuzuncu_clause_preamblede_var():
 def test_eksik_dokuzuncu_clause_yakalanir():
     eski = dc.STANDARD_HEADER.replace("ÇIKARIM GEÇERLİLİĞİ", "xxx")
     assert "ÇIKARIM GEÇERLİLİĞİ" in dc.missing_clauses(eski)
+
+def test_ters_yonlu_asiri_vaat_tbb_listesinde():
+    # DENETCI e2e denemelerinde (2026-09-02, 2026-10-09) yapısal kapı kaçırmıştı
+    metin = _temiz_cikti() + "\nİşveren mutlaka kaybeder.\n"
+    fails = cikti_dogrula.validate_text(metin, denylist=[], kamu=False)
+    assert any("TBB" in f for f in fails)

@@ -65,6 +65,12 @@
   Bu satır yoksa çıktı doğrulama kapısından (`cikti_dogrula.py`) HARD FAIL alır —
   doktrinin sana ulaşmadığının kanıtı sayılır.
 
+- **Dışarı giden belgede yer değişir, kural değişmez:** dilekçe v2, istinaf/temyiz, ihtarname,
+  sözleşme ve müvekkil bilgilendirme metninde SENTINEL, KAYNAK DOĞRULAMA tablosu ve aleyhe
+  beyanı belgeye değil eşlik dosyasına (`<belge-adı>-kaynak-dogrulama.md`; ihtarnamede
+  `kontrol-notlari.md`) yazılır; üç
+  zorunluluk eşlik dosyasında aynen geçerlidir (AGENTS.md "DENETCI Kapısı ve Denetim Politikası").
+
 ---
 
 ## VARYANT A — MUHAKEME rolü (üretici)
@@ -75,9 +81,18 @@
   uydurma riski → kullanma.
 - Çıktının başına SENTINEL satırını yaz; sonuna KAYNAK DOĞRULAMA tablosu +
   Aleyhe içtihat beyanı ekle.
-- Üretim sonrası çıktıyı **DENETCI** (`ajanlar/denetci/SKILL.md`, ölçütler
+- Bağımsız denetim sabit noktalarda çalışır (AGENTS.md "DENETCI Kapısı ve Denetim
+  Politikası"): K1 araştırma raporu, KS stratejik analiz, K2 dışarı giden belge + eşlik
+  dosyası. Bu noktalardaki çıktıyı **DENETCI** (`ajanlar/denetci/SKILL.md`, ölçütler
   `prompts/muhakeme/self_review.md`) üretim bağlamını görmeden denetler
-  (KIRMIZI/SARI/YEŞİL). KIRMIZI/SARI ise düzelt; ancak YEŞİL çıktı Drive'a yazılır.
+  (KIRMIZI/SARI/YEŞİL); KIRMIZI/SARI ise düzelt, yalnız YEŞİL çıktı Drive'a yazılır.
+- Ara çıktı (usul raporu, 4A-4D, dilekçe v1, savunma simülasyonu) yalnız künye havuzundaki
+  künye ve alıntıları kullanır (K1'den geçmiş araştırma raporu + EK'ten geçmiş
+  `kunye-havuzu-ek.md`); `scripts/havuz_kontrol.py` bunu mekanik olarak denetler.
+- Dışarı giden belgeyi (dilekçe v2, istinaf/temyiz, ihtarname, sözleşme) iki dosya olarak yaz:
+  temiz belge + `<belge-adı>-kaynak-dogrulama.md` eşlik dosyası (ihtarnamede `kontrol-notlari.md`).
+  SENTINEL, KAYNAK DOĞRULAMA
+  tablosu, aleyhe beyanı ve karar noktaları eşlik dosyasına girer; UYAP'a gidecek belgeye girmez.
 
 ## VARYANT B — SÜPER STAJYER (harici hukuk araştırmacısı)
 

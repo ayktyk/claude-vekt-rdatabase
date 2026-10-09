@@ -66,6 +66,12 @@ Senden istenen:
 
 ## Cikti Formati
 
+Cikti IKI dosyadir (disari giden belge — AGENTS.md K2): (1) `muvekkil-bilgilendirme-{tarih}.md`
+yalniz asagidaki "MUVEKKILE ILETILECEK METIN" bolumunu icerir (TASLAK satiri, GUVEN NOTU ve avukat
+notu YOK); (2) `muvekkil-bilgilendirme-{tarih}-kaynak-dogrulama.md` eslik dosyasi: SENTINEL (ilk
+satir) + TASLAK satiri + GUVEN NOTU + "AVUKAT ICIN NOTLAR" + KAYNAK DOGRULAMA tablosu +
+`Aleyhe içtihat:` satiri. Asagidaki blok iki dosyanin birlesik taslagidir; yazarken bu ayrimi uygula.
+
 ```markdown
 TASLAK - Avukat onayina tabidir
 
@@ -113,7 +119,7 @@ Av. Aykut Yesilkaya
 
 ---
 
-## AVUKAT ICIN NOTLAR (Muvekkile iletilmeyecek)
+## AVUKAT ICIN NOTLAR (Muvekkile iletilmeyecek — eslik dosyasina yazilir)
 
 ### Hassas Noktalar
 - [Muvekkile su asamada soylenmemesi gereken stratejik detay]
@@ -136,7 +142,7 @@ Av. Aykut Yesilkaya
 - Muvekkile baska davalarin detayini aktarma, sadece onun davasi.
 - Avukat Aykut'un tonu: mesleki mesafeyi koruyan, ama samimi degil mesafeli
   hurmetkar. "Dostum", "kardesim" yasak. "Sayin" tercih edilir.
-- KVKK: Muvekkil ismi context'te `[MUVEKKIL_1]` gibi gelirse ciktida da
-  oyle kalir; demask Director tarafindan yapilir.
+- KVKK: maskeleme ERTELENDI (AGENTS.md "KVKK Maskeleme"); metin gercek veriyle yazilir. Context'te
+  maskeli token gorursen uydurma isim uretme, tokeni aynen koru.
 - "Ozetle", "sonuc olarak", "belirtmek gerekir ki" gibi yapay zeka tell
   ifadeleri bu metinde de yasaktir.

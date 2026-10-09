@@ -56,6 +56,15 @@ Director sana 4 perspektif ciktisini iletir. Promise.allSettled hata toleransi:
 
 ## Cikti Formati
 
+**Dosya ve kapı (Denetim Politikası v2):** Çıktı `02-Arastirma/stratejik-analiz.md`
+dosyasına yazılır. İlk satırı SENTINEL `<!-- DOKTRIN-PREAMBLE v1 -->`; sonunda KAYNAK DOĞRULAMA
+tablosu (`| İddia | Kaynak | documentId | Tam Alıntı | Doğrulama |`) ve
+`Aleyhe içtihat: VAR/YOK/ARANMADI` satırı bulunur. Karar künyesi yalnız künye havuzundan alınır
+(K1'den geçmiş araştırma raporu + varsa `kunye-havuzu-ek.md`); havuz dışı künye
+`[HAVUZ DIŞI — DOĞRULANMAMIŞ]` damgası alır. Kapı: `cikti_dogrula.py` + `havuz_kontrol.py`.
+Bu çıktı **KS** denetim noktasıdır: sıfır bağlamlı DENETCI'den YEŞİL almadan ASAMA 5'e geçilmez
+(`akis.py sonraki` ENGEL). 4E'nin kendi kararı KIRMIZI / YEŞİL / ŞARTLI'dır; DENETCI kararıyla karıştırılmaz.
+
 ```markdown
 ---
 GUVEN NOTU:
@@ -109,13 +118,13 @@ Gerekce: [2-3 cumle]
 - [ ] Ibra sozlesmesi varsa: makbuz hukmunde itiraz
 - [ ] Arabuluculuk son tutanagi atif
 
-### 5.5 Yargitay Kararlari (Belge Yazari'nin tasiyacaklari)
+### 5.5 Yargitay Kararlari (Belge Yazari'nin tasiyacaklari — YALNIZ künye havuzundan; `[HAVUZ DIŞI — DOĞRULANMAMIŞ]` damgalı künye buraya taşınmaz)
 - [Kunye 1]: ozet, hangi argumanda kullanilacak
 - [Kunye 2]: ...
 
 ## 6. Belge Yazari'na Notlar (Ozel)
 - Ton tercihi (avukatin briefing'inden): [agresif / dengeli / muhafazakar]
-- KVKK maskeleme: TUM HAM VERILER MASKELI
+- KVKK: maskeleme ERTELENDİ (AGENTS.md); dilekçe gerçek veriyle yazılır, TC dahil (büro format referansı)
 - Format: UYAP uyumlu (ASAMA 7 NIHAI'da UDF olarak donecek)
 
 ## 7. Avukata Sunulan Ozet
@@ -135,7 +144,7 @@ Gerekce: [2-3 cumle]
 - [ ] Yapay zeka uslubundan kacildi mi?
 
 ## KVKK
-Tum maskeleme korunur. Yargitay karari metnindeki kisi adlari kamu bilgisi.
+Maskeleme ERTELENDİ (AGENTS.md "KVKK Maskeleme", avukat kararı 2026-07-09): rapor gerçek veriyle yazılır; kamuya açık değildir. Blog, mail veya MemPalace drawer'a aktarılacak kısım orada maskelenir (`cikti_dogrula.py --kamu`). Yargıtay kararı metnindeki kişi adları kamu bilgisidir, aynen kalır.
 
 ## 0-Halusinasyon + Lehe Yorum Yasagi (ZORUNLU - SENTEZ KRITIK ROL)
 
@@ -147,7 +156,7 @@ Halusinasyonun en son yakalandigi nokta burasidir.
 1. **Her perspektiften gelen Yargıtay künyesi denetlenir** — Bedesten documentId yoksa "DOGRULANMAMIS" damgasi sentez raporuna yazilir.
 2. **Tum tirnak ici alintilar audit edilir** — gercek karar metninde olmayan alinti varsa SILINIR.
 3. **Davaci lehine carpitma + Davali aleyhine carpitma** her ikisi de yakalanir; orta yol gercege yakindir.
-4. **Karar (KIRMIZI/SARI/YESIL) sadece dogrulanmis kaynaklara dayanir** — uydurma argümanla "YESIL" verme YASAK.
+4. **Karar (KIRMIZI / YEŞİL / ŞARTLI) sadece dogrulanmis kaynaklara dayanir** — uydurma argümanla "YESIL" verme YASAK.
 5. **DUSUK GUVEN flag** zorunludur eger:
    - Cevirilen kaynaklar yetersizse
    - Çelişkili Yargıtay kararları varsa

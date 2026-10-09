@@ -5,6 +5,12 @@ description: Use when the user asks for comprehensive, multi-pronged Turkish leg
 
 # Agentic Legal Deep Research (Yargı MCP)
 
+> **Proje notu (2026-10-09):** Bu rehberin kaynağı olan `agentic_legal_deep_research` aracı
+> sunucuda artık yok; metin referans olarak korunur. Bu projede çok kollu derin araştırma ASAMA 2
+> protokolüyle yürür (`ajanlar/arastirmaci/SKILL.md`); sorgu üretimi için `hukuk_skill`
+> 11-2-derin-emsal-taramasi ve 11-7-kapsamli-arastirma kullanılabilir (AGENTS.md "Karma Mimari").
+> Bölüm 5'teki alt-ajan model önerisi uygulanmaz: alt-ajanlar oturumun modelini devralır.
+
 Guide version: 2026-07-07a
 
 This guide is the ORCHESTRATION layer for Turkish legal research. It is written for AI agents that can spawn subagents or parallel tasks (Claude Code, Codex, Google Antigravity, opencode, and similar). It teaches you how to decompose a complex legal question, run parallel research prongs over the Yargı MCP tools, and merge the results into a single, cited report. It deliberately contains NO query-syntax material — that lives in the core guide (`yargi-legal-research-guide` skill). If you cannot run parallel tasks, you can still follow the same pipeline sequentially (Section 5).

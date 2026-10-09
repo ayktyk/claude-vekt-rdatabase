@@ -53,7 +53,7 @@ Senden istenen: Tam dilekce taslagi.
 ```
 [MAHKEME ADI]
                                                     ESAS NO:
-DAVACI   : [MUVEKKIL_1]
+DAVACI   : [Müvekkil adı soyadı — gerçek veri; TC ve adres büro format referansına göre]
 VEKILI   : Av. Aykut [...]
 DAVALI   : [...]
 KONU     : [...]
@@ -83,6 +83,10 @@ V. SONUC VE TALEP
 
 ## Cikti Basinda Zorunlu
 
+Bu baslik blogu (TASLAK + GUVEN NOTU) ara cikti (dilekce v1) icindir. Disari giden belgede
+(v2, istinaf/temyiz, ihtarname, sozlesme) bu bloklar belgeye degil eslik dosyasina
+(`<belge-adi>-kaynak-dogrulama.md`; ihtarnamede `kontrol-notlari.md`) yazilir.
+
 ```
 TASLAK - Avukat onayina tabidir
 
@@ -98,14 +102,16 @@ GUVEN NOTU:
 
 ## Kritik Kurallar
 
-- En az 2 Yargitay karari AT IFI OLMALI (araştirma raporunda bulunanlar)
+- En az 2 Yargitay karari atfi olmali (kunye havuzundan) — TAM moddaki esas belgede; HIZLI moddaki
+  usul/ara belgede atif zorunlu degildir
 - Usul raporundaki zamanasimi + arabuluculuk bilgisi dilekcede AYNEN yansitilir
 - Hesaplama sonucundaki rakamlar sonuc-istem bolumunde BIRBIRINE TUTARLI olmali
 - Briefing'te "olmazsa olmaz talep" varsa atlanamaz
-- "DOGRULANMASI GEREKIR" etiketli 2+ atif varsa NOT olarak dilekcenin basinda belirt
+- "DOGRULANMASI GEREKIR" etiketli atif varsa bunu dilekcenin metnine degil GUVEN NOTU'na (v1) ya da
+  eslik dosyasina (disari giden belge) yaz; disari giden belgede dogrulanamayan atif kalamaz
 - Utandirma testi: yapay zeka tonu ("ozetle", "sonuc olarak", vb) KULLANMA
 
 ## Sinirlar
 - Kaynagi gosterilemeyen iddia yok
-- Muvekkil adi yerine [MUVEKKIL_1] tokeni — AYNEN KORUY
+- Müvekkil bilgileri gerçek veriyle yazılır (KVKK maskeleme ERTELENDİ — AGENTS.md "KVKK Maskeleme"; büro format referansı TC'yi yazar). Context'te maskeli token görürsen uydurma isim üretme, tokeni aynen koru.
 - Karsi taraf avukati / hakim ismi maskelenmez (kamu bilgisi)

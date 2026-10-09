@@ -1,3 +1,6 @@
+---
+description: "Kritik nokta için derin araştırma: 2B Yargı → 2C Mevzuat (sıralı) + 2D NotebookLM; dava akışında K1 denetimi"
+---
 <!-- DOKTRIN-PREAMBLE v1 -->
 > **0-HALÜSİNASYON + ANTI-SYCOPHANCY (zorunlu — tam metin: `prompts/_doktrin-preamble.md`):**
 > - UYDURMA YARGITAY/HGK/İBK kararı atfı YASAK — her künye Bedesten documentId ile doğrulanır; doğrulanmayan "DOĞRULANMAMIŞ" damgalanır.
@@ -22,7 +25,7 @@ tek-shot araştırma YASAK.
 ## Zorunlu Referans Dokümanlar
 - `ajanlar/arastirmaci/SKILL.md` → Bölüm 1 (Yargı), 2 (Mevzuat), 2.5 (zincir + mülga eleme), 2.7 (NotebookLM)
 - `ajanlar/perspektif/PROTOKOL.md` → ASAMA 2 kesiti
-- `CLAUDE.md` → Araç Katmanı + ASAMA 2
+- `AGENTS.md` → Araç Katmanı + Karma Mimari + ASAMA 2
 - `config/motor-haritasi.json` → motor routing
 
 ## Ön-koşullar (otomatik)
@@ -41,23 +44,24 @@ Director Agent
   |    10 iteratif sorgu (6 hukuki + 4 perspektif)
   |    Dahili kaynak seçilmemişse bu kol atlanır (rapora not düşülür)
   |
-  +-- 2B Claude Fable 5 (Yargı-MCP-Pro) ──> 2C Yargı-MCP-Pro Mevzuat (SIRALI ZİNCİR)
+  +-- 2B ARASTIRMACI (Yargı-MCP-Pro) ──> 2C Yargı-MCP-Pro Mevzuat (SIRALI ZİNCİR)
   |         |                        |
   |         |                        +──> Mülga Eleme Protokolü (kalite kapısı)
   |         |
   |         Çıktı: atif-maddeleri.json (2C'nin zorunlu girdisi)
   |
   v
-ZİNCİR + KOL TAMAMLANINCA → Konsolide Sentez (Terminal Claude)
+ZİNCİR + KOL TAMAMLANINCA → Konsolide Sentez (ARASTIRMACI, aynı oturum) → DENETCI K1
 ```
 
 ## Zorunlu Çağrılar (Detayları Alt Komutlarda)
 
 ### 2B Yargı — `/arastir-yargi` protokolü
-- 2B **bu oturumda Claude Fable 5 tek elden** yürütülür
+- 2B **bu oturumda ARASTIRMACI rolüyle tek elden** yürütülür
   (`config/motor-haritasi.json -> tasks.yargi_mcp`, mod: derin); ayrı
   pipeline scripti YOKTUR
-- Min 15 sorgu / 6 faz / temporal evolution / min 5 tam metin
+- Min 15 sorgu / 6 faz / temporal evolution / min 5 tam metin (TAM; HIZLI'da hafif mod 6 sorgu /
+  3 tam metin — `tasks.yargi_mcp.modes.hafif`)
 - **Temporal evolution DİNAMİK:** içinde bulunulan yıl dahil son 5 takvim
   yılı, yıl-yıl ayrı sorgu (sabit yıl listesi YAZILMAZ)
 - **Backoff (TEK DOĞRU):** 429'da 5→15→30→60 sn, max 4 retry; hâlâ fail
@@ -91,27 +95,31 @@ Sonraki adım: Yargı temporal (dinamik yıl listesi)
 
 60 sn sessizlikte: `STILL_WORKING: <ne yapıyorum>` satırı.
 
-## Konsolide Sentez — Terminal Claude
+## Konsolide Sentez — ARASTIRMACI (aynı oturum)
 
-Sentez **terminal Claude** tarafından yazılır; MCP çıktıları zaten Claude
-oturumunda hazır. (Eski gemini-bridge sentezi DEPRECATED — exit 100.)
+Sentez aynı oturumda ARASTIRMACI rolüyle yazılır; MCP çıktıları zaten oturumda hazırdır.
 
-Zincir + kol tamamlandığında Claude konsolide raporu doğrudan yazar:
-- Frontmatter: `engine: claude`, `model: {config/motor-haritasi.json ->
-  tasks.arastirma_sentezi.model}`, `status: TASLAK`
+Zincir + kol tamamlandığında konsolide rapor doğrudan yazılır:
+- Frontmatter: `python scripts/motor.py damga arastirma_sentezi` (motor tahmin edilmez), `status: TASLAK`
 - Format: ajanlar/perspektif/PROTOKOL.md "Cikti Format Kurallari" + Kalite Kapı 1 gereklilikleri
 - Çıktı: `02-Arastirma/arastirma-raporu.md`
 - Yan dosyalar: `atif-maddeleri.json`, `mulga-eleme.json`
+- Ardından **DENETCI K1** (AGENTS.md "Denetim Politikası"); YEŞİL alan raporun Kaynak
+  Doğrulama tablosu sonraki ASAMA'ların künye havuzudur. Dava akışındaysa sonuç
+  `python scripts/akis.py denetim … --nokta K1` ile `00-AKIS.md`'ye yazılır.
+- HIZLI moddaki hafif raporda K1 çalışmaz (künyeler K2'de denetlenir). Dava dışı araştırmada (dava
+  klasörü olmadan `arastir:`) tek denetim yapılır ve akış kaydı açılmaz.
 
 ## Kalite Kapısı 1 (ASAMA 2 Bitişi)
 - [ ] 2B 15 sorgu + 5 tam metin var mı?
-- [ ] 2B 6 Faz + Gap Check tamamlandı mı (Claude Fable 5 tek elden)?
+- [ ] 2B 6 Faz + Gap Check tamamlandı mı (ARASTIRMACI tek elden)?
 - [ ] Temporal evolution dinamik yıl listesiyle (son 5 takvim yılı) tamamlandı mı?
 - [ ] `atif-maddeleri.json` doldu mu?
 - [ ] 2C 8 sorgu + Normlar Hiyerarşisi etiketli mi?
 - [ ] `mulga-eleme.json` doldu mu? Geçerli karar ≥ 5 mi?
 - [ ] 2D 10 sorgu (veya doygunluk notu / dahili-kaynak-yok notu) var mı?
-- [ ] Sentez Claude tarafından yapıldı mı (`engine: claude` frontmatter)?
+- [ ] Frontmatter `motor.py damga arastirma_sentezi` ile mi üretildi?
+- [ ] DENETCI K1 YEŞİL mi (en çok 3 tur; HIZLI hafif raporda uygulanmaz, dava dışında tek denetim)?
 - [ ] Her künye Pro MCP documentId ile [DOĞRULANMIŞ] etiketli mi?
 - [ ] Çelişkili kararlar bölümü var mı?
 - [ ] Aleyhe içtihat beyanı (VAR/YOK/ARANMADI) yazıldı mı?

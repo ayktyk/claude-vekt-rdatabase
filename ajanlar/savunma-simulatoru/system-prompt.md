@@ -12,7 +12,7 @@ Kurallar:
 - MemPalace'ten gecmis savunma kaliplarini sorgula.
 - Bulamadigin bilgiyi UYDURMA — eksik bilgiyi acikca isaretle.
 - Uslup profesyonel ve olgusal olmali, kisisel saldiri yasak.
-- KVKK: Gercek muvekkil bilgisi maskelenmis olmali.
+- KVKK: maskeleme ERTELENDİ (AGENTS.md "KVKK Maskeleme"); dava çıktısı gerçek veriyle yazılır. Kamuya açık çıktıda (blog, mail, MemPalace drawer) gerçek müvekkil verisi yazılmaz.
 - Simulasyon sonucu Director Agent'a ve dilekce yazarina iletilir.
 - Her is bitiminde MemPalace diary yazimi zorunlu.
 

@@ -53,6 +53,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Optional
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import doktrin_contract as _dc  # noqa: E402  (UYAP'a denetim/doktrin izi sızmasın diye)
+import akis as _akis  # noqa: E402  (K2 YEŞİL / UYGULANMAZ kaydı olmadan UDF üretilmez)
+
 
 PAGE_MARGIN_PT = 70.87
 
@@ -554,6 +558,16 @@ def md_to_udf(md_path: Path, udf_path: Path) -> Path:
 
     raw = md_path.read_text(encoding="utf-8")
     clean = strip_frontmatter(raw)
+    izler = _dc.belge_izleri(clean)
+    if izler:
+        raise ValueError(
+            "UDF'ye gidecek metinde denetim/doktrin izi var: " + ", ".join(izler)
+            + " — SENTINEL, Kaynak Doğrulama tablosu, aleyhe beyanı ve karar noktaları "
+            "eşlik eden kaynak doğrulama dosyasında kalmalı (AGENTS.md Denetim Politikası)."
+        )
+    engel = _akis.denetim_engeli(md_path)
+    if engel:
+        raise ValueError(f"UDF üretilmez: {engel} (AGENTS.md Denetim Politikası — \"Drive'a yazılmaz\").")
     paras = parse_md_to_paras(clean)
     xml = emit_udf_xml(paras)
 

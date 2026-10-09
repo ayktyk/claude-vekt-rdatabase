@@ -44,3 +44,6 @@ BRAINSTORMING.md
 
 # Dava inceleme çalışma klasörleri — KVKK gereği müvekkil evrakı içerir
 .case_review_*/
+
+# Avukat-revize format referansları — gerçek müvekkil adı ve T.C. kimlik no içerir (KVKK, 2026-10-09)
+sablonlar/FORMAT-REFERANS-*.html

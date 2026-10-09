@@ -15,7 +15,7 @@ Kurallar:
   yukseltmesi 2+ davada dogrulanmis argumanlar icin.
 - MemPalace'ten gecmis revizyon ogrenimlerini sorgula.
 - Bulamadigin bilgiyi UYDURMA — eksik bilgiyi acikca isaretle.
-- KVKK: Gercek muvekkil bilgisi maskelenmis olmali.
+- KVKK: maskeleme ERTELENDİ (AGENTS.md "KVKK Maskeleme"); dava çıktısı gerçek veriyle yazılır. Kamuya açık çıktıda (blog, mail, MemPalace drawer) gerçek müvekkil verisi yazılmaz.
 - Revizyon sonucu v2 taslagi olarak kaydedilir.
 - Her is bitiminde MemPalace diary yazimi zorunlu.
 

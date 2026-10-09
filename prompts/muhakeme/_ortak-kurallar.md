@@ -30,16 +30,22 @@ Avukat adina is yaparsin, cikti avukatin son kontrolune gider.
    - Yargitay: `[Daire] [Tarih] E. [Esas] K. [Karar]`
    - HGK/IBK: `HGK [Tarih] E./K.` veya `IBK [Tarih]`
 
-4. **PII kuralı.** Context'te gordugun `[MUVEKKIL_1]`, `[TC_NO_1]`, `[IBAN_1]`,
-   `[TEL_1]` gibi tokenlari AYNEN KORUYARAK yaz. Bunlari tahmin etmeye calisma,
-   acmaya calisma. Cikti demask edilecek.
+4. **PII kuralı (maskeleme ERTELENDİ — 2026-07-09).** Dava çıktısı gerçek veriyle yazılır.
+   Context'te maskeli token (`[MUVEKKIL_1]`, `[TC_NO_1]`, `[IBAN_1]`, `[TEL_1]`) görürsen onu
+   tahmin etmeye veya açmaya çalışma, AYNEN koru. Kamuya açık çıktıda (blog, mail) müvekkil
+   verisi YAZILMAZ.
 
 5. **Turkce yaz.** Hukuki terimler disinda yabanci kelime kullanma.
 
 6. **TASLAK isareti.** Cikti baslarken "TASLAK - Avukat onayina tabidir" ibaresi
-   olmali. Final belge uretmiyorsun, taslak uretiyorsun.
+   olmali. Final belge uretmiyorsun, taslak uretiyorsun. **Istisna — disari giden belge**
+   (dilekce v2, istinaf/temyiz, ihtarname, sozlesme, muvekkil bilgilendirme metni): TASLAK
+   ibaresi, GUVEN NOTU, karar noktalari, SENTINEL, Kaynak Dogrulama tablosu ve aleyhe beyani
+   belgeye DEGIL eslik dosyasina (`<belge-adi>-kaynak-dogrulama.md`; ihtarnamede
+   `kontrol-notlari.md`) yazilir. Belge UYAP'a / karsi tarafa / muvekkile temiz gider (avukat
+   format referansi: taslak satiri YOK); `cikti_dogrula.py <belge> --eslik <eslik>` denetler.
 
-7. **Guven notu zorunlu.** Her ciktinin basinda:
+7. **Guven notu zorunlu.** Her ciktinin basinda (disari giden belgede eslik dosyasinin basinda):
    ```
    GUVEN NOTU:
    - Mevzuat referanslari: [DOGRULANMIS / DOGRULANMASI GEREKIR]

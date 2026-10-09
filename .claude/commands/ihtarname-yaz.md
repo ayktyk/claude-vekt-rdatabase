@@ -1,3 +1,6 @@
+---
+description: "Gönderime hazır ihtarname + kontrol notları (K2 eşlik dosyası); 2026-048 standardı"
+---
 # /ihtarname-yaz - İhtarname Hazırlama (2026-048 standardı)
 
 `$ARGUMENTS` konusuna göre GÖNDERİME HAZIR ihtarname + ayrı kontrol notları üret.
@@ -70,7 +73,8 @@ Av. Aykut YEŞİLKAYA
 
 ## 3. Kontrol Notları (AYRI belge — ZORUNLU)
 
-`kontrol-notlari.md` + `.docx` ayrı dosya olarak üretilir; içeriği:
+`kontrol-notlari.md` + `.docx` ayrı dosya olarak üretilir. Bu dosya ihtarnamenin **K2 eşlik
+dosyasıdır**; ilk satırı SENTINEL `<!-- DOKTRIN-PREAMBLE v1 -->` olur. İçeriği:
 - Gönderim kontrol listesi (imza, fotokopi + barkod + alındı saklama, tebliğ
   dönüşü → temerrüt tarihi hesabı)
 - İadeli taahhütlü seçildiyse ispat uyarısı: teslimi ispatlar, İÇERİĞİ ispatlamaz;
@@ -84,10 +88,15 @@ Av. Aykut YEŞİLKAYA
 ## 4. Çıktı ve Kayıt
 
 1. `{dava-klasörü}/03-Sentez-ve-Dilekce/ihtarname-v1.md` (temiz, gönderilebilir)
-2. `{dava-klasörü}/03-Sentez-ve-Dilekce/kontrol-notlari.md` (büro içi)
-3. Her ikisi `python scripts/md_to_docx.py <klasör>` ile DOCX'e çevrilir
+2. `{dava-klasörü}/03-Sentez-ve-Dilekce/kontrol-notlari.md` (büro içi; K2 eşlik dosyası)
+3. **K2 denetimi (Denetim Politikası v2):** önce yapısal kapı
+   `python scripts/cikti_dogrula.py "<dava-klasoru>/03-Sentez-ve-Dilekce/ihtarname-v1.md" --eslik "<dava-klasoru>/03-Sentez-ve-Dilekce/kontrol-notlari.md"`; ihtarname atıf içeriyorsa
+   DENETCI K2 (DENETİM ÇAĞRI BLOĞU: nokta K2, belge ve eşlik yolu). YEŞİL olmadan ihtarname gönderime hazır
+   sayılmaz. Sonuç `kontrol-notlari.md` sonuna DENETİM SONUCU bloğu olarak yazılır; dava akış kaydı varsa
+   `python scripts/akis.py denetim … --nokta K2` ile de işlenir.
+4. Her ikisi `python scripts/md_to_docx.py <klasör>` ile DOCX'e çevrilir
    (script klasör alır, dosya değil; DOCX Word'de açıksa Permission denied —
    avukata kapattır, yeniden dene)
-4. Frontmatter: `status: GONDERIME-HAZIR (avukat son kontrolu sonrasi)` +
+5. Frontmatter: `status: GONDERIME-HAZIR (avukat son kontrolu sonrasi)` +
    `gonderim: noter | iadeli-taahhutlu-posta`
-5. MemPalace diary write + ilgili ders varsa `dersler/dilekce.md`
+6. MemPalace diary write + ilgili ders varsa `dersler/dilekce.md`

@@ -1,3 +1,6 @@
+---
+description: "Serbest konulu SEO blog yazısı (THEMIS); DENETCI tek denetim, sonuç denetim-sonucu.md dosyasına"
+---
 <!-- DOKTRIN-PREAMBLE v1 -->
 > **0-HALÜSİNASYON + ANTI-SYCOPHANCY (zorunlu — tam metin: `prompts/_doktrin-preamble.md`):**
 > - UYDURMA YARGITAY/HGK/İBK kararı atfı YASAK — her künye Bedesten documentId ile doğrulanır; doğrulanmayan "DOĞRULANMAMIŞ" damgalanır.
@@ -24,9 +27,9 @@ Eger argument bossa: avukata "hangi konuyu blog yapacagiz?" diye sor.
 ## Zorunlu Referans Dokumanlar
 
 - `ajanlar/blog-yazari/SKILL.md` — tam protokol
-- `prompts/muhakeme/blog_yazimi.md` — Antigravity'ye yapistirilan prompt
+- `prompts/muhakeme/blog_yazimi.md` — MUHAKEME üretim protokolü (aynı oturum)
 - `prompts/themis-blog-pr-v3-format.md` — **Gmail PR çıktısının ZORUNLU formatı (THEMIS v3)**. Blog maili/CMS çıktısı AYNEN bu yapıda üretilir (avukat onaylı, 2026-06-03).
-- `prompts/muhakeme/_ortak-kurallar.md` — Gemini ortak kurallari
+- `prompts/muhakeme/_ortak-kurallar.md` — MUHAKEME ortak kuralları
 - `ajanlar/blog-yazari/THEMIS.md` — proje kokunde tam THEMIS referansi
 - `config/author.json` — Aykut sameAs URL'leri
 - `config/motor-haritasi.json` -> `tasks.blog_yazimi`
@@ -100,12 +103,12 @@ Google Drive MCP ile olustur.
 Read config/author.json
 ```
 
-`sameAs` URL listesi (bos string olanlar atlanir) → devir blogu icine.
+`sameAs` URL listesi (bos string olanlar atlanir) → THEMIS girdi paketine.
 
 ### ADIM 3: Vektor DB + Yargi/Mevzuat MCP Tarama (Hizli)
 
 THEMIS yeni arastirma yapmaz AMA serbest konu modunda avukatin hazir
-emsal karari yoksa Director Agent Antigravity'ye gonderecek minimum
+emsal karari yoksa Director Agent THEMIS girdi paketi icin minimum
 context'i toplar:
 
 - `mcp__yargi-mcp-pro__ictihat_ara` ile primary keyword
@@ -113,61 +116,31 @@ context'i toplar:
 - `mcp__yargi-mcp-pro__mevzuat_ara(mevzuat_no="<no>", mevzuat_tur_list=["KANUN"])`
   ile ilgili kanun maddesi (en az 2)
 
-Sonuclar Antigravity devir bloguna gomulur.
+Sonuclar THEMIS girdi paketine girer; her documentId `ictihat_getir` ile acilip
+konuyla ilgisi teyit edilmeden (`verified: true`) pakete alinmaz (SKILL 1.5).
 
-### ADIM 4: Antigravity Devir Blogu Bas
+### ADIM 4: Üretim (tek motor — aynı oturum)
 
-```
-========== ANTIGRAVITY DEVIR BLOGU ==========
-ASAMA: Blog Yazimi (THEMIS) — SERBEST KONU
-Konu: {konu}
+Elle devir bloğu, kopyala-yapıştır ve harici panel YOKTUR. Akış:
+`ajanlar/blog-yazari/SKILL.md` → "Üretim Akışı (tek motor — Blog / THEMIS)".
 
-Sag panele yapistirilacak:
---------------------------------------------
-{ajanlar/blog-yazari/SKILL.md "Antigravity Devri" bolumundeki sablon}
-{prompts/muhakeme/blog_yazimi.md PROTOKOL DOSYASINI Antigravity workspace'inde ac}
+1. ORKESTRATOR THEMIS girdi paketini hazırlar: `mod: serbest`, primary_keyword,
+   secondary_keywords, intent (I|C|T), kategori, sayfa_tipi, hedef_kelime 1500-2500,
+   `verified: true` emsal kararlar (3-5), mevzuat (2+), saha_ornek, entity_graph, author_sameAs.
+2. MUHAKEME `prompts/muhakeme/blog_yazimi.md` protokolüyle dört dosyayı üretir:
+   `blog.md` + `blog.cms.md` + `blog.mail.md` + `kapak.png` → `Blog/{YYYY-MM-DD}-{slug}/`
+   (kök `python scripts/paths.py blog`).
+3. DENETCI tek denetim yapar (AGENTS.md "Denetim Politikası"): `blog_validator.py` + künye
+   içerik teyidi. KIRMIZI veya SARI'da yeniden üretilir (en çok 3 tur); YEŞİL olmadan Gmail taslağı ve MemPalace kaydı açılmaz. Sonuç blog klasöründe
+   ayrı `denetim-sonucu.md` dosyasına yazılır; blog gövdesine, CMS ve mail sürümlerine girmez. Blog
+   hattı dava akış kaydı açmaz.
 
-mod: serbest
-primary_keyword: "{...}"
-secondary_keywords: ["{...}"]
-intent: {I|C|T}
-kategori: {...}
-sayfa_tipi: {blog|cluster|pillar}
-hedef_kelime: 1500-2500
-
-emsal_kararlar:
-  {3-5 Bedesten ID'li karar — Yargi MCP'den}
-
-mevzuat:
-  {2+ kanun maddesi — Mevzuat MCP'den}
-
-saha_ornek: |
-  {avukat onayli anonim senaryo veya BOS}
-
-entity_graph:
-  pillar: "/{kategori}"
-  clusters: [...]
-  tools: [...]
-  dis_otorite: "https://www.mevzuat.gov.tr/..."
-
-author_sameAs:
-  {config/author.json sameAs listesi}
-
-Cikti yolu: G:\Drive'im\Hukuk Burosu\Blog\{tarih}-{slug}\
-Dort dosya: blog.md + blog.cms.md + blog.mail.md + kapak.png
-
-KURALLAR (kisa hatirlatma):
-  - 6 katman OLAY-KOSAR-DERIN-SAHA-ETIK-AKSIYO zorunlu
-  - Min 1500 kelime, min 3 Bedesten ID atfi, min 5 FAQ
+KURALLAR (kısa hatırlatma):
+  - 6 katman OLAY-KOSAR-DERIN-SAHA-ETIK-AKSIYON zorunlu
+  - Min 1500 kelime, min 3 verified Bedesten ID atfı, min 5 FAQ
   - KVKK: tam isim/TC/IBAN/sokak YASAK
   - TBB: "en iyi/garantili/%100/kesin basari" YASAK
-  - Kapak gorseli Imagen ile uret (insan yuzu/logo/yazi YASAK)
-  - Self-review yap; KIRMIZI = Drive'a YAZMA, yeniden uret
---------------------------------------------
-
-Antigravity tamamlayinca buraya don ve "Blog bitti" yaz.
-=============================================
-```
+  - Kapak: "VEGA Kapak Tarz Formülü" (insan yüzü/logo/yazı YASAK)
 
 ### ADIM 5: Avukat Onayini Bekle
 
@@ -182,11 +155,11 @@ Avukat "Blog bitti" diyene kadar bir sonraki adima gecme.
    ```
    - **HARD FAIL** (doğrulanmamış/uydurma emsal, KVKK sızıntı, TBB yasak ifade,
      SENTINEL yok) → **DUR. Gmail draft OLUŞTURMA, final Drive'a yazma.** Sorunları
-     Antigravity'ye geri bildir, düzelttir, yeniden çalıştır.
+     MUHAKEME'ye geri bildir, düzelttir, yeniden çalıştır.
    - **SEO-WARN** → bloklamaz; avukata raporla (yayın öncesi düzeltilebilir).
    - PASS olmadan 2. adıma GEÇİLMEZ ("opsiyonel" DEĞİL — 2026-05-17 sahte icra blog
      dersi). Yapısal kapı documentId gerçekliğini doğrulamaz; her künye ayrıca
-     bağımsız reviewer ile `ictihat_getir` üzerinden teyit edilir.
+     DENETCI ile `ictihat_getir` üzerinden teyit edilir.
 
 1B. **WhatsApp Paketi (ZORUNLU — validator PASS sonrası):**
    ```
@@ -217,7 +190,7 @@ Avukat "Blog bitti" diyene kadar bir sonraki adima gecme.
    ```
    mempalace_diary_write "blog_yazari" \
      "konu={konu}, primary_keyword={kw}, kelime={N}, bedesten_atif={N},
-      self_review=YESIL|SARI, mod=serbest"
+      denetim=YESIL, mod=serbest"
    ```
 
 4. **Hall_blog_konulari'a Drawer (kanibalizasyon icin):**
@@ -242,7 +215,7 @@ Avukat "Blog bitti" diyene kadar bir sonraki adima gecme.
      - Klasor: {drive-yolu}
      - Dosyalar: blog.md ({N} kelime), blog.cms.md, blog.mail.md, kapak.png
      - WhatsApp: wa-durum.png + wa-kare.png + wa-metin.txt
-     - Self-review: YESIL | SARI ({varsa duzeltme notu})
+     - Denetim (DENETCI): YEŞİL (`denetim-sonucu.md`)
      - Validator: PASS | FAIL ({detay})
      - Gmail draft: OLUSTURULDU | OLUSTURULMADI
 
@@ -261,8 +234,8 @@ Avukat "Blog bitti" diyene kadar bir sonraki adima gecme.
 
 ## Fallback
 
-- Antigravity erisilemez → "fallback claude" → terminal Claude uretir.
-  Kapak: Claude-in-Chrome + gemini.google.com (avukat oturumu) uzerinden
+- Kapak: oturumda görsel üretim yoksa tarayıcı otomasyonu (Claude-in-Chrome) +
+  gemini.google.com (avukat oturumu) uzerinden
   "VEGA Kapak Tarz Formulu" ile uretilir (bkz. ajanlar/blog-yazari/SKILL.md);
   Gemini oturumu da yoksa prompt hazir birakilir
 - Imagen tool erisilemez → metin tamamlanir, `coverImage.path: ""` birakilir

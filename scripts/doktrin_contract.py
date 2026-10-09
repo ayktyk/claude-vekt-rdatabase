@@ -53,6 +53,8 @@ TBB_BANNED_PHRASES = [
     "kesin kazan",          # "kesin kazanırsınız" / "kesin kazanç"
     "mutlaka kazan",
     "asla kaybet",
+    "mutlaka kaybed",   # ters yönlü aşırı vaat (karşı taraf için) — dersler/sistem.md 2026-09-02 + 2026-10-09
+    "kesin kaybed",
     "kesin sonuç",
     "size kesin",
 ]
@@ -62,12 +64,45 @@ VERIFIED_TOKENS = ["✓ Tam metin çekildi", "Tam metin çekildi", "DOĞRULANMI�
 UNVERIFIED_TOKENS = ["DOĞRULANMAMIŞ", "DOĞRULANMASI GEREKİR"]
 
 # Yargıtay/HGK/İBK künye paterni (gövdede künye var mı tespiti için)
+# 2026-10-09: büro atıf biçimi ("2023/616 E., 2023/2371 K.") ve "HGK 2012/12-139 K.624"
+# biçimleri eklendi (bağımsız inceleme bulgusu).
 KUNYE_RE = re.compile(
     r"\b(?:Yargıtay\s+)?\d{1,2}\.?\s*(?:HD|CD|HGK|CGK)\b|"
+    r"\b(?:HGK|CGK)\b|"
     r"\bE\.?\s*\d{4}/\d+\b|\bK\.?\s*\d{4}/\d+\b|"
+    r"\b\d{4}/\d+(?:-\d+)?\s*[EK]\.(?=[\s,;)]|$)|"
     r"\b[İI]BK\b",
     re.IGNORECASE,
 )
+
+# Mevzuat maddesi / içtihat ifadesi (K2 gerekli mi kararı için — "atıf içeriyor mu")
+MADDE_RE = re.compile(
+    r"\b(?:m\.|md\.|madde(?:si|sinin|sine|lerinin)?)\s*\d+|\b\d+\s*\.?\s*madde",
+    re.IGNORECASE,
+)
+ICTIHAT_IFADELERI = ("içtihat", "yerleşik", "yargıtay", "danıştay", "anayasa mahkemesi", "aihm")
+# Sözleşme / ihtarname gövdesindeki kendi madde başlıkları ("MADDE 1 - TARAFLAR", "**Madde 2 –**")
+# atıf değildir; atıf tespitinden önce satır başındaki bu başlıklar ayıklanır.
+MADDE_BASLIK_RE = re.compile(r"^[ \t>#*_]*madde\s+\d+\b", re.IGNORECASE | re.MULTILINE)
+
+# UYAP'a gidecek belgeye (UDF) giremeyecek denetim/doktrin izleri — eşlik dosyasında durur
+BELGE_YASAK_IZLER = (
+    SENTINEL,
+    "## Kaynak Doğrulama",
+    "| İddia | Kaynak |",
+    "Aleyhe içtihat:",
+    "AVUKATIN KARAR NOKTALARI",
+    "ARA TASLAK",
+    "DENETİM SONUCU",
+    "GÜVEN NOTU",
+    "GUVEN NOTU",
+    "AVUKAT İÇİN NOTLAR",
+    "AVUKAT ICIN NOTLAR",
+)
+# Gövdede "TASLAK - Avukat onayına tabidir" türü banner satırı (YAML frontmatter hariç;
+# frontmatter'daki `status: TASLAK` iz sayılmaz). Avukat format referansı: taslak satırı YOK.
+TASLAK_SATIRI_RE = re.compile(r"^[ \t>#*_]*TASLAK\b", re.MULTILINE)
+FRONTMATTER_RE = re.compile(r"\A---[ \t]*\r?\n.*?\r?\n---[ \t]*\r?\n", re.DOTALL)
 
 
 # ---------------------------------------------------------------------------
@@ -86,8 +121,10 @@ def missing_clauses(text: str) -> list[str]:
 
 def has_kaynak_table(text: str) -> bool:
     """Kaynak Doğrulama Tablosu başlık satırı var mı (anahtar kolonların hepsi tek satırda)."""
+    # Yalnız gerçek tablo satırı sayılır: doktrin başlığındaki "(| İddia | Kaynak | …)"
+    # madde satırı tablo değildir (2026-10-09 düzeltmesi).
     for line in text.splitlines():
-        if "|" in line and all(col in line for col in KAYNAK_TABLE_KEY_COLUMNS):
+        if line.lstrip().startswith("|") and all(col in line for col in KAYNAK_TABLE_KEY_COLUMNS):
             return True
     return False
 
@@ -110,6 +147,28 @@ def find_banned_phrases(text: str) -> list[str]:
 def body_has_kunye(text: str) -> bool:
     """Gövdede Yargıtay künye paterni var mı."""
     return KUNYE_RE.search(text) is not None
+
+
+def atif_iceriyor(text: str) -> bool:
+    """Metin karar künyesi, mevzuat maddesi veya içtihat ifadesi içeriyor mu.
+
+    False dönen belge (ör. yalnız vekâletname sunumu) K2 DENETCI'den muaf tutulabilir;
+    True dönen her dışarı giden belge K2'den geçer (AGENTS.md Denetim Politikası).
+    """
+    if body_has_kunye(text) or MADDE_RE.search(MADDE_BASLIK_RE.sub("", text)):
+        return True
+    low = text.casefold()
+    return any(ifade in low for ifade in ICTIHAT_IFADELERI)
+
+
+def belge_izleri(text: str) -> list[str]:
+    """Dışarı giden belgede bulunmaması gereken denetim/doktrin izleri."""
+    govde = FRONTMATTER_RE.sub("", text, count=1)
+    low = govde.casefold()
+    izler = [iz for iz in BELGE_YASAK_IZLER if iz.casefold() in low]
+    if TASLAK_SATIRI_RE.search(govde):
+        izler.append("TASLAK satırı")
+    return izler
 
 
 # ---------------------------------------------------------------------------

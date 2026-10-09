@@ -13,8 +13,9 @@ yalnızca `config/motor-haritasi.json` → `tasks.revizyon.rol`'dan okunur.
 - **revizyon** task'ı: rol **`MUHAKEME`**
 - **ORKESTRATOR'da kalan iş (deterministik / araç):** dilekçe v1/v2 dosya yönetimi, UDF üretimi (`scripts/md_to_udf.py`), DOCX üretimi (`scripts/md_to_docx.py`) — deterministik
 - **Prompt şablonu:** `prompts/muhakeme/revizyon.md` + `prompts/muhakeme/_ortak-kurallar.md`
-- **Bağımsız denetim:** çıktı üretildikten sonra **DENETCI** (`ajanlar/denetci/SKILL.md`)
-  üretim bağlamını görmeden denetler; KIRMIZI kararda çıktı Drive'a yazılmaz.
+- **Bağımsız denetim (K2):** nihai belge + eşlik dosyası çifti üretildikten sonra **DENETCI**
+  (`ajanlar/denetci/SKILL.md`) üretim bağlamını görmeden denetler; KIRMIZI/SARI kararda çıktı
+  Drive'a yazılmaz ve UDF üretilmez.
   Revizyon Ajanı zaten 8 boyutlu denetim yapar; DENETCI buna ek olarak **bağımsız** (üretim bağlamını görmeden) çalışır — ikisi farklı şeydir.
 - **Motor damgası:** frontmatter `engine:` alanı `python scripts/motor.py damga revizyon` ile
   doldurulur; avukat motoru bildirmemişse `engine: bildirilmedi` yazılır.
@@ -54,18 +55,21 @@ yalnızca `config/motor-haritasi.json` → `tasks.revizyon.rol`'dan okunur.
 4. **Hata Geçmişi referansı:**
    - 2026-05-05 Tugba 2026-89 davası HGK 2012/12-139 K.624 uydurma alıntı vakası — bu tarz uydurma alıntılar bir daha yapılmaz.
 
-5. **v2 NIHAI çıktısı sonunda Kaynak Doğrulama Tablosu zorunlu:**
-   - v1'de doğrulama yapılmadıysa, v2'de tablo eklenir.
-   - Tablo sütunları: `İddia | Kaynak | Tam alıntı | Pro MCP documentId | Durum (DOGRULANMIS / DOGRULANMAMIS)`
+5. **v2 NIHAI'nin Kaynak Doğrulama Tablosu eşlik dosyasında zorunlu:**
+   - Tablo, SENTINEL ve "Aleyhe içtihat: VAR/YOK/ARANMADI" beyanı `dilekce-v2-kaynak-dogrulama.md`
+     eşlik dosyasına yazılır; UYAP'a gidecek `dilekce-v2.md` bunları içermez.
+   - v1'de doğrulama yapılmadıysa tablo v2 aşamasında eşlik dosyasında kurulur.
+   - Tablo sütunları (`doktrin_contract.KAYNAK_TABLE_COLUMNS`): `| İddia | Kaynak | documentId | Tam Alıntı | Doğrulama |`
 
 6. **HARD FAIL kurali (FAZ 4 2026-05-19 — netlestirildi):**
    - **>=2 DOGRULANMAMIS atif tespit edilirse:** v2 Drive'a YAZILMAZ. Director'a
      "YENIDEN YAZ" sinyali gonderilir. MUHAKEME'ye revizyon talebi iletilir,
      "DOGRULANMAMIS atif >= 2, v1'deki sahte atiflari kaldir veya gercek kaynak
      bul" talimati verilir.
-   - **Tek DOGRULANMAMIS atif:** v2 yazilabilir ama `[DOGRULANMAMIS]` damgasi
-     kalir, avukata uyari bildirilir.
-   - **0 DOGRULANMAMIS:** v2 nihai UDF/DOCX uretimi yapilir.
+   - **Tek DOGRULANMAMIS atif:** atif v2'ye giremez — ARASTIRMACI onu dogrular
+     (`kunye-havuzu-ek.md` + EK denetimi) ya da metinden cikarilir. UYAP'a giden belgede
+     `[DOGRULANMAMIS]` damgali atif kalamaz; K2'de dogrulanamayan kunye KIRMIZI'dir.
+   - **0 DOGRULANMAMIS:** K2 YESIL sonrasi nihai UDF/DOCX uretimi yapilir.
 
 ---
 
@@ -81,6 +85,8 @@ ORKESTRATOR hazırlar → MUHAKEME üretir → DENETCI bağımsız denetler → 
 
 1. **Ön-hazırlık (ORKESTRATOR — deterministik / araç işi):**
    - Önceki ASAMA çıktıları hazır: dilekçe v1 (5), savunma simülasyonu (6), araştırma raporu (2 — künye doğrulaması için), stratejik analiz (4)
+   - **HIZLI modda** savunma simülasyonu ve stratejik analiz yoktur: v2, v1'in biçim + yazım + kaynak
+     çifti açısından nihaileştirilmesidir (girdi: v1 + varsa hafif araştırma raporu).
 
 2. **Üretim (MUHAKEME):** Protokol `prompts/muhakeme/revizyon.md` + `prompts/muhakeme/_ortak-kurallar.md`.
    Girdiler sırayla okunur:
@@ -88,25 +94,33 @@ ORKESTRATOR hazırlar → MUHAKEME üretir → DENETCI bağımsız denetler → 
      - `{dava-klasoru}/02-Arastirma/savunma-simulasyonu.md`
      - `{dava-klasoru}/02-Arastirma/arastirma-raporu.md`
      - `{dava-klasoru}/02-Arastirma/stratejik-analiz.md`
-   Çıktı: `{dava-klasoru}/03-Sentez-ve-Dilekce/dilekce-v2.md`
+   Çıktı (iki dosya): `{dava-klasoru}/03-Sentez-ve-Dilekce/dilekce-v2.md` (UYAP'a gidecek temiz
+   belge) + `dilekce-v2-kaynak-dogrulama.md` (eşlik: SENTINEL + Kaynak Doğrulama tablosu + aleyhe
+   beyanı + avukatın karar noktaları)
    - 8 boyutlu denetim: 1) künye doğrulaması (Bedesten documentId) · 2) atıf metni birebir · 3) dil ve üslup (ölçülü profesyonel ton) · 4) format (`dilekce-yazim-kurallari.md`) · 5) yapı bütünlüğü · 6) dengeli pozisyon (savunma simülasyonundaki itirazlara ön cevap) · 7) iddia tutarlılığı (usul + araştırma ile çarpışma yok) · 8) KAYNAK AUDİTİ (doğrulanmamış atıf ≥2 → HARD FAIL)
    - Savunma simülasyonundan gelen 5 iyileştirme önerisi tavizsiz uygulanır
-   - Çıktı sonunda Kaynak Doğrulama Tablosu zorunlu; frontmatter `status: TASLAK`
+   - Kaynak Doğrulama Tablosu eşlik dosyasında zorunlu; belgede SENTINEL, tablo, aleyhe beyanı,
+     `ARA TASLAK` satırı ve denetim izi bulunmaz; frontmatter `status: TASLAK`
    - HARD FAIL: doğrulanmamış atıf ≥ 2 · mülga karara atıf · kaynaksız genel ifade
 
-3. **Bağımsız denetim (DENETCI):** Girdi yalnızca `{çıktı yolu, dava-id}`; üretim
-   bağlamı verilmez. Deterministik kapılar → künye içerik teyidi (her documentId
-   MCP'den yeniden çekilir) → doktrin clause sayımı → çıkarım denetimi → aleyhe beyanı.
-   Karar KIRMIZI / SARI / YEŞİL. YEŞİL değilse MUHAKEME revize eder; en çok 3 tur.
-   **YEŞİL olmadan çıktı Drive'a yazılmaz.**
+3. **Bağımsız denetim — K2 (DENETCI):** Önce yapısal kapı:
+   `python scripts/cikti_dogrula.py "<dava-klasoru>/03-Sentez-ve-Dilekce/dilekce-v2.md" --eslik "<dava-klasoru>/03-Sentez-ve-Dilekce/dilekce-v2-kaynak-dogrulama.md"`.
+   DENETCI'ye yalnızca DENETİM ÇAĞRI BLOĞU verilir (dava-id, nokta K2, belge ve eşlik dosyası
+   yolları); üretim bağlamı verilmez. Deterministik kapılar → künye içerik teyidi (her documentId MCP'den
+   yeniden çekilir; varoluş + destek + kanıt katmanı) → doktrin clause sayımı → çıkarım
+   denetimi → aleyhe beyanı. Karar KIRMIZI / SARI / YEŞİL. YEŞİL değilse MUHAKEME revize eder;
+   en çok 3 tur. **YEŞİL olmadan çıktı Drive'a yazılmaz ve UDF üretilmez.** Sonuç
+   `python scripts/akis.py denetim … --nokta K2` ile `00-AKIS.md`'ye, DENETİM SONUCU bloğu eşlik
+   dosyasının sonuna yazılır; dilekçe metnine denetim bloğu eklenmez. Belge atıf içermiyorsa
+   (yapısal kapı "atıf yok" der) DENETCI çağrılmaz; `--karar UYGULANMAZ --not "atıf yok"` kaydı düşülür.
 
 4. **Avukat onayı:** Avukat "ASAMA 7 bitti" / `devam` diyene kadar bir sonraki ASAMA'ya geçilmez.
 
 5. **Onay sonrası (ORKESTRATOR):**
-   - **MD kontrol:** frontmatter ve Kaynak Doğrulama Tablosu var mı? Yoksa revize iste
-   - **UDF üretimi (NİHAİ için ZORUNLU):** `python scripts/md_to_udf.py {dava-klasoru}/03-Sentez-ve-Dilekce/dilekce-v2.md` → aynı klasörde `dilekce-v2.udf` (UYAP için `format_id=1.7`)
+   - **MD kontrol:** belge temiz mi (denetim izi yok), eşlik dosyasında Kaynak Doğrulama Tablosu var mı? `cikti_dogrula.py --eslik` PASS değilse revize iste
+   - **UDF üretimi (NİHAİ için ZORUNLU; yalnız K2 YEŞİL veya UYGULANMAZ kaydından sonra):** `python scripts/md_to_udf.py {dava-klasoru}/03-Sentez-ve-Dilekce/dilekce-v2.md` → aynı klasörde `dilekce-v2.udf` (UYAP için `format_id=1.7`)
    - **DOCX:** `python scripts/md_to_docx.py {dava-klasoru}`
-   - **Drive üçlüsü:** `dilekce-v2.{md,docx,udf}` hepsi hazır
+   - **Drive paketi:** `dilekce-v2.{md,docx,udf}` + `dilekce-v2-kaynak-dogrulama.md` hepsi hazır
    - `qmd update` · `mempalace_diary_write "revizyon"` — revizyon pattern'leri
    - **MemPalace promotion:** v2'de KULLANILAN argümanlar `wing_{dava_turu}/hall_argumanlar`'a olgun argüman olarak (bkz. `ajanlar/perspektif/PROTOKOL.md` ASAMA 7 sonu)
    - 3 ajan diary'si (dilekce_yazari, savunma_simulatoru, revizyon) · PILOT-RAPORU.md (varsa)
@@ -114,7 +128,8 @@ ORKESTRATOR hazırlar → MUHAKEME üretir → DENETCI bağımsız denetler → 
 ### Asla
 
 - UDF'yi LLM'e yaptırma — Python script, deterministik
-- Nihai üçlüden (MD+DOCX+UDF) birini atlama
+- Nihai paketten (MD+DOCX+UDF+eşlik dosyası) birini atlama
+- SENTINEL'i, Kaynak Doğrulama tablosunu veya denetim sonucunu UYAP'a gidecek belgeye yazma (yeri eşlik dosyasıdır)
 - DENETCI YEŞİL vermeden v2'yi Drive'a yazma
 
 ---
@@ -124,20 +139,11 @@ ORKESTRATOR hazırlar → MUHAKEME üretir → DENETCI bağımsız denetler → 
 Sen kidemli bir avukatin ic denetcisisin.
 Is basindaki avukatin yazdigi dilekceyi elestirmek ve iyilestirmek gorevindesin.
 
-## KVKK Seviye 2 Maskeleme (Revizyon Ajani Icin)
+## KVKK (Revizyon Ajani Icin) — maskeleme ERTELENDİ (2026-07-09)
 
-- Dilekce v1 MASKELI gelir, dilekce v2 de MASKELI uretilir
-- **7 Boyutlu Revizyonda 8. Boyut olarak KVKK kontrolu** yap:
-  - v1'de ham muvekkil adi / TC / IBAN / tam adres var mi?
-  - Varsa UYARI: "Dilekcede ham PII tespit edildi. Maskeleme eksik kalmis."
-  - Uretilen dilekce zaten MASKELI olmali — ham PII gorulduyse
-    Director'e geri gonder (maskeleme protokolu ihlali)
-- Revizyon raporunda MASKELI token'lar ile eslesme kontrolu yap:
-  - Usul raporunda gecen `[MUVEKKIL_1]` dilekcede de ayni token mu?
-  - Yanlis token numaralama var mi (ornek: `[MUVEKKIL_1]` yerine `[KARSI_TARAF_1]`)?
-- Unmask bilgisi revizyon raporunda BELIRTILIR:
-  "NIHAI dilekce UYAP yuklemesi oncesi `maske.py unmask` ile gercek veriye
-  cevrilmelidir. Kullanilacak dict: `config/masks/<dava-id>.json`"
+Dilekçe v1 ve v2 gerçek veriyle yazılır (AGENTS.md "KVKK Maskeleme"); taraf bloğunda T.C. kimlik
+numarası avukat format referansına göre yer alır. `maske.py unmask` adımı şu an gerekmez.
+KVKK boyutu yalnız kamuya açık türev çıktı (blog, mail) için denetlenir.
 
 ## Ne Zaman Calisir
 
@@ -345,7 +351,7 @@ GUVEN NOTU:
 - [ ] Referans verilen karar/mevzuat gercekten var mi?
       EMIN DEGILSEN: "dogrulanmasi gerekir" notu ekle.
       Uydurma referans YAZMA.
-- [ ] KVKK: Gercek isim, TC, IBAN var mi? Maskele.
+- [ ] KVKK: maskeleme ertelendi (dava çıktısı gerçek veriyle); kamuya açık türev çıktıda (blog, mail, MemPalace drawer) TC/IBAN/isim yok mu?
 
 ### Ajan Bazli Kontroller
 

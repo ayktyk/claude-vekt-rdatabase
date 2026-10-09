@@ -1,3 +1,6 @@
+---
+description: "ASAMA 2B Yargı PRO içtihat derin protokolü (Bedesten, HGK, çelişki ve bozma taraması)"
+---
 <!-- DOKTRIN-PREAMBLE v1 -->
 > **0-HALÜSİNASYON + ANTI-SYCOPHANCY (zorunlu — tam metin: `prompts/_doktrin-preamble.md`):**
 > - UYDURMA YARGITAY/HGK/İBK kararı atfı YASAK — her künye Bedesten documentId ile doğrulanır; doğrulanmayan "DOĞRULANMAMIŞ" damgalanır.
@@ -18,16 +21,18 @@ Mevcut kısa prompt YASAK — bu komut tam protokolü zorunlu uygular.
 `mcp__claude_ai_Yarg_MCP__*` tool'ları emekli.
 
 ## Zorunlu Referans Dokümanlar
-- `.claude/skills/yargi-legal-research-guide/SKILL.md` — **sorgu lehçeleri + tuzaklar (BİRİNCİL referans, sürüm 2026-07-08b)**
+- `.claude/skills/yargi-legal-research-guide/SKILL.md` — **sorgu lehçeleri + tuzaklar (BİRİNCİL referans, sürüm 2026-09-06)**
 - `ajanlar/perspektif/PROTOKOL.md` → ASAMA 2B
 - `ajanlar/arastirmaci/SKILL.md` → Bölüm 1 (Yargı-MCP-Pro Derin Protokolü, 6 Faz) + Bölüm 2.5 (2B → 2C Sıralı Zincir)
 
 ## Kanonik Çalıştırıcı
 
-2B araştırmasını **bu oturumda Claude Fable 5 tek elden** yürütür
+2B araştırmasını **bu oturumda ARASTIRMACI rolüyle tek elden** yürütür
 (`config/motor-haritasi.json -> tasks.yargi_mcp`, mod: derin — min 15 sorgu /
-min 5 tam metin). Ayrı pipeline scripti YOKTUR. Fable limiti dolarsa avukat
-`/model` ile Claude Opus 4.8'e geçer; rapor frontmatter'ı modeli damgalar.
+min 5 tam metin). Ayrı pipeline scripti YOKTUR. Rapor frontmatter'ı
+`python scripts/motor.py damga` ile damgalanır (motor tahmin edilmez). Sorgu setinin
+üretiminde Yargı PRO `hukuk_skill` 11-2-derin-emsal-taramasi yöntemi kullanılabilir
+(AGENTS.md "Karma Mimari").
 Aşağıdaki 6 Faz + Gap Check tamamlanmadan 2C başlatılmaz.
 
 ## Aktif Tool'lar (Yargı-MCP-Pro — FAZ 6 2026-07-09 yeni Türkçe set)
@@ -120,7 +125,7 @@ Her sorgu sonu `.faz2-progress.jsonl`'e satır:
 
 ## Nihai 2B Raporu ve Kalite Kapısı
 
-- Claude, `02-Arastirma/yargi-bulgulari.md` ile
+- ARASTIRMACI, `02-Arastirma/yargi-bulgulari.md` ile
   `02-Arastirma/atif-maddeleri.json` dosyalarını üretir.
 - Üretimden SONRA aynı oturumda kalite kontrol listesi (aşağıda) uygulanır;
   eksik varsa yalnız eksik mini-kol yeniden çalıştırılır.

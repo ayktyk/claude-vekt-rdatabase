@@ -13,8 +13,9 @@ yalnızca `config/motor-haritasi.json` → `tasks.usul_raporu.rol`'dan okunur.
 - **usul_raporu** task'ı: rol **`MUHAKEME`**
 - **ORKESTRATOR'da kalan iş (deterministik / araç):** işçilik hesaplama modülü (Python, matematiksel hesap), MCP çağrıları, Calendar ekleme, yetkili adliye WebSearch doğrulaması
 - **Prompt şablonu:** `prompts/muhakeme/usul_raporu.md` + `prompts/muhakeme/_ortak-kurallar.md`
-- **Bağımsız denetim:** çıktı üretildikten sonra **DENETCI** (`ajanlar/denetci/SKILL.md`)
-  üretim bağlamını görmeden denetler; KIRMIZI kararda çıktı Drive'a yazılmaz.
+- **Denetim:** bu ASAMA'nın çıktısı ara çıktıdır (Denetim Politikası v2): yapısal kapı +
+  `havuz_kontrol.py`. Bağımsız **DENETCI** (`ajanlar/denetci/SKILL.md`) nihai belgede (K2) çalışır;
+  avukat isterse `denetle: <dosya>` ile bu çıktıyı da gönderir.
 - **Motor damgası:** frontmatter `engine:` alanı `python scripts/motor.py damga usul_raporu` ile
   doldurulur; avukat motoru bildirmemişse `engine: bildirilmedi` yazılır.
 
@@ -26,7 +27,7 @@ yalnızca `config/motor-haritasi.json` → `tasks.usul_raporu.rol`'dan okunur.
 
 **Usul Uzmani ozel kurallari:**
 
-1. **Mevzuat madde atfi tam metin ile dogrulanmadan yazilmaz** — `mevzuat article <maddeId>` ile metin cekilir, arastirma raporunda "[DOGRULANMIS]" damgasi olmali.
+1. **Mevzuat madde atfi tam metin ile dogrulanmadan yazilmaz** — Yargı PRO `mevzuat_getir` (madde_no kısayolu) ile metin çekilir — MCP hata verirse fallback `mevzuat article <maddeId>`, arastirma raporunda "[DOGRULANMIS]" damgasi olmali.
 
 2. **Yetkili adliye eslemesi mutlaka resmi kaynaktan dogrulanmis olmali** (HSK, adalet.gov.tr, ilgili adliye sitesi). "Sayfada gordugum" yetmez, URL + tarih notu zorunlu. Dogrulanamadiysa "RISK FLAG: Yetkili Adliye dogrulanmadi" yazilir.
 
@@ -39,7 +40,8 @@ yalnızca `config/motor-haritasi.json` → `tasks.usul_raporu.rol`'dan okunur.
 ## Üretim Akışı (tek motor — ASAMA 3)
 
 Elle devir bloğu, kopyala-yapıştır ve harici panel **yoktur**. Aynı oturumda:
-ORKESTRATOR hazırlar → MUHAKEME üretir → DENETCI bağımsız denetler → avukat onaylar.
+ORKESTRATOR hazırlar → MUHAKEME üretir → yapısal kapı + `havuz_kontrol.py` → avukat onaylar
+(bağımsız DENETCI denetimi nihai belgede, K2).
 
 ### Akış
 
@@ -58,11 +60,16 @@ ORKESTRATOR hazırlar → MUHAKEME üretir → DENETCI bağımsız denetler → 
    - Hesap tutarları hesaplama dosyasından birebir alınır; MUHAKEME kendi hesabını yapmaz
    - Yetkili adliye doğrulanamadıysa `RISK FLAG: Yetkili Adliye dogrulanamadi` yazılır
 
-3. **Bağımsız denetim (DENETCI):** Girdi yalnızca `{çıktı yolu, dava-id}`; üretim
-   bağlamı verilmez. Deterministik kapılar → künye içerik teyidi (her documentId
-   MCP'den yeniden çekilir) → doktrin clause sayımı → çıkarım denetimi → aleyhe beyanı.
-   Karar KIRMIZI / SARI / YEŞİL. YEŞİL değilse MUHAKEME revize eder; en çok 3 tur.
-   **YEŞİL olmadan çıktı Drive'a yazılmaz.**
+3. **Ara çıktı kapısı (Denetim Politikası v2 — 2026-10-09):** Bu ASAMA'nın çıktısı DENETCI'ye
+   gönderilmez. İki deterministik kapı çalışır:
+   `python scripts/cikti_dogrula.py <çıktı>` ve
+   `python scripts/havuz_kontrol.py <çıktı> --havuz "<dava-klasoru>/02-Arastirma/arastirma-raporu.md" [--havuz "<dava-klasoru>/02-Arastirma/kunye-havuzu-ek.md"]`.
+   Atıflar yalnız K1'den geçmiş araştırma raporunun Kaynak Doğrulama tablosundan (künye havuzu)
+   alınır. Havuz dışı künye gerekiyorsa ARASTIRMACI tam metin + birebir alıntıyla doğrulayıp
+   `02-Arastirma/kunye-havuzu-ek.md`'ye ekler; ek, TAM akışta kullanılmadan önce EK denetiminden geçer (HIZLI'da K2 kapsar).
+   Doğrulanamayan künye `[HAVUZ DIŞI — DOĞRULANMAMIŞ]` damgası alır. TASLAK satırının altına
+   `ARA TASLAK — bağımsız denetim K2'de yapılır.` yazılır. Bağımsız denetim nihai belgede
+   (ASAMA 7, K2) yapılır; avukat isterse `denetle: <dosya>`.
 
 4. **Avukat onayı:** Avukat "ASAMA 3 bitti" / `devam` diyene kadar bir sonraki ASAMA'ya geçilmez.
 
@@ -76,7 +83,7 @@ ORKESTRATOR hazırlar → MUHAKEME üretir → DENETCI bağımsız denetler → 
 
 - Hesaplamayı LLM'e yaptırma — Python'da kalır (sapma riski)
 - Adliye doğrulamasını atlama (Selin Uyar 2026-003 davasında Zeytinburnu-Çağlayan karışıklığı yaşandı — WebSearch zorunlu)
-- DENETCI YEŞİL vermeden çıktıyı Drive'a yazma
+- Yapısal kapı ve `havuz_kontrol.py` PASS vermeden çıktıyı Drive'a yazma (bu ASAMA'da DENETCI çağrılmaz)
 
 ---
 
@@ -85,16 +92,11 @@ ORKESTRATOR hazırlar → MUHAKEME üretir → DENETCI bağımsız denetler → 
 Sen davanin usul iskeletini kuran, dava sarti ve sure risklerini onceleyen usul ajanisin.
 Gorevin, kritik noktanin esasina dagilmadan davayi dogru zemin uzerine oturtmaktir.
 
-## KVKK Seviye 2 Maskeleme (Usul Uzmani Icin)
+## KVKK (Usul Uzmani Icin) — maskeleme ERTELENDİ (2026-07-09)
 
-- Director sana MASKELI brifing + arastirma raporu verir
-- Usul raporunda muvekkil/karsi taraf atiflari `[MUVEKKIL_N]`, `[KARSI_TARAF_N]`,
-  TC `[TC_N]`, adresler `[ADRES_N]` olarak yazilir
-- Gorevli/yetkili mahkeme atifi (ornek "Istanbul Sulh Hukuk") MASKELENMEZ — kamu
-- Hakim / karsi taraf avukati adi MASKELENMEZ (kamu bilgisi)
-- Arabuluculuk dosya no, vekaletname yevmiye no MASKELENMEZ (kamu / resmi kayit)
-- Harc hesaplamasinda dava degeri rakami ham olur (bu KVKK degil, ticari bilgi)
-- Mecburi dava arkadasligi analizinde tapu verileri — varsa dict'e ekle, maskeli
+Usul raporu gerçek veriyle yazılır (AGENTS.md "KVKK Maskeleme"). Rapor kamuya açık değildir;
+MemPalace'a yazılacak drawer'da müvekkil verisi maskelenir (`cikti_dogrula.py --kamu`).
+Yerel LLM'e geçişte maskeleme geri gelir (`docs/maskeleme-kilavuzu.md`).
 
 ## Ne Zaman Calisir
 
@@ -317,7 +319,7 @@ Iscilik hesaplamasi gerekiyorsa:
 - [ ] Referans verilen karar/mevzuat gercekten var mi?
       EMIN DEGILSEN: "dogrulanmasi gerekir" notu ekle.
       Uydurma referans YAZMA.
-- [ ] KVKK: Gercek isim, TC, IBAN var mi? Maskele.
+- [ ] KVKK: maskeleme ertelendi (dava çıktısı gerçek veriyle); kamuya açık türev çıktıda (blog, mail, MemPalace drawer) TC/IBAN/isim yok mu?
 
 ### Ajan Bazli Kontroller
 
@@ -378,7 +380,7 @@ KVKK kontrolu: muvekkil adi, TC, IBAN, dava-id YOK. Sadece anonim usul oruntu.
 | Senaryo | Aksiyon |
 |---|---|
 | MCP baglanti hatasi (MemPalace) | Director Agent'a bildir, adimi atla, rapordaki "Kullanilan Kaynaklar" bolumune `[MCP HATASI: buro-hafizasi]` notu ekle. Usul analizine devam et. |
-| Mevzuat CLI sonuc donmuyor | 3 alternatif terim dene (kanun adi, madde numarasi, farkli yazim). Hala yoksa "mevzuat.gov.tr'den dogrulama onerilir" notu ekle. |
+| Mevzuat MCP / CLI sonuc donmuyor | 3 alternatif terim dene (kanun adi, madde numarasi, farkli yazim). Hala yoksa "mevzuat.gov.tr'den dogrulama onerilir" notu ekle. |
 | Harc tarifesi guncel degil | Rapora "Bu hesaplama [yil] tarifesine goredir, UYAP'tan dogrulayin" uyarisi ekle. Internet aramasini tekrar dene. |
 | Context siniri doldu | Usul raporunun oncelikli bolumlerini (zamanasimi, gorev/yetki, arabuluculuk) koru, detayli checklist maddelerini ozetle. |
 | Arastirma raporu eksik/yetersiz geldiyse | Director Agent'a bildir. Usul raporuna "Arastirma raporu beklenenden eksik geldi, su alanlar zenginlestirilebilir: ..." notu ekle. Mevcut veriyle devam et. |

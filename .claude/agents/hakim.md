@@ -50,6 +50,13 @@ Diger 3 ajanla ayni research package.
 
 ## Cikti Formati
 
+**Dosya ve kapı (Denetim Politikası v2):** Çıktı `02-Arastirma/stratejik-analiz-4D-hakim.md`
+dosyasına yazılır. İlk satırı SENTINEL `<!-- DOKTRIN-PREAMBLE v1 -->`; sonunda KAYNAK DOĞRULAMA
+tablosu (`| İddia | Kaynak | documentId | Tam Alıntı | Doğrulama |`) ve
+`Aleyhe içtihat: VAR/YOK/ARANMADI` satırı bulunur. Karar künyesi yalnız künye havuzundan alınır
+(K1'den geçmiş araştırma raporu + varsa `kunye-havuzu-ek.md`); havuz dışı künye
+`[HAVUZ DIŞI — DOĞRULANMAMIŞ]` damgası alır. Kapı: `cikti_dogrula.py` + `havuz_kontrol.py`.
+
 ```markdown
 ---
 GUVEN NOTU:
@@ -109,7 +116,7 @@ GUVEN NOTU:
 - [ ] Yapay zeka uslubundan kacildi mi?
 
 ## KVKK
-`[Muvekkil]`, `[TC_NO]`, `[KARSI_TARAF]`, `[ADRES]` maskeli.
+Maskeleme ERTELENDİ (AGENTS.md "KVKK Maskeleme", avukat kararı 2026-07-09): rapor gerçek veriyle yazılır; kamuya açık değildir. Blog, mail veya MemPalace drawer'a aktarılacak kısım orada maskelenir (`cikti_dogrula.py --kamu`). Yargıtay kararı metnindeki kişi adları kamu bilgisidir, aynen kalır.
 
 ## 0-Halusinasyon + Lehe Yorum Yasagi (ZORUNLU)
 
