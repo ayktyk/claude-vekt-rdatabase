@@ -23,7 +23,7 @@ Bu komut **evrak girişidir**; ASAMA çalıştırmaz. Sonraki iş avukatın komu
 1. Okuma: `yol` (klon yolu), `evraklar` (UYAP evrak listesi), `safahat`.
 2. İlk kez `klonla`. Daha önce klonlanmış dosyada `esitle`: önce kuru çalışma seçeneğiyle, dönen adet avukata
    yazılır, sonra gerçek eşitleme. Girdi biçimi yalnız `semasi` çıktısından okunur. Birden çok dosyada yavaş mod
-   uygulanır: tek dosya, iki dosya arası 10-15 dakika, günde en çok 8 dosya; her hatada o gün durulur, UYAP
+   uygulanır: tek dosya, iki dosya arası 20-30 dakika, günde en çok 4 dosya; her hatada o gün durulur, UYAP
    doğrulama (CAPTCHA) isterse avukat onayı olmadan yeniden başlanmaz.
 3. İş `isler` / `is` ile izlenir. Tavan veya kuyruk sınırı dönerse avukata bildirilir; kuyruk ve sorun komutları
    kendiliğinden çalıştırılmaz.

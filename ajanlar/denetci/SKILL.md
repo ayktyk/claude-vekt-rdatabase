@@ -191,3 +191,10 @@ teyidi MCP ile yapılamaz ve CLI yedeğine geçilir.
 - KIRMIZI bulguya rağmen "genel olarak iyi" diye YEŞİL vermek — lehe yorum
   yasağı denetçi için de geçerlidir
 - Denetim sonucunu dilekçe, ihtarname veya UDF'ye gidecek metne eklemek
+
+
+## Büro üslup kuralı: müvekkil beyanı etiketi (2026-10-19)
+Dışarı giden belgede (dilekçe, cevap, ihtarname) müvekkilin belgesiz olgularını "davacının beyanına göre" vb. kalıpla etiketlemeyi İSTEME; bu kalıbın belgede bulunması SARI üslup bulgusudur (`dilekce-yazim-kurallari.md` §4 BÜRO KURALI). Belge/beyan ayrımını eşlik dosyasında ara: belgesiz olgu eşlikte "MÜVEKKİL BEYANI" damgalı değilse SARI; belgede belgesiz olgu için ispat aracı (sunulacak / celp / tanık) gösterilmemişse SARI.
+
+## Büro üslup kuralı: vekilin sesi (2026-10-19)
+Dışarı giden belgede vekilin kendinden üçüncü şahıs olarak söz etmesi ("davacı vekili … başvurmuş") ve rapor/denetim dili ("bu olgu sabittir", "talebimiz bu biçimde kurulmuştur", "tarafımızca bilinmemektedir") SARI üslup bulgusudur (`dilekce-yazim-kurallari.md` §4 BÜRO KURALI 2026-10-19). Belgeye dürüstlük gereği konan cümleleri bu dile çevirmeyi isteme; aleyhe beyan savunma ağzıyla yazılır, kaynak/olgu ayrımı eşlikte tutulur.

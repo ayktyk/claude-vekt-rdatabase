@@ -179,6 +179,7 @@ def is_title_line(line: str) -> bool:
             "MAHKEMESİ'NE",
             "MAHKEMESINE",
             "HAKİMLİĞİNE",
+            "HÂKİMLİĞİNE",
             "HAKIMLIGINE",
             "KURULU'NA",
             "KURULUNA",
@@ -341,7 +342,7 @@ def parse_md_to_paras(md_text: str) -> List[Para]:
 
         # Signature line detection FIRST (before indent-continuation,
         # because signature lines typically have heavy leading padding).
-        if re.match(r"^\s*(Davacı|Davacılar|Davalı|Davalılar|Müvekkil|Müdafi)?\s*Vekili\s*$", line, re.IGNORECASE):
+        if re.match(r"^\s*(Davacı|Davacılar|Davalı|Davalılar|Müvekkil|Müdafi|Talep Eden)?\s*Vekili\s*$", line, re.IGNORECASE):
             paras.append(Para(
                 runs=[InlineRun(stripped, bold=True)],
                 alignment=2,
@@ -396,7 +397,7 @@ def parse_md_to_paras(md_text: str) -> List[Para]:
                 break
             if is_section_heading(nxt):
                 break
-            if re.match(r"^\s*(Davacı|Davacılar|Davalı|Davalılar|Müvekkil|Müdafi)?\s*Vekili\s*$", nxt, re.IGNORECASE):
+            if re.match(r"^\s*(Davacı|Davacılar|Davalı|Davalılar|Müvekkil|Müdafi|Talep Eden)?\s*Vekili\s*$", nxt, re.IGNORECASE):
                 break
             if is_title_line(nxt):
                 break

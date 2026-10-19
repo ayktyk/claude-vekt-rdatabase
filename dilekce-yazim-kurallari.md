@@ -86,6 +86,20 @@ Ancak asla salt öykü gibi yazılmaz.
 
 ---
 
+### BÜRO KURALI (2026-10-19, Av. Aykut YEŞİLKAYA) — Müvekkilden mesafe koyan kalıp YASAK
+- "davacının beyanına göre", "müvekkilin iddiasına göre", "davacının bilgisine göre", "davacı … olduğunu ileri sürmektedir" gibi müvekkilden mesafe koyan kalıplar dilekçede KULLANILMAZ. Vekil müvekkilinin ağzından konuşur; bu kalıplar müvekkili yabancı gibi anar ve vekilin müvekkilin sözüne güvenmediği izlenimini verir.
+- Belgesiz olgu, vekilin iddiası olarak doğrudan yazılır ve ispat aracı gösterilir: "Davalı, … istemiştir. Bu yazışmalar sunulacak, davalının kayıtlarından da celbi istenmektedir." / "… tanık beyanlarıyla ispatlanacaktır."
+- Olgunun belge mi müvekkil beyanı mı olduğu ayrımı (0-halüsinasyon doktrini) dilekçede değil, EŞLİK dosyasının Kaynak Doğrulama tablosunda "MÜVEKKİL BEYANI" damgasıyla tutulur. DENETCI bu ayrımı eşlikte arar; dilekçede beyan etiketi istemez.
+- Karşı tarafın iddiaları için "davalı … savunmaktadır / ileri sürmektedir" kullanılabilir; yasak yalnız kendi müvekkilimiz içindir.
+
+### BÜRO KURALI (2026-10-19) — Vekil kendinden üçüncü şahıs olarak söz etmez; metin insan ağzından çıkmış gibi okunur
+- "Davacı vekili … başvurmuş", "davacı vekilince … talep edilmektedir" YASAK. Vekil birinci çoğul şahısla konuşur: "başvurduk", "talep ederiz", "sunacağız", "öngörüyoruz", "talebimizi bu biçimde kurduk".
+- Müvekkil olay anlatımında "müvekkil" diye anılır; "davacı" yalnız usul ve kanun uygulaması cümlelerinde, taraf sıfatı gerektiğinde kullanılır.
+- Rapor/denetim dili yasak: "Bu olgu … sabittir", "talebimiz bu biçimde kurulmuştur", "Davacı bu hakkını … kullanacaktır", "… tarafımızca bilinmemektedir", "Yukarıda 5 inci paragrafta açıklandığı üzere". Bunların yerine avukatın Mahkemeye konuşan doğal cümlesi kurulur.
+- Aleyhe kararlar dürüstçe anılır ama savunma ağzıyla: "Davalının aksi yöndeki kararlara dayanacağını da öngörüyoruz." / "Ne var ki bu kararlar … ortadan kaldırmaz."
+- Cümle akışı: kısa ve uzun cümleler karışık; bağlaçlar `uslup-aykut.md` §5 listesinden (nitekim, dolayısıyla, ne var ki, kaldı ki, hal böyle olunca, somut olayda). "Kısacası", "Özetle", "Sonuç olarak" kullanılmaz.
+- Ön koşul: Dilekçe, cevap, istinaf, ihtarname yazan veya revize eden her rol (ORKESTRATOR dahil) yazmaya başlamadan bu dosyayı ve `ajanlar/dilekce-yazari/uslup-aykut.md`'yi OKUR. Kaynak: M. Ufuk Tekin, "Bir Dilekçenin Anatomisi" (7. Bası) özeti + avukat üslup parmak izi; tam kitap NotebookLM'de (erişim için `nlm login`).
+
 ## 5. Atıf ve Kaynak Gösterme
 
 **Yargıtay kararı atfı:**

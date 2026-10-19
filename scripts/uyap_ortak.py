@@ -25,9 +25,12 @@ OKUMA_KOMUTLARI = {"durum", "dosyalarim", "hareketler", "gelen-evraklar", "durus
 SINIR_KODLARI = ("UYAP_ISLEM_SINIRLI", "UYAP_CAPTCHA", "CLONE_BUSY", "SAFAHAT_BUSY", "KUYRUK_DOLU", "BUTCE_ASILDI")
 KILIT_KODLARI = ("UYAP_CAPTCHA",)  # insan doğrulaması: avukat açık onay vermeden toplu iş yeniden başlamaz
 YEREL_HATA_KODLARI = ("INVALID_INPUT",)  # uygulamanın girdi denetimi; UYAP'a gitmez, yalnız o dosya atlanır
+UYGULAMA_HAZIR_DEGIL_KODLARI = ("APP_GONE",)  # uygulama kapalı/yeniden bağlanıyor; UYAP'a gitmez, durma sayılmaz (2026-10-10)
 ONBELLEK_ADI = "00-uyap-onbellek.json"
 CMK_LISTESI_ADI = "00-CMK-DOSYALARI.md"
 ESLESME_ADI = "00-UYAP-ESLESME-TABLOSU.md"
+CMK_KLASORU = "02CMK"  # avukat talimatı 2026-10-13: CMK dosyaları 02CMK/CMK-<no> … klasöründe
+CMK_KODU = re.compile(r"(?<![\w-])CMK-\d+(?!\d)")
 CMK_RE = re.compile(r"\bCMK\b|zorunlu müdafi|baro atama|görevlendir", re.IGNORECASE)
 TURLER = ("agir ceza", "asliye ceza", "sulh ceza", "cocuk", "asliye hukuk", "sulh hukuk", "asliye ticaret", "tuketici",
           "icra hukuk", "icra ceza", "icra", "is", "aile", "kadastro", "idare", "vergi", "hukuk dairesi",
@@ -103,6 +106,13 @@ def caseref_coz(ref) -> dict:
         return {}
 
 
+def klasor_kodu(ad) -> str:
+    """Büro klasör adından kod: `2026-028 …` -> `2026-028`; `02CMK/... CMK-15 …` -> `CMK-15`; yoksa boş."""
+    ad = str(ad or "")
+    m = re.match(r"^\d{4}-\d{3}", ad) or CMK_KODU.search(ad)
+    return m.group(0) if m else ""
+
+
 def eslesme_satirlari(yol: Path | None = None) -> list[dict]:
     """00-UYAP-ESLESME-TABLOSU.md: A (kesin) ve B (orta güven) bölümlerinde büro klasörü vardır; C'de yoktur."""
     yol = yol or aktif_davalar() / ESLESME_ADI
@@ -123,7 +133,7 @@ def eslesme_satirlari(yol: Path | None = None) -> list[dict]:
         m = re.match(r"^(.*?)\s+(\d{4})-(\d+)", uyap)
         if not m:
             continue
-        satirlar.append({"bolum": bolum, "klasor": (re.match(r"^\d{4}-\d{3}", klasor) or [""])[0],
+        satirlar.append({"bolum": bolum, "klasor": klasor_kodu(klasor),
                          "mahkeme": m.group(1), "no": f"{m.group(2)}/{m.group(3)}", "muvekkil": muvekkil,
                          "karsi": karsi, "cmk": cmk_mi(muvekkil)})
     return satirlar
@@ -172,7 +182,7 @@ def durma_nedeni(yanit, cikis_kodu) -> str:
     if not isinstance(yanit, dict):
         return "tanınmayan yanıt"
     kod = hata_kodu(yanit)
-    if kod and any(k in kod for k in YEREL_HATA_KODLARI):
+    if kod and any(k in kod for k in YEREL_HATA_KODLARI + UYGULAMA_HAZIR_DEGIL_KODLARI):
         return ""
     if kod:
         return kod

@@ -150,6 +150,14 @@
       "mcp__yargi-mcp-pro__reklam_bulten_icinde_ara"
     ]
   },
+  "enabledMcpjsonServers": [
+    "notebooklm",
+    "buro-hafizasi",
+    "qmd-hafiza",
+    "yargi-mcp-pro",
+    "arguman",
+    "isbu-ofis"
+  ],
   "hooks": {
     "PreToolUse": [
       {
@@ -172,11 +180,5 @@
       }
     ]
   },
-  "enabledMcpjsonServers": [
-    "notebooklm",
-    "buro-hafizasi",
-    "qmd-hafiza",
-    "yargi-mcp-pro",
-    "arguman"
-  ]
+  "enableAllProjectMcpServers": true
 }

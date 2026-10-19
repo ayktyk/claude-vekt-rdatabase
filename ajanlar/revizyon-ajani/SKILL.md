@@ -268,6 +268,10 @@ Kayit yollari:
 
 Kalici kaydi yerel diske yapma.
 
+### EKLER Klasoru (ZORUNLU — buro kurali 2026-10-19)
+
+**EKLER klasörü (BÜRO KURALI 2026-10-19):** Nihai belgenin EKLER bölümünde gösterilen her belge, belgenin yanındaki `EKLER/` klasörüne (`03-Sentez-ve-Dilekce/EKLER/`) KOPYALANIR; asıl dosya `04-Muvekkil-Belgeleri/` altında kalır, taşınmaz. Dosya adı `Ek-<no> <kısa ad>.<uzantı>` biçiminde, UYAP yüklemesinde sorun çıkmaması için Türkçe karakter kullanılmadan yazılır (ör. `Ek-6 Rektorluk fesih yazisi 18.03.2025.pdf`). Arabuluculuk son tutanağı için e-imzalı/barkodlu UDF kullanılır. Kopyalardan sonra sağlama (md5) asıllarla karşılaştırılır. Ek listesi değişirse klasör aynı anda güncellenir. Elde olmayan ek (ör. "sunulacak" e-posta) klasöre konmaz, eşlikte açık iş olarak yazılır. Amaç: dava açılırken evrak aranmaz. **UYAP PAKETİ (BÜRO KURALI 2026-10-20):** UYAP'a dilekçeyle en fazla 10 ek yüklenebilir; EKLER klasörü bu sınıra göre yükleme paketi olarak kurulur. Her ek numarası TEK dosyadır: aynı ek numarasındaki birden çok görsel/PDF tek PDF'te birleştirilir (A4, `fitz`/PyMuPDF), dilekçe "Ek-3/7" gibi alt numarayla atıf yapıyorsa her sayfanın üstüne o etiket basılır ve sayfa sırası atıf sırasıyla aynı tutulur. Karekodlu/e-imzalı UDF ve e-imzalı belgeler birleştirilmez, değiştirilmeden konur (cmp ile kontrol). Ek numarası sayısı 10'u aşarsa dilekçenin EKLER listesi mantıklı gruplarla (ör. faturalar, yazışmalar, banka kayıtları) yeniden numaralandırılır ve metindeki tüm Ek atıfları buna göre güncellenir; bu bir metin değişikliğidir, K2'den geçer. Tekil md5'li kopyalar `EKLER/_tekil/` altında kalır (UYAP'a yüklenmez); `EKLER/00-EK LISTESI.txt` yükleme listesini (dosya adı + sayfa içeriği) gösterir. Birleştirilen PDF'lerden en az biri (atıf yapılan bir sayfa) görsel olarak açılıp kontrol edilir. İlk uygulama: 2026-054 (24 dosya → 7).
+
 ### UDF Uretimi (ZORUNLU — v2 NIHAI icin)
 
 Dilekce v2 MD dosyasi Drive'a yazildiktan SONRA ayni session'da UDF

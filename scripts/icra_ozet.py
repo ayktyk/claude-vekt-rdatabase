@@ -223,7 +223,7 @@ def dosya_ozeti(klon: Path, bugun: date | None = None) -> dict:
 
 
 def icra_klonlari(kok: Path | None = None) -> list[Path]:
-    kok = kok or aktif_davalar() / "YargiPRO" / "YargiPRO"
+    kok = kok or aktif_davalar() / "YargiPRO"
     out = []
     for p in sorted(kok.rglob("uyap-project.json")):
         try:

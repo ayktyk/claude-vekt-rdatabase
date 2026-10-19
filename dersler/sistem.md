@@ -174,3 +174,26 @@ sayfayı yeni bir çalışma kitabına taşıdı, sayfa ana dosyada kalmadı ve 
 sayfa onun önüne alınır; referans her taşımadan sonra adla yeniden alınır. Gerçek dosyadan önce kopya üzerinde denendi;
 yazmadan önce akşam yedeği alındı.
 **KURAL ADAYI:** Avukatın dosyasına yazan yeni bir kod yolu önce dosyanın kopyası üzerinde çalıştırılır.
+
+
+## 2026-10-11 — havuz_kontrol.py tablo ayrıştırıcısı (2026-050)
+
+**KAÇIRILAN:** `havuz_kontrol.py` içinde `tablo_satirlari`, hücresinde "documentId" kelimesi geçen HER tablo
+satırını başlık sayıyor; Kaynak tablosuna "documentId 493726400" gibi açıklama yazınca sonraki satırlar yanlış
+sütunlarla okundu ve geçerli künyeler "havuz dışı" diye FAIL verdi. Ayrıca documentId hücresine "—" dışında
+açıklama ("— (resmî PDF)", "yukarıdaki tablo") veya noktalı virgülle birden çok kimlik yazılınca da FAIL.
+**DÜZELTME:** Hücrelerde "documentId" kelimesi kullanılmadı ("Bedesten no"), documentId sütunu yalnız tek kimlik
+veya yalın "—"; birden çok karar ayrı satırlara bölündü. Script değiştirilmedi.
+**KURAL ADAYI:** Kaynak Doğrulama tablosunda documentId hücresi = tek kimlik ya da "—"; satır başına tek karar;
+hücre metninde "documentId" kelimesi geçmez. (Script tarafında: başlık tespiti yalnız tablonun ilk satırına
+bakmalı — terfi adayı, `scripts/havuz_kontrol.py`.)
+
+
+## 2026-10-16 — havuz_kontrol ve denetçi sonuç blokları
+- Denetçinin dosya sonuna eklediği DENETİM SONUCU bloğundaki künye tablosu ve «» alıntıları havuz_kontrol'ü dosyanın tamamında FAIL'e düşürür. Üretim kısmı `awk '/^## DENETİM SONUCU/{exit}'` ile ayrılarak kontrol edilir; denetçiye sonuç bloğunu tablosuz ve «» alıntısız yazması söylenebilir.
+- Tam Alıntı hücresinde yalnız düz tırnak bulunsa da havuz_kontrol bunu alıntı sayabilir; havuz dışı mevzuat metni Doğrulama sütununa tek tırnakla yazılır.
+- Yargı PRO kotası %8'e düştüğünde denetçiye yalnız yeni/değişen künyeleri çekmesi, kalanını havuz hücreleriyle kıyaslaması söylenir; sonuç bloğu hangisinin çekildiğini yazar.
+
+
+## 2026-10-19 — BÜRO KURALI: EKLER klasörü
+- Avukat: "dava dilekçesinde ekler olarak gösterdiğimiz belgeleri de EKLER adlı bir klasör açarak koy … her seferinde evrakları aramayalım". Nihai pakette `03-Sentez-ve-Dilekce/EKLER/` zorunlu; kopya (taşıma yok), `Ek-<no> <ad>` adlandırma, md5 kontrolü. Kural AGENTS.md ASAMA 7 ve revizyon-ajani SKILL'de.

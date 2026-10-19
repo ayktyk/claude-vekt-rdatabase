@@ -32,6 +32,15 @@
     "arguman": {
       "type": "http",
       "url": "https://mcp.arguman.ai/mcp"
+    },
+    "isbu-ofis": {
+      "command": "python",
+      "args": [
+        "scripts/isbu_mcp.py"
+      ],
+      "env": {
+        "PYTHONIOENCODING": "utf-8"
+      }
     }
   }
 }

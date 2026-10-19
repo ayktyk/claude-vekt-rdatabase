@@ -149,7 +149,8 @@ def test_yavas_esitleme_kotasi_ayni_gun_tekrarinda_asilmaz():
     assert ue.bugun_sinir_alindi_mi([{"sinir": True, "zaman": "2026-10-09T12:00:00"}], "2026-10-09")
 
 
-def test_esitleme_adaylari_oncelikli_ve_tekrarsiz():
+def test_esitleme_adaylari_oncelikli_ve_tekrarsiz(monkeypatch):
+    monkeypatch.setattr(ue, "ALINAN_DOSYA_TURLERI", None)
     gecmis = [{"kabul": True, "birim": "İstanbul 8. İcra Dairesi", "dosyaNo": "2099/39152"}]
     onbellek = _onbellek()
     onbellek["hareketler"]["hareketler"].append(
@@ -159,7 +160,7 @@ def test_esitleme_adaylari_oncelikli_ve_tekrarsiz():
             {"mahkeme": "Kartal 1. Sulh Hukuk Mahkemesi", "esasNo": "2098/9", "portal": "vatandas"}]
     adaylar = ue.adaylar(onbellek, eski, gecmis)
     assert [(a["dosyaNo"], a["kaynak"]) for a in adaylar] == [
-        ("2099/39171", "hareket"), ("2099/265", "hareket"), ("2099/123", "hareket"), ("2099/5", "eski-klon")]
+        ("2099/39171", "hareket"), ("2099/265", "hareket"), ("2099/5", "eski-klon")]  # 2099/123 ağır ceza: atlanır
 
 
 def test_pano_raporu_dikkat_durusma_ve_kapsam(tmp_path):
@@ -209,3 +210,61 @@ def test_cmk_listesi_excele_almaz_ve_panoda_isaretler(tmp_path):
     istinaf = next(s for s in metin.splitlines() if "İstinaf Formu" in s)
     assert "CMK" in istinaf
     assert uo.cmk_listesi(tmp_path / "yok.md") == []
+
+
+def test_esitleme_adaylari_az_evrakli_once(monkeypatch):
+    monkeypatch.setattr(ue, "ALINAN_DOSYA_TURLERI", None)
+    """Avukat talimatı (2026-10-10): az evraklı dosyalardan başla; evrak sayısı bilinmeyenler sona."""
+    eski = [{"mahkeme": "İstanbul 13. İş Mahkemesi", "esasNo": "2099/265", "portal": None, "evrak": 40},
+            {"mahkeme": "Bakırköy 12. Asliye Hukuk Mahkemesi", "esasNo": "2099/5", "portal": None, "evrak": 3},
+            {"mahkeme": "Kartal 2. Asliye Hukuk Mahkemesi", "esasNo": "2099/7", "portal": None, "evrak": 12}]
+    adaylar = ue.adaylar({"hareketler": {"hareketler": [
+        {"birimAdi": "İstanbul 8. İcra Dairesi", "dosyaNo": "2099/1", "dosyaTuru": "İcra Dosyası", "yerelde": False}]}},
+        eski, [])
+    assert [a["dosyaNo"] for a in adaylar] == ["2099/5", "2099/7", "2099/265", "2099/1"]
+
+
+def test_esitleme_adaylari_agir_ceza_atlanir(monkeypatch):
+    monkeypatch.setattr(ue, "ALINAN_DOSYA_TURLERI", None)
+    """Avukat talimatı (2026-10-11): ağır ceza dosyaları şimdilik atlanır; asliye ceza aday kalır."""
+    eski = [{"mahkeme": "Gaziosmanpaşa 3. Ağır Ceza Mahkemesi", "esasNo": "2099/9", "portal": None, "evrak": 2},
+            {"mahkeme": "Küçükçekmece 6. Asliye Ceza Mahkemesi", "esasNo": "2099/8", "portal": None, "evrak": 5}]
+    adaylar = ue.adaylar({"hareketler": {"hareketler": [
+        {"birimAdi": "İstanbul 4. Ağır Ceza Mahkemesi", "dosyaNo": "2099/3", "dosyaTuru": "Ceza Dava Dosyası", "yerelde": False}]}},
+        eski, [])
+    assert [a["dosyaNo"] for a in adaylar] == ["2099/8"]
+
+
+def test_esitleme_adaylari_yalniz_hukuk(monkeypatch):
+    """Tür süzgeci (2026-10-11 yalnız hukuk talimatı; 2026-10-12'den beri süzgeç kapalı, icra da alınır)."""
+    monkeypatch.setattr(ue, "ALINAN_DOSYA_TURLERI", frozenset({"Hukuk Dava Dosyası"}))
+    eski = [{"mahkeme": "Küçükçekmece 6. Asliye Ceza Mahkemesi", "esasNo": "2099/8", "portal": None, "evrak": 1,
+             "tur": "Ceza Dava Dosyası"},
+            {"mahkeme": "Kartal 2. Asliye Hukuk Mahkemesi", "esasNo": "2099/7", "portal": None, "evrak": 12,
+             "tur": "Hukuk Dava Dosyası"}]
+    adaylar = ue.adaylar({"hareketler": {"hareketler": [
+        {"birimAdi": "İstanbul 8. İcra Dairesi", "dosyaNo": "2099/1", "dosyaTuru": "İcra Dosyası", "yerelde": False}]}},
+        eski, [])
+    assert [a["dosyaNo"] for a in adaylar] == ["2099/7"]
+
+
+def test_gunluk_tavan_anayasa_sinirini_asamaz(monkeypatch):
+    bugun = "2099-01-01"
+    gecmis = [{"kabul": True, "zaman": f"{bugun}T09:00:00"}] * 4
+    monkeypatch.setattr(ue, "kayitlar", lambda: gecmis)
+    monkeypatch.setattr(ue, "adaylar", lambda *a: [])
+    monkeypatch.setattr(ue.uo, "onbellek_oku", lambda: {})
+    monkeypatch.setattr(ue, "eski_klonlar", lambda: [])
+    assert ue.bugun_kalan(gecmis, bugun, min(20, ue.ANAYASA_TAVANI)) == 4
+    assert ue.bugun_kalan(gecmis, bugun, min(6, ue.ANAYASA_TAVANI)) == 2
+
+
+def test_eslesme_tablosu_cmk_klasor_kodunu_okur(tmp_path):
+    """CMK dosyaları 02CMK/CMK-<no> … klasöründedir (avukat talimatı 2026-10-13); kod klasör sütunundan okunur."""
+    yol = tmp_path / "eslesme.md"
+    yol.write_text("\n".join([
+        "## A) KESİN EŞLEŞMELER", "| Manuel Klasör | UYAP Klasörü | Müvekkil (Rolümüz) | Karşı Taraf |", "|---|---|---|---|",
+        "| 02CMK/... CMK-15 UYUŞTURUCU ÖRNEK | GOP 4. Ağır Ceza 2099-143 | K. M. (CMK sanık müdafii) | — |",
+        "| 02CMK/CMK-150 BAŞKA | GOP 1. Ağır Ceza 2099-7 | L. N. (CMK sanık müdafii) | — |"]), encoding="utf-8")
+    es = uo.eslesme_satirlari(yol)
+    assert [(e["klasor"], e["no"], e["cmk"]) for e in es] == [("CMK-15", "2099/143", True), ("CMK-150", "2099/7", True)]

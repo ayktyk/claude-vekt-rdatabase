@@ -390,6 +390,10 @@ kullanmalidir.
 
 ---
 
+## 10A. YASAK: Muvekkilden mesafe koyan kaliplar (buro kurali 2026-10-19)
+
+"davacının beyanına göre", "müvekkilin iddiasına göre", "davacının bilgisine göre", "davacı … olduğunu ileri sürmektedir" gibi müvekkilden mesafe koyan kalıplar dilekçede KULLANILMAZ. Olgu dogrudan vekilin iddiasi olarak yazilir, yanina ispat araci konur. Belge/beyan ayrimi yalniz esLik dosyasinda (MUVEKKIL BEYANI damgasi). Ayrinti: `dilekce-yazim-kurallari.md` §4 BURO KURALI.
+
 ## 11. Cumle Yapisi ve Uzunluk
 
 | Metrik | Gozlem |

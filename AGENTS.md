@@ -788,20 +788,44 @@ kayda veya repoya yazılmaz.
 - `durusmalar` ve `icra` gibi okumalar UYAP'a canlı gider ve `UYAP_ISLEM_SINIRLI` dönebilir. Canlı okuma günde bir
   kez yapılır, sonucu saklanır; sınır uyarısı alınan gün yeniden denenmez.
 - **Büyük eşitleme** (avukat talimatı 2026-10-09: "hepsini bir yerde topla ve büyük bir eşitleme yapalım"): uygulamanın
-  takip etmediği UYAP dosyaları uygulamanın kendi ağacına (`Aktif Davalar/YargiPRO/YargiPRO`) alınır. Aday listesi
+  takip etmediği UYAP dosyaları uygulamanın kendi ağacına (`Aktif Davalar/YargiPRO`) alınır. Aday listesi
   bitene kadar her gün `python scripts/uyap_esitle.py calistir` günlük kotayı işler (`plan` kalan aday ve kotayı
-  gösterir; kayıt `Aktif Davalar/00-uyap-esitleme-kaydi.jsonl`). Eski dava-cli ağacı (`Aktif Davalar/YargiPRO/Avukat UYAP`,
-  Ağustos 2026) silinmez; avukat onayıyla arşivlenir. Vatandaş portalı dosyaları uygulamada vatandaş oturumu açıkken alınır.
+  gösterir; kayıt `Aktif Davalar/00-uyap-esitleme-kaydi.jsonl`). Eski dava-cli ağacı (Ağustos 2026) silinmedi; 2026-10-12'de
+  `Aktif Davalar/0ESKİ/YargiPRO-eski-agac-2026-10-12` altına arşivlendi. Vatandaş portalı dosyaları uygulamada vatandaş oturumu açıkken alınır.
+  2026-10-12 avukat onayı: önce uygulama listesinde olup hiç inmeyen dosyalar (`klonla`), sonra güncelleme (`esitle`:
+  son eşitlemeden sonra hareketli → eksik evraklı → 30 günden eski eşitlenen açık dosya; karara çıkmış/kapalı yalnız
+  hareketle); ikisi aynı günlük kotadan (8) sayılır. Arabuluculuk, ağır ceza ve `ATLANAN_DOSYALAR` alınmaz;
+  vatandaş portalı dosyaları güncellenmez (avukat talimatı 2026-10-13, `ALINAN_PORTALLAR`).
+  `scripts/uyap_surekli.ps1` (`uyap_esitle.py surekli`) günler boyunca sürer, gün sonunda `uyap_duzen bagla/kopyala`
+  çalıştırır, her durmada biter; çıktı `Aktif Davalar/00-uyap-surekli-cikti.log`.
 - **Toplu klonlama ve eşitleme yavaş yapılır** (avukat talimatı 2026-10-09: "uzun da sürse dikkatli yavaşça indir";
-  aşırı otomatik indirme UYAP erişim yasağına yol açabilir): aynı anda tek dosya, iki dosya arası 10-15 dakika, günde
+  aşırı otomatik indirme UYAP erişim yasağına yol açabilir): aynı anda tek dosya, iki dosya arası 20-30 dakika, günde
   en çok 8 dosya. Başarı dışındaki HER sonuçta (UYAP hatası, zaman aşımı, tanınmayan yanıt) o günkü indirme durur,
   yeniden deneme yapılmaz; yalnız uygulamanın yerel girdi hatası (INVALID_INPUT) o dosyayı atlatır.
 - **UYAP doğrulama (CAPTCHA) kilidi:** UYAP doğrulama isterse toplu iş KİLİTLENİR. Avukat doğrulamayı Yargı PRO
   uygulamasında açılan pencerede tamamlar; eşitleme yalnız avukatın açık onayıyla
   (`python scripts/uyap_esitle.py devam --not "<onay>"`) yeniden başlar. 2026-10-09'da 15 dosya/gün hızında, üç saat
   içinde doğrulama istendi; koşucu bu kodu tanımadığı için 14 kez daha denedi (ders: `dersler/sistem.md`).
+- **Klasör düzeni: Yargı PRO ↔ Aktif Davalar** (avukat talimatı 2026-10-11: "kopyala yap bağlama da yap, işi şansa
+  bırakmayalım"). UYAP evrakının tek kaynağı uygulamanın ağacıdır (`Aktif Davalar/YargiPRO`; uygulama ayarı
+  `downloadBaseDir` = `Aktif Davalar`, `YargiPRO` klasörünü uygulama kendisi açar; 2026-10-12'de iç içe iki
+  `YargiPRO` tek seviyeye indirildi, ayar bu yüzden bir üst klasörü gösterir ve geri değiştirilmez). Bu ağaçtan klasör
+  **taşınmaz**: uygulama klonu klasör yolundan tanır, taşınan dosyayı kaybeder ve yeniden indirmeye aday yapar. Dava
+  klasörüne yalnız kopya girer: `python scripts/uyap_duzen.py kopyala --uygula` bağlı her klonu `<dava>/UYAP/` altına
+  tek yönlü kopyalar (silme yok) ve `<dava>/00-UYAP-KAYNAK.md` yazar. Bağlar `Aktif Davalar/00-UYAP-DAVA-BAGLARI.json`
+  dosyasındadır (`uyap_duzen.py bagla --uygula`; kaynak: dava klasöründe bulunan klon + eşleşme tablosu A; B ve
+  çift kodlu klasör teyide düşer). Ağaç dışına düşmüş klon `uyap_duzen.py toparla --uygula` ile ağaçtaki yerine
+  kopyalanır; uygulama onu yeniden indirmeden tanır (2026-10-11 denemesi). **Bir davayla çalışırken iki yer birlikte
+  okunur:** dava klasörü ve `00-UYAP-KAYNAK.md`'de yazan Yargı PRO klasörü; kopya eskiyse önce `kopyala` çalıştırılır.
+  Eşitleme ve klonlamadan sonra `kopyala` yeniden çalıştırılır.
 - **CMK listesi:** avukatın CMK olarak bildirdiği dosyalar `Aktif Davalar/00-CMK-DOSYALARI.md` tablosundadır; iş takip
   Excel'ine girmez, panoda "CMK" diye işaretlenir ve takip edilmeye devam eder.
+- **CMK klasörü** (avukat talimatı 2026-10-13: "cmk dosyaları cmk klasöründe olacak"): CMK dosyasının büro çalışma
+  klasörü `Aktif Davalar/02CMK/CMK-<no> <SUÇ> <SANIK>/`'dır; CMK dosyası için kökte `2026-0xx` dava-id klasörü açılmaz,
+  ASAMA çıktıları bu klasöre yazılır. Eşleşme tablosunda klasör sütunu `02CMK/<klasör adı>` yazılır;
+  `uyap_ortak.klasor_kodu` `CMK-<no>` kodunu okur, `uyap_duzen` bu klasörleri dava klasörü sayar (bağ anahtarı
+  `02CMK/<klasör adı>`), `kopyala` UYAP kopyasını `<CMK klasörü>/UYAP/` altına koyar. Dosya ayrıca
+  `00-CMK-DOSYALARI.md`'ye eklenir ki iş takip Excel'ine girmesin.
 
 ### Yalnız istenince çalışan beceriler
 
@@ -953,6 +977,28 @@ Sira **baglayicidir**:
 5. **Advanced Briefing** (avukat tercihleri: ton, risk toleransi, olmazsa olmaz
    talepler) — protokolun **Adim 24**'udur, en sonda kalir.
 
+**BÜRO KURALI — Şirket tarafsa MERSİS kaydı (2026-10-19, avukat talimatı):** Davada müvekkil,
+karşı taraf veya olayda adı geçen bir şirket varsa, olayın hukuki iskeleti kurulurken
+avukattan o şirketin **MERSİS kaydı** (firma bilgileri + yetkililer + ticari temsilciler)
+istenir; elde edilene kadar şirket adına hareket eden kişinin sıfatı **varsayım** sayılır
+ve briefing'de `EKSIK — MERSIS kaydi` olarak Avukatın Karar Noktalarına taşınır.
+Kayıt gelince sağlam adımlar:
+  (a) Unvan, MERSİS no, vergi no/dairesi, ticaret sicil müdürlüğü + sicil no, merkez adresi,
+      elektronik tebligat adresi, firma türü (tek ortaklı vb.) birebir okunur; dilekçe
+      başlığındaki taraf bloğu ve yetki (merkez adresi → HMK 6/1) buna göre kurulur.
+  (b) Yetkililer tablosu (ad, yetki, yetki şekli: münferiden/müştereken, süre) okunur.
+      Yazışmada/işlemde muhatap olan kişi yetkili ise beyanları şirketin beyanıdır
+      (TTK 629/1 → 371/1 Ltd.; AŞ'de 371). Yetkili değilse temsil/tacir yardımcılığı
+      (TTK 547 vd.) ve görünürlük ayrıca araştırılır; SGK/tanık yolu ancak o zaman açılır.
+  (c) Görselde görülmeyen hiçbir şey yazılmaz: kapalı "Ticari Temsilciler" bölümü varsa
+      "tek yetkili" denmez; ortaklık yapısı görünmüyorsa "ortak" denmez.
+  (d) Kayıt `BELGELER/` altına, dilekçe ekiyse `EKLER/Ek-<no> MERSIS kaydi …` olarak
+      kopyalanır (md5); delillere MERSİS + ilgili sicil dosyasının celbi eklenir.
+  (e) Konkordato/iflas ve firma durumu (aktif/terkin/tasfiye) kontrol edilir; terkin veya
+      tasfiye taraf ehliyetini, konkordato/iflas takip ve dava yolunu etkiler.
+Ders: 2026-054'te muhatap "şantiye sorumlusu" (belgesiz avukat beyanı) sanıldı; MERSİS'te
+şirketin münferiden temsile yetkili müdürü çıktı ve ana risk (husumet savunması) kapandı.
+
 **Tercih sorulmadan once olayin hukuki iskeleti kurulur; sira tersine cevrilemez.**
 
 Protokol kaynagi: Dr. Halil Polat, *Teori ve Pratikte Hukuk Nosyonu Cilt I*,
@@ -1001,6 +1047,13 @@ yasanan Zeytinburnu-Cağlayan/Bakirkoy karisikligi ornegi).
 Detay: `@ajanlar/usul-uzmani/SKILL.md` -> "Yetkili Mahkeme —
 Adliye Esleme Protokolu" bolumu.
 
+**BÜRO KURALI — Görev/yetki güncellik kontrolü (2026-10-19):** Kanun maddesiyle yetinilmez;
+HSK Genel Kurulu / Birinci Daire yargı çevresi, kuruluş, kapatma, birleştirme kararları
+(hsk.gov.tr, Resmî Gazete) ve UYAP duyuruları güncel olarak taranır. Usul raporunda
+"Görev/yetki güncellik kontrolü" satırı (kaynak + tarih) zorunludur. Ders: 2026-054'te
+dilekçe kapatılmış "Bakırköy ATM"ye yazılmıştı (HSK GK 18.02.2026/282; İstanbul ATM'leri
+tek çatı, UYAP'ta İSTANBUL ADLİYESİ); avukat yakaladı.
+
 ### ASAMA 4 - 5 Ajan Stratejik Analiz
 4A Davaci Avukat + 4B Davali Avukat + 4C Bilirkisi + 4D Hakim paralel
 calisir, 4E Sentez bunlari birlestirir ve dilekce yazim rehberi uretir.
@@ -1039,6 +1092,7 @@ Detay: `@ajanlar/savunma-simulatoru/SKILL.md`.
 
 ### ASAMA 7 - Revizyon Ajani (Dilekce v2 NIHAI)
 Tetikleyici: `revize et: [dava-id]` veya ASAMA 6 sonrasi.
+**EKLER klasörü (BÜRO KURALI 2026-10-19):** Nihai belgenin EKLER bölümünde gösterilen her belge, belgenin yanındaki `EKLER/` klasörüne (`03-Sentez-ve-Dilekce/EKLER/`) KOPYALANIR; asıl dosya `04-Muvekkil-Belgeleri/` altında kalır, taşınmaz. Dosya adı `Ek-<no> <kısa ad>.<uzantı>` biçiminde, UYAP yüklemesinde sorun çıkmaması için Türkçe karakter kullanılmadan yazılır (ör. `Ek-6 Rektorluk fesih yazisi 18.03.2025.pdf`). Arabuluculuk son tutanağı için e-imzalı/barkodlu UDF kullanılır. Kopyalardan sonra sağlama (md5) asıllarla karşılaştırılır. Ek listesi değişirse klasör aynı anda güncellenir. Elde olmayan ek (ör. "sunulacak" e-posta) klasöre konmaz, eşlikte açık iş olarak yazılır. Amaç: dava açılırken evrak aranmaz. **UYAP PAKETİ (BÜRO KURALI 2026-10-20):** UYAP'a dilekçeyle en fazla 10 ek yüklenebilir; EKLER klasörü bu sınıra göre yükleme paketi olarak kurulur. Her ek numarası TEK dosyadır: aynı ek numarasındaki birden çok görsel/PDF tek PDF'te birleştirilir (A4, `fitz`/PyMuPDF), dilekçe "Ek-3/7" gibi alt numarayla atıf yapıyorsa her sayfanın üstüne o etiket basılır ve sayfa sırası atıf sırasıyla aynı tutulur. Karekodlu/e-imzalı UDF ve e-imzalı belgeler birleştirilmez, değiştirilmeden konur (cmp ile kontrol). Ek numarası sayısı 10'u aşarsa dilekçenin EKLER listesi mantıklı gruplarla (ör. faturalar, yazışmalar, banka kayıtları) yeniden numaralandırılır ve metindeki tüm Ek atıfları buna göre güncellenir; bu bir metin değişikliğidir, K2'den geçer. Tekil md5'li kopyalar `EKLER/_tekil/` altında kalır (UYAP'a yüklenmez); `EKLER/00-EK LISTESI.txt` yükleme listesini (dosya adı + sayfa içeriği) gösterir. Birleştirilen PDF'lerden en az biri (atıf yapılan bir sayfa) görsel olarak açılıp kontrol edilir. İlk uygulama: 2026-054 (24 dosya → 7).
 **Nihai cikti:** temiz `dilekce-v2.md` (UYAP'a gidecek metin; SENTINEL, Kaynak Doğrulama
 tablosu, aleyhe beyanı, karar noktaları ve denetim notu İÇERMEZ) + eşlik dosyası
 `dilekce-v2-kaynak-dogrulama.md` (SENTINEL + Kaynak Doğrulama tablosu + aleyhe beyanı +
