@@ -46,4 +46,12 @@ BRAINSTORMING.md
 .case_review_*/
 
 # Avukat-revize format referansları — gerçek müvekkil adı ve T.C. kimlik no içerir (KVKK, 2026-10-09)
-sablonlar/FORMAT-REFERANS-*.html
+sablonlar/FORMAT-REFERANS-*
+
+# Yerel / makineye özel (2026-10-23) — depo herkese açık
+.tmp/
+*.log
+config/paths.local.json
+.claude/settings.local.json
+# Gerçek dilekçe örneği (T.C. no, adres içerir) — yerelde kalır
+2.udf
