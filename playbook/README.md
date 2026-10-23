@@ -80,6 +80,13 @@ tazminat, ZMSS, Sigorta Tahkim, Ticaret Mahkemesi).
 | 14 | Is kazasi (maddi-manevi tazminat) | `is-kazasi.md` | ✅ YAZILDI |
 | 15 | Miras (reddi miras / hukmen ret) | `miras-ret.md` | ✅ YAZILDI |
 
+### Surec haritalari (`playbook/surec/`, 2026-10-20)
+
+- `_asama-modeli.md` — tum dava turleri icin ORUNTU:ASAMA kodu (ISC/HMK/ICRA/CMK/AILE/GAYR/TAHK/IYUK/ARB) ve portfoy gorunumu kurali.
+- `iscilik-alacaklari-dava-sureci.md` — iscilik davasinin tensipten istinaf sonucuna akisi (A0–A13), islah / HMK 109-4 karar agaci, Kaynak Dogrulama Tablosu (mevzuat + ictihat MCP ile dogrulandi).
+
+Bir dosyanin "hangi asamada, siradaki islem ne" sorusu bu dosyalardan cevaplanir; playbook dava ONCESINI, surec haritasi dava SONRASINI kodlar.
+
 ### Dogrulanmis Kunye Cekirdegi (tekrar kullanilabilir — 2026-07-23/24)
 
 Bu documentId'ler tam metin acilip alintilar birebir dogrulandi. Yeni dosyada

@@ -291,9 +291,14 @@ def parse_md_to_paras(md_text: str) -> List[Para]:
         if m:
             label = m.group(1).strip()
             value = m.group(2)
+            # Avukat bicimi (2026-10-20): etiket kalin+altcizili, sekme ve
+            # iki nokta da altcizili; uzun etikette (>= 12 kr, orn. HARCA
+            # ESAS DEGER) sekme yok, yalniz altcizili ":".
             runs: List[InlineRun] = [InlineRun(label, bold=True, underline=True)]
-            runs.append(InlineRun("\t"))  # tab separator
-            runs.append(InlineRun(": "))
+            if len(label) < 12:
+                runs.append(InlineRun("\t", underline=True))  # tab separator
+            runs.append(InlineRun(":", underline=True))
+            runs.append(InlineRun(" "))
             runs.extend(parse_inline(value))
             paras.append(Para(runs=runs, alignment=3))
             i += 1
@@ -365,8 +370,14 @@ def parse_md_to_paras(md_text: str) -> List[Para]:
         # keep alignment=3, preserve leading spacing (so Av./name/address
         # lines inside VEKILLERI/DAVACILAR blocks stay left-indented).
         if line.startswith("   "):
+            # Taraf blogu adres satiri degerin altina hizali (25 bosluk,
+            # avukat bicimi 2026-10-20); daha kisa girinti genisletilir.
+            cont = line.rstrip()
+            lead = len(cont) - len(cont.lstrip(" "))
+            if 3 <= lead < 25:
+                cont = " " * 25 + cont.lstrip(" ")
             paras.append(Para(
-                runs=parse_inline(line.rstrip()),
+                runs=parse_inline(cont),
                 alignment=3,
             ))
             i += 1
