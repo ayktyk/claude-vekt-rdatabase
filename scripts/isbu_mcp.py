@@ -138,7 +138,10 @@ def isbu_oneri(tur: str, external_ref: str, dava_id: str, payload: dict, ozet: s
     tur: case_upsert | hearing_upsert | deadline_upsert | diary_add | enforcement_upsert | task_add | ...
     external_ref: tekrar güvenliği anahtarı (aynı ref için bekleyen öneri güncellenir). kaynak: uyap | kalkan |
     icra_ozet | asistan. `gonder=false` (varsayılan) yalnız şemaya göre doğrulanmış öneriyi gösterir; avukat
-    görmeden `gonder=true` kullanılmaz."""
+    görmeden `gonder=true` kullanılmaz.
+    SADE STANDART (20.10.2026, docs/isbu-oneri-sade-standart.md): ozet = Excel satırı gibi tek satır
+    ("Müvekkil – Karşı taraf · Mahkeme No · Konu"), gerekce = "Sıradaki iş: … (kaynak)"; dış kimlik, KALKAN#,
+    tür/betik adı, önbellek/klon gibi sistem dili yasak — ihlalde öneri reddedilir (isbu_sade.denetle_oge)."""
     import isbu_esitle
     try:
         oge = isbu_esitle.oge(tur, external_ref, dava_id, payload, ozet, gerekce, kaynak)

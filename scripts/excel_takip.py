@@ -334,6 +334,9 @@ def main(argv: list[str]) -> int:
     try:
         print(ozet(uygula(yol, args.kuru), args.kuru))
         return 0
+    except ImportError as hata:  # win32com yalnız Windows'ta (Excel COM)
+        print(f"HATA: Excel COM yalnız Windows'ta çalışır; bu adımı Windows PC'de çalıştırın ({hata})", file=sys.stderr)
+        return 1
     except (OSError, ValueError) as hata:
         print(f"HATA: {hata}", file=sys.stderr)
         return 1

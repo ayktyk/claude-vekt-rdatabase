@@ -18,5 +18,15 @@
     "darwin": "",
     "windows": "C:\\Users\\user\\AppData\\Local\\Programs\\dava-desktop-app\\resources\\bin\\yargipro.cmd"
   },
-  "_not_yargipro_cli": "Yargı PRO masaüstü uygulamasının komut satırı aracı (Ayarlar > Komut satırı). Yalnız uygulama açıkken çalışır. Mac yolu uygulamanın aynı ekranından kopyalanıp 'darwin' anahtarına yazılır. Ortam değişkeni YARGIPRO_CLI bu dosyanın önündedir."
+  "_not_yargipro_cli": "Yargı PRO masaüstü uygulamasının komut satırı aracı (Ayarlar > Komut satırı). Yalnız uygulama açıkken çalışır. Mac yolu uygulamanın aynı ekranından kopyalanıp 'darwin' anahtarına yazılır. Ortam değişkeni YARGIPRO_CLI bu dosyanın önündedir.",
+  "buro_excel": {
+    "dosya_adi": "VEGA HUKUK (OneDrive).xlsx"
+  },
+  "_not_buro_excel": "Avukatın iş takip Excel'inin yerel kopyası: <data_root>/dosya_adi (paths.buro_excel). Canlı nüsha OneDrive'da; excel_indir.py ya da isbu_excel.py bu kopyayı yeniler. Makineye özel yol gerekirse config/paths.local.json içine buro_excel.<platform> yazılır ya da BURO_EXCEL ortam değişkeni verilir.",
+  "buro_excel_onedrive": {
+    "link": "",
+    "download": "",
+    "paylasim": "",
+    "_not": "GERÇEK DEĞERLER BURADA DEĞİL: config/paths.local.json (gitignore). Depo herkese açık; paylaşım linki müvekkil listesine erişim verir. Excel YALNIZ ortak (Mücahit'le) dosyaları tutar; isbu-ofis tüm davalar; Excel'de olmamak ret sebebi değildir (avukat 22.10.2026)."
+  }
 }

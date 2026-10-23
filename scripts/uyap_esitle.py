@@ -257,9 +257,14 @@ def klonla(a: dict) -> tuple[dict, int]:
     kimlik = ("esit-" if esitle else "klon-") + hashlib.sha1(
         f"{a['birim']}|{a['dosyaNo']}|{date.today() if esitle else ''}".encode("utf-8")).hexdigest()[:16]
     yol = str(yargipro_cli())
-    hedef = [a["caseRef"]] if esitle else ["--dosya-no", a["dosyaNo"], "--birim", a["birim"]]
+    # 2026-10-20: araç her iki komutta caseRef istiyor (`--dosya-no/--birim` → INVALID_INPUT "caseRef zorunlu")
+    a["caseRef"] = a.get("caseRef") or uo.caseref_yap(a["birim"], a["dosyaNo"], a.get("portal") or "avukat")
+    # yeni dosya uygulamanın yerel listesinde yoksa "cozum/1 bulunamadi" verir; `--liste <portal>` portal listesinden
+    # çözer (22.10.2026: yeni bir ATM dosyası bu bayrakla indi)
+    hedef = [a["caseRef"]] if esitle else [a["caseRef"], "--liste", a.get("portal") or "avukat"]
     onceki = _is_kimlikleri()
-    surec = subprocess.Popen(["cmd", "/c", yol, tip, *hedef, "--idempotency-key", kimlik], stdin=subprocess.DEVNULL,
+    komut = ["cmd", "/c", yol] if yol.lower().endswith(".cmd") else [yol]  # macOS: CLI doğrudan çalışır
+    surec = subprocess.Popen([*komut, tip, *hedef, "--idempotency-key", kimlik], stdin=subprocess.DEVNULL,
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     bas = time.time()
     try:
@@ -281,7 +286,10 @@ def klonla(a: dict) -> tuple[dict, int]:
         return {"_zaman_asimi": "çağrı süresi aşıldı; iş uygulamada sürüyor olabilir"}, -2
     finally:
         if surec.poll() is None:
-            subprocess.run(["taskkill", "/PID", str(surec.pid), "/T", "/F"], capture_output=True)
+            if sys.platform.startswith("win"):
+                subprocess.run(["taskkill", "/PID", str(surec.pid), "/T", "/F"], capture_output=True)
+            else:
+                surec.kill()
 
 
 def _kaydet(satir: dict) -> None:
@@ -297,9 +305,10 @@ def son_deneme(gecmis: list[dict]) -> datetime | None:
 
 
 def denenmis_gecersizleri_cikar(liste: list[dict], gecmis: list[dict]) -> list[dict]:
-    """Uygulamanın girdi hatası (INVALID_INPUT) verdiği dosya her gün yeniden denenmez; avukata raporlanır."""
+    """Uygulamanın girdi hatası (INVALID_INPUT) verdiği dosya her gün yeniden denenmez; avukata raporlanır.
+    caseRef'siz (2026-10-20 öncesi, eski parametreyle) alınan girdi hataları sayılmaz: o dosyalar yeniden denenir."""
     gecersiz = {anahtar(k.get("birim"), k.get("dosyaNo")) for k in gecmis
-                if uo.hata_kodu(k.get("yanit") or {}) in uo.YEREL_HATA_KODLARI}
+                if uo.hata_kodu(k.get("yanit") or {}) in uo.YEREL_HATA_KODLARI and k.get("caseRef")}
     return [a for a in liste if anahtar(a["birim"], a["dosyaNo"]) not in gecersiz]
 
 

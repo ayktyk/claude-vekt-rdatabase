@@ -74,9 +74,11 @@ def anahtar_oku(env_yollari: list[Path] | None = None) -> str:
     raise IsbuHata(f"{ANAHTAR_ADI} bulunamadı (ortam değişkeni, .env veya config/.env)")
 
 
-def request_id(kind: str, external_ref: str, payload: dict, case_ref: dict | None = None) -> str:
-    """Deterministik kimlik: 'isbu-' + sha256(kanonik içerik)[:40] (45 karakter; sözleşme 8-100)."""
-    kanonik = json.dumps({"k": kind, "r": external_ref, "c": case_ref or {}, "p": payload},
+def request_id(kind: str, external_ref: str, payload: dict, case_ref: dict | None = None, tuz: str = "") -> str:
+    """Deterministik kimlik: 'isbu-' + sha256(kanonik içerik)[:40] (45 karakter; sözleşme 8-100).
+    `tuz`: aynı payload'ı farklı metinle (ör. sade özet) yeniden göndermek için; sunucu aynı request_id'yi
+    idempotent sayıp içeriği geri yazmaz, bekleyen öneri ancak yeni kimlikle güncellenir."""
+    kanonik = json.dumps({"k": kind, "r": external_ref, "c": case_ref or {}, "p": payload, **({"t": tuz} if tuz else {})},
                          ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     return "isbu-" + hashlib.sha256(kanonik.encode("utf-8")).hexdigest()[:40]
 

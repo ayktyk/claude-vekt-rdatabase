@@ -93,9 +93,17 @@ def test_ara_bekleme_onceki_calistirmadaki_son_denemeden_sayilir():
 
 def test_gecersiz_girdi_alan_dosya_yeniden_denenmez():
     gecmis = [{"birim": "Bakırköy 34. İş Mahkemesi", "dosyaNo": "2099/242", "kod": 2, "kabul": False,
-               "yanit": {"hata": {"code": "INVALID_INPUT"}}}]
+               "caseRef": "c1.x", "yanit": {"hata": {"code": "INVALID_INPUT"}}}]
     liste = [{"birim": "Bakırköy 34. İş Mahkemesi", "dosyaNo": "2099/242"}, {"birim": "X 1. İş Mahkemesi", "dosyaNo": "2099/1"}]
     assert [a["dosyaNo"] for a in ue.denenmis_gecersizleri_cikar(liste, gecmis)] == ["2099/1"]
+
+
+def test_caserefsiz_eski_girdi_hatasi_yeniden_denenir():
+    """2026-10-20: araç caseRef zorunlu tuttuğu için eski parametreyle alınan INVALID_INPUT kalıcı ret sayılmaz."""
+    gecmis = [{"birim": "Bakırköy 34. İş Mahkemesi", "dosyaNo": "2099/242", "kod": 2, "kabul": False,
+               "yanit": {"hata": {"code": "INVALID_INPUT"}}}]
+    liste = [{"birim": "Bakırköy 34. İş Mahkemesi", "dosyaNo": "2099/242"}]
+    assert [a["dosyaNo"] for a in ue.denenmis_gecersizleri_cikar(liste, gecmis)] == ["2099/242"]
 
 
 def test_gece_yarisindan_sonra_biten_calisma_ayni_sabah_surer():

@@ -8,7 +8,9 @@ Windows yoluna bagli kalmaz; ayni kod Windows'ta da macOS'ta da calisir.
 
 Cozumleme onceligi:
   1) Ortam degiskeni HUKUK_BUROSU_ROOT (varsa her seyi ezer)
-  2) config/paths.json -> data_root[<platform>]
+  2) config/paths.local.json -> data_root[<platform>]  (gitignore; makineye ozel deger ve
+     paylasim linkleri burada durur, depo herkese acik oldugu icin commit edilmez)
+  3) config/paths.json -> data_root[<platform>]
 
 Platform anahtarlari: 'windows', 'darwin' (macOS), 'linux'.
 
@@ -33,6 +35,8 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 _CONFIG = REPO_ROOT / "config" / "paths.json"
+_YEREL_CONFIG = REPO_ROOT / "config" / "paths.local.json"  # gitignore: makineye ozel deger, gizli linkler
+VARSAYILAN_BURO_EXCEL = "VEGA HUKUK (OneDrive).xlsx"
 
 
 def _platform_key() -> str:
@@ -43,10 +47,23 @@ def _platform_key() -> str:
     return "linux"
 
 
+def _birlestir(taban: dict, ust: dict) -> dict:
+    """ust'teki anahtarlar tabanin uzerine yazilir; ic ice sozlukler alan alan birlesir."""
+    for k, v in ust.items():
+        if isinstance(v, dict) and isinstance(taban.get(k), dict):
+            _birlestir(taban[k], v)
+        else:
+            taban[k] = v
+    return taban
+
+
 def _load_cfg() -> dict:
-    if _CONFIG.exists():
-        return json.loads(_CONFIG.read_text(encoding="utf-8"))
-    return {}
+    """config/paths.json + (varsa) config/paths.local.json. Yerel dosya commit edilmez; iki makine
+    ayni paths.json'u paylasirken her biri kendi yolunu ve gizli linkini yerelde tutar."""
+    cfg = json.loads(_CONFIG.read_text(encoding="utf-8")) if _CONFIG.exists() else {}
+    if _YEREL_CONFIG.exists():
+        _birlestir(cfg, json.loads(_YEREL_CONFIG.read_text(encoding="utf-8")))
+    return cfg
 
 
 def data_root() -> Path:
@@ -134,6 +151,19 @@ def dava_dir(dava_id: str) -> Path:
         adlar = ", ".join(p.name for p in adaylar)
         raise ValueError(f"'{dava_id}' birden cok dava klasoruyle eslesiyor: {adlar} — tam adi verin")
     return adaylar[0] if adaylar else tam
+
+
+def buro_excel() -> Path:
+    """Avukatın iş takip Excel'inin yerel kopyası (canlı nüsha OneDrive'da; excel_indir.py buraya yazar).
+    Öncelik: env BURO_EXCEL > config 'buro_excel.<platform>' > <data_root>/'buro_excel.dosya_adi'."""
+    env = os.environ.get("BURO_EXCEL")
+    if env:
+        return Path(env).expanduser()
+    ayar = _load_cfg().get("buro_excel", {})
+    yol = ayar.get(_platform_key())
+    if yol:
+        return Path(yol).expanduser()
+    return data_root() / (ayar.get("dosya_adi") or VARSAYILAN_BURO_EXCEL)
 
 
 def _main(argv):

@@ -272,17 +272,26 @@ def eslestir(davalar: list[dict], env: dict) -> dict:
 
 # --- öneri planı ------------------------------------------------------------------------------------------------
 
-def oge(kind: str, external_ref: str, case_id: str, payload: dict, summary: str, reason: str, source: str) -> dict:
-    """Şemaya göre temizlenmiş, deterministik request_id'li öneri öğesi. Şema hatasında ValueError."""
+def oge(kind: str, external_ref: str, case_id: str | dict, payload: dict, summary: str, reason: str, source: str,
+        tuz: str = "") -> dict:
+    """Şemaya göre temizlenmiş, deterministik request_id'li öneri öğesi. Şema hatasında ValueError.
+    Metinler isbu_sade standardından geçer (sistem dili yasak); `case_id` dava kimliği ya da hazır case_ref
+    (yeni dava için {"external_ref": ...}). `tuz`: aynı içeriği yeni kimlikle göndermek için (bkz. isbu_ofis)."""
+    import hashlib
     import isbu_ofis
+    import isbu_sade
     temiz, hatalar = isbu_sema.payload_temizle(kind, payload)
     if hatalar:
         raise ValueError(f"{kind} {external_ref}: " + "; ".join(hatalar))
-    case_ref = {"id": case_id}
-    item = {"kind": kind, "external_ref": external_ref[:200], "case_ref": case_ref, "payload": temiz,
-            "summary": summary.strip()[:1000], "reason": reason.strip()[:5000], "source": source,
-            "request_id": isbu_ofis.request_id(kind, external_ref[:200], temiz, case_ref)}
-    sorun = isbu_sema.oge_dogrula(item)
+    case_ref = case_id if isinstance(case_id, dict) or case_id is None else {"id": case_id}
+    summary, reason = summary.strip()[:1000], reason.strip()[:5000]
+    # metin değişince de bekleyen öneri güncellensin: sunucu aynı request_id'yi "duplicate" sayar (inceleme H1)
+    tuz = (tuz or "") + ":" + hashlib.sha1(f"{summary}\x1f{reason}".encode("utf-8")).hexdigest()[:12]
+    item = {"kind": kind, "external_ref": external_ref[:200], "payload": temiz, "summary": summary, "reason": reason,
+            "source": source, "request_id": isbu_ofis.request_id(kind, external_ref[:200], temiz, case_ref, tuz)}
+    if case_ref is not None:
+        item["case_ref"] = case_ref
+    sorun = isbu_sema.oge_dogrula(item) + isbu_sade.denetle_oge(item)
     if sorun:
         raise ValueError(f"{kind} {external_ref}: " + "; ".join(sorun))
     return item
@@ -314,11 +323,13 @@ def dava_onerisi(d: dict, k: dict, bugun: date) -> tuple[dict | None, list[str]]
     ext = d.get("externalRef") or k["external_ref"]
     if not p and d.get("externalRef"):
         return None, notlar
-    kaynak = ", ".join(k["kaynaklar"])
-    alanlar = ", ".join(x for x in p if x != "overwrite") or "yalnız dış kimlik bağlama"
-    item = oge("case_upsert", ext, d["id"], p, f"Dava bilgisi: {alanlar}",
-               f"Büro kaynakları ({kaynak}) {bugun:%d.%m.%Y}; eşleşme esas no + mahkeme veya büro kodu ile tekil. "
-               + " ".join(notlar), "uyap")
+    import isbu_sade
+    etiket = {"buro_kodu": "büro kodu", "case_number": "esas no", "court_name": "mahkeme",
+              "is_cmk_assignment": "CMK işareti"}
+    alanlar = ", ".join(etiket.get(x, x) for x in p if x != "overwrite") or "UYAP dosyasıyla bağlantı"
+    baslik = isbu_sade.ozet_satiri(d.get("clientName") or d.get("title"), None, k.get("mahkeme"), k.get("no"))
+    item = oge("case_upsert", ext, d["id"], p, f"{baslik} · {alanlar}",
+               f"Büro kayıtlarındaki eksik alanlar ({bugun:%d.%m.%Y}).", "uyap")
     return item, notlar
 
 
@@ -331,9 +342,9 @@ def durusma_onerileri(d: dict, k: dict, detay: dict | None, bugun: date) -> list
         if any(ayni_dakika(h.get("hearingDate"), iso) for h in mevcut):
             continue
         ext = f"{k['external_ref']}:durusma:{iso[:16]}"
+        gun = datetime.fromisoformat(iso)
         out.append(oge("hearing_upsert", ext, d["id"], {"hearing_date": iso, "notes": x.get("islem") or ""},
-                       f"UYAP: duruşma {iso[:10]} {iso[11:16]}",
-                       f"UYAP önbelleği duruşma listesi ({k['mahkeme']} {k['no']}).", "uyap"))
+                       f"Duruşma {gun:%d.%m.%Y %H:%M} · {k['mahkeme']} {k['no']}", "UYAP duruşma listesi.", "uyap"))
     return out
 
 
@@ -349,24 +360,25 @@ def sure_onerileri(d: dict, satirlar: list[dict], detay: dict | None) -> tuple[l
         if not isinstance(s, dict) or s.get("durum") == "arşiv" or not s.get("satir_id"):
             continue
         ext = f"kalkan:{s['satir_id']}"
-        p = {"title": _kalkan_baslik(s), "description": f"Kaynak: KALKAN#{s['satir_id']}",
+        p = {"title": _kalkan_baslik(s), "description": "",
              "legal_basis": next((str(s[a]) for a in ("dayanak", "kanuni_dayanak", "legal_basis") if s.get(a)), "")}
         kos = s.get("kosullu_hesap") if isinstance(s.get("kosullu_hesap"), dict) else {}
         if isbu_sema.gun_mu(s.get("hukuki_son_gun")):
             p["due_date"] = s["hukuki_son_gun"]
-            ozet = f"Süre (kesin): {p['title']} son gün {s['hukuki_son_gun']}"
+            gun = date.fromisoformat(s["hukuki_son_gun"])
+            ozet = f"Süre: {p['title']} · son gün {gun:%d.%m.%Y}"
         elif kos.get("tarih"):
-            p.update(conditional=True, condition=f"Başlangıç teyidi bekliyor ({kos.get('baslangic_durumu') or '?'}); "
-                     f"koşullu hesap {kos['tarih']} — kesin son gün değil")
+            p.update(conditional=True, condition=f"Başlangıç tarihi teyit bekliyor ({kos.get('baslangic_durumu') or '?'}); "
+                     f"tahmini son gün {kos['tarih']}, kesin değil")
             ozet = f"Süre (koşullu): {p['title']}"
         else:
-            p.update(conditional=True, condition=f"Tarihsiz Kalkan satırı (durum: {s.get('durum') or '?'})")
+            p.update(conditional=True, condition=f"Tarih henüz belli değil (durum: {s.get('durum') or '?'})")
             ozet = f"Süre (tarihsiz): {p['title']}"
         var = acik.get(ext)
         if var and p.get("due_date") and str(var.get("dueDate") or "")[:10] == p["due_date"]:
             notlar.append(f"{ext}: isbu'da güncel")
             continue
-        out.append(oge("deadline_upsert", ext, d["id"], p, ozet, f"Süre Kalkanı KALKAN#{s['satir_id']}", "kalkan"))
+        out.append(oge("deadline_upsert", ext, d["id"], p, ozet, "Süre hesabı (Süre Kalkanı).", "kalkan"))
     return out, notlar
 
 
@@ -378,8 +390,9 @@ def icra_onerisi(d: dict, ozet: dict, detay: dict | None, k: dict) -> dict | Non
         return None
     return oge("enforcement_upsert", f"icra:{k['external_ref']}", d["id"],
                {"data": degisen, "source_ref": f"yargipro-klon:{norm_mahkeme(k['mahkeme'])}|{k['no']}"[:200]},
-               f"İcra özeti: {len(degisen)} alan", "icra_ozet: Yargı PRO klonundaki dosya bilgileri, safahat ve sorgu "
-               "evrakı (UYAP'a yeni sorgu yapılmadı). 'Sorgu evrakı yok' mal varlığı yok demek değildir.", "icra_ozet")
+               f"İcra özeti güncellendi ({len(degisen)} alan) · {k['mahkeme']} {k['no']}",
+               "İcra dosyasındaki bilgiler, safahat ve sorgu evrakından; UYAP'a yeni sorgu yapılmadı. "
+               "'Sorgu evrakı yok' mal varlığı yok demek değildir.", "icra_ozet")
 
 
 def sonraki_adim_onerisi(d: dict, k: dict, bugun: date) -> dict | None:
@@ -396,8 +409,8 @@ def sonraki_adim_onerisi(d: dict, k: dict, bugun: date) -> dict | None:
     h = olaylar[0]
     bekleme = f"{h['dikkat']} (UYAP {h['tarih']}: {h['aciklama']})"[:500]
     return oge("next_step", f"{k['external_ref']}:sonraki-adim", d["id"], {"target": "workspace", "waiting_for": bekleme},
-               f"Sıradaki adım: {h['dikkat']}", "isbu nabzı: sırada iş yok/atıl; bekleme nedeni UYAP hareketinden "
-               "(uyap_ortak.dikkat kuralı). Kontrol tarihi önerilmedi (kaynak yok).", "uyap")
+               f"Beklenen: {h['dikkat']} · {k['mahkeme']} {k['no']}",
+               "Dosyada sırada iş görünmüyor; bekleme nedeni UYAP'taki son hareket.", "uyap")
 
 
 def plan_kur(sonuc: dict, detaylar: dict, kalkan: dict, icra_ozetleri: dict, bugun: date) -> dict:

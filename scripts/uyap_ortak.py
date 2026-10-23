@@ -14,6 +14,7 @@ import json
 import re
 import subprocess
 import sys
+import unicodedata
 from datetime import date, datetime
 from pathlib import Path
 
@@ -52,8 +53,9 @@ DIKKAT_KURALLARI = (
 # --- eşleştirme -----------------------------------------------------------------------------------------------
 
 def tr(metin) -> str:
-    """Türkçe harfleri ASCII küçük harfe indirger (eşleştirme anahtarı için)."""
-    s = str(metin or "").replace("İ", "i").replace("I", "ı").lower().replace("̇", "")
+    """Türkçe harfleri ASCII küçük harfe indirger (eşleştirme anahtarı için). Önce NFC: macOS/Drive klasör adları
+    ayrışık (NFD: u + U+0308) gelebilir; Windows'ta etkisizdir."""
+    s = unicodedata.normalize("NFC", str(metin or "")).replace("İ", "i").replace("I", "ı").lower().replace("̇", "")
     for a, b in (("ı", "i"), ("ş", "s"), ("ğ", "g"), ("ü", "u"), ("ö", "o"), ("ç", "c"), ("â", "a"), ("î", "i")):
         s = s.replace(a, b)
     return s
@@ -95,6 +97,14 @@ def cmk_mi(rol) -> bool:
 def dikkat(aciklama) -> str:
     a = str(aciklama or "")
     return next((etiket for desen, etiket in DIKKAT_KURALLARI if re.search(desen, a)), "")
+
+
+def caseref_yap(birim, no, portal: str = "avukat") -> str:
+    """caseref_coz'un tersi: masaüstü araç 2026-10'dan beri klonla/esitle için caseRef zorunlu tutuyor
+    (`--dosya-no/--birim` INVALID_INPUT: girdi/1 alan caseRef zorunlu)."""
+    govde = json.dumps({"portal": portal or "avukat", "birimAdi": str(birim or "").strip(), "dosyaNo": dosya_no(no)},
+                       ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    return "c1." + base64.urlsafe_b64encode(govde).decode("ascii").rstrip("=")
 
 
 def caseref_coz(ref) -> dict:
